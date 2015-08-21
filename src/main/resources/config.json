@@ -1,0 +1,15 @@
+{
+  "servers":{
+    "publicServer": {
+      "host": "0.0.0.0",
+      "port": 8080,
+      "resourcePath":"c:/tmp/",
+      "servicePath":"",
+      "publicUriPrefix":"/public/"
+    },
+    "clusterServer": {
+      "host": "127.0.0.1",
+      "servicePath":""
+    }
+  }
+}
