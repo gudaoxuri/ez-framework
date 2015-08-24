@@ -1,16 +1,15 @@
 package com.ecfront.ez.framework.service
 
-import com.ecfront.storage.Id
-
 import scala.beans.BeanProperty
 
 abstract class IdModel extends Serializable {
   @BeanProperty
-  @Id var id: String = _
+  var id: String = _
 }
 
 object IdModel {
   val ID_FLAG = "id"
+  val SPLIT_FLAG = "@"
 }
 
 abstract class SecureModel extends IdModel {

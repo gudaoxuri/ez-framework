@@ -47,7 +47,7 @@ object KeyLogService extends JDBCService[KeyLogModel, EZReq] with SyncService[Ke
     val log = KeyLogModel()
     log.code = code
     log.message = message
-    log.loginId = request.get.loginId
+    log.loginId =if(request.isDefined) request.get.loginId else ""
     _save(log, request)
   }
 

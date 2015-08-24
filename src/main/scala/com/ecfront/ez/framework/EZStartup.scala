@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework
 
 import com.ecfront.common.Resp
+import com.ecfront.ez.framework.module.auth.AuthService
 import com.ecfront.ez.framework.module.core.EZReq
 import com.ecfront.ez.framework.module.schedule.ScheduleService
 import com.ecfront.ez.framework.rpc.RPC.EChannel
@@ -18,7 +19,13 @@ trait EZStartup extends App with LazyLogging {
 
   protected def customShutdownHook() = {}
 
-  protected def customPublicExecuteInterceptor(method: String, uri: String, parameters: Map[String, String], interceptorInfo: Map[String, String]): Resp[_] = Resp.success(null)
+  protected def customPublicExecuteInterceptor(method: String, uri: String, parameters: Map[String, String], interceptorInfo: Map[String, String]): Resp[_] = {
+    if (parameters.contains(EZReq.TOKEN)) {
+      AuthService.authorization(method,uri,parameters(EZReq.TOKEN))
+    } else {
+      Resp.badRequest(s"Missing required field : [ ${EZReq.TOKEN} ].")
+    }
+  }
 
   protected def customInnerExecuteInterceptor(method: String, uri: String, parameters: Map[String, String], interceptorInfo: Map[String, String]): Resp[_] = Resp.success(null)
 

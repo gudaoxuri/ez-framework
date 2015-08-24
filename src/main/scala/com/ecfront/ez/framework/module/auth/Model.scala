@@ -5,6 +5,15 @@ import com.ecfront.storage._
 
 import scala.beans.BeanProperty
 
+/**
+ * 资源实体，id=method@uri
+ */
+@Entity("Resources")
+case class Resource() extends SecureModel {
+  @BeanProperty var name: String = _
+  @ManyToMany(mapping = "Role", labelField = "name", master = false, fetch = true)
+  @BeanProperty var role_ids: List[String] = List[String]()
+}
 
 /**
  * 角色实体，id=code
@@ -12,54 +21,35 @@ import scala.beans.BeanProperty
 @Entity("Roles")
 case class Role() extends SecureModel {
   @BeanProperty var name: String = _
-  @ManyToMany(mapping = "Resource", master = false, fetch = false)
-  @BeanProperty var resourceIds: List[String] = List()
+  @ManyToMany(mapping = "Resource", labelField = "name", master = true, fetch = false)
+  @BeanProperty var resource_ids: Map[String, String] = Map[String,String]()
 }
 
-/**
- * 资源实体，id=uri
- */
-@Entity("Resources")
-case class Resource() extends SecureModel {
-  @BeanProperty var name: String = _
-  @Index
-  @BeanProperty var method: String = _
-  @ManyToMany(mapping = "Role", master = false, fetch = true)
-  @BeanProperty var roleIds: List[String] = List()
-}
 
 /**
  * 账号实体，id=account
  */
 @Entity("Accounts")
 case class Account() extends SecureModel {
-  @BeanProperty var password: String = _
   @Index
   @BeanProperty var name: String = _
+  @BeanProperty var password: String = _
   @BeanProperty var email: String = _
   @Index
-  @BeanProperty var extId: String = _
+  @BeanProperty var ext_id: String = _
   @BeanProperty
-  @Text var extInfo: String = _
-  @ManyToMany(mapping = "Role", master = true, fetch = true)
-  @BeanProperty var roleIds: List[String] = List()
+  @Text var ext_info: String = _
+  @ManyToMany(mapping = "Role", labelField = "name", master = true, fetch = true)
+  @BeanProperty var role_ids: Map[String, String] = Map[String,String]()
 }
 
-/**
- * Login Info Instances ,id = token
- */
-@Entity("Login Info")
-case class LoginInfo() extends IdModel {
-  @BeanProperty var name: String = _
-  @BeanProperty var roleIds: List[String] = _
-  @BeanProperty var extId: String = _
-  @BeanProperty var lastLoginTime: Long = _
+@Entity("Token Info")
+case class TokenInfo() extends IdModel {
+  @BeanProperty var login_id: String = _
+  @BeanProperty var login_name: String = _
+  @BeanProperty var role_ids: Map[String, String] = _
+  @BeanProperty var ext_id: String = _
+  @BeanProperty var last_login_time: Long = _
 }
 
-/**
- * 认证类型
- */
-object AuthType extends Enumeration {
-  type AuthType = Value
-  val LOGIN, LOGOUT, AUTHENTICATION = Value
-}
+
