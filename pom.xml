@@ -24,8 +24,8 @@
     </scm>
 
     <properties>
-        <ez-common.version>0.5.1</ez-common.version>
-        <ez-storage.version>1.0-SNAPSHOT</ez-storage.version>
+        <ez-common.version>0.5.2</ez-common.version>
+        <ez-storage.version>1.5-SNAPSHOT</ez-storage.version>
         <vertx.version>3.0.0</vertx.version>
         <httpclient.version>4.5</httpclient.version>
 		<redisson.version>2.1.0</redisson.version>

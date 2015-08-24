@@ -87,26 +87,7 @@ object AutoBuildingProcessor extends LazyLogging {
   }
 
   private def getClassFromMethodInfo(methodInfo: methodAnnotationInfo): Class[_] = {
-    val clazzStr = methodInfo.method.paramLists.head(1).info.toString
-    clazzStr match {
-      case "Int" => classOf[Int]
-      case "String" => classOf[String]
-      case "Long" => classOf[Long]
-      case "Float" => classOf[Float]
-      case "Double" => classOf[Double]
-      case "Boolean" => classOf[Boolean]
-      case "Short" => classOf[Short]
-      case "Byte" => classOf[Byte]
-      case s if s.startsWith("Map") => Class.forName("scala.collection.immutable.Map")
-      case s if s.startsWith("List") || s.startsWith("scala.List") => Class.forName("scala.collection.immutable.List")
-      case s if s.startsWith("Set") => Class.forName("scala.collection.immutable.Set")
-      case s if s.startsWith("Seq") || s.startsWith("scala.Seq") => Class.forName("scala.collection.immutable.Seq")
-      case s if s.startsWith("Vector") || s.startsWith("scala.Vector") => Class.forName("scala.collection.immutable.Vector")
-      case s if s.startsWith("Array") => Class.forName("scala.Array")
-      //去泛型
-      case s if s.endsWith("]") => Class.forName(s.substring(0, s.indexOf("[")))
-      case s => Class.forName(s)
-    }
+    BeanHelper.getClassByStr(methodInfo.method.paramLists.head(1).info.toString)
   }
 
 }

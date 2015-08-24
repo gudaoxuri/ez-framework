@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework
 
 import com.ecfront.common.Resp
-import com.ecfront.ez.framework.module.auth.AuthService
+import com.ecfront.ez.framework.module.core.EZReq
 import com.ecfront.ez.framework.module.schedule.ScheduleService
 import com.ecfront.ez.framework.rpc.RPC.EChannel
 import com.ecfront.ez.framework.rpc.{RPC, Server}
@@ -10,7 +10,7 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 
 trait EZStartup extends App with LazyLogging {
 
-  protected def  appName: String
+  protected def  moduleName: String
 
   protected def preStartup() = {}
 
@@ -37,7 +37,7 @@ trait EZStartup extends App with LazyLogging {
             if (!uri.startsWith(ConfigContainer.serversConfig.publicServer.publicUriPrefix)) {
               customPublicExecuteInterceptor(method, uri, parameters, interceptorInfo)
             } else {
-              Resp.success(AuthService.anonymousReq)
+              Resp.success(EZReq.anonymousReq)
             }
         }).startup().autoBuilding(ConfigContainer.serversConfig.publicServer.servicePath)
       logger.info(s"Public Server  started at ${ConfigContainer.serversConfig.publicServer.host} : ${ConfigContainer.serversConfig.publicServer.port}")
@@ -53,7 +53,7 @@ trait EZStartup extends App with LazyLogging {
         .startup().autoBuilding(ConfigContainer.serversConfig.clusterServer.servicePath)
       logger.info(s"Inner Server  started at ${ConfigContainer.serversConfig.clusterServer.host}")
     }
-    ScheduleService.runByModuleName(appName)
+    ScheduleService.runByModuleName(moduleName)
     postStartup()
     logger.info("RPC Service started.")
   }
