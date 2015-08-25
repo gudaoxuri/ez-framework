@@ -26,8 +26,7 @@ class EventBusClientProcessor extends ClientProcessor with EventBusOptions {
           val preResult = rpcClient.preExecuteInterceptor(method, path, inject)
           if (preResult) {
             EventBusOptions.eb.send(address, getBody(requestBody), setDeliveryOptions(method, path, "0", preResult.body))
-            finishFun(None)
-            rpcClient.postExecuteInterceptor(method, path)
+            clientExecute(method, path, finishFun, None)
           }
         } else {
           val preResult = rpcClient.preExecuteInterceptor(method, path, inject)
@@ -38,11 +37,9 @@ class EventBusClientProcessor extends ClientProcessor with EventBusOptions {
                   logger.error(s"Send [$address] failed!", event.cause())
                 } else {
                   if (resultClass == classOf[Resp[E]]) {
-                    finishFun(Some(parseResp(event.result().body(), responseClass).asInstanceOf[F]))
-                    rpcClient.postExecuteInterceptor(method, path)
+                    clientExecute(method, path, finishFun, Some(parseResp(event.result().body(), responseClass).asInstanceOf[F]))
                   } else {
-                    finishFun(Some(JsonHelper.toObject(event.result().body(), responseClass).asInstanceOf[F]))
-                    rpcClient.postExecuteInterceptor(method, path)
+                    clientExecute(method, path, finishFun, Some(JsonHelper.toObject(event.result().body(), responseClass).asInstanceOf[F]))
                   }
                 }
               }
@@ -53,8 +50,7 @@ class EventBusClientProcessor extends ClientProcessor with EventBusOptions {
         val preResult = rpcClient.preExecuteInterceptor(method, path, inject)
         if (preResult) {
           EventBusOptions.eb.publish(address, getBody(requestBody), setDeliveryOptions(method, path, "0", preResult.body))
-          finishFun(None)
-          rpcClient.postExecuteInterceptor(method, path)
+          clientExecute(method, path, finishFun, None)
         }
       }
     } else {

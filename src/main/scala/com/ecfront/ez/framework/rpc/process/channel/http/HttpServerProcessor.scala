@@ -18,33 +18,31 @@ import scala.collection.JavaConversions._
  */
 class HttpServerProcessor extends ServerProcessor {
 
-  private val vertx = Vertx.vertx()
   private var server: HttpServer = _
 
   override protected def init(): Unit = {
     val latch = new CountDownLatch(1)
     server = vertx.createHttpServer(new HttpServerOptions().setHost(host).setPort(port).setCompressionSupported(true).setTcpKeepAlive(true))
       .requestHandler(new Handler[HttpServerRequest] {
-      override def handle(request: HttpServerRequest): Unit = {
-        if (request.method().name() == "OPTIONS") {
-          returnContent("", request.response(), "text/html")
-        } else {
-          if (request.path() != "/favicon.ico") {
-            val contentType =
-              if (request.headers().contains("content-type")) request.headers().get("content-type").toLowerCase else "application/json; charset=UTF-8"
-            val parameters = collection.mutable.Map[String, String]()
-            val interceptInfo = collection.mutable.Map[String, String]()
-            request.params().entries().foreach {
-              item =>
-                //排除框架定义的变量
-                if (!item.getKey.startsWith("__") && !item.getKey.endsWith("__")) {
-                  parameters += item.getKey -> item.getValue
-                } else if (item.getKey.startsWith(FLAG_INTERCEPTOR_INFO)) {
-                  interceptInfo += item.getKey.substring(FLAG_INTERCEPTOR_INFO.length) -> item.getValue
-                }
-            }
-            val uri = request.path() + (if (request.path().contains("?")) "" else "?") + parameters.map(item => item._1 + "=" + item._2).mkString("&")
-            try {
+        override def handle(request: HttpServerRequest): Unit = {
+          if (request.method().name() == "OPTIONS") {
+            returnContent("", request.response(), "text/html")
+          } else {
+            if (request.path() != "/favicon.ico") {
+              val contentType =
+                if (request.headers().contains("content-type")) request.headers().get("content-type").toLowerCase else "application/json; charset=UTF-8"
+              val parameters = collection.mutable.Map[String, String]()
+              val interceptInfo = collection.mutable.Map[String, String]()
+              request.params().entries().foreach {
+                item =>
+                  //排除框架定义的变量
+                  if (!item.getKey.startsWith("__") && !item.getKey.endsWith("__")) {
+                    parameters += item.getKey -> item.getValue
+                  } else if (item.getKey.startsWith(FLAG_INTERCEPTOR_INFO)) {
+                    interceptInfo += item.getKey.substring(FLAG_INTERCEPTOR_INFO.length) -> item.getValue
+                  }
+              }
+              val uri = request.path() + (if (request.path().contains("?")) "" else "?") + parameters.map(item => item._1 + "=" + item._2).mkString("&")
               val (preResult, fun, newParameters, postFun) = router.getFunction(request.method().name(), request.path(), parameters.toMap, interceptInfo.toMap)
               if (preResult) {
                 if (request.headers().contains("content-type") && (request.headers.get("content-type").toLowerCase.startsWith("multipart/form-data") || request.headers.get("content-type").toLowerCase.startsWith("application/x-www-form-urlencoded"))) {
@@ -72,13 +70,7 @@ class HttpServerProcessor extends ServerProcessor {
                       })
                       upload.endHandler(new Handler[Void] {
                         override def handle(e: Void): Unit = {
-                          try {
-                            execute(request.method().name(), uri, newParameters, path + newName, preResult.body, fun, postFun, request.response(), "application/json; charset=UTF-8")
-                          } catch {
-                            case e: Exception =>
-                              logger.error("RPC basic process error.", e)
-                              returnContent(Resp.unknown("RPC upload process error : " + e.getMessage), request.response(), contentType)
-                          }
+                          execute(request.method().name(), uri, newParameters, path + newName, preResult.body, fun, postFun, request.response(), "application/json; charset=UTF-8")
                         }
                       })
                       upload.streamToFileSystem(tPath)
@@ -88,13 +80,7 @@ class HttpServerProcessor extends ServerProcessor {
                   //Post或Put请求，需要处理Body
                   request.bodyHandler(new Handler[Buffer] {
                     override def handle(data: Buffer): Unit = {
-                      try {
-                        execute(request.method().name(), uri, newParameters, data.getString(0, data.length), preResult.body, fun, postFun, request.response(), contentType)
-                      } catch {
-                        case e: Exception =>
-                          logger.error("RPC basic process error.", e)
-                          returnContent(Resp.unknown("RPC body process error : " + e.getMessage), request.response(), contentType)
-                      }
+                      execute(request.method().name(), uri, newParameters, data.getString(0, data.length), preResult.body, fun, postFun, request.response(), contentType)
                     }
                   })
                 } else {
@@ -105,15 +91,10 @@ class HttpServerProcessor extends ServerProcessor {
                 //前置处理错误，直接返回结果
                 returnContent(preResult, request.response(), contentType)
               }
-            } catch {
-              case e: Exception =>
-                logger.error("RPC basic process error.", e)
-                returnContent(Resp.unknown("RPC basic process error : " + e.getMessage), request.response(), contentType)
             }
           }
         }
-      }
-    }).listen(new Handler[AsyncResult[HttpServer]] {
+      }).listen(new Handler[AsyncResult[HttpServer]] {
       override def handle(event: AsyncResult[HttpServer]): Unit = {
         if (event.succeeded()) {
           latch.countDown()

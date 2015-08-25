@@ -3,6 +3,7 @@ package com.ecfront.ez.framework.rpc.process
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
 import com.ecfront.ez.framework.rpc.Client
 import com.fasterxml.jackson.databind.node.TextNode
+import io.vertx.core.Handler
 
 import scala.concurrent.{Future, Promise}
 
@@ -130,6 +131,25 @@ trait ClientProcessor extends Processor {
     } else {
       JsonHelper.toObject(json, classOf[Resp[E]])
     }
+  }
+
+  protected def clientExecute[F](method: String, tPath: String, finishFun: => (Option[F]) => Unit, result: Option[F]) {
+    vertx.executeBlocking(new Handler[io.vertx.core.Future[Any]] {
+      override def handle(future: io.vertx.core.Future[Any]): Unit = {
+        try {
+          finishFun(result)
+          rpcClient.postExecuteInterceptor(method, tPath)
+        }
+        catch {
+          case e: Exception =>
+            logger.error("Execute function error.", e)
+        }
+        future.complete()
+      }
+    }, false, new Handler[io.vertx.core.AsyncResult[Any]] {
+      override def handle(event: io.vertx.core.AsyncResult[Any]): Unit = {
+      }
+    })
   }
 
 }

@@ -4,13 +4,13 @@ import com.ecfront.common.{EncryptHelper, Resp}
 import com.ecfront.ez.framework.module.auth.Account
 import com.ecfront.ez.framework.module.core.{CommonUtils, EZReq}
 import com.ecfront.ez.framework.rpc._
+import com.ecfront.ez.framework.service.SyncService
 import com.ecfront.ez.framework.service.protocols.JDBCService
-import com.ecfront.ez.framework.service.{BasicService, SyncService}
 import com.ecfront.storage.PageModel
 
 @RPC("/auth/manage/account/")
 @HTTP
-object AccountService extends JDBCService[Account, EZReq] with SyncService[Account, EZReq] with BasicService {
+object AccountService extends JDBCService[Account, EZReq] with SyncService[Account, EZReq] {
 
   @POST("")
   def save(parameter: Map[String, String], body: Account, req: Option[EZReq]): Resp[String] = {

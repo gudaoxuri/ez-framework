@@ -7,11 +7,11 @@ import com.ecfront.ez.framework.module.auth.manage.{AccountService, ResourceServ
 import com.ecfront.ez.framework.module.core.EZReq
 import com.ecfront.ez.framework.module.keylog.KeyLogService
 import com.ecfront.ez.framework.rpc.{GET, HTTP, POST, RPC}
-import com.ecfront.ez.framework.service.{BasicService, IdModel}
+import com.ecfront.ez.framework.service.IdModel
 
 @RPC("/auth/")
 @HTTP
-object AuthService extends BasicService {
+object AuthService {
 
   @POST("/public/auth/login/")
   def login(parameter: Map[String, String], body: Map[String, String], req: Option[EZReq]): Resp[TokenInfo] = {

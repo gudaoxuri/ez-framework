@@ -5,17 +5,17 @@ import java.net.URL
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.rpc.process.ClientProcessor
 import io.netty.handler.codec.http.DefaultHttpHeaders
+import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.impl.HeadersAdaptor
 import io.vertx.core.http.{HttpClientOptions, WebSocket}
-import io.vertx.core.{Handler, Vertx}
 
 /**
  * WebSockets连接处理器
  */
 class WebSocketsClientProcessor extends ClientProcessor {
 
-  private val webSocketClient = Vertx.vertx().createHttpClient(new HttpClientOptions().setMaxPoolSize(200))
+  private val webSocketClient = vertx.createHttpClient(new HttpClientOptions().setMaxPoolSize(200))
 
   override protected def init(): Unit = {
   }
@@ -50,17 +50,14 @@ class WebSocketsClientProcessor extends ClientProcessor {
             response.handler(new Handler[Buffer] {
               override def handle(data: Buffer): Unit = {
                 if (resultClass == classOf[Resp[E]]) {
-                  finishFun(Some(parseResp(data.getString(0, data.length), responseClass).asInstanceOf[F]))
-                  rpcClient.postExecuteInterceptor(method, tPath)
+                  clientExecute(method, tPath, finishFun, Some(parseResp(data.getString(0, data.length), responseClass).asInstanceOf[F]))
                 } else {
-                  finishFun(Some(JsonHelper.toObject(data.getString(0, data.length), responseClass).asInstanceOf[F]))
-                  rpcClient.postExecuteInterceptor(method, tPath)
+                  clientExecute(method, tPath, finishFun, Some(JsonHelper.toObject(data.getString(0, data.length), responseClass).asInstanceOf[F]))
                 }
               }
             })
           } else {
-            finishFun(None)
-            rpcClient.postExecuteInterceptor(method, tPath)
+            clientExecute(method, tPath, finishFun, None)
           }
         }
       })

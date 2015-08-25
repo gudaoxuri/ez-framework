@@ -17,44 +17,36 @@ import scala.collection.JavaConversions._
  */
 class WebSocketsServerProcessor extends ServerProcessor {
 
-  private val vertx = Vertx.vertx()
   private var server: HttpServer = _
 
   override protected def init(): Unit = {
     val latch = new CountDownLatch(1)
     server = vertx.createHttpServer(new HttpServerOptions().setHost(host).setPort(port).setCompressionSupported(true))
       .websocketHandler(new Handler[ServerWebSocket] {
-      override def handle(request: ServerWebSocket): Unit = {
-        val parameters = collection.mutable.Map[String, String]()
-        val interceptInfo = collection.mutable.Map[String, String]()
-        if (request.query() != null && request.query().trim.nonEmpty) {
-          URLDecoder.decode(request.query(), "UTF-8").split("&").foreach {
-            item =>
-              //只支持有值的参数
-              val kv = item.split("=")
-              parameters += (kv(0) -> kv(1))
-          }
-        }
-        val method = if (request.headers().contains(FLAG_METHOD)) request.headers.get(FLAG_METHOD).toUpperCase else "GET"
-        request.headers().foreach {
-          item =>
-            if (item.getKey.startsWith(FLAG_INTERCEPTOR_INFO)) {
-              interceptInfo += item.getKey.substring(FLAG_INTERCEPTOR_INFO.length) -> item.getValue
+        override def handle(request: ServerWebSocket): Unit = {
+          val parameters = collection.mutable.Map[String, String]()
+          val interceptInfo = collection.mutable.Map[String, String]()
+          if (request.query() != null && request.query().trim.nonEmpty) {
+            URLDecoder.decode(request.query(), "UTF-8").split("&").foreach {
+              item =>
+                //只支持有值的参数
+                val kv = item.split("=")
+                parameters += (kv(0) -> kv(1))
             }
-        }
-        try {
+          }
+          val method = if (request.headers().contains(FLAG_METHOD)) request.headers.get(FLAG_METHOD).toUpperCase else "GET"
+          request.headers().foreach {
+            item =>
+              if (item.getKey.startsWith(FLAG_INTERCEPTOR_INFO)) {
+                interceptInfo += item.getKey.substring(FLAG_INTERCEPTOR_INFO.length) -> item.getValue
+              }
+          }
           val (preResult, fun, newParameters, postFun) = router.getFunction(method, request.path(), parameters.toMap, interceptInfo.toMap)
           if (preResult) {
             if (method == "POST" || method == "PUT") {
               request.frameHandler(new Handler[WebSocketFrame] {
                 override def handle(event: WebSocketFrame): Unit = {
-                  try {
-                    execute(method, request.uri(), newParameters, event.textData(), preResult.body, fun, postFun, request)
-                  } catch {
-                    case e: Exception =>
-                      logger.error("RPC body process error.", e)
-                      returnContent(Resp.unknown("RPC body process error : " + e.getMessage), request)
-                  }
+                  execute(method, request.uri(), newParameters, event.textData(), preResult.body, fun, postFun, request)
                 }
               })
             } else {
@@ -63,13 +55,8 @@ class WebSocketsServerProcessor extends ServerProcessor {
           } else {
             returnContent(preResult, request)
           }
-        } catch {
-          case e: Exception =>
-            logger.error("RPC basic process error.", e)
-            returnContent(Resp.unknown("RPC basic process error : " + e.getMessage), request)
         }
-      }
-    }).listen(new Handler[AsyncResult[HttpServer]] {
+      }).listen(new Handler[AsyncResult[HttpServer]] {
       override def handle(event: AsyncResult[HttpServer]): Unit = {
         if (event.succeeded()) {
           latch.countDown()

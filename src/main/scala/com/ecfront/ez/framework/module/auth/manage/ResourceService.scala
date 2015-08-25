@@ -4,13 +4,13 @@ import com.ecfront.common.Resp
 import com.ecfront.ez.framework.module.auth.Resource
 import com.ecfront.ez.framework.module.core.{CommonUtils, EZReq}
 import com.ecfront.ez.framework.rpc._
+import com.ecfront.ez.framework.service.SyncService
 import com.ecfront.ez.framework.service.protocols.JDBCService
-import com.ecfront.ez.framework.service.{BasicService, SyncService}
 import com.ecfront.storage.PageModel
 
 @RPC("/auth/manage/resource/")
 @HTTP
-object ResourceService extends JDBCService[Resource, EZReq] with SyncService[Resource, EZReq] with BasicService {
+object ResourceService extends JDBCService[Resource, EZReq] with SyncService[Resource, EZReq] {
 
   @POST("")
   def save(parameter: Map[String, String], body: Resource, req: Option[EZReq]): Resp[String] = {

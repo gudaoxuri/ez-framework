@@ -4,9 +4,9 @@ import java.net.URL
 
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
 import com.ecfront.ez.framework.rpc.process.ClientProcessor
+import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpClientOptions, HttpClientResponse, HttpMethod}
-import io.vertx.core.{Handler, Vertx}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
@@ -15,7 +15,7 @@ import org.jsoup.nodes.Document
  */
 class HttpClientProcessor extends ClientProcessor {
 
-  private val httpClient = Vertx.vertx().createHttpClient(new HttpClientOptions().setMaxPoolSize(200).setKeepAlive(true))
+  private val httpClient = vertx.createHttpClient(new HttpClientOptions().setMaxPoolSize(200).setKeepAlive(true))
 
   override protected def init(): Unit = {
   }
@@ -54,31 +54,25 @@ class HttpClientProcessor extends ClientProcessor {
             if (response.statusCode + "" != StandardCode.SUCCESS) {
               logger.error("Server NOT responded.")
               if (resultClass.isInstance(Resp)) {
-                finishFun(Some(Resp.serverUnavailable[E]("Server NOT responded.").asInstanceOf[F]))
-                rpcClient.postExecuteInterceptor(method, tPath)
+                clientExecute(method, tPath, finishFun, Some(Resp.serverUnavailable[E]("Server NOT responded.").asInstanceOf[F]))
               } else {
-                finishFun(None)
-                rpcClient.postExecuteInterceptor(method, tPath)
+                clientExecute(method, tPath, finishFun, None)
               }
             } else {
               response.bodyHandler(new Handler[Buffer] {
                 override def handle(data: Buffer): Unit = {
                   if (resultClass == classOf[Resp[E]]) {
-                    finishFun(Some(parseResp(data.getString(0, data.length), responseClass).asInstanceOf[F]))
-                    rpcClient.postExecuteInterceptor(method, tPath)
+                    clientExecute(method, tPath, finishFun, Some(parseResp(data.getString(0, data.length), responseClass).asInstanceOf[F]))
                   } else if (jsonType) {
-                    finishFun(Some(JsonHelper.toObject(data.getString(0, data.length), responseClass).asInstanceOf[F]))
-                    rpcClient.postExecuteInterceptor(method, tPath)
+                    clientExecute(method, tPath, finishFun, Some(JsonHelper.toObject(data.getString(0, data.length), responseClass).asInstanceOf[F]))
                   } else {
-                    finishFun(Some(Jsoup.parse(data.getString(0, data.length)).asInstanceOf[F]))
-                    rpcClient.postExecuteInterceptor(method, tPath)
+                    clientExecute(method, tPath, finishFun, Some(Jsoup.parse(data.getString(0, data.length)).asInstanceOf[F]))
                   }
                 }
               })
             }
           } else {
-            finishFun(None)
-            rpcClient.postExecuteInterceptor(method, tPath)
+            clientExecute(method, tPath, finishFun, None)
           }
         }
       }).putHeader("content-type", if (jsonType) "application/json; charset=UTF-8" else "application/xml; charset=UTF-8").end(body)

@@ -2,10 +2,10 @@ package com.ecfront.ez.framework.module.keylog
 
 import com.ecfront.common.StandardCode
 import com.ecfront.ez.framework.module.core.EZReq
+import com.ecfront.ez.framework.service.SyncService
 import com.ecfront.ez.framework.service.protocols.JDBCService
-import com.ecfront.ez.framework.service.{BasicService, SyncService}
 
-object KeyLogService extends JDBCService[KeyLogModel, EZReq] with SyncService[KeyLogModel, EZReq] with BasicService {
+object KeyLogService extends JDBCService[KeyLogModel, EZReq] with SyncService[KeyLogModel, EZReq] {
 
   def success(message: String, request: Option[EZReq]): Unit = {
     log(StandardCode.SUCCESS, message, request)
@@ -47,7 +47,7 @@ object KeyLogService extends JDBCService[KeyLogModel, EZReq] with SyncService[Ke
     val log = KeyLogModel()
     log.code = code
     log.message = message
-    log.loginId =if(request.isDefined) request.get.loginId else ""
+    log.loginId = if (request.isDefined) request.get.loginId else ""
     _save(log, request)
   }
 

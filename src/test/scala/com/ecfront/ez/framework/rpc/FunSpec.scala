@@ -20,6 +20,10 @@ class FunSpec extends FunSuite {
   }
 
   def jsonFunTest(channel: EChannel) {
+
+    println(s"===============Start ${channel.toString}===================")
+    println(s"=====Start Server=====")
+
     val latch = new CountDownLatch(8)
 
     val server = RPC.server.setHost("127.0.0.1").setPort(808).setChannel(channel).setAny({
@@ -67,7 +71,9 @@ class FunSpec extends FunSuite {
     m.createTime = 123456789
     m.name = "sunisle"
 
-    Thread.sleep(1000)
+    Thread.sleep(5000)
+
+    println(s"=====Start Async Client=====")
 
     val client = RPC.client.setHost("127.0.0.1").setPort(808).setChannel(channel).startup()
       .get[Long]("/number/", classOf[Long], {
@@ -123,6 +129,8 @@ class FunSpec extends FunSuite {
 
     latch.await()
 
+    println(s"=====Start Sync Client=====")
+
     assert(client.getSync[Long]("/number/", classOf[Long]).get.body == 1L)
     assert(client.getSync[Boolean]("/boolean/", classOf[Boolean]).get.body)
     assert(client.getSync[String]("/index/?a=1", classOf[String]).get.body == "完成")
@@ -130,6 +138,8 @@ class FunSpec extends FunSuite {
     assert(client.putSync[TestModel]("/index/test/", TestModel("测试"), classOf[TestModel]).get.body.name == "测试")
     client.putSync[TestModel]("/index/test/", TestModel("测试"))
     assert(client.raw.putSync[TestModel]("/custom/test/", TestModel("测试"), classOf[TestModel]).get.name == "测试")
+
+    println(s"=====Finish=====")
 
     server.shutdown()
     client.shutdown()

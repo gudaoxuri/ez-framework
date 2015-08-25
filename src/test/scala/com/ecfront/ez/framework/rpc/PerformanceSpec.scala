@@ -23,20 +23,25 @@ class PerformanceSpec extends FunSuite with LazyLogging {
       (param, body, _) =>
         Resp.success(body)
     })
-    val client = RPC.client.setPort(808).setChannel(channel).startup()
 
+    val client = RPC.client.setPort(808).setChannel(channel).startup()
     client.putSync[TestModel]("/index/test/", TestModel("测试"), classOf[TestModel])
 
     val latch = new CountDownLatch(2000)
     val threads = for (i <- 0 to 2000)
       yield new Thread(new Runnable {
         override def run(): Unit = {
+          //          val res = JsonHelper.toGenericObject[Resp[TestModel]](HttpHelper.put("http://127.0.0.1:808/index/test/",TestModel("测试")).body)
+          //          assert(res.code == "200")
+          //          assert(res.body.name == "测试")
+          //          println(">>>>>>> Current Count：" + latch.getCount)
+
           client.put[TestModel]("/index/test/", TestModel("测试"), classOf[TestModel], {
             result =>
-              assert(result.code == "200")
-              assert(result.body.name == "测试")
-              println(">>>>>>> Current Count：" + latch.getCount)
-              latch.countDown()
+          assert(result.code == "200")
+          assert(result.body.name == "测试")
+          println(">>>>>>> Current Count：" + latch.getCount)
+           latch.countDown()
           })
         }
       })
@@ -53,9 +58,9 @@ class PerformanceSpec extends FunSuite with LazyLogging {
   test("HTTP性能测试") {
     RPC.server.setPort(808).setChannel(EChannel.HTTP).startup()
       .get("/index/:id/", {
-      (param, _, _) =>
-        Resp.success("OK")
-    })
+        (param, _, _) =>
+          Resp.success("OK")
+      })
     val latch = new CountDownLatch(1)
     latch.await()
 

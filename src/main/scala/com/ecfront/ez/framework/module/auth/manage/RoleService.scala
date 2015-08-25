@@ -4,13 +4,13 @@ import com.ecfront.common.Resp
 import com.ecfront.ez.framework.module.auth.Role
 import com.ecfront.ez.framework.module.core.{CommonUtils, EZReq}
 import com.ecfront.ez.framework.rpc._
+import com.ecfront.ez.framework.service.SyncService
 import com.ecfront.ez.framework.service.protocols.JDBCService
-import com.ecfront.ez.framework.service.{BasicService, SyncService}
 import com.ecfront.storage.PageModel
 
 @RPC("/auth/manage/role/")
 @HTTP
-object RoleService extends JDBCService[Role, EZReq] with SyncService[Role, EZReq] with BasicService {
+object RoleService extends JDBCService[Role, EZReq] with SyncService[Role, EZReq] {
 
   @POST("")
   def save(parameter: Map[String, String], body: Role, req: Option[EZReq]): Resp[String] = {
