@@ -11,7 +11,7 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 
 trait EZStartup extends App with LazyLogging {
 
-  protected def  moduleName: String
+  protected def moduleName: String
 
   protected def preStartup() = {}
 
@@ -19,15 +19,9 @@ trait EZStartup extends App with LazyLogging {
 
   protected def customShutdownHook() = {}
 
-  protected def customPublicExecuteInterceptor(method: String, uri: String, parameters: Map[String, String], interceptorInfo: Map[String, String]): Resp[_] = {
-    if (parameters.contains(EZReq.TOKEN)) {
-      AuthService.authorization(method,uri,parameters(EZReq.TOKEN))
-    } else {
-      Resp.badRequest(s"Missing required field : [ ${EZReq.TOKEN} ].")
-    }
-  }
+  protected def customPublicExecuteInterceptor(method: String, uri: String, parameters: Map[String, String], interceptorInfo: Map[String, String]): Resp[_] = null
 
-  protected def customInnerExecuteInterceptor(method: String, uri: String, parameters: Map[String, String], interceptorInfo: Map[String, String]): Resp[_] = Resp.success(null)
+  protected def customInnerExecuteInterceptor(method: String, uri: String, parameters: Map[String, String], interceptorInfo: Map[String, String]): Resp[_] = null
 
   private def startup(): Unit = {
     preStartup()
@@ -42,7 +36,17 @@ trait EZStartup extends App with LazyLogging {
         .setPreExecuteInterceptor({
           (method, uri, parameters, interceptorInfo) =>
             if (!uri.startsWith(ConfigContainer.serversConfig.publicServer.publicUriPrefix)) {
-              customPublicExecuteInterceptor(method, uri, parameters, interceptorInfo)
+              val customResult = customPublicExecuteInterceptor(method, uri, parameters, interceptorInfo)
+              if (customResult == null) {
+                //未使用自定义方法
+                if (parameters.contains(EZReq.TOKEN)) {
+                  AuthService.authorizationPublicServer(method, uri, parameters(EZReq.TOKEN))
+                } else {
+                  Resp.badRequest(s"Missing required field : [ ${EZReq.TOKEN} ].")
+                }
+              } else {
+                customResult
+              }
             } else {
               Resp.success(EZReq.anonymousReq)
             }
@@ -55,7 +59,17 @@ trait EZStartup extends App with LazyLogging {
         .setHost(ConfigContainer.serversConfig.clusterServer.host)
         .setPreExecuteInterceptor({
           (method, uri, parameters, interceptorInfo) =>
-            customInnerExecuteInterceptor(method, uri, parameters, interceptorInfo)
+            val customResult = customInnerExecuteInterceptor(method, uri, parameters, interceptorInfo)
+            if (customResult == null) {
+              //未使用自定义方法
+              if (parameters.contains(EZReq.TOKEN)) {
+                AuthService.authorizationInnerServer(method, uri, parameters(EZReq.TOKEN))
+              } else {
+                Resp.badRequest(s"Missing required field : [ ${EZReq.TOKEN} ].")
+              }
+            } else {
+              customResult
+            }
         })
         .startup().autoBuilding(ConfigContainer.serversConfig.clusterServer.servicePath)
       logger.info(s"Inner Server  started at ${ConfigContainer.serversConfig.clusterServer.host}")

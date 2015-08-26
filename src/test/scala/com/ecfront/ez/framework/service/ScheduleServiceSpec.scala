@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.service
 
 import com.ecfront.common.JsonHelper
+import com.ecfront.ez.framework.BasicSpec
 import com.ecfront.ez.framework.module.schedule.{EZTask, ScheduleService}
 
 

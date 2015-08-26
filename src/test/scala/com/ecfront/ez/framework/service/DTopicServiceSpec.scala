@@ -2,6 +2,7 @@ package com.ecfront.ez.framework.service
 
 import java.util.concurrent.CountDownLatch
 
+import com.ecfront.ez.framework.BasicSpec
 import com.ecfront.ez.framework.service.common.DTopicService
 
 import scala.collection.mutable.ArrayBuffer

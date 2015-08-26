@@ -1,4 +1,4 @@
-package com.ecfront.ez.framework.service
+package com.ecfront.ez.framework
 
 import com.ecfront.ez.framework.module.schedule.ScheduleService
 import com.ecfront.ez.framework.rpc.cluster.ClusterManager

@@ -3,7 +3,7 @@ package com.ecfront.ez.framework.module.auth
 import java.util.UUID
 
 import com.ecfront.common.Resp
-import com.ecfront.ez.framework.module.auth.manage.{AccountService, ResourceService}
+import com.ecfront.ez.framework.module.auth.manage.AccountService
 import com.ecfront.ez.framework.module.core.EZReq
 import com.ecfront.ez.framework.module.keylog.KeyLogService
 import com.ecfront.ez.framework.rpc.{GET, HTTP, POST, RPC}
@@ -92,26 +92,37 @@ object AuthService {
    * <li>比对登录用户的角色与action可访问的角色是否有交集，有则通过反之不通过</li>
    * </ul>
    */
-  def authorization(method: String, uri: String, token: String): Resp[Void] = {
-    val res = ResourceService._getById(method + IdModel.SPLIT_FLAG + uri).body
-    if (res != null && res.role_ids.nonEmpty) {
+  def authorizationPublicServer(method: String, uri: String, token: String): Resp[EZReq] = {
+    val resourceCode = method + IdModel.SPLIT_FLAG + uri
+    if (LocalCacheContainer.existResource(resourceCode)) {
       //请求资源（action）需要认证
-      val loginInfoWrap = TokenService._getById(token)
-      if (loginInfoWrap) {
-        if ((res.role_ids.toSet & loginInfoWrap.body.role_ids.keySet).nonEmpty) {
-          Resp.success(null)
+      val tokenInfoWrap = TokenService._getById(token)
+      if (tokenInfoWrap&&tokenInfoWrap.body!=null) {
+        val tokenInfo = tokenInfoWrap.body
+        if (LocalCacheContainer.isMatchInRoles(resourceCode, tokenInfo.role_ids.keySet)) {
+          Resp.success(EZReq(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, tokenInfo.role_ids))
         } else {
           KeyLogService.unAuthorized(s"The action [$method] [$uri] allowed role not in request.", None)
           Resp.unAuthorized(s"The action [$method] [$uri] allowed role not in request.")
         }
       } else {
         KeyLogService.unAuthorized(s"The action [$method] [$uri] need authorization.", None)
-        loginInfoWrap
+        Resp.unAuthorized(s"The action [$method] [$uri] need authorization.")
       }
     } else {
       //可匿名访问
-      Resp.success(null)
+      Resp.success(EZReq.anonymousReq)
     }
-
   }
+
+  def authorizationInnerServer(method: String, uri: String, token: String): Resp[EZReq] = {
+    val tokenInfoWrap = TokenService._getById(token)
+    if (tokenInfoWrap&&tokenInfoWrap.body!=null) {
+      val tokenInfo = tokenInfoWrap.body
+      Resp.success(EZReq(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, tokenInfo.role_ids))
+    }else{
+      Resp.success(EZReq.anonymousReq)
+    }
+  }
+
 }

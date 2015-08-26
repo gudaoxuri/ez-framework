@@ -3,6 +3,7 @@ package com.ecfront.ez.framework.service
 import java.util.concurrent.CountDownLatch
 import java.util.{Timer, TimerTask}
 
+import com.ecfront.ez.framework.BasicSpec
 import com.ecfront.ez.framework.service.common.DMapService
 
 

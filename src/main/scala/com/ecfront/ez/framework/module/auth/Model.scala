@@ -21,7 +21,7 @@ case class Resource() extends SecureModel {
 @Entity("Roles")
 case class Role() extends SecureModel {
   @BeanProperty var name: String = _
-  @ManyToMany(mapping = "Resource", labelField = "name", master = true, fetch = false)
+  @ManyToMany(mapping = "Resource", labelField = "name", master = true, fetch = true)
   @BeanProperty var resource_ids: Map[String, String] = Map[String,String]()
 }
 

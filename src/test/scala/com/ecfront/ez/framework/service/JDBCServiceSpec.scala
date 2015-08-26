@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.service
 
 import com.ecfront.common.SReq
+import com.ecfront.ez.framework.BasicSpec
 import com.ecfront.ez.framework.service.protocols.JDBCService
 
 import scala.concurrent.Await

@@ -1,5 +1,6 @@
 package com.ecfront.ez.framework.service
 
+import com.ecfront.ez.framework.BasicSpec
 import com.ecfront.ez.framework.service.common.DCountDownLatchService
 
 class DCountDownLatchServiceSpec extends BasicSpec {

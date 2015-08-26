@@ -1,9 +1,8 @@
 package com.ecfront.ez.framework.rpc
 
-import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.scalatest.FunSuite
 
-class HiSpec extends FunSuite with LazyLogging {
+class HiSpec extends FunSuite {
 
   test("Hi") {
     "Happy,Sad,Laugh,Cry,Hopeful,Disappointed,Successful,Failed"

@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.module.auth.manage
 
 import com.ecfront.common.Resp
-import com.ecfront.ez.framework.module.auth.Role
+import com.ecfront.ez.framework.module.auth.{LocalCacheContainer, Role}
 import com.ecfront.ez.framework.module.core.{CommonUtils, EZReq}
 import com.ecfront.ez.framework.rpc._
 import com.ecfront.ez.framework.service.SyncService
@@ -58,6 +58,33 @@ object RoleService extends JDBCService[Role, EZReq] with SyncService[Role, EZReq
     } else {
       Resp.success(model)
     }
+  }
+
+  override protected def _postSave(result: String, preResult: Any, request: Option[EZReq]): Resp[String] = {
+    val role = __getById(result).get
+    LocalCacheContainer.addRole(role.id, role.resource_ids.keySet)
+    super._postSave(result, preResult, request)
+  }
+
+  override protected def _postUpdate(result: String, preResult: Any, request: Option[EZReq]): Resp[String] = {
+    val role = __getById(result).get
+    LocalCacheContainer.addRole(role.id, role.resource_ids.keySet)
+    super._postUpdate(result, preResult, request)
+  }
+
+  override protected def _postDeleteById(result: String, preResult: Any, request: Option[EZReq]): Resp[String] = {
+    LocalCacheContainer.removeRole(result)
+    super._postDeleteById(result, preResult, request)
+  }
+
+  override protected def _postDeleteByCondition(result: List[String], preResult: Any, request: Option[EZReq]): Resp[List[String]] = {
+    result.foreach(LocalCacheContainer.removeRole)
+    super._postDeleteByCondition(result, preResult, request)
+  }
+
+  override protected def _postDeleteAll(result: List[String], preResult: Any, request: Option[EZReq]): Resp[List[String]] = {
+    LocalCacheContainer.removeAllRole()
+    super._postDeleteAll(result, preResult, request)
   }
 
 }
