@@ -32,7 +32,7 @@ object AuthService {
   }
 
   @GET("logininfo/")
-  def getLoginInfo(parameter: Map[String, String], req: Option[EZReq]): Resp[Void] = {
+  def getLoginInfo(parameter: Map[String, String], req: Option[EZReq]): Resp[TokenInfo] = {
     doGetLoginInfo(parameter(EZReq.TOKEN), req)
   }
 
@@ -99,7 +99,7 @@ object AuthService {
       val tokenInfoWrap = TokenService._getById(token)
       if (tokenInfoWrap&&tokenInfoWrap.body!=null) {
         val tokenInfo = tokenInfoWrap.body
-        if (LocalCacheContainer.isMatchInRoles(resourceCode, tokenInfo.role_ids.keySet)) {
+        if (LocalCacheContainer.matchInRoles(resourceCode, tokenInfo.role_ids.keySet)) {
           Resp.success(EZReq(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, tokenInfo.role_ids))
         } else {
           KeyLogService.unAuthorized(s"The action [$method] [$uri] allowed role not in request.", None)

@@ -8,7 +8,7 @@ object EZReq {
 
   val anonymousReq = EZReq("0", "0", "anonymous", null)
 
-  val TOKEN="token"
+  val TOKEN="ez_token"
 
   val ORDER_FIELD = "orderField"
   val ORDER_SORT = "orderSort"

@@ -2,12 +2,10 @@ package com.ecfront.ez.framework.module.auth
 
 import com.ecfront.ez.framework.module.auth.manage.{ResourceService, RoleService}
 
-import scala.collection.mutable.ArrayBuffer
-
 object LocalCacheContainer {
 
-  private val resources = ArrayBuffer[String]()
-  private val roles = collection.mutable.Map[String,Set[String]]()
+  private[ez] val resources = collection.mutable.HashSet[String]()
+  private[ez] val roles = collection.mutable.Map[String,Set[String]]()
 
   def init(): Unit = {
     RoleService.__findAll().get.foreach {
@@ -44,9 +42,9 @@ object LocalCacheContainer {
     resources.clear()
   }
 
-  def isMatchInRoles(resourceCode: String, roleCodes: Set[String])=roleCodes.exists(roles(_).contains(resourceCode))
+  def matchInRoles(resourceCode: String, roleCodes: Set[String]) = roleCodes.exists(roles(_).contains(resourceCode))
 
-  def existResource(resourceCode:String)=resources.contains(resourceCode)
+  def existResource(resourceCode: String) = resources.contains(resourceCode)
 
   init()
 
