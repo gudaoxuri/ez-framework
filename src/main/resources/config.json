@@ -5,7 +5,8 @@
       "port": 8080,
       "resourcePath":"c:/tmp/",
       "servicePath":"",
-      "publicUriPrefix":"/public/"
+      "publicUriPrefix":"/public/",
+      "authManage":true
     },
     "clusterServer": {
       "host": "127.0.0.1",

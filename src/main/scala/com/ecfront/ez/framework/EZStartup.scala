@@ -2,6 +2,7 @@ package com.ecfront.ez.framework
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.module.auth.AuthService
+import com.ecfront.ez.framework.module.auth.manage.Initiator
 import com.ecfront.ez.framework.module.core.EZReq
 import com.ecfront.ez.framework.module.schedule.ScheduleService
 import com.ecfront.ez.framework.rpc.RPC.EChannel
@@ -51,6 +52,10 @@ trait EZStartup extends App with LazyLogging {
               Resp.success(EZReq.anonymousReq)
             }
         }).startup().autoBuilding(ConfigContainer.serversConfig.publicServer.servicePath)
+      if(ConfigContainer.serversConfig.publicServer.authManage){
+        Initiator.init()
+        publicServer.autoBuilding("com.ecfront.ez.framework.module.auth")
+      }
       logger.info(s"Public Server  started at ${ConfigContainer.serversConfig.publicServer.host} : ${ConfigContainer.serversConfig.publicServer.port}")
     }
     if (ConfigContainer.serversConfig.clusterServer != null) {

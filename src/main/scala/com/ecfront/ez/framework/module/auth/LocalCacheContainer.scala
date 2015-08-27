@@ -8,13 +8,13 @@ object LocalCacheContainer {
   private[ez] val roles = collection.mutable.Map[String,Set[String]]()
 
   def init(): Unit = {
-    RoleService.__findAll().get.foreach {
-      role =>
-        addRole(role.id, role.resource_ids.keySet)
-    }
     ResourceService.__findAll().get.foreach {
       resource =>
         addResource(resource.id)
+    }
+    RoleService.__findAll().get.foreach {
+      role =>
+        addRole(role.id, role.resource_ids.keySet)
     }
   }
 

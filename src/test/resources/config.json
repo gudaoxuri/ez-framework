@@ -4,12 +4,13 @@
       "host": "0.0.0.0",
       "port": 8080,
       "resourcePath":"c:/tmp/",
-      "servicePath":"",
-      "publicUriPrefix":"/public/"
+      "servicePath":"com.ecfront.ez.framework.empty",
+      "publicUriPrefix":"/public/",
+      "authManage":true
     },
     "clusterServer": {
       "host": "127.0.0.1",
-      "servicePath":""
+      "servicePath":"com.ecfront.ez.framework.empty"
     }
   }
 }

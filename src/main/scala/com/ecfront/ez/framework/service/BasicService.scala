@@ -182,6 +182,19 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
 
   protected def _doPageByCondition(condition: String, parameters: Option[List[Any]], pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]]
 
+
+  protected def _executeSaveOrUpdate(model: M, request: Option[R]): Resp[String] = {
+    model match {
+      case idModel: IdModel =>
+        if (idModel.id != null && idModel.id.trim != "" && _doGetById(idModel.id, request).body != null) {
+          _executeUpdate(idModel.id, model, request)
+        } else {
+          _executeSave(model, request)
+        }
+      case _ => _executeSave(model, request)
+    }
+  }
+
   //=========================Save=========================
 
   protected def _preSave(model: M, request: Option[R]): Resp[Any] = {

@@ -96,6 +96,16 @@ trait SyncVOService[M <: AnyRef, V <: AnyRef, R <: Req] extends BasicService[M, 
     }
   }
 
+  def _saveOrUpdate(vo: V, request: Option[R] = None): Resp[String] = {
+    if (_voClazz == null) {
+      super._executeSaveOrUpdate(vo.asInstanceOf[M], request)
+    } else {
+      val model = _modelClazz.newInstance()
+      BeanHelper.copyProperties(model, vo)
+      super._executeSaveOrUpdate(voToModel(vo, model), request)
+    }
+  }
+
   def _save(vo: V, request: Option[R] = None): Resp[String] = {
     if (_voClazz == null) {
       super._executeSave(vo.asInstanceOf[M], request)

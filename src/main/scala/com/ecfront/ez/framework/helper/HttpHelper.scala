@@ -2,17 +2,14 @@ package com.ecfront.ez.framework.helper
 
 import java.io.File
 import java.net.SocketException
-import java.util
 
 import com.ecfront.common.{JsonHelper, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import org.apache.http.client.entity.UrlEncodedFormEntity
+import org.apache.http.HttpHeaders
 import org.apache.http.client.methods._
 import org.apache.http.entity.{FileEntity, StringEntity}
 import org.apache.http.impl.client.{CloseableHttpClient, HttpClients}
-import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
-import org.apache.http.{HttpHeaders, NameValuePair}
 
 import scala.language.implicitConversions
 
@@ -51,13 +48,13 @@ object HttpHelper extends LazyLogging {
     if (body != null) {
       val entity = body match {
         case b: String => new StringEntity(b, "UTF-8")
-        case b: Map[_, _] =>
-          val m = new util.ArrayList[NameValuePair]()
-          b.asInstanceOf[Map[String, Any]].foreach {
-            entry =>
-              m.add(new BasicNameValuePair(entry._1, entry._2.toString))
-          }
-          new UrlEncodedFormEntity(m, "UTF-8")
+        /*        case b: Map[_, _] =>
+                  val m = new util.ArrayList[NameValuePair]()
+                  b.asInstanceOf[Map[String, Any]].foreach {
+                    entry =>
+                      m.add(new BasicNameValuePair(entry._1, entry._2.toString))
+                  }
+                  new UrlEncodedFormEntity(m, "UTF-8")*/
         case b: File =>
           new FileEntity(b)
         case _ => new StringEntity(JsonHelper.toJsonString(body), "UTF-8")

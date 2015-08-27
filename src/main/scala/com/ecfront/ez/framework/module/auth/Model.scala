@@ -44,10 +44,10 @@ case class Account() extends SecureModel {
 }
 
 @Entity("Token Info")
-case class TokenInfo() extends IdModel {
+case class Token_Info() extends IdModel {
   @BeanProperty var login_id: String = _
   @BeanProperty var login_name: String = _
-  @BeanProperty var role_ids: Map[String, String] = _
+  @BeanProperty var role_ids_json: String = _
   @BeanProperty var ext_id: String = _
   @BeanProperty var last_login_time: Long = _
 }

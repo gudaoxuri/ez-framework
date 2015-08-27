@@ -32,6 +32,10 @@ trait FutureService[M <: AnyRef, R <: Req] extends BasicService[M,R] {
     _executePageByCondition(condition, parameters, pageNumber, pageSize, request)
   }
 
+  def _saveOrUpdate(model: M, request: Option[R] = None): Future[Resp[String]] = Future {
+    _executeSaveOrUpdate(model, request)
+  }
+
   def _save(model: M, request: Option[R] = None): Future[Resp[String]] = Future {
     _executeSave(model, request)
   }
