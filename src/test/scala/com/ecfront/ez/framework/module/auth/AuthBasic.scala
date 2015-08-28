@@ -24,7 +24,6 @@ object AuthBasic {
     role1.resource_ids = Map(GET_SOME -> null, ADD_SOME -> null)
     RoleService._update("admin", role1)
 
-
     val role2 = Role()
     role2.id = "user"
     role2.name = "普通用户"
