@@ -81,7 +81,7 @@ trait JDBCService[M <: IdModel, R <: Req] extends BasicService[M, R] with JDBCSt
 
   protected override def __appendAuth(request: Option[R]): (String, List[Any]) = {
     if(_isSecureModel&&request.isDefined&&request.get!=null){
-      _authType match {
+      _useAuthType match {
         case _AuthType.BY_CREATE_USER =>
           ("AND create_user = ? ", List(request.get.login_Id))
         case _AuthType.BY_UPDATE_USER =>

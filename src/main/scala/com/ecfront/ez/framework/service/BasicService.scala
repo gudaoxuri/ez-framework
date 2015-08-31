@@ -17,7 +17,7 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
 
   //=========================Common=========================
 
-  protected val _authType = _AuthType.BY_CREATE_USER
+  protected def _useAuthType = _AuthType.BY_CREATE_USER
 
   protected def _convertToView(model: M, request: Option[R]): M = {
     model
