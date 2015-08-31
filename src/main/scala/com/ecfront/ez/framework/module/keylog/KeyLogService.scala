@@ -1,53 +1,53 @@
 package com.ecfront.ez.framework.module.keylog
 
-import com.ecfront.common.StandardCode
-import com.ecfront.ez.framework.module.core.EZReq
+import com.ecfront.common.{Req, StandardCode}
 import com.ecfront.ez.framework.service.SyncService
 import com.ecfront.ez.framework.service.protocols.JDBCService
 
-object KeyLogService extends JDBCService[KeyLogModel, EZReq] with SyncService[KeyLogModel, EZReq] {
+object KeyLogService extends JDBCService[Key_Log, Req] with SyncService[Key_Log, Req] {
 
-  def success(message: String, request: Option[EZReq]): Unit = {
+  def success(message: String, request: Option[Req]): Unit = {
     log(StandardCode.SUCCESS, message, request)
   }
 
-  def notFound(message: String, request: Option[EZReq]): Unit = {
+  def notFound(message: String, request: Option[Req]): Unit = {
     log(StandardCode.NOT_FOUND, message, request)
   }
 
-  def badRequest(message: String, request: Option[EZReq]): Unit = {
+  def badRequest(message: String, request: Option[Req]): Unit = {
     log(StandardCode.BAD_REQUEST, message, request)
   }
 
-  def forbidden(message: String, request: Option[EZReq]): Unit = {
+  def forbidden(message: String, request: Option[Req]): Unit = {
     log(StandardCode.FORBIDDEN, message, request)
   }
 
-  def unAuthorized(message: String, request: Option[EZReq]): Unit = {
+  def unAuthorized(message: String, request: Option[Req]): Unit = {
     log(StandardCode.UNAUTHORIZED, message, request)
   }
 
-  def serverError(message: String, request: Option[EZReq]): Unit = {
+  def serverError(message: String, request: Option[Req]): Unit = {
     log(StandardCode.INTERNAL_SERVER_ERROR, message, request)
   }
 
-  def notImplemented(message: String, request: Option[EZReq]): Unit = {
+  def notImplemented(message: String, request: Option[Req]): Unit = {
     log(StandardCode.NOT_IMPLEMENTED, message, request)
   }
 
-  def serverUnavailable(message: String, request: Option[EZReq]): Unit = {
+  def serverUnavailable(message: String, request: Option[Req]): Unit = {
     log(StandardCode.SERVICE_UNAVAILABLE, message, request)
   }
 
-  def customFail(code: String, message: String, request: Option[EZReq]): Unit = {
+  def customFail(code: String, message: String, request: Option[Req]): Unit = {
     log(code, message, request)
   }
 
-  private def log(code: String, message: String, request: Option[EZReq]): Unit = {
-    val log = KeyLogModel()
+  private def log(code: String, message: String, request: Option[Req]): Unit = {
+    val log = Key_Log()
     log.code = code
     log.message = message
-    log.loginId = if (request.isDefined) request.get.loginId else ""
+    log.login_Id = if (request.isDefined) request.get.login_Id else ""
+    log.organization_id = if (request.isDefined) request.get.organization_id else ""
     _save(log, request)
   }
 

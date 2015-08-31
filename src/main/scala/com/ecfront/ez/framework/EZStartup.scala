@@ -1,9 +1,9 @@
 package com.ecfront.ez.framework
 
-import com.ecfront.common.Resp
+import com.ecfront.common.{Req, Resp}
 import com.ecfront.ez.framework.module.auth.AuthService
 import com.ecfront.ez.framework.module.auth.manage.Initiator
-import com.ecfront.ez.framework.module.core.EZReq
+import com.ecfront.ez.framework.module.core.CommonUtils
 import com.ecfront.ez.framework.module.schedule.ScheduleService
 import com.ecfront.ez.framework.rpc.RPC.EChannel
 import com.ecfront.ez.framework.rpc.{RPC, Server}
@@ -40,19 +40,19 @@ trait EZStartup extends App with LazyLogging {
               val customResult = customPublicExecuteInterceptor(method, uri, parameters, interceptorInfo)
               if (customResult == null) {
                 //未使用自定义方法
-                if (parameters.contains(EZReq.TOKEN)) {
-                  AuthService.authorizationPublicServer(method, uri, parameters(EZReq.TOKEN))
+                if (parameters.contains(CommonUtils.TOKEN)) {
+                  AuthService.authorizationPublicServer(method, uri, parameters(CommonUtils.TOKEN))
                 } else {
-                  Resp.badRequest(s"Missing required field : [ ${EZReq.TOKEN} ].")
+                  Resp.badRequest(s"Missing required field : [ ${CommonUtils.TOKEN} ].")
                 }
               } else {
                 customResult
               }
             } else {
-              Resp.success(EZReq.anonymousReq)
+              Resp.success(Req.anonymousReq)
             }
         }).startup().autoBuilding(ConfigContainer.serversConfig.publicServer.servicePath)
-      if(ConfigContainer.serversConfig.publicServer.authManage){
+      if (ConfigContainer.serversConfig.publicServer.authManage) {
         Initiator.init()
         publicServer.autoBuilding("com.ecfront.ez.framework.module.auth")
       }
@@ -67,10 +67,10 @@ trait EZStartup extends App with LazyLogging {
             val customResult = customInnerExecuteInterceptor(method, uri, parameters, interceptorInfo)
             if (customResult == null) {
               //未使用自定义方法
-              if (parameters.contains(EZReq.TOKEN)) {
-                AuthService.authorizationInnerServer(method, uri, parameters(EZReq.TOKEN))
+              if (parameters.contains(CommonUtils.TOKEN)) {
+                AuthService.authorizationInnerServer(method, uri, parameters(CommonUtils.TOKEN))
               } else {
-                Resp.badRequest(s"Missing required field : [ ${EZReq.TOKEN} ].")
+                Resp.badRequest(s"Missing required field : [ ${CommonUtils.TOKEN} ].")
               }
             } else {
               customResult

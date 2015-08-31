@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.service
 
-import com.ecfront.common.SReq
+import com.ecfront.common.Req
 import com.ecfront.ez.framework.BasicSpec
 import com.ecfront.ez.framework.service.protocols.JDBCService
 
@@ -12,7 +12,7 @@ class JDBCServiceSpec extends BasicSpec {
 
   test("Async测试") {
 
-    val request = Some(SReq("0000", "jzy"))
+    val request = Some(Req.anonymousReq)
 
     //-------------------save--------------------------------------------
     val model = TestModel()
@@ -25,8 +25,8 @@ class JDBCServiceSpec extends BasicSpec {
     var resultSingle = Await.result(TestJDBCService._getById("id001", request), Duration.Inf).body
     assert(resultSingle.name == "张三")
     assert(resultSingle.bool)
-    assert(resultSingle.create_user == "jzy")
-    assert(resultSingle.update_user == "jzy")
+    assert(resultSingle.create_user == Req.ANONYMOUS_ID)
+    assert(resultSingle.update_user == Req.ANONYMOUS_ID)
     assert(resultSingle.create_time != 0)
     assert(resultSingle.update_time != 0)
     //-------------------update--------------------------------------------
@@ -146,7 +146,7 @@ class JDBCServiceSpec extends BasicSpec {
 
   test("VO测试") {
 
-    val request = Some(SReq("0000", "jzy"))
+    val request = Some(Req.anonymousReq)
 
     //-------------------save--------------------------------------------
     val vo = TestVO()
@@ -208,11 +208,11 @@ class JDBCServiceSpec extends BasicSpec {
 
 }
 
-object TestJDBCService extends JDBCService[TestModel, SReq] with FutureService[TestModel, SReq]
+object TestJDBCService extends JDBCService[TestModel, Req] with FutureService[TestModel, Req]
 
-object TestJDBCSyncService extends JDBCService[TestModel, SReq] with SyncService[TestModel, SReq]
+object TestJDBCSyncService extends JDBCService[TestModel, Req] with SyncService[TestModel, Req]
 
-object TestJDBCVOService extends JDBCService[TestModel, SReq] with SyncVOService[TestModel, TestVO, SReq]
+object TestJDBCVOService extends JDBCService[TestModel, Req] with SyncVOService[TestModel, TestVO, Req]
 
 
 

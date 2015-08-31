@@ -2,9 +2,9 @@ package com.ecfront.ez.framework.module.auth
 
 import java.util.UUID
 
-import com.ecfront.common.{JsonHelper, Resp}
+import com.ecfront.common.{JsonHelper, Req, Resp}
 import com.ecfront.ez.framework.module.auth.manage.AccountService
-import com.ecfront.ez.framework.module.core.EZReq
+import com.ecfront.ez.framework.module.core.CommonUtils
 import com.ecfront.ez.framework.module.keylog.KeyLogService
 import com.ecfront.ez.framework.rpc.{GET, HTTP, POST, RPC}
 import com.ecfront.ez.framework.service.IdModel
@@ -14,7 +14,7 @@ import com.ecfront.ez.framework.service.IdModel
 object AuthService {
 
   @POST("/public/auth/login/")
-  def login(parameter: Map[String, String], body: Map[String, String], req: Option[EZReq]): Resp[Token_Info_VO] = {
+  def login(parameter: Map[String, String], body: Map[String, String], req: Option[Req]): Resp[Token_Info_VO] = {
     if (body.contains("loginId")) {
       if (body.contains("password")) {
         doLogin(body("loginId"), body("password"))
@@ -27,12 +27,12 @@ object AuthService {
   }
 
   @GET("logout/")
-  def logout(parameter: Map[String, String], req: Option[EZReq]): Resp[Void] = {
-    doLogout(parameter(EZReq.TOKEN), req)
+  def logout(parameter: Map[String, String], req: Option[Req]): Resp[Void] = {
+    doLogout(parameter(CommonUtils.TOKEN), req)
   }
 
   @GET("logininfo/")
-  def getLoginInfo(parameter: Map[String, String], req: Option[EZReq]): Resp[Token_Info_VO] = {
+  def getLoginInfo(parameter: Map[String, String], req: Option[Req]): Resp[Token_Info_VO] = {
     doGetLoginInfo(req.get.token, req)
   }
 
@@ -50,10 +50,10 @@ object AuthService {
         tokenInfo.role_ids_json = JsonHelper.toJsonString(account.role_ids)
         tokenInfo.ext_id = account.ext_id
         tokenInfo.last_login_time = System.currentTimeMillis()
-        val req = EZReq(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, account.role_ids)
+        val req = Req(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, tokenInfo.organization_id, tokenInfo.organization_name, account.role_ids)
         TokenService._save(tokenInfo, Some(req))
         KeyLogService.success(s"Login Success by ${tokenInfo.login_id} , token : ${tokenInfo.id}", Some(req))
-        Resp.success(Token_Info_VO(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, account.role_ids, tokenInfo.ext_id, tokenInfo.last_login_time))
+        Resp.success(Token_Info_VO(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, tokenInfo.organization_id, tokenInfo.organization_name, account.role_ids, tokenInfo.ext_id, tokenInfo.last_login_time))
       } else {
         Resp.notFound(s"[ Password ] NOT match.")
       }
@@ -66,7 +66,7 @@ object AuthService {
    * 注销
    *
    */
-  private def doLogout(token: String, req: Option[EZReq]): Resp[Void] = {
+  private def doLogout(token: String, req: Option[Req]): Resp[Void] = {
     val loginInfo = TokenService._getById(token, req).body
     if (loginInfo != null) {
       TokenService._deleteById(token, req)
@@ -79,12 +79,23 @@ object AuthService {
    * 获取登录信息
    *
    */
-  private def doGetLoginInfo(token: String, req: Option[EZReq]): Resp[Token_Info_VO] = {
+  private def doGetLoginInfo(token: String, req: Option[Req]): Resp[Token_Info_VO] = {
     val tokenInfoWrap = TokenService._getById(token, req)
     if (tokenInfoWrap) {
       val tokenInfo = tokenInfoWrap.body
       val roleIds = JsonHelper.toGenericObject[Map[String,String]](tokenInfo.role_ids_json)
-      Resp.success(Token_Info_VO(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, roleIds, tokenInfo.ext_id, tokenInfo.last_login_time))
+      Resp.success(
+        Token_Info_VO(
+          tokenInfo.id,
+          tokenInfo.login_id,
+          tokenInfo.login_name,
+          tokenInfo.organization_id,
+          tokenInfo.organization_name,
+          roleIds,
+          tokenInfo.ext_id,
+          tokenInfo.last_login_time
+        )
+      )
     } else {
       tokenInfoWrap
     }
@@ -100,7 +111,7 @@ object AuthService {
    * <li>比对登录用户的角色与action可访问的角色是否有交集，有则通过反之不通过</li>
    * </ul>
    */
-  def authorizationPublicServer(method: String, uri: String, token: String): Resp[EZReq] = {
+  def authorizationPublicServer(method: String, uri: String, token: String): Resp[Req] = {
     val resourceCode = method + IdModel.SPLIT_FLAG + uri
     if (LocalCacheContainer.existResource(resourceCode)) {
       //请求资源（action）需要认证
@@ -109,7 +120,7 @@ object AuthService {
         val tokenInfo = tokenInfoWrap.body
         val roleIds = JsonHelper.toGenericObject[Map[String,String]](tokenInfo.role_ids_json)
         if (LocalCacheContainer.matchInRoles(resourceCode, roleIds.keySet)) {
-          Resp.success(EZReq(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, roleIds))
+          Resp.success(Req(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, tokenInfo.organization_id, tokenInfo.organization_name, roleIds))
         } else {
           KeyLogService.unAuthorized(s"The action [$method] [$uri] allowed role not in request.", None)
           Resp.unAuthorized(s"The action [$method] [$uri] allowed role not in request.")
@@ -120,18 +131,18 @@ object AuthService {
       }
     } else {
       //可匿名访问
-      Resp.success(EZReq.anonymousReq)
+      Resp.success(Req.anonymousReq)
     }
   }
 
-  def authorizationInnerServer(method: String, uri: String, token: String): Resp[EZReq] = {
+  def authorizationInnerServer(method: String, uri: String, token: String): Resp[Req] = {
     val tokenInfoWrap = TokenService._getById(token)
     if (tokenInfoWrap && tokenInfoWrap.body != null) {
       val tokenInfo = tokenInfoWrap.body
       val roleIds = JsonHelper.toGenericObject[Map[String,String]](tokenInfo.role_ids_json)
-      Resp.success(EZReq(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, roleIds))
+      Resp.success(Req(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, tokenInfo.organization_id, tokenInfo.organization_name, roleIds))
     } else {
-      Resp.success(EZReq.anonymousReq)
+      Resp.success(Req.anonymousReq)
     }
   }
 

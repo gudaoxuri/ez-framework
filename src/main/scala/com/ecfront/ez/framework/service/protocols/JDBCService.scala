@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.service.protocols
 
 import com.ecfront.common.{Req, Resp}
-import com.ecfront.ez.framework.service.{BasicService, IdModel, SecureModel}
+import com.ecfront.ez.framework.service.{_AuthType, BasicService, IdModel, SecureModel}
 import com.ecfront.storage.{JDBCStorable, PageModel}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
@@ -73,9 +73,27 @@ trait JDBCService[M <: IdModel, R <: Req] extends BasicService[M, R] with JDBCSt
 
   protected def _addDefaultSort(condition: String): String = {
     if (condition.toLowerCase.indexOf("order by") == -1 && classOf[SecureModel].isAssignableFrom(_modelClazz)) {
-      condition + " ORDER BY update_time desc"
+      condition + " ORDER BY update_time desc "
     } else {
       condition
+    }
+  }
+
+  protected override def __appendAuth(request: Option[R]): (String, List[Any]) = {
+    if(_isSecureModel&&request.isDefined&&request.get!=null){
+      _authType match {
+        case _AuthType.BY_CREATE_USER =>
+          ("AND create_user = ? ", List(request.get.login_Id))
+        case _AuthType.BY_UPDATE_USER =>
+          ("AND update_user = ? ", List(request.get.login_Id))
+        case _AuthType.BY_CREATE_ORGANIZATION =>
+          ("AND create_organization = ? ", List(request.get.organization_id))
+        case _AuthType.BY_UPDATE_ORGANIZATION =>
+          ("AND update_organization = ? ", List(request.get.organization_id))
+      }
+
+    }else{
+      ("", List())
     }
   }
 

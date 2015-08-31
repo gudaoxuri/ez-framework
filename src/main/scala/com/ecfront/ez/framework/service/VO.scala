@@ -9,8 +9,10 @@ trait IdVO extends Serializable {
 trait SecureVO extends IdVO {
   @BeanProperty var create_user: String = _
   @BeanProperty var create_time: Long = _
+  @BeanProperty var create_organization: String = _
   @BeanProperty var update_user: String = _
   @BeanProperty var update_time: Long = _
+  @BeanProperty var update_organization: String = _
 }
 
 

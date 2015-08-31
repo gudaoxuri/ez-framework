@@ -11,10 +11,13 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
   protected val _modelClazz = this.getClass.getGenericInterfaces()(0).asInstanceOf[ParameterizedType].getActualTypeArguments()(0).asInstanceOf[Class[M]]
 
   protected val _isIdModel = classOf[IdModel].isAssignableFrom(_modelClazz)
+  protected val _isSecureModel = classOf[SecureModel].isAssignableFrom(_modelClazz)
 
   logger.info( """Create Service: model: %s""".format(_modelClazz.getSimpleName))
 
   //=========================Common=========================
+
+  protected val _authType = _AuthType.BY_CREATE_USER
 
   protected def _convertToView(model: M, request: Option[R]): M = {
     model
@@ -214,9 +217,11 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
         idModel match {
           case secureModel: SecureModel =>
             secureModel.create_time = System.currentTimeMillis()
-            secureModel.create_user = if (request.isDefined) request.get.accountId else ""
+            secureModel.create_user = if (request.isDefined) request.get.login_Id else ""
+            secureModel.create_organization = if (request.isDefined) request.get.organization_id else ""
             secureModel.update_time = System.currentTimeMillis()
-            secureModel.update_user = if (request.isDefined) request.get.accountId else ""
+            secureModel.update_user = if (request.isDefined) request.get.login_Id else ""
+            secureModel.update_organization = if (request.isDefined) request.get.organization_id else ""
           case _ =>
         }
       case _ =>
@@ -259,7 +264,8 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
           idModel match {
             case secureModel: SecureModel =>
               secureModel.update_time = System.currentTimeMillis()
-              secureModel.update_user = if (request.isDefined) request.get.accountId else ""
+              secureModel.update_user = if (request.isDefined) request.get.login_Id else ""
+              secureModel.update_organization = if (request.isDefined) request.get.organization_id else ""
               secureModel.create_time = sCreateTime
             case _ =>
           }
@@ -363,5 +369,9 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
 
 }
 
+object _AuthType extends Enumeration {
+  type _AuthType = Value
+  val BY_CREATE_USER, BY_UPDATE_USER, BY_CREATE_ORGANIZATION, BY_UPDATE_ORGANIZATION = Value
+}
 
 

@@ -2,7 +2,7 @@ package com.ecfront.ez.framework.module.schedule
 
 import java.util.{Timer, TimerTask}
 
-import com.ecfront.common.{JsonHelper, SReq}
+import com.ecfront.common.{JsonHelper, Req}
 import com.ecfront.ez.framework.service.SyncService
 import com.ecfront.ez.framework.service.common.DLockService
 import com.ecfront.ez.framework.service.protocols.JDBCService
@@ -59,7 +59,7 @@ object ScheduleService extends LazyLogging {
   private val timers = collection.mutable.Map[String, Timer]()
   private val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
 
-  def stop(): Unit ={
+  def stop(): Unit = {
     timers.foreach(_._2.cancel())
   }
 
@@ -77,8 +77,8 @@ object ScheduleService extends LazyLogging {
         task =>
           val timerTask = new TimerTask() {
             override def run(): Unit = {
-              val lock=DLockService("schedule-"+task.task_path)
-              if(lock.tryLock()){
+              val lock = DLockService("schedule-" + task.task_path)
+              if (lock.tryLock()) {
                 val instance = if (task.task_path.endsWith("$")) {
                   runtimeMirror.reflectModule(runtimeMirror.staticModule(task.task_path)).instance.asInstanceOf[EZTask]
                 } else {
@@ -122,6 +122,6 @@ object ScheduleService extends LazyLogging {
 
 }
 
-object ScheduleTaskService extends JDBCService[EZ_Schedule_Task, SReq] with SyncService[EZ_Schedule_Task, SReq]
+object ScheduleTaskService extends JDBCService[EZ_Schedule_Task, Req] with SyncService[EZ_Schedule_Task, Req]
 
-object ScheduleLogService extends JDBCService[EZ_Schedule_Log, SReq] with SyncService[EZ_Schedule_Log, SReq]
+object ScheduleLogService extends JDBCService[EZ_Schedule_Log, Req] with SyncService[EZ_Schedule_Log, Req]
