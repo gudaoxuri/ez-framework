@@ -6,7 +6,7 @@ import com.ecfront.storage.Entity
 import scala.beans.BeanProperty
 
 @Entity("Key Logs")
-case class Key_Log() extends SecureModel {
+case class EZ_Key_Log() extends SecureModel {
   @BeanProperty var code: String = _
   @BeanProperty var message: String = _
   @BeanProperty var login_Id: String = _

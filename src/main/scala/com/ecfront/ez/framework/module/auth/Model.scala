@@ -12,7 +12,7 @@ import scala.beans.BeanProperty
 case class EZ_Resource() extends SecureModel {
   @Index
   @BeanProperty var name: String = _
-  @ManyToMany(mapping = "Role", labelField = "name", master = false, fetch = true)
+  @ManyToMany(mapping = "EZ_Role", labelField = "name", master = false, fetch = true)
   @BeanProperty var role_ids: List[String] = List[String]()
 }
 
@@ -23,7 +23,7 @@ case class EZ_Resource() extends SecureModel {
 case class EZ_Role() extends SecureModel {
   @Index
   @BeanProperty var name: String = _
-  @ManyToMany(mapping = "Resource", labelField = "name", master = true, fetch = true)
+  @ManyToMany(mapping = "EZ_Resource", labelField = "name", master = true, fetch = true)
   @BeanProperty var resource_ids: Map[String, String] = Map[String,String]()
 }
 
@@ -35,7 +35,7 @@ case class EZ_Organization() extends SecureModel {
   @Index
   @BeanProperty var name: String = _
   @BeanProperty var image: String = _
-  @OneToMany(mapping = "account", relField = "organization_id", labelField = "name", fetch = false)
+  @OneToMany(mapping = "EZ_Account", relField = "organization_id", labelField = "name", fetch = false)
   @BeanProperty var account_ids: List[String] = List[String]()
 }
 
@@ -56,7 +56,7 @@ case class EZ_Account() extends SecureModel {
   @Text var ext_info: String = _
   @Index
   @BeanProperty var organization_id: String = _
-  @ManyToMany(mapping = "Role", labelField = "name", master = true, fetch = true)
+  @ManyToMany(mapping = "EZ_Role", labelField = "name", master = true, fetch = true)
   @BeanProperty var role_ids: Map[String, String] = Map[String,String]()
 }
 

@@ -4,7 +4,7 @@ import com.ecfront.common.{Req, StandardCode}
 import com.ecfront.ez.framework.service.SyncService
 import com.ecfront.ez.framework.service.protocols.JDBCService
 
-object KeyLogService extends JDBCService[Key_Log, Req] with SyncService[Key_Log, Req] {
+object KeyLogService extends JDBCService[EZ_Key_Log, Req] with SyncService[EZ_Key_Log, Req] {
 
   def success(message: String, request: Option[Req]): Unit = {
     log(StandardCode.SUCCESS, message, request)
@@ -43,7 +43,7 @@ object KeyLogService extends JDBCService[Key_Log, Req] with SyncService[Key_Log,
   }
 
   private def log(code: String, message: String, request: Option[Req]): Unit = {
-    val log = Key_Log()
+    val log = EZ_Key_Log()
     log.code = code
     log.message = message
     log.login_Id = if (request.isDefined) request.get.login_Id else ""
