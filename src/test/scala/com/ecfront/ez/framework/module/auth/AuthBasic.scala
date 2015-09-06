@@ -9,7 +9,7 @@ object AuthBasic {
   val GET_SOME = s"GET${IdModel.SPLIT_FLAG}/some/:id/"
 
   def init(): Unit = {
-    val res = Resource()
+    val res = EZ_Resource()
     res.id = GET_SOME
     res.name = "获取资源"
     ResourceService._save(res)
@@ -17,14 +17,14 @@ object AuthBasic {
     res.name = "保存资源"
     ResourceService._save(res)
 
-    val role1 = Role()
+    val role1 = EZ_Role()
     role1.id = "admin"
     role1.name = "管理员"
     RoleService._save(role1)
     role1.resource_ids = Map(GET_SOME -> null, ADD_SOME -> null)
     RoleService._update("admin", role1)
 
-    val role2 = Role()
+    val role2 = EZ_Role()
     role2.id = "user"
     role2.name = "普通用户"
     role2.resource_ids = Map(GET_SOME -> null, ADD_SOME -> null)
@@ -32,7 +32,7 @@ object AuthBasic {
     role2.resource_ids = Map()
     RoleService._update("user", role2)
 
-    val account1 = Account()
+    val account1 = EZ_Account()
     account1.id = "user1"
     account1.name = "用户1"
     account1.password = "123"
@@ -40,7 +40,7 @@ object AuthBasic {
     account1.role_ids = Map("admin" -> null)
     AccountService._save(account1)
 
-    val account2 = Account()
+    val account2 = EZ_Account()
     account2.id = "user2"
     account2.name = "用户2"
     account2.password = "123"

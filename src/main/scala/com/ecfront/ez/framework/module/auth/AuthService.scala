@@ -43,7 +43,7 @@ object AuthService {
     val account = AccountService._getById(loginId).body
     if (account != null) {
       if (AccountService.packageEncryptPwd(loginId, password) == account.password) {
-        val tokenInfo = Token_Info()
+        val tokenInfo = EZ_Token_Info()
         tokenInfo.id = UUID.randomUUID().toString
         tokenInfo.login_id = account.id
         tokenInfo.login_name = account.name

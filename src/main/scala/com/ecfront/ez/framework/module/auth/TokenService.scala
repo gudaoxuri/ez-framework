@@ -5,11 +5,11 @@ import com.ecfront.ez.framework.module.keylog.KeyLogService
 import com.ecfront.ez.framework.service.SyncService
 import com.ecfront.ez.framework.service.protocols.CacheService
 
-object TokenService extends CacheService[Token_Info, Req] with SyncService[Token_Info, Req] {
+object TokenService extends CacheService[EZ_Token_Info, Req] with SyncService[EZ_Token_Info, Req] {
 
   private val maxIndate = 2592000000L //30天
 
-  override protected def _postGetById(tokenInfo: Token_Info, preResult: Any, req: Option[Req]): Resp[Token_Info] = {
+  override protected def _postGetById(tokenInfo: EZ_Token_Info, preResult: Any, req: Option[Req]): Resp[EZ_Token_Info] = {
     if (tokenInfo == null) {
       Resp.unAuthorized("Token NOT exist.")
     } else {

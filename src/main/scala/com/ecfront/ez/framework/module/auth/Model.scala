@@ -9,7 +9,7 @@ import scala.beans.BeanProperty
  * 资源实体，id=method@uri
  */
 @Entity("Resources")
-case class Resource() extends SecureModel {
+case class EZ_Resource() extends SecureModel {
   @Index
   @BeanProperty var name: String = _
   @ManyToMany(mapping = "Role", labelField = "name", master = false, fetch = true)
@@ -20,7 +20,7 @@ case class Resource() extends SecureModel {
  * 角色实体，id=code
  */
 @Entity("Roles")
-case class Role() extends SecureModel {
+case class EZ_Role() extends SecureModel {
   @Index
   @BeanProperty var name: String = _
   @ManyToMany(mapping = "Resource", labelField = "name", master = true, fetch = true)
@@ -31,7 +31,7 @@ case class Role() extends SecureModel {
  * 组织实体
  */
 @Entity("Organizations")
-case class Organization() extends SecureModel {
+case class EZ_Organization() extends SecureModel {
   @Index
   @BeanProperty var name: String = _
   @BeanProperty var image: String = _
@@ -43,7 +43,7 @@ case class Organization() extends SecureModel {
  * 账号实体，id=account
  */
 @Entity("Accounts")
-case class Account() extends SecureModel {
+case class EZ_Account() extends SecureModel {
   @Index
   @BeanProperty var name: String = _
   @BeanProperty var image: String = _
@@ -61,7 +61,7 @@ case class Account() extends SecureModel {
 }
 
 @Entity("Token Info")
-case class Token_Info() extends IdModel {
+case class EZ_Token_Info() extends IdModel {
   @BeanProperty var login_id: String = _
   @BeanProperty var login_name: String = _
   @BeanProperty var organization_id: String = _

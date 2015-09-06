@@ -91,7 +91,6 @@ trait JDBCService[M <: IdModel, R <: Req] extends BasicService[M, R] with JDBCSt
         case _AuthType.BY_UPDATE_ORGANIZATION =>
           ("AND update_organization = ? ", List(request.get.organization_id))
       }
-
     }else{
       ("", List())
     }

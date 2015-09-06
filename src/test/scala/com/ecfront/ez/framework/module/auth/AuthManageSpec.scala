@@ -6,7 +6,7 @@ import com.ecfront.ez.framework.service.IdModel
 
 class AuthManageSpec extends BasicSpec {
 
-  test("Manage 测试") {
+  test("age 测试") {
     AuthBasic.init()
 
     val newRole1 = RoleService._getById("admin").body

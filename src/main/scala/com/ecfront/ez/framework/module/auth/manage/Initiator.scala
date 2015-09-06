@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.module.auth.manage
 
-import com.ecfront.ez.framework.module.auth.{Account, Resource, Role}
+import com.ecfront.ez.framework.module.auth.{EZ_Account, EZ_Resource, EZ_Role}
 import com.ecfront.ez.framework.service.IdModel
 
 
@@ -10,7 +10,7 @@ object Initiator {
   val SYSTEM_ROLE_ID = "system"
 
   def init(): Unit = {
-    val res = Resource()
+    val res = EZ_Resource()
     res.id = s"GET${IdModel.SPLIT_FLAG}/auth/logininfo/"
     res.name = s"Fetch Login Info"
     ResourceService._save(res)
@@ -57,7 +57,7 @@ object Initiator {
     res.name = s"Delete a exist Resource By Id"
     ResourceService._save(res)
 
-    val role = Role()
+    val role = EZ_Role()
     role.id = SYSTEM_ROLE_ID
     role.name = "System Role"
     role.resource_ids = Map(
@@ -78,7 +78,7 @@ object Initiator {
     )
     RoleService._save(role)
 
-    val account = Account()
+    val account = EZ_Account()
     account.id = SYSTEM_ACCOUNT_ID
     account.name = "System Administrator"
     account.password = "admin"

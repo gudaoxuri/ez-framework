@@ -26,19 +26,19 @@ class AuthMockSpec extends FunSuite {
     println("Token:" + token)
     val loginInfo = JsonHelper.toGenericObject[Resp[Token_Info_VO]](HttpHelper.get(s"http://127.0.0.1:8080/auth/logininfo/?ez_token=$token").body).body
     assert(loginInfo.login_id == "sysadmin")
-    val account = Account()
+    val account = EZ_Account()
     account.id = "testUser"
     account.name = "测试用户"
     account.password = "456"
     account.role_ids = Map("user" -> null)
     JsonHelper.toGenericObject[Resp[String]](HttpHelper.post(s"http://127.0.0.1:8080/auth/manage/account/?ez_token=$token",account).body)
-    val getAccount = JsonHelper.toGenericObject[Resp[Account]](HttpHelper.get(s"http://127.0.0.1:8080/auth/manage/account/testUser/?ez_token=$token").body).body
+    val getAccount = JsonHelper.toGenericObject[Resp[EZ_Account]](HttpHelper.get(s"http://127.0.0.1:8080/auth/manage/account/testUser/?ez_token=$token").body).body
     assert(getAccount.id == "testUser")
     assert(getAccount.name == "测试用户")
     assert(getAccount.password == AccountService.packageEncryptPwd("testUser", "456"))
     assert(getAccount.role_ids == Map("user" -> "普通用户"))
     JsonHelper.toGenericObject[Resp[Void]](HttpHelper.get(s"http://127.0.0.1:8080/auth/logout/?ez_token=$token").body)
-    val getAccountWrap = JsonHelper.toGenericObject[Resp[Account]](HttpHelper.get(s"http://127.0.0.1:8080/auth/manage/account/testUser/?ez_token=$token").body)
+    val getAccountWrap = JsonHelper.toGenericObject[Resp[EZ_Account]](HttpHelper.get(s"http://127.0.0.1:8080/auth/manage/account/testUser/?ez_token=$token").body)
     assert(getAccountWrap.code == StandardCode.UNAUTHORIZED)
 
 

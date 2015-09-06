@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.module.auth.manage
 
 import com.ecfront.common.{EncryptHelper, Req, Resp}
-import com.ecfront.ez.framework.module.auth.Account
+import com.ecfront.ez.framework.module.auth.EZ_Account
 import com.ecfront.ez.framework.module.core.CommonUtils
 import com.ecfront.ez.framework.rpc._
 import com.ecfront.ez.framework.service.SyncService
@@ -10,15 +10,15 @@ import com.ecfront.storage.PageModel
 
 @RPC("/auth/manage/account/")
 @HTTP
-object AccountService extends JDBCService[Account, Req] with SyncService[Account, Req] {
+object AccountService extends JDBCService[EZ_Account, Req] with SyncService[EZ_Account, Req] {
 
   @POST("")
-  def save(parameter: Map[String, String], body: Account, req: Option[Req]): Resp[String] = {
+  def save(parameter: Map[String, String], body: EZ_Account, req: Option[Req]): Resp[String] = {
     _save(body, req)
   }
 
   @PUT(":id/")
-  def update(parameter: Map[String, String], body: Account, req: Option[Req]): Resp[String] = {
+  def update(parameter: Map[String, String], body: EZ_Account, req: Option[Req]): Resp[String] = {
     _update(parameter("id"), body, req)
   }
 
@@ -28,12 +28,12 @@ object AccountService extends JDBCService[Account, Req] with SyncService[Account
   }
 
   @GET(":id/")
-  def get(parameter: Map[String, String], req: Option[Req]): Resp[Account] = {
+  def get(parameter: Map[String, String], req: Option[Req]): Resp[EZ_Account] = {
     _getById(parameter("id"), req)
   }
 
   @GET("page/:number/:size/")
-  def page(parameter: Map[String, String], req: Option[Req]): Resp[PageModel[Account]] = {
+  def page(parameter: Map[String, String], req: Option[Req]): Resp[PageModel[EZ_Account]] = {
     val (orderSql, orderParams) = CommonUtils.packageOrder(parameter)
     if (orderSql.nonEmpty) {
       _pageByCondition(orderSql, Some(orderParams), parameter("number").toInt, parameter("size").toInt, req)
@@ -43,7 +43,7 @@ object AccountService extends JDBCService[Account, Req] with SyncService[Account
   }
 
   @GET("")
-  def find(parameter: Map[String, String], req: Option[Req]): Resp[List[Account]] = {
+  def find(parameter: Map[String, String], req: Option[Req]): Resp[List[EZ_Account]] = {
     val (orderSql, orderParams) = CommonUtils.packageOrder(parameter)
     if (orderSql.nonEmpty) {
       _findByCondition(orderSql, Some(orderParams), req)
@@ -56,7 +56,7 @@ object AccountService extends JDBCService[Account, Req] with SyncService[Account
    * ID检查，是否非法
    * 设置主键、密码
    */
-  override protected def _preSave(model: Account, request: Option[Req]): Resp[Any] = {
+  override protected def _preSave(model: EZ_Account, request: Option[Req]): Resp[Any] = {
     if (model.id == null || model.id.trim.isEmpty) {
       Resp.badRequest("Require LoginId.")
     } else {
@@ -65,7 +65,7 @@ object AccountService extends JDBCService[Account, Req] with SyncService[Account
     }
   }
 
-  override protected def _preUpdate(id: String, model: Account, request: Option[Req]): Resp[Any] = {
+  override protected def _preUpdate(id: String, model: EZ_Account, request: Option[Req]): Resp[Any] = {
     model.password = packageEncryptPwd(model.id, model.password)
     Resp.success(model)
   }

@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.module.auth.manage
 
 import com.ecfront.common.{Req, Resp}
-import com.ecfront.ez.framework.module.auth.{LocalCacheContainer, Role}
+import com.ecfront.ez.framework.module.auth.{LocalCacheContainer, EZ_Role}
 import com.ecfront.ez.framework.module.core.CommonUtils
 import com.ecfront.ez.framework.rpc._
 import com.ecfront.ez.framework.service.SyncService
@@ -10,15 +10,15 @@ import com.ecfront.storage.PageModel
 
 @RPC("/auth/manage/role/")
 @HTTP
-object RoleService extends JDBCService[Role, Req] with SyncService[Role, Req] {
+object RoleService extends JDBCService[EZ_Role, Req] with SyncService[EZ_Role, Req] {
 
   @POST("")
-  def save(parameter: Map[String, String], body: Role, req: Option[Req]): Resp[String] = {
+  def save(parameter: Map[String, String], body: EZ_Role, req: Option[Req]): Resp[String] = {
     _save(body, req)
   }
 
   @PUT(":id/")
-  def update(parameter: Map[String, String], body: Role, req: Option[Req]): Resp[String] = {
+  def update(parameter: Map[String, String], body: EZ_Role, req: Option[Req]): Resp[String] = {
     _update(parameter("id"), body, req)
   }
 
@@ -33,7 +33,7 @@ object RoleService extends JDBCService[Role, Req] with SyncService[Role, Req] {
   }
 
   @GET("page/:number/:size/")
-  def page(parameter: Map[String, String], req: Option[Req]): Resp[PageModel[Role]] = {
+  def page(parameter: Map[String, String], req: Option[Req]): Resp[PageModel[EZ_Role]] = {
     val (orderSql, orderParams) = CommonUtils.packageOrder(parameter)
     if (orderSql.nonEmpty) {
       _pageByCondition(orderSql, Some(orderParams), parameter("number").toInt, parameter("size").toInt, req)
@@ -43,7 +43,7 @@ object RoleService extends JDBCService[Role, Req] with SyncService[Role, Req] {
   }
 
   @GET("")
-  def find(parameter: Map[String, String], req: Option[Req]): Resp[List[Role]] = {
+  def find(parameter: Map[String, String], req: Option[Req]): Resp[List[EZ_Role]] = {
     val (orderSql, orderParams) = CommonUtils.packageOrder(parameter)
     if (orderSql.nonEmpty) {
       _findByCondition(orderSql, Some(orderParams), req)
@@ -52,7 +52,7 @@ object RoleService extends JDBCService[Role, Req] with SyncService[Role, Req] {
     }
   }
 
-  override protected def _preSave(model: Role, request: Option[Req]): Resp[Any] = {
+  override protected def _preSave(model: EZ_Role, request: Option[Req]): Resp[Any] = {
     if (model.id == null || model.id.trim.isEmpty) {
       Resp.badRequest("Require Code.")
     } else {

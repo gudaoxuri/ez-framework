@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.module.auth.manage
 
 import com.ecfront.common.{Req, Resp}
-import com.ecfront.ez.framework.module.auth.{LocalCacheContainer, Resource}
+import com.ecfront.ez.framework.module.auth.{LocalCacheContainer, EZ_Resource}
 import com.ecfront.ez.framework.module.core.CommonUtils
 import com.ecfront.ez.framework.rpc._
 import com.ecfront.ez.framework.service.SyncService
@@ -10,15 +10,15 @@ import com.ecfront.storage.PageModel
 
 @RPC("/auth/manage/resource/")
 @HTTP
-object ResourceService extends JDBCService[Resource, Req] with SyncService[Resource, Req] {
+object ResourceService extends JDBCService[EZ_Resource, Req] with SyncService[EZ_Resource, Req] {
 
   @POST("")
-  def save(parameter: Map[String, String], body: Resource, req: Option[Req]): Resp[String] = {
+  def save(parameter: Map[String, String], body: EZ_Resource, req: Option[Req]): Resp[String] = {
     _save(body, req)
   }
 
   @PUT(":id/")
-  def update(parameter: Map[String, String], body: Resource, req: Option[Req]): Resp[String] = {
+  def update(parameter: Map[String, String], body: EZ_Resource, req: Option[Req]): Resp[String] = {
     _update(parameter("id"), body, req)
   }
 
@@ -33,7 +33,7 @@ object ResourceService extends JDBCService[Resource, Req] with SyncService[Resou
   }
 
   @GET("page/:number/:size/")
-  def page(parameter: Map[String, String], req: Option[Req]): Resp[PageModel[Resource]] = {
+  def page(parameter: Map[String, String], req: Option[Req]): Resp[PageModel[EZ_Resource]] = {
     val (orderSql, orderParams) = CommonUtils.packageOrder(parameter)
     if (orderSql.nonEmpty) {
       _pageByCondition(orderSql, Some(orderParams), parameter("number").toInt, parameter("size").toInt, req)
@@ -43,7 +43,7 @@ object ResourceService extends JDBCService[Resource, Req] with SyncService[Resou
   }
 
   @GET("")
-  def find(parameter: Map[String, String], req: Option[Req]): Resp[List[Resource]] = {
+  def find(parameter: Map[String, String], req: Option[Req]): Resp[List[EZ_Resource]] = {
     val (orderSql, orderParams) = CommonUtils.packageOrder(parameter)
     if (orderSql.nonEmpty) {
       _findByCondition(orderSql, Some(orderParams), req)
@@ -52,7 +52,7 @@ object ResourceService extends JDBCService[Resource, Req] with SyncService[Resou
     }
   }
 
-  override protected def _preSave(model: Resource, request: Option[Req]): Resp[Any] = {
+  override protected def _preSave(model: EZ_Resource, request: Option[Req]): Resp[Any] = {
     if (model.id == null || model.id.trim.isEmpty) {
       Resp.badRequest("Require method and uri.")
     } else {
