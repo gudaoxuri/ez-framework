@@ -34,7 +34,7 @@
 
 ##示例
 
-    //TODO
+   https://github.com/gudaoxuri/ez-framework/wiki
 
 ### Check out sources
 `git clone https://github.com/gudaoxuri/ez-framework.git`
