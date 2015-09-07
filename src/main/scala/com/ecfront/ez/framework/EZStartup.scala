@@ -81,7 +81,7 @@ trait EZStartup extends App with LazyLogging {
     }
     ScheduleService.runByModuleName(moduleName)
     postStartup()
-    logger.info("RPC Service started.")
+    logger.info("EZ-Framework started.")
   }
 
   private def shutdownHook(): Unit = {
@@ -92,7 +92,7 @@ trait EZStartup extends App with LazyLogging {
       publicServer.shutdown()
       innerServer.shutdown()
       customShutdownHook()
-      logger.info("RPC Service shutdown.")
+      logger.info("EZ-Framework shutdown.")
     })
   }
 
