@@ -3,7 +3,8 @@ package com.ecfront.ez.framework.service.common
 import com.ecfront.ez.framework.service.protocols.RedisService
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.redisson.core.RMap
-import collection.JavaConversions._
+
+import scala.collection.JavaConversions._
 
 case class DMapService[M](key: String) extends LazyLogging {
 

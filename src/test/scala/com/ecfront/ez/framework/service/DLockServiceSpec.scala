@@ -54,9 +54,9 @@ class DLockServiceSpec extends BasicSpec {
   }
 
 
-  test("集群关闭后Lock自动释放测试"){
+  test("集群关闭后Lock自动释放测试") {
     val lock = DLockService("test_lock")
-    while (true){
+    while (true) {
       Thread.sleep(1000)
       println("tryLock > " + lock.tryLock())
     }

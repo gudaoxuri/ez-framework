@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.service.protocols
 
 import com.ecfront.common.{Req, Resp}
-import com.ecfront.ez.framework.service.{_AuthType, BasicService, IdModel, SecureModel}
+import com.ecfront.ez.framework.service.{BasicService, IdModel, SecureModel, _AuthType}
 import com.ecfront.storage.{JDBCStorable, PageModel}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
@@ -25,6 +25,14 @@ trait JDBCService[M <: IdModel, R <: Req] extends BasicService[M, R] with JDBCSt
 
   override protected def _doPageByCondition(condition: String, parameters: Option[List[Any]], pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = {
     Resp.success(__pageByCondition(_addDefaultSort(condition), parameters, pageNumber, pageSize, request).orNull)
+  }
+
+  protected def _addDefaultSort(condition: String): String = {
+    if (condition.toLowerCase.indexOf("order by") == -1 && classOf[SecureModel].isAssignableFrom(_modelClazz)) {
+      condition + " ORDER BY update_time desc "
+    } else {
+      condition
+    }
   }
 
   override protected def _doSave(model: M, request: Option[R]): Resp[String] = {
@@ -71,16 +79,8 @@ trait JDBCService[M <: IdModel, R <: Req] extends BasicService[M, R] with JDBCSt
     Resp.success(__deleteByConditionWithoutTransaction(condition, parameters, request).orNull)
   }
 
-  protected def _addDefaultSort(condition: String): String = {
-    if (condition.toLowerCase.indexOf("order by") == -1 && classOf[SecureModel].isAssignableFrom(_modelClazz)) {
-      condition + " ORDER BY update_time desc "
-    } else {
-      condition
-    }
-  }
-
   protected override def __appendAuth(request: Option[R]): (String, List[Any]) = {
-    if(_isSecureModel&&request.isDefined&&request.get!=null){
+    if (_isSecureModel && request.isDefined && request.get != null) {
       _useAuthType match {
         case _AuthType.BY_CREATE_USER =>
           ("AND create_user = ? ", List(request.get.login_Id))
@@ -91,7 +91,7 @@ trait JDBCService[M <: IdModel, R <: Req] extends BasicService[M, R] with JDBCSt
         case _AuthType.BY_UPDATE_ORGANIZATION =>
           ("AND update_organization = ? ", List(request.get.organization_id))
       }
-    }else{
+    } else {
       ("", List())
     }
   }

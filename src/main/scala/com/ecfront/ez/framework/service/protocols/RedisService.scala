@@ -50,7 +50,7 @@ object RedisService extends LazyLogging {
   }
 
   def close(): Unit = {
-    if(redis!=null){
+    if (redis != null) {
       redis.shutdown()
     }
 

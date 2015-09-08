@@ -37,6 +37,16 @@ object HttpHelper extends LazyLogging {
     execute(new HttpPost(url), file, header, null)
   }
 
+  implicit def toSafe(str: String): Object {def safe: String} = new {
+    def safe = {
+      if (str != null && str.nonEmpty) {
+        str.replaceAll("&", "&amp;").replaceAll("\\<", "&lt;").replaceAll("\\>", "&gt;").replaceAll("'", "&apos;").replaceAll("\"", "&quot;")
+      } else {
+        ""
+      }
+    }
+  }
+
   private def execute(method: HttpRequestBase, body: AnyRef, header: Map[String, String] = Map(), contentType: String, retry: Int = 0): Resp[String] = {
     logger.debug(s"HTTP [${method.getMethod}] request : ${method.getURI}")
     if (header != null) {
@@ -77,16 +87,6 @@ object HttpHelper extends LazyLogging {
       case e: Exception =>
         logger.warn(s"HTTP [${method.getMethod}] request : ${method.getURI} ERROR.", e)
         Resp.unknown(e.getMessage)
-    }
-  }
-
-  implicit def toSafe(str: String): Object {def safe: String} = new {
-    def safe = {
-      if (str != null && str.nonEmpty) {
-        str.replaceAll("&", "&amp;").replaceAll("\\<", "&lt;").replaceAll("\\>", "&gt;").replaceAll("'", "&apos;").replaceAll("\"", "&quot;")
-      } else {
-        ""
-      }
     }
   }
 }

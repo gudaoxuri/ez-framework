@@ -22,16 +22,16 @@ object LocalCacheContainer {
     roles(roleCode) = resourceCodes
   }
 
+  def addResource(resourceCode: String): Unit = {
+    resources += resourceCode
+  }
+
   def removeRole(roleCode: String): Unit = {
     roles -= roleCode
   }
 
   def removeAllRole(): Unit = {
     roles.clear()
-  }
-
-  def addResource(resourceCode: String): Unit = {
-    resources += resourceCode
   }
 
   def removeResource(resourceCode: String): Unit = {

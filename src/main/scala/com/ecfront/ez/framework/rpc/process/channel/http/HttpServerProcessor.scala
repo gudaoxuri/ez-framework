@@ -106,22 +106,6 @@ class HttpServerProcessor extends ServerProcessor {
     latch.await()
   }
 
-  override protected[rpc] def process(method: String, path: String, isRegex: Boolean): Unit = {}
-
-  override private[rpc] def destroy(): Unit = {
-    val latch = new CountDownLatch(1)
-    server.close(new Handler[AsyncResult[Void]] {
-      override def handle(event: AsyncResult[Void]): Unit = {
-        if (event.succeeded()) {
-          latch.countDown()
-        } else {
-          logger.error("Shutdown failed.", event.cause())
-        }
-      }
-    })
-    latch.await()
-  }
-
   private def execute(method: String, uri: String, parameters: Map[String, String], body: Any, preData: Any, fun: Fun[_], postFun: => Any => Any, response: HttpServerResponse, contentType: String) {
     vertx.executeBlocking(new Handler[Future[Any]] {
       override def handle(future: Future[Any]): Unit = {
@@ -170,6 +154,22 @@ class HttpServerProcessor extends ServerProcessor {
       .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
       .putHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, X-authentication, X-client")
       .end(body)
+  }
+
+  override protected[rpc] def process(method: String, path: String, isRegex: Boolean): Unit = {}
+
+  override private[rpc] def destroy(): Unit = {
+    val latch = new CountDownLatch(1)
+    server.close(new Handler[AsyncResult[Void]] {
+      override def handle(event: AsyncResult[Void]): Unit = {
+        if (event.succeeded()) {
+          latch.countDown()
+        } else {
+          logger.error("Shutdown failed.", event.cause())
+        }
+      }
+    })
+    latch.await()
   }
 
 }

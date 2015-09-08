@@ -19,6 +19,7 @@ import scala.concurrent.duration.Duration
  */
 case class Client() extends LazyLogging {
 
+  private val client = this
   /**
    * 服务连接的端口（对Event Bus通道无效）
    */
@@ -27,7 +28,6 @@ case class Client() extends LazyLogging {
    * 服务连接的IP（对Event Bus通道无效）
    */
   private var host = "0.0.0.0"
-
   /**
    * 后置接收方法，可用于权限过滤
    * <p>
@@ -36,15 +36,12 @@ case class Client() extends LazyLogging {
    * 参数为：method,uri,inject => Resp[clientInterceptInfo]
    */
   private[rpc] var preExecuteInterceptor: (String, String, Any) => Resp[Map[String, String]] = { (method, uri, inject) => Resp.success(null) }
-
   /**
    * 后置执行方法
    * <p>
    * 参数为： (String, String) => Unit
    */
   private[rpc] var postExecuteInterceptor: (String, String) => Unit = { (method, uri) => Unit }
-
-
   /**
    * 通道类型
    * <p>
@@ -138,7 +135,6 @@ case class Client() extends LazyLogging {
     this
   }
 
-
   /**
    * 关闭连接
    */
@@ -161,7 +157,6 @@ case class Client() extends LazyLogging {
     processor.isPointToPoint = true
     this
   }
-
 
   /**
    * GET请求（异步）
@@ -267,8 +262,6 @@ case class Client() extends LazyLogging {
    * 返回原生对象的资源操作
    */
   def raw = new Raw
-
-  private val client = this
 
   class Raw {
 

@@ -68,22 +68,6 @@ class WebSocketsServerProcessor extends ServerProcessor {
     latch.await()
   }
 
-  override protected[rpc] def process(method: String, path: String, isRegex: Boolean): Unit = {}
-
-  override private[rpc] def destroy(): Unit = {
-    val latch = new CountDownLatch(1)
-    server.close(new Handler[AsyncResult[Void]] {
-      override def handle(event: AsyncResult[Void]): Unit = {
-        if (event.succeeded()) {
-          latch.countDown()
-        } else {
-          logger.error("Shutdown failed.", event.cause())
-        }
-      }
-    })
-    latch.await()
-  }
-
   private def execute(method: String, uri: String, parameters: Map[String, String], body: Any, preData: Any, fun: Fun[_], postFun: => Any => Any, request: ServerWebSocket) {
     vertx.executeBlocking(new Handler[Future[Any]] {
       override def handle(future: Future[Any]): Unit = {
@@ -115,6 +99,22 @@ class WebSocketsServerProcessor extends ServerProcessor {
       case _ => JsonHelper.toJsonString(result)
     }
     request.write(Buffer.buffer(body))
+  }
+
+  override protected[rpc] def process(method: String, path: String, isRegex: Boolean): Unit = {}
+
+  override private[rpc] def destroy(): Unit = {
+    val latch = new CountDownLatch(1)
+    server.close(new Handler[AsyncResult[Void]] {
+      override def handle(event: AsyncResult[Void]): Unit = {
+        if (event.succeeded()) {
+          latch.countDown()
+        } else {
+          logger.error("Shutdown failed.", event.cause())
+        }
+      }
+    })
+    latch.await()
   }
 
 }

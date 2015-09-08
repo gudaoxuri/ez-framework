@@ -10,9 +10,9 @@ case class DLockService(key: String) extends LazyLogging {
   private val lock = ClusterManager.clusterManager.getHazelcastInstance.getLock(key)
 
   def lock(leaseTime: Long = -1, unit: TimeUnit = TimeUnit.SECONDS) {
-    if(leaseTime== -1){
+    if (leaseTime == -1) {
       lock.lock()
-    }else {
+    } else {
       lock.lock(leaseTime, unit)
     }
   }

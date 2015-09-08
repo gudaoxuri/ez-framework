@@ -22,7 +22,7 @@ case class DTopicService[M](key: String) {
   }
 
   def delete() = {
-//    topic.delete()
+    //    topic.delete()
     this
   }
 

@@ -96,6 +96,24 @@ trait EventBusOptions extends Processor {
     }
   }
 
+  /**
+   * 从集群中获取服务路由表
+   * @param useRegex 是否是正则路由
+   * @param callback 获取成功后的回调方法
+   */
+  private def getAddressPathInCluster(useRegex: Boolean, callback: => List[String] => Unit): Unit = {
+    EventBusOptions.clusterAddressPathMap.get(if (useRegex) "__r_address_path__" else "__address_path__", new Handler[AsyncResult[ChoosableIterable[String]]] {
+      override def handle(event: AsyncResult[ChoosableIterable[String]]): Unit = {
+        if (event.succeeded()) {
+          //正则或非正则的服务路由表
+          callback(event.result().iterator().toList)
+        } else {
+          logger.error(s"Get REGISTER_MAP_ADDRESS_PATH failed!", event.cause())
+        }
+      }
+    })
+  }
+
   protected def destoryEventbus(): Unit = {
     val latch = new CountDownLatch(1)
     EventBusOptions.eb.close(new Handler[AsyncResult[Void]] {
@@ -139,6 +157,30 @@ trait EventBusOptions extends Processor {
     nPath
   }
 
+  /**
+   * 删除请求的Path参数
+   *
+   * @param path 请求Path
+   * @return 不带参数的请求Path
+   */
+  protected def removeParameter(path: String): String = {
+    if (path.contains("?")) {
+      path.substring(0, path.indexOf("?"))
+    } else {
+      path
+    }
+  }
+
+  /* protected def unRegisterAddress(address: String, useRegex: Boolean): Unit = {
+     registerAddressMap.remove(if (useRegex) "__r_address__" else "__address__", address, new Handler[AsyncResult[java.lang.Boolean]] {
+       override def handle(event: AsyncResult[java.lang.Boolean]): Unit = {
+         if (!event.succeeded()) {
+           logger.error(s"UnRegister $address to FLAG_REGISTER_ADDRESS failed!", event.cause())
+         }
+       }
+     })
+   }*/
+
   protected def addAddress(method: String, path: String): String = {
     method + "__" + path
   }
@@ -157,34 +199,6 @@ trait EventBusOptions extends Processor {
           logger.debug(s"Register $address to REGISTER_MAP_ADDRESS_PATH success.")
         } else {
           logger.error(s"Register $address to REGISTER_MAP_ADDRESS_PATH failed!", event.cause())
-        }
-      }
-    })
-  }
-
-  /* protected def unRegisterAddress(address: String, useRegex: Boolean): Unit = {
-     registerAddressMap.remove(if (useRegex) "__r_address__" else "__address__", address, new Handler[AsyncResult[java.lang.Boolean]] {
-       override def handle(event: AsyncResult[java.lang.Boolean]): Unit = {
-         if (!event.succeeded()) {
-           logger.error(s"UnRegister $address to FLAG_REGISTER_ADDRESS failed!", event.cause())
-         }
-       }
-     })
-   }*/
-
-  /**
-   * 从集群中获取服务路由表
-   * @param useRegex 是否是正则路由
-   * @param callback 获取成功后的回调方法
-   */
-  private def getAddressPathInCluster(useRegex: Boolean, callback: => List[String] => Unit): Unit = {
-    EventBusOptions.clusterAddressPathMap.get(if (useRegex) "__r_address_path__" else "__address_path__", new Handler[AsyncResult[ChoosableIterable[String]]] {
-      override def handle(event: AsyncResult[ChoosableIterable[String]]): Unit = {
-        if (event.succeeded()) {
-          //正则或非正则的服务路由表
-          callback(event.result().iterator().toList)
-        } else {
-          logger.error(s"Get REGISTER_MAP_ADDRESS_PATH failed!", event.cause())
         }
       }
     })
@@ -215,27 +229,13 @@ trait EventBusOptions extends Processor {
     parameter
   }
 
-  /**
-   * 删除请求的Path参数
-   *
-   * @param path 请求Path
-   * @return 不带参数的请求Path
-   */
-  protected def removeParameter(path: String): String = {
-    if (path.contains("?")) {
-      path.substring(0, path.indexOf("?"))
-    } else {
-      path
-    }
-  }
-
 }
 
 object EventBusOptions extends LazyLogging {
 
+  val localAddressPathMap = collection.mutable.Map[String, Void]()
+  val localRAddressPathList = ArrayBuffer[Pattern]()
   private val existInstance = new AtomicBoolean(false)
-  private var startFinish = false
-
   var eb: EventBus = _
   /**
    * 集群中的路由映射表
@@ -243,7 +243,6 @@ object EventBusOptions extends LazyLogging {
    * key = __r_address_path__ 或 __r_address_path__ 分别表示 正则地址和非正则地址，value = 正则化处理后的地址列表（MultiMap类型，value是List）
    */
   var clusterAddressPathMap: AsyncMultiMap[String, String] = _
-  val localAddressPathMap = collection.mutable.Map[String, Void]()
-  val localRAddressPathList = ArrayBuffer[Pattern]()
+  private var startFinish = false
 
 }

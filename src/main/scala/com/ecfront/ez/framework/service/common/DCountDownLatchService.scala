@@ -9,7 +9,7 @@ case class DCountDownLatchService(key: String) extends LazyLogging {
 
   private val countDownLatch = ClusterManager.clusterManager.getHazelcastInstance.getCountDownLatch(key)
 
-  def set(value: Int):Boolean= {
+  def set(value: Int): Boolean = {
     countDownLatch.destroy()
     countDownLatch.trySetCount(value)
   }

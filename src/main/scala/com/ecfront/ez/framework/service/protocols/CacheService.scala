@@ -2,11 +2,12 @@ package com.ecfront.ez.framework.service.protocols
 
 import java.util.UUID
 
-import com.ecfront.common.{Resp, Req}
-import com.ecfront.ez.framework.service.{IdModel, BasicService}
+import com.ecfront.common.{Req, Resp}
+import com.ecfront.ez.framework.service.{BasicService, IdModel}
 import com.ecfront.storage.PageModel
 import org.redisson.core.RMap
-import collection.JavaConversions._
+
+import scala.collection.JavaConversions._
 
 trait CacheService[M <: AnyRef, R <: Req] extends BasicService[M, R] {
 

@@ -20,8 +20,8 @@ object ConfigContainer extends LazyLogging {
 
 case class ServerConfig(publicServer: WebServer, clusterServer: ClusterServer)
 
-case class WebServer(host: String, port: Int, resourcePath: String,servicePath:String,publicUriPrefix:String,authManage:Boolean)
+case class WebServer(host: String, port: Int, resourcePath: String, servicePath: String, publicUriPrefix: String, authManage: Boolean)
 
-case class ClusterServer(host: String,servicePath:String)
+case class ClusterServer(host: String, servicePath: String)
 
 

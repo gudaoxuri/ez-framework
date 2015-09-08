@@ -20,23 +20,6 @@ class WebSocketsClientProcessor extends ClientProcessor {
   override protected def init(): Unit = {
   }
 
-  override private[rpc] def destroy(): Unit = {
-    webSocketClient.close()
-  }
-
-  private def getUrlInfo(path: String): (String, Int, String) = {
-    var tHost = host
-    var tPort = port
-    var tPath = path
-    if (path.toLowerCase.startsWith("http")) {
-      val url = new URL(path)
-      tHost = url.getHost
-      tPort = if (url.getPort == -1) 80 else url.getPort
-      tPath = url.getPath
-    }
-    (tHost, tPort, tPath)
-  }
-
   override protected def doProcess[E, F](method: String, path: String, requestBody: Any, responseClass: Class[E], resultClass: Class[F], finishFun: => (Option[F]) => Unit, inject: Any): Unit = {
     val (tHost, tPort, tPath) = getUrlInfo(path)
     val headers = new DefaultHttpHeaders
@@ -64,6 +47,19 @@ class WebSocketsClientProcessor extends ClientProcessor {
     }
   }
 
+  private def getUrlInfo(path: String): (String, Int, String) = {
+    var tHost = host
+    var tPort = port
+    var tPath = path
+    if (path.toLowerCase.startsWith("http")) {
+      val url = new URL(path)
+      tHost = url.getHost
+      tPort = if (url.getPort == -1) 80 else url.getPort
+      tPath = url.getPath
+    }
+    (tHost, tPort, tPath)
+  }
+
   private def setHeader(method: String, interceptInfo: Map[String, String]): DefaultHttpHeaders = {
     val headers = new DefaultHttpHeaders
     headers.add(FLAG_METHOD, method)
@@ -81,6 +77,10 @@ class WebSocketsClientProcessor extends ClientProcessor {
       case b: String => b
       case _ => JsonHelper.toJsonString(requestBody)
     }
+  }
+
+  override private[rpc] def destroy(): Unit = {
+    webSocketClient.close()
   }
 
 }

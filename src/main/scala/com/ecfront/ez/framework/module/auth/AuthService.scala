@@ -26,16 +26,6 @@ object AuthService {
     }
   }
 
-  @GET("logout/")
-  def logout(parameter: Map[String, String], req: Option[Req]): Resp[Void] = {
-    doLogout(parameter(CommonUtils.TOKEN), req)
-  }
-
-  @GET("logininfo/")
-  def getLoginInfo(parameter: Map[String, String], req: Option[Req]): Resp[Token_Info_VO] = {
-    doGetLoginInfo(req.get.token, req)
-  }
-
   /**
    * 登录
    */
@@ -62,6 +52,11 @@ object AuthService {
     }
   }
 
+  @GET("logout/")
+  def logout(parameter: Map[String, String], req: Option[Req]): Resp[Void] = {
+    doLogout(parameter(CommonUtils.TOKEN), req)
+  }
+
   /**
    * 注销
    *
@@ -73,6 +68,11 @@ object AuthService {
       KeyLogService.success(s"Logout Success by ${loginInfo.login_id} , token : ${loginInfo.id}", req)
     }
     Resp.success(null)
+  }
+
+  @GET("logininfo/")
+  def getLoginInfo(parameter: Map[String, String], req: Option[Req]): Resp[Token_Info_VO] = {
+    doGetLoginInfo(req.get.token, req)
   }
 
   /**

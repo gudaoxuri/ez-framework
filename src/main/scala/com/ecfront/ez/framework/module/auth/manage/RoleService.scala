@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.module.auth.manage
 
 import com.ecfront.common.{Req, Resp}
-import com.ecfront.ez.framework.module.auth.{LocalCacheContainer, EZ_Role}
+import com.ecfront.ez.framework.module.auth.{EZ_Role, LocalCacheContainer}
 import com.ecfront.ez.framework.module.core.CommonUtils
 import com.ecfront.ez.framework.rpc._
 import com.ecfront.ez.framework.service.SyncService

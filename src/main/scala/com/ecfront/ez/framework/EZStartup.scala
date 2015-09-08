@@ -12,17 +12,10 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 
 trait EZStartup extends App with LazyLogging {
 
+  private var publicServer: Server = _
+  private var innerServer: Server = _
+
   protected def moduleName: String
-
-  protected def preStartup() = {}
-
-  protected def postStartup() = {}
-
-  protected def customShutdownHook() = {}
-
-  protected def customPublicExecuteInterceptor(method: String, uri: String, parameters: Map[String, String], interceptorInfo: Map[String, String]): Resp[_] = null
-
-  protected def customInnerExecuteInterceptor(method: String, uri: String, parameters: Map[String, String], interceptorInfo: Map[String, String]): Resp[_] = null
 
   private def startup(): Unit = {
     preStartup()
@@ -84,22 +77,29 @@ trait EZStartup extends App with LazyLogging {
     logger.info("EZ-Framework started.")
   }
 
+  protected def preStartup() = {}
+
+  protected def postStartup() = {}
+
+  protected def customPublicExecuteInterceptor(method: String, uri: String, parameters: Map[String, String], interceptorInfo: Map[String, String]): Resp[_] = null
+
+  protected def customInnerExecuteInterceptor(method: String, uri: String, parameters: Map[String, String], interceptorInfo: Map[String, String]): Resp[_] = null
+
+  startup()
+  shutdownHook()
+
   private def shutdownHook(): Unit = {
     sys.addShutdownHook({
       ScheduleService.stop()
       RedisService.close()
       JDBCService.close()
-      publicServer.shutdown()
-      innerServer.shutdown()
+      if (publicServer != null) publicServer.shutdown()
+      if (innerServer != null) innerServer.shutdown()
       customShutdownHook()
       logger.info("EZ-Framework shutdown.")
     })
   }
 
-  startup()
-  shutdownHook()
-
-  private var publicServer: Server = _
-  private var innerServer: Server = _
+  protected def customShutdownHook() = {}
 
 }

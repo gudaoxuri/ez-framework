@@ -1,11 +1,8 @@
 package com.ecfront.ez.framework.rpc.autobuilding
 
 import com.ecfront.common.{BeanHelper, Resp, methodAnnotationInfo}
-import com.ecfront.ez.framework.rpc.EVENT_BUS
-import com.ecfront.ez.framework.rpc.HTTP
-import com.ecfront.ez.framework.rpc.WEB_SOCKETS
 import com.ecfront.ez.framework.rpc.RPC.EChannel
-import com.ecfront.ez.framework.rpc._
+import com.ecfront.ez.framework.rpc.{EVENT_BUS, HTTP, WEB_SOCKETS, _}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 object AutoBuildingProcessor extends LazyLogging {

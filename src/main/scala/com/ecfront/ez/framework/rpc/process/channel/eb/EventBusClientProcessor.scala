@@ -10,14 +10,6 @@ import io.vertx.core.{AsyncResult, Handler}
  */
 class EventBusClientProcessor extends ClientProcessor with EventBusOptions {
 
-  override protected def init(): Unit = {
-    initEventbus(host, port)
-  }
-
-  override private[rpc] def destroy(): Unit = {
-    destoryEventbus()
-  }
-
   def doProcess[E, F](method: String, path: String, requestBody: Any, responseClass: Class[E], resultClass: Class[F], finishFun: => Option[F] => Unit, inject: Any) {
     val address = getAddress(method, path)
     if (address != null) {
@@ -83,6 +75,14 @@ class EventBusClientProcessor extends ClientProcessor with EventBusOptions {
       case b: String => b
       case _ => JsonHelper.toJsonString(requestBody)
     }
+  }
+
+  override protected def init(): Unit = {
+    initEventbus(host, port)
+  }
+
+  override private[rpc] def destroy(): Unit = {
+    destoryEventbus()
   }
 
 }

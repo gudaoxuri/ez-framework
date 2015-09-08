@@ -20,17 +20,18 @@ import scala.reflect.runtime._
 case class Server() extends LazyLogging {
 
   private val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
-
+  /**
+   * 路径表实例
+   */
+  private val router = new Router(this)
   /**
    * 上传文件的根路径，只对HTTP通道有效，默认为/tmp/
    */
   private var rootUploadPath = "/tmp/"
-
   /**
    * 服务注册的端口（对Event Bus通道无效）
    */
   private var port = 8080
-
   /**
    * 服务注册的IP（对Event Bus通道无效）
    */
@@ -49,17 +50,10 @@ case class Server() extends LazyLogging {
    * [[com.ecfront.ez.framework.rpc.RPC.EChannel]]
    */
   private var channel = EChannel.HTTP
-
   /**
    * 处理类实例，不同的通道对应不同的类
    */
   private[rpc] var processor: ServerProcessor = _
-
-  /**
-   * 路径表实例
-   */
-  private val router = new Router(this)
-
   /**
    * 后置接收方法，可用于权限过滤
    * <p>

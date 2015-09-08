@@ -13,11 +13,12 @@ import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager
  */
 object ClusterManager extends LazyLogging {
 
+  private val existInstance = new AtomicBoolean(false)
   //集群对象
   var clusterManager: HazelcastClusterManager = _
   var vertx: Vertx = _
 
-  def initCluster(host: String="127.0.0.1"): Unit = {
+  def initCluster(host: String = "127.0.0.1"): Unit = {
     if (!existInstance.getAndSet(true)) {
       val counter = new CountDownLatch(1)
       val hazelcastConfig = new Config()
@@ -44,10 +45,8 @@ object ClusterManager extends LazyLogging {
     }
   }
 
-  def destoryCluster(): Unit ={
+  def destoryCluster(): Unit = {
     existInstance.set(false)
   }
-
-  private val existInstance = new AtomicBoolean(false)
 
 }

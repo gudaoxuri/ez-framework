@@ -18,13 +18,6 @@ trait ClientProcessor extends Processor {
   private[rpc] var isPointToPoint = true
   private[rpc] var rpcClient: Client = _
 
-  private[rpc] def init(port: Int, host: String, client: Client) {
-    this.port = port
-    this.host = host
-    this.rpcClient = client
-    init()
-  }
-
   /**
    * 处理Result包装返回类型（异步方式）
    * @param method  资源操作方式
@@ -150,6 +143,13 @@ trait ClientProcessor extends Processor {
       override def handle(event: io.vertx.core.AsyncResult[Any]): Unit = {
       }
     })
+  }
+
+  private[rpc] def init(port: Int, host: String, client: Client) {
+    this.port = port
+    this.host = host
+    this.rpcClient = client
+    init()
   }
 
 }

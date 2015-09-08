@@ -37,7 +37,7 @@ class DMapServiceSpec extends BasicSpec {
     map.clear()
 
     val model = TestModel()
-    model.id="1"
+    model.id = "1"
     model.name = "abc"
     model.age = 23
     model.bool = true
@@ -46,7 +46,7 @@ class DMapServiceSpec extends BasicSpec {
     assert(newModel.id == "1")
     assert(newModel.name == "abc")
     assert(newModel.age == 23)
-    assert(newModel.bool )
+    assert(newModel.bool)
 
   }
 

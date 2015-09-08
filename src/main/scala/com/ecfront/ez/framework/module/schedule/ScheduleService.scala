@@ -12,6 +12,9 @@ import scala.reflect.runtime._
 
 object ScheduleService extends LazyLogging {
 
+  private val timers = collection.mutable.Map[String, Timer]()
+  private val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
+
   def registerTask[T <: EZTask](taskName: String, moduleName: String, executeClass: Class[T], delay: Long, period: Long, parameters: Map[String, Any] = Map()): String = {
     logger.info(s"Register Schedule Task [$moduleName][$taskName]")
     val task = EZ_Schedule_Task()
@@ -44,31 +47,8 @@ object ScheduleService extends LazyLogging {
     runById(taskId)
   }
 
-  def unRegisterTask(taskId: String): Unit = {
-    val task = ScheduleTaskService.__getById(taskId).get
-    logger.info(s"UnRegister Schedule Task [${task.module_name}][${task.task_name}]")
-    ScheduleTaskService.__deleteById(taskId)
-    timers(taskId).cancel()
-    timers -= taskId
-  }
-
-  def existTask(taskName: String, moduleName: String): Boolean = {
-    ScheduleTaskService.__findByCondition("task_name =? AND module_name =? ", Some(List(taskName, moduleName))).get.nonEmpty
-  }
-
-  private val timers = collection.mutable.Map[String, Timer]()
-  private val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
-
-  def stop(): Unit = {
-    timers.foreach(_._2.cancel())
-  }
-
   def runById(taskId: String = null): Unit = {
     run(List(ScheduleTaskService._getById(taskId).body))
-  }
-
-  def runByModuleName(moduleName: String = null): Unit = {
-    run(ScheduleTaskService._findByCondition("module_name = ?  AND is_enabled = ?", Some(List(moduleName, true))).body)
   }
 
   private def run(tasks: List[EZ_Schedule_Task]): Unit = {
@@ -118,6 +98,26 @@ object ScheduleService extends LazyLogging {
           timers += task.id -> timer
       }
     }
+  }
+
+  def unRegisterTask(taskId: String): Unit = {
+    val task = ScheduleTaskService.__getById(taskId).get
+    logger.info(s"UnRegister Schedule Task [${task.module_name}][${task.task_name}]")
+    ScheduleTaskService.__deleteById(taskId)
+    timers(taskId).cancel()
+    timers -= taskId
+  }
+
+  def existTask(taskName: String, moduleName: String): Boolean = {
+    ScheduleTaskService.__findByCondition("task_name =? AND module_name =? ", Some(List(taskName, moduleName))).get.nonEmpty
+  }
+
+  def stop(): Unit = {
+    timers.foreach(_._2.cancel())
+  }
+
+  def runByModuleName(moduleName: String = null): Unit = {
+    run(ScheduleTaskService._findByCondition("module_name = ?  AND is_enabled = ?", Some(List(moduleName, true))).body)
   }
 
 }

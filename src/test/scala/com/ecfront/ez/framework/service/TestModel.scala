@@ -13,8 +13,6 @@ case class TestModel() extends SecureModel {
 }
 
 
-
-
 case class TestVO() extends IdVO {
   @BeanProperty var name: String = _
   @BeanProperty var bool: Boolean = _

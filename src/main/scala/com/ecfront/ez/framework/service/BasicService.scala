@@ -19,24 +19,6 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
 
   protected def _useAuthType = _AuthType.BY_CREATE_USER
 
-  protected def _convertToView(model: M, request: Option[R]): M = {
-    model
-  }
-
-  protected def _convertToViews(models: List[M], request: Option[R]): List[M] = {
-    models
-  }
-
-  //=========================GetByID=========================
-
-  protected def _preGetById(id: String, request: Option[R]): Resp[Any] = {
-    Resp.success(null)
-  }
-
-  protected def _postGetById(result: M, preResult: Any, request: Option[R]): Resp[M] = {
-    Resp.success(result)
-  }
-
   protected def _executeGetById(id: String, request: Option[R]): Resp[M] = {
     val preResult = _preGetById(id, request)
     if (preResult) {
@@ -51,17 +33,17 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
     }
   }
 
-  protected def _doGetById(id: String, request: Option[R]): Resp[M]
-
-  //=========================GetByCondition=========================
-
-  protected def _preGetByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[Any] = {
+  protected def _preGetById(id: String, request: Option[R]): Resp[Any] = {
     Resp.success(null)
   }
 
-  protected def _postGetByCondition(result: M, preResult: Any, request: Option[R]): Resp[M] = {
+  //=========================GetByID=========================
+
+  protected def _postGetById(result: M, preResult: Any, request: Option[R]): Resp[M] = {
     Resp.success(result)
   }
+
+  protected def _doGetById(id: String, request: Option[R]): Resp[M]
 
   protected def _executeGetByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[M] = {
     val preResult = _preGetByCondition(condition, parameters, request)
@@ -77,17 +59,21 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
     }
   }
 
-  protected def _doGetByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[M]
+  protected def _convertToView(model: M, request: Option[R]): M = {
+    model
+  }
 
-  //=========================FindAll=========================
+  //=========================GetByCondition=========================
 
-  protected def _preFindAll(request: Option[R]): Resp[Any] = {
+  protected def _preGetByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[Any] = {
     Resp.success(null)
   }
 
-  protected def _postFindAll(result: List[M], preResult: Any, request: Option[R]): Resp[List[M]] = {
+  protected def _postGetByCondition(result: M, preResult: Any, request: Option[R]): Resp[M] = {
     Resp.success(result)
   }
+
+  protected def _doGetByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[M]
 
   protected def _executeFindAll(request: Option[R]): Resp[List[M]] = {
     val preResult = _preFindAll(request)
@@ -103,17 +89,17 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
     }
   }
 
-  protected def _doFindAll(request: Option[R]): Resp[List[M]]
+  //=========================FindAll=========================
 
-  //=========================FindByCondition=========================
-
-  protected def _preFindByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[Any] = {
+  protected def _preFindAll(request: Option[R]): Resp[Any] = {
     Resp.success(null)
   }
 
-  protected def _postFindByCondition(result: List[M], preResult: Any, request: Option[R]): Resp[List[M]] = {
+  protected def _postFindAll(result: List[M], preResult: Any, request: Option[R]): Resp[List[M]] = {
     Resp.success(result)
   }
+
+  protected def _doFindAll(request: Option[R]): Resp[List[M]]
 
   protected def _executeFindByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[List[M]] = {
     val preResult = _preFindByCondition(condition, parameters, request)
@@ -129,17 +115,17 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
     }
   }
 
-  protected def _doFindByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[List[M]]
+  //=========================FindByCondition=========================
 
-  //=========================PageAll=========================
-
-  protected def _prePageAll(pageNumber: Long, pageSize: Long, request: Option[R]): Resp[Any] = {
+  protected def _preFindByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[Any] = {
     Resp.success(null)
   }
 
-  protected def _postPageAll(result: PageModel[M], preResult: Any, pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = {
+  protected def _postFindByCondition(result: List[M], preResult: Any, request: Option[R]): Resp[List[M]] = {
     Resp.success(result)
   }
+
+  protected def _doFindByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[List[M]]
 
   protected def _executePageAll(pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = {
     val preResult = _prePageAll(pageNumber, pageSize, request)
@@ -156,17 +142,23 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
     }
   }
 
-  protected def _doPageAll(pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]]
+  //=========================PageAll=========================
 
-  //=========================PageByCondition=========================
+  protected def _convertToViews(models: List[M], request: Option[R]): List[M] = {
+    models
+  }
 
-  protected def _prePageByCondition(condition: String, parameters: Option[List[Any]], pageNumber: Long, pageSize: Long, request: Option[R]): Resp[Any] = {
+  protected def _prePageAll(pageNumber: Long, pageSize: Long, request: Option[R]): Resp[Any] = {
     Resp.success(null)
   }
 
-  protected def _postPageByCondition(result: PageModel[M], preResult: Any, pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = {
+  protected def _postPageAll(result: PageModel[M], preResult: Any, pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = {
     Resp.success(result)
   }
+
+  protected def _doPageAll(pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]]
+
+  //=========================PageByCondition=========================
 
   protected def _executePageByCondition(condition: String, parameters: Option[List[Any]], pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = {
     val preResult = _prePageByCondition(condition, parameters, pageNumber, pageSize, request)
@@ -181,6 +173,14 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
     } else {
       preResult
     }
+  }
+
+  protected def _prePageByCondition(condition: String, parameters: Option[List[Any]], pageNumber: Long, pageSize: Long, request: Option[R]): Resp[Any] = {
+    Resp.success(null)
+  }
+
+  protected def _postPageByCondition(result: PageModel[M], preResult: Any, pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = {
+    Resp.success(result)
   }
 
   protected def _doPageByCondition(condition: String, parameters: Option[List[Any]], pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]]
@@ -199,14 +199,6 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
   }
 
   //=========================Save=========================
-
-  protected def _preSave(model: M, request: Option[R]): Resp[Any] = {
-    Resp.success(null)
-  }
-
-  protected def _postSave(result: String, preResult: Any, request: Option[R]): Resp[String] = {
-    Resp.success(result)
-  }
 
   protected def _executeSave(model: M, request: Option[R]): Resp[String] = {
     model match {
@@ -239,15 +231,11 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
     }
   }
 
-  protected def _doSave(model: M, request: Option[R]): Resp[String]
-
-  //=========================Update=========================
-
-  protected def _preUpdate(id: String, model: M, request: Option[R]): Resp[Any] = {
+  protected def _preSave(model: M, request: Option[R]): Resp[Any] = {
     Resp.success(null)
   }
 
-  protected def _postUpdate(result: String, preResult: Any, request: Option[R]): Resp[String] = {
+  protected def _postSave(result: String, preResult: Any, request: Option[R]): Resp[String] = {
     Resp.success(result)
   }
 
@@ -287,17 +275,21 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
     }
   }
 
-  protected def _doUpdate(id: String, model: M, request: Option[R]): Resp[String]
+  //=========================Update=========================
 
-  //=========================DeleteById=========================
-
-  protected def _preDeleteById(id: String, request: Option[R]): Resp[Any] = {
+  protected def _preUpdate(id: String, model: M, request: Option[R]): Resp[Any] = {
     Resp.success(null)
   }
 
-  protected def _postDeleteById(result: String, preResult: Any, request: Option[R]): Resp[String] = {
+  protected def _postUpdate(result: String, preResult: Any, request: Option[R]): Resp[String] = {
     Resp.success(result)
   }
+
+  protected def _doSave(model: M, request: Option[R]): Resp[String]
+
+  protected def _doUpdate(id: String, model: M, request: Option[R]): Resp[String]
+
+  //=========================DeleteById=========================
 
   protected def _executeDeleteById(id: String, request: Option[R]): Resp[String] = {
     val preResult = _preDeleteById(id, request)
@@ -313,17 +305,17 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
     }
   }
 
-  protected def _doDeleteById(id: String, request: Option[R]): Resp[String]
-
-  //=========================DeleteByCondition=========================
-
-  protected def _preDeleteByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[Any] = {
+  protected def _preDeleteById(id: String, request: Option[R]): Resp[Any] = {
     Resp.success(null)
   }
 
-  protected def _postDeleteByCondition(result: List[String], preResult: Any, request: Option[R]): Resp[List[String]] = {
+  protected def _postDeleteById(result: String, preResult: Any, request: Option[R]): Resp[String] = {
     Resp.success(result)
   }
+
+  protected def _doDeleteById(id: String, request: Option[R]): Resp[String]
+
+  //=========================DeleteByCondition=========================
 
   protected def _executeDeleteByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[List[String]] = {
     val preResult = _preDeleteByCondition(condition, parameters, request)
@@ -339,17 +331,17 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
     }
   }
 
-  protected def _doDeleteByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[List[String]]
-
-  //=========================DeleteAll=========================
-
-  protected def _preDeleteAll(request: Option[R]): Resp[Any] = {
+  protected def _preDeleteByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[Any] = {
     Resp.success(null)
   }
 
-  protected def _postDeleteAll(result: List[String], preResult: Any, request: Option[R]): Resp[List[String]] = {
+  protected def _postDeleteByCondition(result: List[String], preResult: Any, request: Option[R]): Resp[List[String]] = {
     Resp.success(result)
   }
+
+  protected def _doDeleteByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[List[String]]
+
+  //=========================DeleteAll=========================
 
   protected def _executeDeleteAll(request: Option[R]): Resp[List[String]] = {
     val preResult = _preDeleteAll(request)
@@ -363,6 +355,14 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
     } else {
       preResult
     }
+  }
+
+  protected def _preDeleteAll(request: Option[R]): Resp[Any] = {
+    Resp.success(null)
+  }
+
+  protected def _postDeleteAll(result: List[String], preResult: Any, request: Option[R]): Resp[List[String]] = {
+    Resp.success(result)
   }
 
   protected def _doDeleteAll(request: Option[R]): Resp[List[String]]
