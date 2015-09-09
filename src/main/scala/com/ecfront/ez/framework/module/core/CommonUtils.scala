@@ -3,7 +3,7 @@ package com.ecfront.ez.framework.module.core
 
 object CommonUtils {
 
-  val TOKEN = "ez_token"
+  val TOKEN = "__token__"
 
   val ORDER_FIELD = "orderField"
   val ORDER_SORT = "orderSort"
