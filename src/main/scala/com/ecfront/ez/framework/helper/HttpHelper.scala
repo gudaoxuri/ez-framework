@@ -3,7 +3,7 @@ package com.ecfront.ez.framework.helper
 import java.io.File
 import java.net.SocketException
 
-import com.ecfront.common.{JsonHelper, Resp}
+import com.ecfront.common.JsonHelper
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.apache.http.HttpHeaders
 import org.apache.http.client.methods._
@@ -17,23 +17,23 @@ object HttpHelper extends LazyLogging {
 
   val httpClient: CloseableHttpClient = HttpClients.createDefault
 
-  def post(url: String, body: AnyRef, header: Map[String, String] = Map(), contentType: String = "application/json; charset=utf-8"): Resp[String] = {
+  def post(url: String, body: AnyRef, header: Map[String, String] = Map(), contentType: String = "application/json; charset=utf-8"): String = {
     execute(new HttpPost(url), body, header, contentType)
   }
 
-  def put(url: String, body: AnyRef, header: Map[String, String] = Map(), contentType: String = "application/json; charset=utf-8"): Resp[String] = {
+  def put(url: String, body: AnyRef, header: Map[String, String] = Map(), contentType: String = "application/json; charset=utf-8"): String = {
     execute(new HttpPut(url), body, header, contentType)
   }
 
-  def get(url: String, header: Map[String, String] = Map(), contentType: String = "application/json; charset=utf-8"): Resp[String] = {
+  def get(url: String, header: Map[String, String] = Map(), contentType: String = "application/json; charset=utf-8"): String = {
     execute(new HttpGet(url), null, header, contentType)
   }
 
-  def delete(url: String, header: Map[String, String] = Map(), contentType: String = "application/json; charset=utf-8"): Resp[String] = {
+  def delete(url: String, header: Map[String, String] = Map(), contentType: String = "application/json; charset=utf-8"): String = {
     execute(new HttpDelete(url), null, header, contentType)
   }
 
-  def upload(url: String, file: File, header: Map[String, String] = Map()): Resp[String] = {
+  def upload(url: String, file: File, header: Map[String, String] = Map()): String = {
     execute(new HttpPost(url), file, header, null)
   }
 
@@ -47,7 +47,7 @@ object HttpHelper extends LazyLogging {
     }
   }
 
-  private def execute(method: HttpRequestBase, body: AnyRef, header: Map[String, String] = Map(), contentType: String, retry: Int = 0): Resp[String] = {
+  private def execute(method: HttpRequestBase, body: AnyRef, header: Map[String, String] = Map(), contentType: String, retry: Int = 0): String = {
     logger.debug(s"HTTP [${method.getMethod}] request : ${method.getURI}")
     if (header != null) {
       header.foreach(h => method.addHeader(h._1, h._2))
@@ -73,7 +73,7 @@ object HttpHelper extends LazyLogging {
     }
     try {
       val response = httpClient.execute(method)
-      Resp.success(EntityUtils.toString(response.getEntity))
+      EntityUtils.toString(response.getEntity)
     } catch {
       case e: SocketException =>
         if (retry <= 5) {
@@ -82,11 +82,11 @@ object HttpHelper extends LazyLogging {
           execute(method, body, header, contentType, retry + 1)
         } else {
           logger.warn(s"HTTP [${method.getMethod}] request : ${method.getURI} ERROR.", e)
-          Resp.unknown(e.getMessage)
+          throw e
         }
       case e: Exception =>
         logger.warn(s"HTTP [${method.getMethod}] request : ${method.getURI} ERROR.", e)
-        Resp.unknown(e.getMessage)
+        throw e
     }
   }
 }
