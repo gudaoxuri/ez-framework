@@ -11,7 +11,7 @@
       "host": "127.0.0.1"
     },
     "servicePath": "com.ecfront.ez.framework.empty",
-    "entityPath": ""
+    "entityPath": "com.ecfront.ez.framework.module"
   },
   "args": {}
 }

@@ -9,6 +9,8 @@ object AuthBasic {
   val GET_SOME = s"GET${IdModel.SPLIT_FLAG}/some/:id/"
 
   def init(): Unit = {
+    MockStartup
+
     val res = EZ_Resource()
     res.id = GET_SOME
     res.name = "获取资源"

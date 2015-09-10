@@ -1,10 +1,10 @@
 package com.ecfront.ez.framework.module.auth
 
-import com.ecfront.ez.framework.BasicSpec
 import com.ecfront.ez.framework.module.auth.manage.{AccountService, RoleService}
 import com.ecfront.ez.framework.storage.IdModel
+import org.scalatest.FunSuite
 
-class AuthManageSpec extends BasicSpec {
+class AuthManageSpec extends FunSuite {
 
   test("RBAC 测试") {
     AuthBasic.init()
@@ -12,7 +12,8 @@ class AuthManageSpec extends BasicSpec {
     val newRole1 = RoleService._getById("admin").body
     assert(newRole1.id == "admin")
     assert(newRole1.name == "管理员")
-    assert(newRole1.resource_ids == Map(AuthBasic.GET_SOME -> "获取资源", AuthBasic.ADD_SOME -> "保存资源"))
+    assert(newRole1.resource_ids(AuthBasic.GET_SOME).name == "获取资源")
+    assert(newRole1.resource_ids(AuthBasic.ADD_SOME).name == "保存资源")
 
     val newRole2 = RoleService._getById("user").body
     assert(newRole2.id == "user")
@@ -25,7 +26,7 @@ class AuthManageSpec extends BasicSpec {
     assert(newAccount1.name == "用户1")
     assert(newAccount1.password == AccountService.packageEncryptPwd("user1", "123"))
     assert(newAccount1.email == "123@ecfront.com")
-    assert(newAccount1.role_ids == Map("admin" -> "管理员"))
+    assert(newAccount1.role_ids("admin").name == "管理员")
 
     val newAccount2 = AccountService._getById("user2").body
     assert(newAccount2.id == "user2")

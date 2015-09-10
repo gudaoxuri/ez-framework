@@ -23,7 +23,7 @@ case class EZ_Role() extends SecureModel with StatusModel {
   @Index
   @BeanProperty var name: String = _
   @ManyToMany(mapping = "EZ_Resource", master = true, fetch = true)
-  @BeanProperty var resource_ids: Map[String, EZ_Organization] = Map[String,EZ_Organization]()
+  @BeanProperty var resource_ids: Map[String, EZ_Resource] = Map[String,EZ_Resource]()
 }
 
 /**

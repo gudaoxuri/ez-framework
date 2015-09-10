@@ -37,13 +37,13 @@ object AuthService {
         tokenInfo.id = UUID.randomUUID().toString
         tokenInfo.login_id = account.id
         tokenInfo.login_name = account.name
-        tokenInfo.role_ids_json = JsonHelper.toJsonString(account.role_ids)
+        tokenInfo.role_ids_json = JsonHelper.toJsonString(account.role_ids.map(role => role._1 -> role._2.name))
         tokenInfo.ext_id = account.ext_id
         tokenInfo.last_login_time = System.currentTimeMillis()
-        val req = Req(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, tokenInfo.organization_id, tokenInfo.organization_name, account.role_ids.map{role => role._1 -> role._2.name})
+        val req = Req(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, tokenInfo.organization_id, tokenInfo.organization_name, account.role_ids.map { role => role._1 -> role._2.name })
         TokenService._save(tokenInfo, Some(req))
         KeyLogService.success(s"Login Success by ${tokenInfo.login_id} , token : ${tokenInfo.id}", Some(req))
-        Resp.success(Token_Info_VO(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, tokenInfo.organization_id, tokenInfo.organization_name, account.role_ids.map{role => role._1 -> role._2.name}, tokenInfo.ext_id, tokenInfo.last_login_time))
+        Resp.success(Token_Info_VO(tokenInfo.id, tokenInfo.login_id, tokenInfo.login_name, tokenInfo.organization_id, tokenInfo.organization_name, account.role_ids.map { role => role._1 -> role._2.name }, tokenInfo.ext_id, tokenInfo.last_login_time))
       } else {
         Resp.notFound(s"[ Password ] NOT match.")
       }
