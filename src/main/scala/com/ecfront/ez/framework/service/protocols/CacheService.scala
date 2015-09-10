@@ -3,8 +3,8 @@ package com.ecfront.ez.framework.service.protocols
 import java.util.UUID
 
 import com.ecfront.common.{Req, Resp}
-import com.ecfront.ez.framework.service.{BasicService, IdModel}
-import com.ecfront.storage.PageModel
+import com.ecfront.ez.framework.service.BasicService
+import com.ecfront.ez.framework.storage.{IdModel, PageModel}
 import org.redisson.core.RMap
 
 import scala.collection.JavaConversions._
@@ -64,4 +64,11 @@ trait CacheService[M <: AnyRef, R <: Req] extends BasicService[M, R] {
 
   override protected def _doDeleteByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[List[String]] = Resp.notImplemented("deleteByCondition")
 
+  override protected def _doFindAllDisable(request: Option[R]): Resp[List[M]] = Resp.notImplemented("findAllDisable")
+
+  override protected def _doFindAllEnable(request: Option[R]): Resp[List[M]] = Resp.notImplemented("findAllEnable")
+
+  override protected def _doPageAllDisable(pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = Resp.notImplemented("pageAllDisable")
+
+  override protected def _doPageAllEnable(pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = Resp.notImplemented("pageAllEnable")
 }

@@ -6,7 +6,7 @@ import com.ecfront.ez.framework.module.core.CommonUtils
 import com.ecfront.ez.framework.rpc._
 import com.ecfront.ez.framework.service.SyncService
 import com.ecfront.ez.framework.service.protocols.JDBCService
-import com.ecfront.storage.PageModel
+import com.ecfront.ez.framework.storage.PageModel
 
 @RPC("/auth/manage/organization/")
 @HTTP

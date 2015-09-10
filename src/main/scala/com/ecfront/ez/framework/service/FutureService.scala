@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.service
 
 import com.ecfront.common.{Req, Resp}
-import com.ecfront.storage.PageModel
+import com.ecfront.ez.framework.storage.PageModel
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -20,12 +20,28 @@ trait FutureService[M <: AnyRef, R <: Req] extends BasicService[M, R] {
     _executeFindAll(request)
   }
 
+  def _findAllEnable(request: Option[R] = None): Future[Resp[List[M]]] = Future {
+    _executeFindAllEnable(request)
+  }
+
+  def _findAllDisable(request: Option[R] = None): Future[Resp[List[M]]] = Future {
+    _executeFindAllDisable(request)
+  }
+
   def _findByCondition(condition: String, parameters: Option[List[Any]] = None, request: Option[R] = None): Future[Resp[List[M]]] = Future {
     _executeFindByCondition(condition, parameters, request)
   }
 
   def _pageAll(pageNumber: Long = 1, pageSize: Long = 10, request: Option[R] = None): Future[Resp[PageModel[M]]] = Future {
     _executePageAll(pageNumber, pageSize, request)
+  }
+
+  def _pageAllEnable(pageNumber: Long = 1, pageSize: Long = 10, request: Option[R] = None): Future[Resp[PageModel[M]]] = Future {
+    _executePageAllEnable(pageNumber, pageSize, request)
+  }
+
+  def _pageAllDisable(pageNumber: Long = 1, pageSize: Long = 10, request: Option[R] = None): Future[Resp[PageModel[M]]] = Future {
+    _executePageAllDisable(pageNumber, pageSize, request)
   }
 
   def _pageByCondition(condition: String, parameters: Option[List[Any]] = None, pageNumber: Long = 1, pageSize: Long = 10, request: Option[R] = None): Future[Resp[PageModel[M]]] = Future {

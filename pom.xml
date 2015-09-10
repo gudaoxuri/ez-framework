@@ -25,10 +25,10 @@
 
     <properties>
         <ez-common.version>0.5.3</ez-common.version>
-        <ez-storage.version>1.5-SNAPSHOT</ez-storage.version>
+        <ez-dbutils.version>2.5.2</ez-dbutils.version>
         <vertx.version>3.0.0</vertx.version>
         <httpclient.version>4.5</httpclient.version>
-		<redisson.version>2.1.0</redisson.version>
+        <redisson.version>2.1.0</redisson.version>
         <ez-dbutils.version>2.5.2</ez-dbutils.version>
         <jsoup.version>1.8.3</jsoup.version>
     </properties>
@@ -47,12 +47,12 @@
         </dependency>
         <dependency>
             <groupId>com.ecfront</groupId>
-            <artifactId>ez-storage</artifactId>
-            <version>${ez-storage.version}</version>
+            <artifactId>ez-dbutils</artifactId>
+            <version>${ez-dbutils.version}</version>
             <exclusions>
                 <exclusion>
-                    <groupId>com.ecfront</groupId>
-                    <artifactId>ez-common</artifactId>
+                    <groupId>org.spark-project.hive</groupId>
+                    <artifactId>hive-jdbc</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -81,7 +81,7 @@
             <artifactId>httpclient</artifactId>
             <version>${httpclient.version}</version>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
             <version>${redisson.version}</version>

@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.module.auth.manage
 
 import com.ecfront.ez.framework.module.auth.{EZ_Account, EZ_Resource, EZ_Role}
-import com.ecfront.ez.framework.service.IdModel
+import com.ecfront.ez.framework.storage.IdModel
 
 
 object Initiator {

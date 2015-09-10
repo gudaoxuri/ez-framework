@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.service
 
-import com.ecfront.storage.Entity
+import com.ecfront.ez.framework.storage.{Entity, SecureModel}
 
 import scala.beans.BeanProperty
 

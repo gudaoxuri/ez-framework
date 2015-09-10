@@ -1,7 +1,6 @@
 package com.ecfront.ez.framework.module.auth
 
-import com.ecfront.ez.framework.service.{IdModel, SecureModel}
-import com.ecfront.storage._
+import com.ecfront.ez.framework.storage._
 
 import scala.beans.BeanProperty
 
@@ -9,10 +8,10 @@ import scala.beans.BeanProperty
  * 资源实体，id=method@uri
  */
 @Entity("Resources")
-case class EZ_Resource() extends SecureModel {
+case class EZ_Resource() extends SecureModel with StatusModel {
   @Index
   @BeanProperty var name: String = _
-  @ManyToMany(mapping = "EZ_Role", labelField = "name", master = false, fetch = true)
+  @ManyToMany(mapping = "EZ_Role", master = false, fetch = true)
   @BeanProperty var role_ids: List[String] = List[String]()
 }
 
@@ -20,22 +19,22 @@ case class EZ_Resource() extends SecureModel {
  * 角色实体，id=code
  */
 @Entity("Roles")
-case class EZ_Role() extends SecureModel {
+case class EZ_Role() extends SecureModel with StatusModel {
   @Index
   @BeanProperty var name: String = _
-  @ManyToMany(mapping = "EZ_Resource", labelField = "name", master = true, fetch = true)
-  @BeanProperty var resource_ids: Map[String, String] = Map[String,String]()
+  @ManyToMany(mapping = "EZ_Resource", master = true, fetch = true)
+  @BeanProperty var resource_ids: Map[String, EZ_Organization] = Map[String,EZ_Organization]()
 }
 
 /**
  * 组织实体
  */
 @Entity("Organizations")
-case class EZ_Organization() extends SecureModel {
+case class EZ_Organization() extends SecureModel with StatusModel {
   @Index
   @BeanProperty var name: String = _
   @BeanProperty var image: String = _
-  @OneToMany(mapping = "EZ_Account", relField = "organization_id", labelField = "name", fetch = false)
+  @OneToMany(mapping = "EZ_Account", relField = "organization_id", fetch = false)
   @BeanProperty var account_ids: List[String] = List[String]()
 }
 
@@ -43,7 +42,7 @@ case class EZ_Organization() extends SecureModel {
  * 账号实体，id=account
  */
 @Entity("Accounts")
-case class EZ_Account() extends SecureModel {
+case class EZ_Account() extends SecureModel with StatusModel {
   @Index
   @BeanProperty var name: String = _
   @BeanProperty var image: String = _
@@ -56,8 +55,8 @@ case class EZ_Account() extends SecureModel {
   @Text var ext_info: String = _
   @Index
   @BeanProperty var organization_id: String = _
-  @ManyToMany(mapping = "EZ_Role", labelField = "name", master = true, fetch = true)
-  @BeanProperty var role_ids: Map[String, String] = Map[String,String]()
+  @ManyToMany(mapping = "EZ_Role", master = true, fetch = true)
+  @BeanProperty var role_ids: Map[String, EZ_Role] = Map[String,EZ_Role]()
 }
 
 @Entity("Token Info")

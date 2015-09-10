@@ -2,7 +2,7 @@ package com.ecfront.ez.framework.module.auth
 
 import com.ecfront.ez.framework.BasicSpec
 import com.ecfront.ez.framework.module.auth.manage.{AccountService, RoleService}
-import com.ecfront.ez.framework.service.IdModel
+import com.ecfront.ez.framework.storage.IdModel
 
 class AuthManageSpec extends BasicSpec {
 

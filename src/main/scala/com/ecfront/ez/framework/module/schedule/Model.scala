@@ -1,7 +1,6 @@
 package com.ecfront.ez.framework.module.schedule
 
-import com.ecfront.ez.framework.service.IdModel
-import com.ecfront.storage.{Entity, Index}
+import com.ecfront.ez.framework.storage.{Entity, IdModel, Index}
 
 import scala.beans.BeanProperty
 

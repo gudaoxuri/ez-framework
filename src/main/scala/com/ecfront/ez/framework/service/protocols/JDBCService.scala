@@ -1,14 +1,22 @@
 package com.ecfront.ez.framework.service.protocols
 
 import com.ecfront.common.{Req, Resp}
-import com.ecfront.ez.framework.service.{BasicService, IdModel, SecureModel, _AuthType}
-import com.ecfront.storage.{JDBCStorable, PageModel}
+import com.ecfront.ez.framework.service.{BasicService, _AuthType}
+import com.ecfront.ez.framework.storage.{IdModel, JDBCStorable, PageModel, SecureModel}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 trait JDBCService[M <: IdModel, R <: Req] extends BasicService[M, R] with JDBCStorable[M, R] {
 
   override protected def _doFindAll(request: Option[R]): Resp[List[M]] = {
-    _doFindByCondition("1=1", None, request)
+    _doFindByCondition(" 1=1 ", None, request)
+  }
+
+  override protected def _doFindAllEnable(request: Option[R]): Resp[List[M]] = {
+    _doFindByCondition(" enable = true ", None, request)
+  }
+
+  override protected def _doFindAllDisable(request: Option[R]): Resp[List[M]] = {
+    _doFindByCondition(" enable = false ", None, request)
   }
 
   override protected def _doFindByCondition(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[List[M]] = {
@@ -20,7 +28,15 @@ trait JDBCService[M <: IdModel, R <: Req] extends BasicService[M, R] with JDBCSt
   }
 
   override protected def _doPageAll(pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = {
-    _doPageByCondition("1=1", None, pageNumber, pageSize, request)
+    _doPageByCondition(" 1=1 ", None, pageNumber, pageSize, request)
+  }
+
+  override protected def _doPageAllEnable(pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = {
+    _doPageByCondition(" enable = true ", None, pageNumber, pageSize, request)
+  }
+
+  override protected def _doPageAllDisable(pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = {
+    _doPageByCondition(" enable = false ", None, pageNumber, pageSize, request)
   }
 
   override protected def _doPageByCondition(condition: String, parameters: Option[List[Any]], pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = {
