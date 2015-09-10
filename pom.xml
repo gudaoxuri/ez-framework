@@ -25,7 +25,6 @@
 
     <properties>
         <ez-common.version>0.5.3</ez-common.version>
-        <ez-dbutils.version>2.5.2</ez-dbutils.version>
         <vertx.version>3.0.0</vertx.version>
         <httpclient.version>4.5</httpclient.version>
         <redisson.version>2.1.0</redisson.version>
@@ -42,17 +41,6 @@
                 <exclusion>
                     <groupId>com.google.code.findbugs</groupId>
                     <artifactId>jsr305</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.ecfront</groupId>
-            <artifactId>ez-dbutils</artifactId>
-            <version>${ez-dbutils.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.spark-project.hive</groupId>
-                    <artifactId>hive-jdbc</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
