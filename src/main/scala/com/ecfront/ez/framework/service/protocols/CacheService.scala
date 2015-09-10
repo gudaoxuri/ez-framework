@@ -71,4 +71,8 @@ trait CacheService[M <: AnyRef, R <: Req] extends BasicService[M, R] {
   override protected def _doPageAllDisable(pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = Resp.notImplemented("pageAllDisable")
 
   override protected def _doPageAllEnable(pageNumber: Long, pageSize: Long, request: Option[R]): Resp[PageModel[M]] = Resp.notImplemented("pageAllEnable")
+
+  override protected def _doDisable(id: String, request: Option[R]): Resp[String] = ???
+
+  override protected def _doEnable(id: String, request: Option[R]): Resp[String] = ???
 }

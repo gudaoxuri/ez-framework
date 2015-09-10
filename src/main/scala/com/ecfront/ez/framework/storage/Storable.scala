@@ -14,7 +14,7 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 trait Storable[M <: AnyRef, Q <: AnyRef] extends LazyLogging {
 
   protected val __modelClazz = this.getClass.getGenericInterfaces()(0).asInstanceOf[ParameterizedType].getActualTypeArguments()(0).asInstanceOf[Class[M]]
-  val __tableName = __modelClazz.getSimpleName.toUpperCase
+  protected val __tableName = __modelClazz.getSimpleName.toUpperCase
   protected val __entityInfo = if (EntityContainer.CONTAINER.contains(__tableName)) {
     EntityContainer.CONTAINER(__tableName)
   } else {

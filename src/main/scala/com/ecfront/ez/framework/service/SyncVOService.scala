@@ -12,6 +12,10 @@ trait SyncVOService[M <: AnyRef, V <: AnyRef, R <: Req] extends BasicService[M, 
   protected val _typeArgs = this.getClass.getGenericInterfaces()(1).asInstanceOf[ParameterizedType].getActualTypeArguments
   protected val _voClazz = if (_typeArgs.size == 3) _typeArgs(1).asInstanceOf[Class[V]] else null
 
+  protected def voToModel(vo: V, model: M): M = model
+
+  protected def modelToVO(model: M, vo: V): V = vo
+
   def _findAll(request: Option[R] = None): Resp[List[V]] = {
     _find(super._executeFindAll(request))
   }
@@ -108,8 +112,6 @@ trait SyncVOService[M <: AnyRef, V <: AnyRef, R <: Req] extends BasicService[M, 
     }
   }
 
-  protected def modelToVO(model: M, vo: V): V = vo
-
   def _saveOrUpdate(vo: V, request: Option[R] = None): Resp[String] = {
     if (_voClazz == null) {
       super._executeSaveOrUpdate(vo.asInstanceOf[M], request)
@@ -120,7 +122,14 @@ trait SyncVOService[M <: AnyRef, V <: AnyRef, R <: Req] extends BasicService[M, 
     }
   }
 
-  protected def voToModel(vo: V, model: M): M = model
+
+  def _enable(id:String, request: Option[R] = None): Resp[String] = {
+    super._executeEnable(id, request)
+  }
+
+  def _disable(id:String, request: Option[R] = None): Resp[String] = {
+    super._executeDisable(id, request)
+  }
 
   def _save(vo: V, request: Option[R] = None): Resp[String] = {
     if (_voClazz == null) {

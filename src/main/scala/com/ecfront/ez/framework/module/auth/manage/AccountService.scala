@@ -32,6 +32,16 @@ object AccountService extends JDBCService[EZ_Account, Req] with SyncService[EZ_A
     _getById(parameter("id"), req)
   }
 
+  @GET(":id/enable/")
+  def enable(parameter: Map[String, String], req: Option[Req]): Resp[EZ_Account] = {
+    _enable(parameter("id"), req)
+  }
+
+  @GET(":id/disable/")
+  def disable(parameter: Map[String, String], req: Option[Req]): Resp[EZ_Account] = {
+    _disable(parameter("id"), req)
+  }
+
   @GET("page/:number/:size/")
   def page(parameter: Map[String, String], req: Option[Req]): Resp[PageModel[EZ_Account]] = {
     val (orderSql, orderParams) = CommonUtils.packageOrder(parameter)

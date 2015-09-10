@@ -60,6 +60,14 @@ trait FutureService[M <: AnyRef, R <: Req] extends BasicService[M, R] {
     _executeUpdate(id, model, request)
   }
 
+  def _enable(id: String, request: Option[R] = None): Future[Resp[String]] = Future {
+    _executeEnable(id, request)
+  }
+
+  def _disable(id: String, request: Option[R] = None): Future[Resp[String]] = Future {
+    _executeDisable(id, request)
+  }
+
   def _deleteById(id: String, request: Option[R] = None): Future[Resp[String]] = Future {
     _executeDeleteById(id, request)
   }

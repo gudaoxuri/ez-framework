@@ -317,18 +317,6 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
     Resp.success(result)
   }
 
-  protected def _executeSaveOrUpdate(model: M, request: Option[R]): Resp[String] = {
-    model match {
-      case idModel: IdModel =>
-        if (idModel.id != null && idModel.id.trim != "" && _doGetById(idModel.id, request).body != null) {
-          _executeUpdate(idModel.id, model, request)
-        } else {
-          _executeSave(model, request)
-        }
-      case _ => _executeSave(model, request)
-    }
-  }
-
   protected def _doSave(model: M, request: Option[R]): Resp[String]
 
   protected def _executeSave(model: M, request: Option[R]): Resp[String] = {
@@ -410,6 +398,18 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
     }
   }
 
+  protected def _executeSaveOrUpdate(model: M, request: Option[R]): Resp[String] = {
+    model match {
+      case idModel: IdModel =>
+        if (idModel.id != null && idModel.id.trim != "" && _doGetById(idModel.id, request).body != null) {
+          _executeUpdate(idModel.id, model, request)
+        } else {
+          _executeSave(model, request)
+        }
+      case _ => _executeSave(model, request)
+    }
+  }
+
   //=========================DeleteById=========================
 
   protected def _preDeleteById(id: String, request: Option[R]): Resp[Any] = {
@@ -433,6 +433,66 @@ trait BasicService[M <: AnyRef, R <: Req] extends LazyLogging {
       }
     } else {
       preResult
+    }
+  }
+
+  //=========================Enable=========================
+
+  protected def _preEnable(id: String, request: Option[R]): Resp[Any] = {
+    Resp.success(null)
+  }
+
+  protected def _postEnable(result: String, preResult: Any, request: Option[R]): Resp[String] = {
+    Resp.success(result)
+  }
+
+  protected def _doEnable(id: String, request: Option[R]): Resp[String]
+
+  protected def _executeEnable(id: String, request: Option[R]): Resp[String] = {
+    if (classOf[StatusModel].isAssignableFrom(_modelClazz)) {
+      val preResult = _preEnable(id, request)
+      if (preResult) {
+        val result = _doEnable(id, request)
+        if (result) {
+          _postEnable(result.body, preResult.body, request)
+        } else {
+          result
+        }
+      } else {
+        preResult
+      }
+    } else {
+      Resp.badRequest("The model not extend [StatusModel]")
+    }
+  }
+
+  //=========================Disable=========================
+
+  protected def _preDisable(id: String, request: Option[R]): Resp[Any] = {
+    Resp.success(null)
+  }
+
+  protected def _postDisable(result: String, preResult: Any, request: Option[R]): Resp[String] = {
+    Resp.success(result)
+  }
+
+  protected def _doDisable(id: String, request: Option[R]): Resp[String]
+
+  protected def _executeDisable(id: String, request: Option[R]): Resp[String] = {
+    if (classOf[StatusModel].isAssignableFrom(_modelClazz)) {
+      val preResult = _preDisable(id, request)
+      if (preResult) {
+        val result = _doDisable(id, request)
+        if (result) {
+          _postDisable(result.body, preResult.body, request)
+        } else {
+          result
+        }
+      } else {
+        preResult
+      }
+    } else {
+      Resp.badRequest("The model not extend [StatusModel]")
     }
   }
 

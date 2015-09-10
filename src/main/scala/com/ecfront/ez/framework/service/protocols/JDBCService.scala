@@ -2,7 +2,7 @@ package com.ecfront.ez.framework.service.protocols
 
 import com.ecfront.common.{Req, Resp}
 import com.ecfront.ez.framework.service.{BasicService, _AuthType}
-import com.ecfront.ez.framework.storage.{IdModel, JDBCStorable, PageModel, SecureModel}
+import com.ecfront.ez.framework.storage._
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 trait JDBCService[M <: IdModel, R <: Req] extends BasicService[M, R] with JDBCStorable[M, R] {
@@ -93,6 +93,26 @@ trait JDBCService[M <: IdModel, R <: Req] extends BasicService[M, R] with JDBCSt
 
   protected def _doDeleteByConditionWithoutTransaction(condition: String, parameters: Option[List[Any]], request: Option[R]): Resp[List[String]] = {
     Resp.success(__deleteByConditionWithoutTransaction(condition, parameters, request).orNull)
+  }
+
+  override protected def _doDisable(id: String, request: Option[R]): Resp[String] = {
+    val model = __getById(id, request).get
+    if (model != null) {
+      model.asInstanceOf[StatusModel].enable = false
+      _executeUpdate(id, model, request)
+    } else {
+      Resp.notFound(s"Not found by id:$id")
+    }
+  }
+
+  override protected def _doEnable(id: String, request: Option[R]): Resp[String] = {
+    val model = __getById(id, request).get
+    if (model != null) {
+      model.asInstanceOf[StatusModel].enable = true
+      _executeUpdate(id, model, request)
+    } else {
+      Resp.notFound(s"Not found by id:$id")
+    }
   }
 
   protected override def __appendAuth(request: Option[R]): (String, List[Any]) = {
