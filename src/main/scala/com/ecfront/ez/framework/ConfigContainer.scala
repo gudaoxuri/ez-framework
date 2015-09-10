@@ -12,16 +12,18 @@ object ConfigContainer extends LazyLogging {
 
   logger.info("Load config.")
 
-  val config: JsonNode = ConfigHelper.init(this.getClass.getResource("/config.json").getPath, classOf[JsonNode]).get
+  private val config: JsonNode = ConfigHelper.init(this.getClass.getResource("/config.json").getPath, classOf[JsonNode]).get
 
-  val serversConfig: ServerConfig = JsonHelper.toObject(config.get("servers"), classOf[ServerConfig])
+  private[ez] val serversConfig: ServerConfig = JsonHelper.toObject(config.get("servers"), classOf[ServerConfig])
+
+  val args: JsonNode = config.get("args")
 
 }
 
-case class ServerConfig(publicServer: WebServer, clusterServer: ClusterServer)
+case class ServerConfig(publicServer: WebServer, clusterServer: ClusterServer,servicePath: String, entityPath: String)
 
-case class WebServer(host: String, port: Int, resourcePath: String, servicePath: String, publicUriPrefix: String, authManage: Boolean)
+case class WebServer(host: String, port: Int, resourcePath: String,  publicUriPrefix: String, authManage: Boolean)
 
-case class ClusterServer(host: String, servicePath: String)
+case class ClusterServer(host: String)
 
 

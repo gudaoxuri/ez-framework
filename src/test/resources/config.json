@@ -1,16 +1,17 @@
 {
-  "servers":{
+  "servers": {
     "publicServer": {
       "host": "0.0.0.0",
       "port": 8080,
-      "resourcePath":"c:/tmp/",
-      "servicePath":"com.ecfront.ez.framework.empty",
-      "publicUriPrefix":"/public/",
-      "authManage":true
+      "resourcePath": "c:/tmp/",
+      "publicUriPrefix": "/public/",
+      "authManage": true
     },
     "clusterServer": {
-      "host": "127.0.0.1",
-      "servicePath":"com.ecfront.ez.framework.empty"
-    }
-  }
+      "host": "127.0.0.1"
+    },
+    "servicePath": "com.ecfront.ez.framework.empty",
+    "entityPath": ""
+  },
+  "args": {}
 }

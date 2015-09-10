@@ -8,6 +8,7 @@ import com.ecfront.ez.framework.module.schedule.ScheduleService
 import com.ecfront.ez.framework.rpc.RPC.EChannel
 import com.ecfront.ez.framework.rpc.{RPC, Server}
 import com.ecfront.ez.framework.service.protocols.{JDBCService, RedisService}
+import com.ecfront.ez.framework.storage.EntityContainer
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 trait EZStartup extends App with LazyLogging {
@@ -21,6 +22,9 @@ trait EZStartup extends App with LazyLogging {
     preStartup()
     RedisService.init()
     JDBCService.init()
+    if (ConfigContainer.serversConfig.entityPath.nonEmpty) {
+      EntityContainer.autoBuilding(ConfigContainer.serversConfig.entityPath)
+    }
     if (ConfigContainer.serversConfig.publicServer != null) {
       publicServer = RPC.server
         .setChannel(EChannel.HTTP)
@@ -44,7 +48,7 @@ trait EZStartup extends App with LazyLogging {
             } else {
               Resp.success(Req.anonymousReq)
             }
-        }).startup().autoBuilding(ConfigContainer.serversConfig.publicServer.servicePath)
+        }).startup().autoBuilding(ConfigContainer.serversConfig.servicePath)
       if (ConfigContainer.serversConfig.publicServer.authManage) {
         Initiator.init()
         publicServer.autoBuilding("com.ecfront.ez.framework.module.auth")
@@ -69,7 +73,7 @@ trait EZStartup extends App with LazyLogging {
               customResult
             }
         })
-        .startup().autoBuilding(ConfigContainer.serversConfig.clusterServer.servicePath)
+        .startup().autoBuilding(ConfigContainer.serversConfig.servicePath)
       logger.info(s"Inner Server  started at ${ConfigContainer.serversConfig.clusterServer.host}")
     }
     ScheduleService.runByModuleName(moduleName)
