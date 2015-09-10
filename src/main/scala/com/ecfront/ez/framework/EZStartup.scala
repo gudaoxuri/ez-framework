@@ -37,10 +37,10 @@ trait EZStartup extends App with LazyLogging {
               val customResult = customPublicExecuteInterceptor(method, uri, parameters, interceptorInfo)
               if (customResult == null) {
                 //未使用自定义方法
-                if (parameters.contains(CommonUtils.TOKEN)) {
-                  AuthService.authorizationPublicServer(method, uri, parameters(CommonUtils.TOKEN))
+                if (parameters.contains(CommonUtils.TOKEN_FLAG)) {
+                  AuthService.authorizationPublicServer(method, uri, parameters(CommonUtils.TOKEN_FLAG))
                 } else {
-                  Resp.badRequest(s"Missing required field : [ ${CommonUtils.TOKEN} ].")
+                  Resp.badRequest(s"Missing required field : [ ${CommonUtils.TOKEN_FLAG} ].")
                 }
               } else {
                 customResult
@@ -64,10 +64,10 @@ trait EZStartup extends App with LazyLogging {
             val customResult = customInnerExecuteInterceptor(method, uri, parameters, interceptorInfo)
             if (customResult == null) {
               //未使用自定义方法
-              if (parameters.contains(CommonUtils.TOKEN)) {
-                AuthService.authorizationInnerServer(method, uri, parameters(CommonUtils.TOKEN))
+              if (parameters.contains(CommonUtils.TOKEN_FLAG)) {
+                AuthService.authorizationInnerServer(method, uri, parameters(CommonUtils.TOKEN_FLAG))
               } else {
-                Resp.badRequest(s"Missing required field : [ ${CommonUtils.TOKEN} ].")
+                Resp.badRequest(s"Missing required field : [ ${CommonUtils.TOKEN_FLAG} ].")
               }
             } else {
               customResult

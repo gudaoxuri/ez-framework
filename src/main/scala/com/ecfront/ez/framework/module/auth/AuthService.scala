@@ -54,7 +54,7 @@ object AuthService {
 
   @GET("logout/")
   def logout(parameter: Map[String, String], req: Option[Req]): Resp[Void] = {
-    doLogout(parameter(CommonUtils.TOKEN), req)
+    doLogout(parameter(CommonUtils.TOKEN_FLAG), req)
   }
 
   /**
