@@ -13,10 +13,9 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 
 trait EZStartup extends App with LazyLogging {
 
-  private var publicServer: Server = _
-  private var innerServer: Server = _
-
   protected def moduleName: String
+
+  EZStartup.moduleName = moduleName
 
   private def startup(): Unit = {
     preStartup()
@@ -26,7 +25,7 @@ trait EZStartup extends App with LazyLogging {
       EntityContainer.autoBuilding(ConfigContainer.serversConfig.entityPath)
     }
     if (ConfigContainer.serversConfig.publicServer != null) {
-      publicServer = RPC.server
+      EZStartup.publicServer = RPC.server
         .setChannel(EChannel.HTTP)
         .setHost(ConfigContainer.serversConfig.publicServer.host)
         .setPort(ConfigContainer.serversConfig.publicServer.port)
@@ -51,12 +50,12 @@ trait EZStartup extends App with LazyLogging {
         }).startup().autoBuilding(ConfigContainer.serversConfig.servicePath)
       if (ConfigContainer.serversConfig.publicServer.authManage) {
         Initiator.init()
-        publicServer.autoBuilding("com.ecfront.ez.framework.module.auth")
+        EZStartup.publicServer.autoBuilding("com.ecfront.ez.framework.module.auth")
       }
       logger.info(s"Public Server  started at ${ConfigContainer.serversConfig.publicServer.host} : ${ConfigContainer.serversConfig.publicServer.port}")
     }
     if (ConfigContainer.serversConfig.clusterServer != null) {
-      innerServer = RPC.server
+      EZStartup.innerServer = RPC.server
         .setChannel(EChannel.EVENT_BUS)
         .setHost(ConfigContainer.serversConfig.clusterServer.host)
         .setPreExecuteInterceptor({
@@ -76,7 +75,7 @@ trait EZStartup extends App with LazyLogging {
         .startup().autoBuilding(ConfigContainer.serversConfig.servicePath)
       logger.info(s"Inner Server  started at ${ConfigContainer.serversConfig.clusterServer.host}")
     }
-    ScheduleService.runByModuleName(moduleName)
+    ScheduleService.runByModuleName(EZStartup.moduleName)
     postStartup()
     logger.info("EZ-Framework started.")
   }
@@ -97,8 +96,8 @@ trait EZStartup extends App with LazyLogging {
       ScheduleService.stop()
       RedisService.close()
       JDBCService.close()
-      if (publicServer != null) publicServer.shutdown()
-      if (innerServer != null) innerServer.shutdown()
+      if (EZStartup.publicServer != null) EZStartup.publicServer.shutdown()
+      if (EZStartup.innerServer != null) EZStartup.innerServer.shutdown()
       customShutdownHook()
       logger.info("EZ-Framework shutdown.")
     })
@@ -106,4 +105,10 @@ trait EZStartup extends App with LazyLogging {
 
   protected def customShutdownHook() = {}
 
+}
+
+object EZStartup {
+  var publicServer: Server = _
+  var innerServer: Server = _
+  var moduleName: String = _
 }

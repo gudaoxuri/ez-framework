@@ -24,7 +24,7 @@ class FunSpec extends FunSuite {
     println(s"===============Start ${channel.toString}===================")
     println(s"=====Start Server=====")
 
-    val latch = new CountDownLatch(8)
+    val latch = new CountDownLatch(9)
 
     val server = RPC.server.setHost("127.0.0.1").setPort(808).setChannel(channel).setAny({
       (method, uri, parameters, body, inject) =>
@@ -57,6 +57,12 @@ class FunSpec extends FunSuite {
         assert(param.get("id").get == "test")
         //Result custom type
         body
+    }).put[TestModel]("/custom2/:id/", classOf[TestModel], {
+      (param, body, _) =>
+        assert(body.name == "测试")
+        assert(param.get("id").get == "test")
+        //Result custom type
+        "success"
     }).put[List[TestIdModel]]("/test/", classOf[List[TestIdModel]], {
       (param, body, _) =>
         val res = JsonHelper.toGenericObject[List[TestIdModel]](body)
@@ -124,6 +130,12 @@ class FunSpec extends FunSuite {
     client.raw.put[TestModel]("/custom/test/", TestModel("测试"), classOf[TestModel], {
       result =>
         assert(result.name == "测试")
+        latch.countDown()
+    })
+
+    client.raw.put[String]("/custom2/test/", TestModel("测试"), classOf[String], {
+      result =>
+        assert(result == "success")
         latch.countDown()
     })
 
