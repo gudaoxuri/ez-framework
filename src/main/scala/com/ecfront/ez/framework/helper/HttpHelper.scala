@@ -5,11 +5,11 @@ import java.net.SocketException
 
 import com.ecfront.common.JsonHelper
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import org.apache.http.HttpHeaders
 import org.apache.http.client.methods._
 import org.apache.http.entity.{FileEntity, StringEntity}
 import org.apache.http.impl.client.{CloseableHttpClient, HttpClients}
 import org.apache.http.util.EntityUtils
+import org.apache.http.{HttpHeaders, NoHttpResponseException}
 
 import scala.language.implicitConversions
 
@@ -75,7 +75,7 @@ object HttpHelper extends LazyLogging {
       val response = httpClient.execute(method)
       EntityUtils.toString(response.getEntity)
     } catch {
-      case e: SocketException =>
+      case e if e.getClass == classOf[SocketException] || e.getClass == classOf[NoHttpResponseException] =>
         if (retry <= 5) {
           Thread.sleep(500)
           logger.warn(s"HTTP [${method.getMethod}] request  ${method.getURI} ERROR. retry [${retry + 1}] .")

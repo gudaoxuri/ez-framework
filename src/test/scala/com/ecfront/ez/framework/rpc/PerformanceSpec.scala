@@ -43,6 +43,13 @@ class PerformanceSpec extends FunSuite with LazyLogging {
           println(">>>>>>> Current Count：" + latch.getCount)
            latch.countDown()
           })
+
+          /*val ss = HttpHelper.put("http://127.0.0.1:808/index/test/",TestModel("测试"))
+          val result = JsonHelper.toGenericObject[Resp[TestModel]](ss)
+          assert(result.code == "200")
+          assert(result.body.name == "测试")
+          println(">>>>>>> Current Count：" + latch.getCount)
+          latch.countDown()*/
         }
       })
     val start = System.currentTimeMillis()

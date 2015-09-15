@@ -15,7 +15,7 @@ import org.jsoup.nodes.Document
  */
 class HttpClientProcessor extends ClientProcessor {
 
-  private val httpClient = vertx.createHttpClient(new HttpClientOptions().setMaxPoolSize(200).setKeepAlive(true))
+  private val httpClient = vertx.createHttpClient(new HttpClientOptions().setMaxPoolSize(100).setKeepAlive(true))
 
   override protected def init(): Unit = {
   }
