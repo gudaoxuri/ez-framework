@@ -49,8 +49,8 @@ trait EZStartup extends App with LazyLogging {
             }
         }).startup().autoBuilding(ConfigContainer.serversConfig.servicePath)
       if (ConfigContainer.serversConfig.publicServer.authManage) {
-        Initiator.init()
         EZStartup.publicServer.autoBuilding("com.ecfront.ez.framework.module.auth")
+        Initiator.init()
       }
       logger.info(s"Public Server  started at ${ConfigContainer.serversConfig.publicServer.host} : ${ConfigContainer.serversConfig.publicServer.port}")
     }

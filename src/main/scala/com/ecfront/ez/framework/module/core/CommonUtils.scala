@@ -13,13 +13,13 @@ object CommonUtils {
   def packageSql(parameter: Map[String, String]): (String, List[Any]) = {
     val sql =
       if (parameter.contains(STATUS_FLAG))
-        //防SQL注入
+      //防SQL注入
         s" $STATUS_FLAG = ${parameter(STATUS_FLAG).toBoolean.toString} "
       else ""
-    val orderSql = if (parameter.contains(ORDER_FIELD_FLAG)) {
-      s"  ORDER BY  ? " + (if (parameter.contains(ORDER_FIELD_FLAG)) s" ${parameter(ORDER_SORT_FLAG)} " else " DESC ")
-    } else ""
-    (sql + orderSql, List[Any](parameter(ORDER_FIELD_FLAG)))
+    val (orderSql, params) = if (parameter.contains(ORDER_FIELD_FLAG)) {
+      (s"  ORDER BY  ? " + (if (parameter.contains(ORDER_FIELD_FLAG)) s" ${parameter(ORDER_SORT_FLAG)} " else " DESC "), List[Any](parameter(ORDER_FIELD_FLAG)))
+    } else ("", List[Any]())
+    (sql + orderSql, params)
   }
 
 }

@@ -38,7 +38,7 @@ trait SimpleRPCService[M <: IdModel, R <: Req] extends SyncService[M, R] {
     _disable(parameter("id"), req)
   }
 
-  @GET("page/:number/:size/")
+  @GET("page/:pageNumber/:pageSize/")
   def _rpc_page(parameter: Map[String, String], req: Option[R]): Resp[PageModel[M]] = {
     val (sql, params) = CommonUtils.packageSql(parameter)
     if (sql.nonEmpty) {
