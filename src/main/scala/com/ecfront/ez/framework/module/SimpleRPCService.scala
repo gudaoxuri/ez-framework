@@ -58,4 +58,9 @@ trait SimpleRPCService[M <: IdModel, R <: Req] extends SyncService[M, R] {
     }
   }
 
+  @POST("upload/")
+  def _rpc_upload(parameter: Map[String, String],body:String, req: Option[R]): Resp[String] = {
+    Resp.success(body)
+  }
+
 }
