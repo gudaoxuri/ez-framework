@@ -29,8 +29,10 @@ class HttpServerProcessor extends ServerProcessor {
             returnContent("", request.response(), "text/html")
           } else {
             if (request.path() != "/favicon.ico") {
+              val accept =
+                if (request.headers().contains("Accept") && request.headers().get("Accept") != "*.*") request.headers().get("Accept").split(",")(0).toLowerCase else "application/json"
               val contentType =
-                if (request.headers().contains("content-type")) request.headers().get("content-type").toLowerCase else "application/json; charset=UTF-8"
+                if (request.headers().contains("Content-Type")) request.headers().get("Content-Type").toLowerCase else "application/json; charset=UTF-8"
               val parameters = collection.mutable.Map[String, String]()
               val interceptInfo = collection.mutable.Map[String, String]()
               request.params().entries().foreach {
@@ -45,7 +47,7 @@ class HttpServerProcessor extends ServerProcessor {
               val uri = request.path() + (if (request.path().contains("?")) "" else "?") + parameters.map(item => item._1 + "=" + item._2).mkString("&")
               val (preResult, fun, newParameters, postFun) = router.getFunction(request.method().name(), request.path(), parameters.toMap, interceptInfo.toMap)
               if (preResult) {
-                if (request.headers().contains("content-type") && (request.headers.get("content-type").toLowerCase.startsWith("multipart/form-data") || request.headers.get("content-type").toLowerCase.startsWith("application/x-www-form-urlencoded"))) {
+                if (request.headers().contains("Content-Type") && (request.headers.get("Content-Type").toLowerCase.startsWith("multipart/form-data") || request.headers.get("Content-Type").toLowerCase.startsWith("application/x-www-form-urlencoded"))) {
                   //上传处理
                   request.setExpectMultipart(true)
                   request.uploadHandler(new Handler[HttpServerFileUpload] {
@@ -65,12 +67,12 @@ class HttpServerProcessor extends ServerProcessor {
                       val tPath = rootUploadPath + path + newName
                       upload.exceptionHandler(new Handler[Throwable] {
                         override def handle(e: Throwable): Unit = {
-                          returnContent(Resp.serverError(e.getMessage), request.response(), "application/json; charset=UTF-8")
+                          returnContent(Resp.serverError(e.getMessage), request.response(), accept)
                         }
                       })
                       upload.endHandler(new Handler[Void] {
                         override def handle(e: Void): Unit = {
-                          execute(request.method().name(), uri, newParameters, path + newName, preResult.body, fun, postFun, request.response(), "application/json; charset=UTF-8")
+                          execute(request.method().name(), uri, newParameters, path + newName, preResult.body, fun, postFun, request.response(), "application/json; charset=UTF-8",accept)
                         }
                       })
                       upload.streamToFileSystem(tPath)
@@ -80,16 +82,16 @@ class HttpServerProcessor extends ServerProcessor {
                   //Post或Put请求，需要处理Body
                   request.bodyHandler(new Handler[Buffer] {
                     override def handle(data: Buffer): Unit = {
-                      execute(request.method().name(), uri, newParameters, data.getString(0, data.length), preResult.body, fun, postFun, request.response(), contentType)
+                      execute(request.method().name(), uri, newParameters, data.getString(0, data.length), preResult.body, fun, postFun, request.response(), contentType, accept)
                     }
                   })
                 } else {
                   //Get或Delete请求
-                  execute(request.method().name(), uri, newParameters, null, preResult.body, fun, postFun, request.response(), contentType)
+                  execute(request.method().name(), uri, newParameters, null, preResult.body, fun, postFun, request.response(), contentType, accept)
                 }
               } else {
                 //前置处理错误，直接返回结果
-                returnContent(preResult, request.response(), contentType)
+                returnContent(preResult, request.response(), accept)
               }
             }
           }
@@ -106,7 +108,7 @@ class HttpServerProcessor extends ServerProcessor {
     latch.await()
   }
 
-  private def execute(method: String, uri: String, parameters: Map[String, String], body: Any, preData: Any, fun: Fun[_], postFun: => Any => Any, response: HttpServerResponse, contentType: String) {
+  private def execute(method: String, uri: String, parameters: Map[String, String], body: Any, preData: Any, fun: Fun[_], postFun: => Any => Any, response: HttpServerResponse, contentType: String, accept: String) {
     vertx.executeBlocking(new Handler[Future[Any]] {
       override def handle(future: Future[Any]): Unit = {
         try {
@@ -121,12 +123,12 @@ class HttpServerProcessor extends ServerProcessor {
             } else {
               rpcServer.any(method, uri, parameters, body, preData)
             }
-          returnContent(postFun(result), response, contentType)
+          returnContent(postFun(result), response, accept)
         }
         catch {
           case e: Exception =>
             logger.error("Execute function error.", e)
-            returnContent(Resp.serverError(e.getMessage), response, contentType)
+            returnContent(Resp.serverError(e.getMessage), response, accept)
         }
         future.complete()
       }
@@ -136,16 +138,14 @@ class HttpServerProcessor extends ServerProcessor {
     })
   }
 
-  private def returnContent(result: Any, response: HttpServerResponse, contentType: String) {
-    val body = contentType match {
+  private def returnContent(result: Any, response: HttpServerResponse, accept: String) {
+    val (body, contentType) = accept match {
       case t if t.contains("json") => result match {
-        case r: String => r
-        case _ => JsonHelper.toJsonString(result)
+        case r: String => (r, "application/json; charset=UTF-8")
+        case _ => (JsonHelper.toJsonString(result), "application/json; charset=UTF-8")
       }
-      case t if t.contains("xml") || t.contains("html") => result.toString
-      case _ =>
-        logger.error("Not support content type:" + contentType)
-        ""
+      case t if t.contains("xml") => (result.toString, "text/xml; charset=UTF-8")
+      case _ => (result.toString, s"$accept; charset=UTF-8")
     }
     //支持CORS
     response.setStatusCode(200).putHeader("Content-Type", contentType)
