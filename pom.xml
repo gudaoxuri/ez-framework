@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.ecfront</groupId>
         <artifactId>ez-vertx-verticle-parent</artifactId>
-        <version>0.1.5</version>
+        <version>0.1.6</version>
     </parent>
 
     <artifactId>ez-framework</artifactId>
@@ -24,7 +24,6 @@
     </scm>
 
     <properties>
-        <asciidoc.dir>${project.basedir}/doc</asciidoc.dir>
     </properties>
 
     <dependencies>
@@ -64,37 +63,6 @@
         </exclusions>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.asciidoctor</groupId>
-                <artifactId>asciidoctor-maven-plugin</artifactId>
-                <version>1.5.2</version>
-                <configuration>
-                    <sourceDirectory>doc</sourceDirectory>
-                    <outputDirectory>${project.build.directory}/docs</outputDirectory>
-                    <preserveDirectories>true</preserveDirectories>
-                    <relativeBaseDir>true</relativeBaseDir>
-                    <backend>html</backend>
-                    <doctype>book</doctype>
-                    <attributes>
-                        <maven-groupId>${project.groupId}</maven-groupId>
-                        <maven-artifactId>${project.artifactId}</maven-artifactId>
-                        <maven-version>${project.version}</maven-version>
-                    </attributes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>process-asciidoc</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
     <repositories>
         <repository>
