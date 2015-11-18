@@ -1,0 +1,59 @@
+<html>
+<head><title>Web Socket Test</title></head>
+<body>
+<script>
+    var socket_visitSaved;
+    var socket_AddABrowser;
+    var socket_AddANewVisit;
+    if (window.WebSocket) {
+        socket_visitSaved = new WebSocket("ws://localhost:8080/query/ws/visit/saved/");
+        socket_visitSaved.onmessage = function (event) {
+            alert("visit saved received : " + event.data);
+        };
+        socket_visitSaved.onopen = function (event) {
+            alert("visit saved opened!");
+        };
+        socket_visitSaved.onclose = function (event) {
+            alert("visit savedt closed.");
+        };
+        socket_AddABrowser = new WebSocket("ws://localhost:8080/query/ws/counter/add_a_browser/");
+        socket_AddABrowser.onmessage = function (event) {
+            alert("add a browser received : " + event.data);
+        };
+        socket_AddABrowser.onopen = function (event) {
+            alert("add a browser opened!");
+        };
+        socket_AddABrowser.onclose = function (event) {
+            alert("add a browser closed.");
+        };
+        socket_AddANewVisit = new WebSocket("ws://localhost:8080/query/ws/counter/add_a_new_visit/");
+        socket_AddANewVisit.onmessage = function (event) {
+            alert("add a new visit received : " + event.data);
+        };
+        socket_AddANewVisit.onopen = function (event) {
+            alert("add a new visit opened!");
+        };
+        socket_AddANewVisit.onclose = function (event) {
+            alert("add a new visit closed.");
+        };
+    } else {
+        alert("Your browser does not support Websockets. (Use Chrome)");
+    }
+
+   /* function send(message) {
+        if (!window.WebSocket) {
+            return;
+        }
+        if (socket.readyState == WebSocket.OPEN) {
+            socket.send(message);
+        } else {
+            alert("The socket is not open.");
+        }
+    }*/
+</script>
+<form onsubmit="return false;">
+    <!--<input type="text" name="message" value="Hello, World!"/>
+    <input type="button" value="Send Web Socket Data" onclick="send(this.form.message.value)"/>-->
+</form>
+</body>
+</html>

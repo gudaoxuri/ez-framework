@@ -6,8 +6,8 @@
 
     <parent>
         <groupId>com.ecfront</groupId>
-        <artifactId>ez-parent</artifactId>
-        <version>0.1.1</version>
+        <artifactId>ez-vertx-verticle-parent</artifactId>
+        <version>0.1.5</version>
     </parent>
 
     <artifactId>ez-framework</artifactId>
@@ -15,7 +15,7 @@
     <description>EZ框架</description>
     <url>https://github.com/gudaoxuri/ez-framework</url>
     <packaging>jar</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 
     <scm>
         <connection>scm:git:git@github.com:gudaoxuri/ez-framework.git</connection>
@@ -24,83 +24,77 @@
     </scm>
 
     <properties>
-        <ez-common.version>0.5.3</ez-common.version>
-        <vertx.version>3.0.0</vertx.version>
-        <httpclient.version>4.5</httpclient.version>
-        <redisson.version>2.1.0</redisson.version>
-        <ez-dbutils.version>2.5.2</ez-dbutils.version>
-        <jsoup.version>1.8.3</jsoup.version>
+        <asciidoc.dir>${project.basedir}/doc</asciidoc.dir>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>com.ecfront</groupId>
-            <artifactId>ez-common</artifactId>
-            <version>${ez-common.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.code.findbugs</groupId>
-                    <artifactId>jsr305</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
-            <version>${vertx.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-hazelcast</artifactId>
+            <artifactId>vertx-jdbc-client</artifactId>
             <version>${vertx.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${httpclient.version}</version>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.36</version>
         </dependency>
         <dependency>
-            <groupId>org.redisson</groupId>
-            <artifactId>redisson</artifactId>
-            <version>${redisson.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-databind</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-redis-client</artifactId>
+            <version>${vertx.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.ecfront</groupId>
-            <artifactId>ez-dbutils</artifactId>
-            <version>${ez-dbutils.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.spark-project.hive</groupId>
-                    <artifactId>hive-jdbc</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>2.2.2</version>
         </dependency>
         <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>${jsoup.version}</version>
+        <groupId>com.ecfront</groupId>
+        <artifactId>ez-excelconverter</artifactId>
+        <version>0.2</version>
+        <exclusions>
+            <exclusion>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+            </exclusion>
+        </exclusions>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <version>1.5.2</version>
+                <configuration>
+                    <sourceDirectory>doc</sourceDirectory>
+                    <outputDirectory>${project.build.directory}/docs</outputDirectory>
+                    <preserveDirectories>true</preserveDirectories>
+                    <relativeBaseDir>true</relativeBaseDir>
+                    <backend>html</backend>
+                    <doctype>book</doctype>
+                    <attributes>
+                        <maven-groupId>${project.groupId}</maven-groupId>
+                        <maven-artifactId>${project.artifactId}</maven-artifactId>
+                        <maven-version>${project.version}</maven-version>
+                    </attributes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <repositories>
         <repository>

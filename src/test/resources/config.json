@@ -1,17 +1,66 @@
 {
-  "servers": {
+  "ez": {
     "publicServer": {
       "host": "0.0.0.0",
       "port": 8080,
       "resourcePath": "c:/tmp/",
       "publicUriPrefix": "/public/",
-      "authManage": true
+      "authManage": false
     },
     "clusterServer": {
       "host": "127.0.0.1"
     },
-    "servicePath": "com.ecfront.ez.framework.empty",
-    "entityPath": "com.ecfront.ez.framework.module"
+    "servicePath": "com.asto.dop.core.module",
+    "entityPath": "com.asto.dop.core.entity",
+    "db": {
+      "driver_class": "com.mysql.jdbc.Driver",
+      "jdbc": "jdbc:mysql://192.168.4.99:3306/dop?characterEncoding=UTF-8&autoReconnect=true",
+      "userName": "root",
+      "userPassword": "123456",
+      "max_pool_size": 200,
+      "max_idle_time": 1800,
+      "idle_test_period": 120,
+      "validate": true
+    },
+    "redis": {
+      "host": "192.168.4.99",
+      "port": 6379,
+      "auth": "",
+      "db": 0
+    },
+    "useCache": true
   },
-  "args": {}
+  "args": {
+    "binlog": {
+      "host": "192.168.4.99",
+      "port": 3306,
+      "userName": "root",
+      "userPassword": "123456",
+      "monitorTables": "user,bind,apply"
+    },
+    "businessApi": {
+      "register": {
+        "api": "http://115.159.42.96:8081/statistics/register"
+      },
+      "bind": {
+        "table": "property_shop",
+        "api": "http://115.159.42.96:8081/statistics/addshop"
+      },
+      "apply": {
+        "table": "loan_app",
+        "api": "http://115.159.42.96:8081/statistics/apply"
+      },
+      "self_examine_pass": {
+        "table": "loan_app_audit_snap",
+        "api": "http://115.159.42.96:8081/statistics/selfexaminepass"
+      },
+      "bank_examine_pass": {
+        "table": "loan_app_audit_snap",
+        "api": "http://115.159.42.96:8081/statistics/bankexaminepass"
+      }
+    },
+    "visitRecomputeAction": "login_success",
+    "visitRegisterAction": "register_success",
+    "ip_path":""
+  }
 }

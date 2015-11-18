@@ -1,17 +1,36 @@
 {
-  "servers":{
+  "ez": {
     "publicServer": {
       "host": "0.0.0.0",
       "port": 8080,
-      "resourcePath":"c:/tmp/",
-      "publicUriPrefix":"/public/",
-      "authManage":true
+      "resourcePath": "c:/tmp/",
+      "publicUriPrefix": "/public/",
+      "authManage": false
     },
     "clusterServer": {
       "host": "127.0.0.1"
     },
-    "servicePath":"",
-    "entityPath":""
+    "servicePath": "com.asto.dop.core.module",
+    "entityPath": "com.asto.dop.core.entity",
+    "db": {
+      "driver_class": "com.mysql.jdbc.Driver",
+      "jdbc": "jdbc:mysql://192.168.4.99:3306/dop?characterEncoding=UTF-8&autoReconnect=true",
+      "userName": "root",
+      "userPassword": "123456",
+      "max_pool_size": 200,
+      "max_idle_time": 1800,
+      "idle_test_period": 120,
+      "validate": true
+    },
+    "redis": {
+      "host": "192.168.4.99",
+      "port": 6379,
+      "auth": "",
+      "db": 0
+    },
+    "useCache": false
   },
-  "args":{}
+  "args": {
+
+  }
 }
