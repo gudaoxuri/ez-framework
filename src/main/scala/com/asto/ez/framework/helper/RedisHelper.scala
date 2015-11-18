@@ -11,8 +11,8 @@ import io.vertx.redis.{RedisClient, RedisOptions}
 import scala.concurrent.{Future, Promise}
 
 /**
- * Redis 异步操作辅助类
- */
+  * Redis 异步操作辅助类
+  */
 object RedisHelper extends LazyLogging {
 
   private var redisClient: RedisClient = _
@@ -20,13 +20,13 @@ object RedisHelper extends LazyLogging {
 
   def init(vertx: Vertx, host: String, port: Int, db: Integer, auth: String = null, _useCache: Boolean = true): Unit = {
     useCache = _useCache
-    if(useCache) {
+    if (useCache) {
       redisClient = RedisClient.create(vertx, new RedisOptions().setHost(host).setPort(port))
-      redisClient.select(db, new Handler[AsyncResult[String]] {
-        override def handle(event: AsyncResult[String]): Unit = {
-          if (event.succeeded()) {
-            if (auth != null && auth.nonEmpty) {
-              redisClient.auth(auth, new Handler[AsyncResult[String]] {
+      if (auth != null && auth.nonEmpty) {
+        redisClient.auth(auth, new Handler[AsyncResult[String]] {
+          override def handle(event: AsyncResult[String]): Unit = {
+            if (event.succeeded()) {
+              redisClient.select(db, new Handler[AsyncResult[String]] {
                 override def handle(event: AsyncResult[String]): Unit = {
                   if (event.succeeded()) {
                     logger.info(s"DOP core app redis connected $host:$port")
@@ -35,19 +35,29 @@ object RedisHelper extends LazyLogging {
                   }
                 }
               })
+            } else {
+              logger.error("Redis connection error.", event.cause())
             }
-          } else {
-            logger.error("Redis connection error.", event.cause())
           }
-        }
-      })
+        })
+      }else{
+        redisClient.select(db, new Handler[AsyncResult[String]] {
+          override def handle(event: AsyncResult[String]): Unit = {
+            if (event.succeeded()) {
+              logger.info(s"DOP core app redis connected $host:$port")
+            } else {
+              logger.error("Redis connection error.", event.cause())
+            }
+          }
+        })
+      }
     }
   }
 
   /**
-   * @param expire (seconds)
-   * @return
-   */
+    * @param expire (seconds)
+    * @return
+    */
   def set(key: String, value: String, expire: Long = 0): Future[Resp[Void]] = {
     val p = Promise[Resp[Void]]()
     if (useCache) {
