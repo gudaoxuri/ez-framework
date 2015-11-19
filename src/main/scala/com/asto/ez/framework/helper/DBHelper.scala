@@ -160,6 +160,7 @@ object DBHelper extends LazyLogging {
 
   def get[E](sql: String, parameters: List[Any], resultClass: Class[E] = classOf[JsonObject]): Future[Resp[E]] = {
     val p = Promise[Resp[E]]()
+    logger.trace(s"DB get : $sql [$parameters]")
     db.onComplete {
       case Success(conn) =>
         try {
@@ -208,6 +209,7 @@ object DBHelper extends LazyLogging {
 
   def find[E](sql: String, parameters: List[Any], resultClass: Class[E] = classOf[JsonObject]): Future[Resp[List[E]]] = {
     val p = Promise[Resp[List[E]]]()
+    logger.trace(s"DB find : $sql [$parameters]")
     db.onComplete {
       case Success(conn) =>
         try {
@@ -250,6 +252,7 @@ object DBHelper extends LazyLogging {
 
   def page[E](sql: String, parameters: List[Any], pageNumber: Long = 1, pageSize: Int = 10, resultClass: Class[E] = classOf[JsonObject]): Future[Resp[Page[E]]] = {
     val p = Promise[Resp[Page[E]]]()
+    logger.trace(s"DB page : $sql [$parameters]")
     db.onComplete {
       case Success(conn) =>
         try {
@@ -304,6 +307,7 @@ object DBHelper extends LazyLogging {
 
   def count(sql: String, parameters: List[Any]): Future[Resp[Long]] = {
     val p = Promise[Resp[Long]]()
+    logger.trace(s"DB count : $sql [$parameters]")
     db.onComplete {
       case Success(conn) =>
         try {
@@ -363,6 +367,7 @@ object DBHelper extends LazyLogging {
 
   def exist(sql: String, parameters: List[Any]): Future[Resp[Boolean]] = {
     val p = Promise[Resp[Boolean]]()
+    logger.trace(s"DB exist : $sql [$parameters]")
     db.onComplete {
       case Success(conn) =>
         try {
