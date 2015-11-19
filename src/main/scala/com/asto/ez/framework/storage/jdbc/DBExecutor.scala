@@ -94,7 +94,7 @@ object DBExecutor {
     if (idValue != null) {
       val clazz = entityInfo.clazz
       val richValueInfos=collection.mutable.Map[String,Any]()
-      richValueInfos++=valueInfos.filterNot(_._1==entityInfo.idFieldName)
+      richValueInfos++=valueInfos
       if(classOf[SecureModel].isAssignableFrom(clazz)){
         val now=SecureModel.df.format(new Date()).toLong
         if(!valueInfos.contains(SecureModel.UPDATE_USER_FLAG)||valueInfos(SecureModel.UPDATE_USER_FLAG)==null){
