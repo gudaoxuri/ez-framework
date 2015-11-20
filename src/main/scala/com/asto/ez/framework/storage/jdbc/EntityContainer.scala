@@ -12,6 +12,7 @@ object EntityContainer extends LazyLogging {
                          tableName: String,
                          tableDesc: String,
                          idFieldName: String,
+                         idStrategy: String,
                          fkFieldNames: List[String],
                          fieldDesc: Map[String, String],
                          allFields: Map[String, String],
@@ -64,7 +65,7 @@ object EntityContainer extends LazyLogging {
       item =>
         val ttype = item._1 match {
           case name if textFieldNames.contains(name) => "text"
-          case name if idFieldInfo!=null && idFieldInfo.fieldName == name && idFieldInfo.annotation.asInstanceOf[Id].strategy != "" =>
+          case name if idFieldInfo != null && idFieldInfo.fieldName == name && idFieldInfo.annotation.asInstanceOf[Id].strategy != "" =>
             idFieldInfo.annotation.asInstanceOf[Id].strategy
           case _ => item._2
         }
@@ -91,7 +92,8 @@ object EntityContainer extends LazyLogging {
       clazz,
       tableName,
       tableDesc,
-      if(idFieldInfo!=null) idFieldInfo.fieldName else "",
+      if (idFieldInfo != null) idFieldInfo.fieldName else "",
+      if (idFieldInfo != null) idFieldInfo.annotation.asInstanceOf[Id].strategy else "",
       fkFieldNames,
       fieldDesc,
       allFields,
