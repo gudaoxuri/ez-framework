@@ -11,6 +11,8 @@ import io.vertx.core.http.{HttpServer, HttpServerOptions}
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.jdbc.JDBCClient
 
+import scala.io.Source
+
 /**
   * 系统启动类
   */
@@ -26,9 +28,9 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     * 启动入口
     */
   override def start(): Unit = {
-    EZGlobal.vertx = vertx
-    EZGlobal.config = config()
-    HttpClientHelper.httpClient = vertx.createHttpClient()
+    EZGlobal.vertx = if (vertx != null) vertx else Vertx.vertx()
+    EZGlobal.config =if (vertx != null) config() else new JsonObject(Source.fromFile(this.getClass.getResource("/").getPath + "config.json").mkString)
+    HttpClientHelper.httpClient = EZGlobal.vertx.createHttpClient()
     preStartup()
     buildServiceContainer()
     startHttpServer()
@@ -94,7 +96,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     }
   }
 
-  def startScheduler(): Unit ={
+  def startScheduler(): Unit = {
     SchedulerService.init()
   }
 
