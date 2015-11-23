@@ -1,4 +1,4 @@
-package com.asto.es.framework.function
+package com.asto.ez.framework.function
 
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date}

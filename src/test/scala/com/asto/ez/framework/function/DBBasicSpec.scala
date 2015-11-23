@@ -1,4 +1,4 @@
-package com.asto.es.framework.function
+package com.asto.ez.framework.function
 
 import com.asto.ez.framework.helper.DBHelper
 import com.typesafe.scalalogging.slf4j.LazyLogging

@@ -1,7 +1,5 @@
 package com.asto.ez.framework.storage.jdbc
 
-import java.util.Date
-
 import com.asto.ez.framework.EZContext
 import com.asto.ez.framework.helper.{DBHelper, Page}
 import com.asto.ez.framework.storage.jdbc.EntityContainer.EntityInfo
@@ -17,32 +15,6 @@ object DBExecutor {
     val clazz = entityInfo.clazz
     val richValueInfos = collection.mutable.Map[String, Any]()
     richValueInfos ++= valueInfos
-    if (classOf[SecureModel].isAssignableFrom(clazz)) {
-      val now = SecureModel.df.format(new Date()).toLong
-      if (!valueInfos.contains(SecureModel.CREATE_USER_FLAG) || valueInfos(SecureModel.CREATE_USER_FLAG) == null) {
-        richValueInfos += SecureModel.CREATE_USER_FLAG -> context.userId
-      }
-      if (!valueInfos.contains(SecureModel.CREATE_TIME_FLAG) || valueInfos(SecureModel.CREATE_TIME_FLAG) == 0) {
-        richValueInfos += SecureModel.CREATE_TIME_FLAG -> now
-      }
-      if (!valueInfos.contains(SecureModel.CREATE_ORG_FLAG) || valueInfos(SecureModel.CREATE_ORG_FLAG) == null) {
-        richValueInfos += SecureModel.CREATE_ORG_FLAG -> context.orgId
-      }
-      if (!valueInfos.contains(SecureModel.UPDATE_USER_FLAG) || valueInfos(SecureModel.UPDATE_USER_FLAG) == null) {
-        richValueInfos += SecureModel.UPDATE_USER_FLAG -> context.userId
-      }
-      if (!valueInfos.contains(SecureModel.UPDATE_TIME_FLAG) || valueInfos(SecureModel.UPDATE_TIME_FLAG) == 0) {
-        richValueInfos += SecureModel.UPDATE_TIME_FLAG -> now
-      }
-      if (!valueInfos.contains(SecureModel.UPDATE_ORG_FLAG) || valueInfos(SecureModel.UPDATE_ORG_FLAG) == null) {
-        richValueInfos += SecureModel.UPDATE_ORG_FLAG -> context.orgId
-      }
-    }
-    if (classOf[StatusModel].isAssignableFrom(clazz)) {
-      if (!valueInfos.contains(StatusModel.ENABLE_FLAG) || valueInfos(StatusModel.ENABLE_FLAG) == null) {
-        richValueInfos += StatusModel.ENABLE_FLAG -> false
-      }
-    }
     if (entityInfo.idStrategy == Id.STRATEGY_SEQ && richValueInfos.contains(idFieldName) && richValueInfos(idFieldName) == 0) {
       richValueInfos -= idFieldName
     }
@@ -72,18 +44,6 @@ object DBExecutor {
     val clazz = entityInfo.clazz
     val richValueInfos = collection.mutable.Map[String, Any]()
     richValueInfos ++= valueInfos.filterNot(_._1 == entityInfo.idFieldName)
-    if (classOf[SecureModel].isAssignableFrom(clazz)) {
-      val now = SecureModel.df.format(new Date()).toLong
-      if (!valueInfos.contains(SecureModel.UPDATE_USER_FLAG) || valueInfos(SecureModel.UPDATE_USER_FLAG) == null) {
-        richValueInfos += SecureModel.UPDATE_USER_FLAG -> context.userId
-      }
-      if (!valueInfos.contains(SecureModel.UPDATE_TIME_FLAG) || valueInfos(SecureModel.UPDATE_TIME_FLAG) == 0) {
-        richValueInfos += SecureModel.UPDATE_TIME_FLAG -> now
-      }
-      if (!valueInfos.contains(SecureModel.UPDATE_ORG_FLAG) || valueInfos(SecureModel.UPDATE_ORG_FLAG) == null) {
-        richValueInfos += SecureModel.UPDATE_ORG_FLAG -> context.orgId
-      }
-    }
     //keys.toList.map ，toList 让map有序
     val newValues = richValueInfos.keys.toList.map(key => s"$key = ? ").mkString(",")
     val condition = s" $idFieldName = ? "
@@ -95,21 +55,8 @@ object DBExecutor {
     val idFieldName = entityInfo.idFieldName
     val idValue = if (valueInfos.contains(idFieldName)) valueInfos(idFieldName) else null
     if (idValue != null) {
-      val clazz = entityInfo.clazz
       val richValueInfos = collection.mutable.Map[String, Any]()
       richValueInfos ++= valueInfos
-      if (classOf[SecureModel].isAssignableFrom(clazz)) {
-        val now = SecureModel.df.format(new Date()).toLong
-        if (!valueInfos.contains(SecureModel.UPDATE_USER_FLAG) || valueInfos(SecureModel.UPDATE_USER_FLAG) == null) {
-          richValueInfos += SecureModel.UPDATE_USER_FLAG -> context.userId
-        }
-        if (!valueInfos.contains(SecureModel.UPDATE_TIME_FLAG) || valueInfos(SecureModel.UPDATE_TIME_FLAG) == 0) {
-          richValueInfos += SecureModel.UPDATE_TIME_FLAG -> now
-        }
-        if (!valueInfos.contains(SecureModel.UPDATE_ORG_FLAG) || valueInfos(SecureModel.UPDATE_ORG_FLAG) == null) {
-          richValueInfos += SecureModel.UPDATE_ORG_FLAG -> context.orgId
-        }
-      }
       if (entityInfo.idStrategy == Id.STRATEGY_SEQ && richValueInfos.contains(idFieldName) && richValueInfos(idFieldName) == 0) {
         richValueInfos -= idFieldName
       }

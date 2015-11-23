@@ -18,6 +18,8 @@ import scala.io.Source
   */
 abstract class EZStartup extends AbstractVerticle with LazyLogging {
 
+  protected  def module:String
+
   protected def preStartup() = {}
 
   protected def postStartup() = {}
@@ -97,7 +99,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
   }
 
   def startScheduler(): Unit = {
-    SchedulerService.init()
+    SchedulerService.init(module)
   }
 
   /**

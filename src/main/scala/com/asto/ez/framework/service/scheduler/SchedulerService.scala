@@ -11,6 +11,7 @@ object SchedulerService extends LazyLogging {
   private val quartzScheduler = StdSchedulerFactory.getDefaultScheduler
 
   def save(scheduler: EZ_Scheduler): Unit = {
+    scheduler.enable=true
     scheduler.parameterstr = JsonHelper.toJsonString(scheduler.parameters)
     scheduler.save().onSuccess {
       case saveResp =>
@@ -21,6 +22,7 @@ object SchedulerService extends LazyLogging {
   }
 
   def update(scheduler: EZ_Scheduler): Unit = {
+    scheduler.enable=true
     scheduler.parameterstr = JsonHelper.toJsonString(scheduler.parameters)
     scheduler.update().onSuccess {
       case updateResp =>
@@ -48,10 +50,10 @@ object SchedulerService extends LazyLogging {
     }
   }
 
-  def init(): Unit = {
+  def init(module:String): Unit = {
     logger.debug("Startup scheduling.")
     quartzScheduler.start()
-    EZ_Scheduler().find().onSuccess {
+    EZ_Scheduler().findEnabled("module =?",List(module)).onSuccess {
       case findResp =>
         if (findResp) {
           findResp.body.foreach {

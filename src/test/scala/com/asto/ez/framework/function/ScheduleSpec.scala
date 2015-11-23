@@ -1,4 +1,4 @@
-package com.asto.es.framework.function
+package com.asto.ez.framework.function
 
 import java.util.concurrent.CountDownLatch
 
@@ -10,10 +10,11 @@ class ScheduleSpec extends DBBasicSpec {
 
     val cdl = new CountDownLatch(1)
 
-    SchedulerService.init()
+    SchedulerService.init("testModule1")
     val scheduler=EZ_Scheduler()
     scheduler.name="测试"
     scheduler.cron="* * * * * ?"
+    scheduler.module="testModule1"
     scheduler.clazz=TestScheduleJob.getClass.getName
     scheduler.parameters=Map("p1"->1,"p2"->"1")
     SchedulerService.save(scheduler)
