@@ -5,11 +5,13 @@ import com.asto.ez.framework.rpc.AutoBuildingProcessor
 import com.asto.ez.framework.rpc.http.HttpProcessor
 import com.asto.ez.framework.rpc.websocket.WebSocketProcessor
 import com.asto.ez.framework.service.scheduler.SchedulerService
+import com.asto.ez.framework.storage.mongo.MongoHelper
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core._
 import io.vertx.core.http.{HttpServer, HttpServerOptions}
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.jdbc.JDBCClient
+import io.vertx.ext.mongo.MongoClient
 
 import scala.io.Source
 
@@ -37,6 +39,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     buildServiceContainer()
     startHttpServer()
     startDBClient()
+    startMongoClient()
     startRedisClient()
     startScheduler()
     postStartup()
@@ -82,6 +85,14 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
         .put("validate", db.getBoolean("validate"))
       )
       logger.info(s"EZ Framework DB connected. ${db.getString("jdbc")}")
+    }
+  }
+
+  def startMongoClient(): Unit = {
+    if (EZGlobal.ez.containsKey("mongo")) {
+      val mongo = EZGlobal.ez.getJsonObject("mongo")
+      MongoHelper.mongoClient = MongoClient.createShared(EZGlobal.vertx, mongo)
+      logger.info(s"EZ Framework Mongo connected.")
     }
   }
 

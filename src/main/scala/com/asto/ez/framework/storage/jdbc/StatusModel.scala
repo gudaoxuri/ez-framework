@@ -1,7 +1,7 @@
 package com.asto.ez.framework.storage.jdbc
 
 import com.asto.ez.framework.EZContext
-import com.asto.ez.framework.helper.Page
+import com.asto.ez.framework.storage.Page
 import com.ecfront.common.Resp
 
 import scala.beans.BeanProperty

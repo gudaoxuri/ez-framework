@@ -5,6 +5,7 @@ import java.sql.SQLTransactionRollbackException
 import java.util.concurrent.atomic.AtomicLong
 
 import com.asto.ez.framework.EZGlobal
+import com.asto.ez.framework.storage.Page
 import com.ecfront.common.{JsonHelper, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.json.{JsonArray, JsonObject}
@@ -418,12 +419,4 @@ object DBHelper extends LazyLogging {
   }
 }
 
-class Page[E] {
-  //start with 1
-  var pageNumber: Long = _
-  var pageSize: Int = _
-  var pageTotal: Long = _
-  var recordTotal: Long = _
-  var objects: List[E] = _
 
-}

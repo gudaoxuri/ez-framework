@@ -1,7 +1,8 @@
 package com.asto.ez.framework.storage.jdbc
 
 import com.asto.ez.framework.EZContext
-import com.asto.ez.framework.helper.{DBHelper, Page}
+import com.asto.ez.framework.helper.DBHelper
+import com.asto.ez.framework.storage.Page
 import com.asto.ez.framework.storage.jdbc.EntityContainer.EntityInfo
 import com.ecfront.common.Resp
 
