@@ -5,7 +5,8 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http._
-
+import scala.async.Async.{async, await}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 
 /**
@@ -34,7 +35,7 @@ object HttpClientHelper extends LazyLogging {
     request(HttpMethod.DELETE, url, null, responseClass, contentType)
   }
 
-  private def request[E](method: HttpMethod, url: String, body: Any, responseClass: Class[E], contentType: String): Future[Resp[E]] = {
+  private def request[E](method: HttpMethod, url: String, body: Any, responseClass: Class[E], contentType: String): Future[Resp[E]] = async {
     val p = Promise[Resp[E]]()
     val client = httpClient.requestAbs(method, url, new Handler[HttpClientResponse] {
       override def handle(response: HttpClientResponse): Unit = {
@@ -51,8 +52,8 @@ object HttpClientHelper extends LazyLogging {
                 } else {
                   null.asInstanceOf
                 }
-                val resp=Resp[E](result.get("code").asText(), result.get("message").asText(), Some(body))
-                resp.body=body
+                val resp = Resp[E](result.get("code").asText(), result.get("message").asText(), Some(body))
+                resp.body = body
                 p.success(resp)
               } else {
                 p.success(Resp.success(JsonHelper.toObject(result, responseClass)))
@@ -72,7 +73,7 @@ object HttpClientHelper extends LazyLogging {
     } else {
       client.end()
     }
-    p.future
+    await(p.future)
   }
 
   def returnContent(result: Any, response: HttpServerResponse, accept: String = "application/json; charset=UTF-8") {

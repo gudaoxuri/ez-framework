@@ -13,6 +13,7 @@ import io.vertx.core.{AsyncResult, Handler}
 import io.vertx.ext.jdbc.JDBCClient
 import io.vertx.ext.sql.{ResultSet, SQLConnection, UpdateResult}
 
+import scala.async.Async.{async, await}
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
@@ -27,7 +28,7 @@ object DBHelper extends LazyLogging {
 
   var dbClient: JDBCClient = _
 
-  def update(sql: String, parameters: List[Any] = null, retryTimes: Int = 0): Future[Resp[Void]] = {
+  def update(sql: String, parameters: List[Any] = null, retryTimes: Int = 0): Future[Resp[Void]] = async {
     val p = Promise[Resp[Void]]()
     logger.trace(s"JDBC update : $sql [$parameters]")
     db.onComplete {
@@ -104,10 +105,10 @@ object DBHelper extends LazyLogging {
       case Failure(ex) =>
         p.success(Resp.serverUnavailable(ex.getMessage))
     }
-    p.future
+    await(p.future)
   }
 
-  def batch(sql: String, parameterList: List[List[Any]] = null): Future[Resp[Void]] = {
+  def batch(sql: String, parameterList: List[List[Any]] = null): Future[Resp[Void]] = async {
     val p = Promise[Resp[Void]]()
     logger.trace(s"JDBC update : $sql [$parameterList]")
     db.onComplete {
@@ -156,10 +157,10 @@ object DBHelper extends LazyLogging {
       case Failure(ex) =>
         p.success(Resp.serverUnavailable(ex.getMessage))
     }
-    p.future
+    await(p.future)
   }
 
-  def get[E](sql: String, parameters: List[Any], resultClass: Class[E] = classOf[JsonObject]): Future[Resp[E]] = {
+  def get[E](sql: String, parameters: List[Any], resultClass: Class[E]): Future[Resp[E]] = async {
     val p = Promise[Resp[E]]()
     logger.trace(s"JDBC get : $sql [$parameters]")
     db.onComplete {
@@ -205,10 +206,10 @@ object DBHelper extends LazyLogging {
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
     }
-    p.future
+    await(p.future)
   }
 
-  def find[E](sql: String, parameters: List[Any], resultClass: Class[E] = classOf[JsonObject]): Future[Resp[List[E]]] = {
+  def find[E](sql: String, parameters: List[Any], resultClass: Class[E]): Future[Resp[List[E]]] = async {
     val p = Promise[Resp[List[E]]]()
     logger.trace(s"JDBC find : $sql [$parameters]")
     db.onComplete {
@@ -248,10 +249,10 @@ object DBHelper extends LazyLogging {
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
     }
-    p.future
+    await(p.future)
   }
 
-  def page[E](sql: String, parameters: List[Any], pageNumber: Long = 1, pageSize: Int = 10, resultClass: Class[E] = classOf[JsonObject]): Future[Resp[Page[E]]] = {
+  def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int, resultClass: Class[E]): Future[Resp[Page[E]]] = async {
     val p = Promise[Resp[Page[E]]]()
     logger.trace(s"JDBC page : $sql [$parameters]")
     db.onComplete {
@@ -303,10 +304,10 @@ object DBHelper extends LazyLogging {
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
     }
-    p.future
+    await(p.future)
   }
 
-  def count(sql: String, parameters: List[Any]): Future[Resp[Long]] = {
+  def count(sql: String, parameters: List[Any]): Future[Resp[Long]] = async {
     val p = Promise[Resp[Long]]()
     logger.trace(s"JDBC count : $sql [$parameters]")
     db.onComplete {
@@ -336,7 +337,7 @@ object DBHelper extends LazyLogging {
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
     }
-    p.future
+    await(p.future)
   }
 
   //此方法仅为分页请求提供
@@ -366,7 +367,7 @@ object DBHelper extends LazyLogging {
     p.future
   }
 
-  def exist(sql: String, parameters: List[Any]): Future[Resp[Boolean]] = {
+  def exist(sql: String, parameters: List[Any]): Future[Resp[Boolean]] = async {
     val p = Promise[Resp[Boolean]]()
     logger.trace(s"JDBC exist : $sql [$parameters]")
     db.onComplete {
@@ -400,7 +401,7 @@ object DBHelper extends LazyLogging {
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
     }
-    p.future
+    await(p.future)
   }
 
   private def db: Future[SQLConnection] = {

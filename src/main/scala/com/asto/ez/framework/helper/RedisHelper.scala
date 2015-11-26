@@ -7,7 +7,8 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.{AsyncResult, Handler, Vertx}
 import io.vertx.redis.op.SetOptions
 import io.vertx.redis.{RedisClient, RedisOptions}
-
+import scala.async.Async.{async, await}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 
 /**
@@ -58,7 +59,7 @@ object RedisHelper extends LazyLogging {
     * @param expire (seconds)
     * @return
     */
-  def set(key: String, value: String, expire: Long = 0): Future[Resp[Void]] = {
+  def set(key: String, value: String, expire: Long = 0): Future[Resp[Void]] = async {
     val p = Promise[Resp[Void]]()
     if (useCache) {
       if (expire == 0) {
@@ -87,10 +88,10 @@ object RedisHelper extends LazyLogging {
     } else {
       p.success(Resp.success(null))
     }
-    p.future
+    await(p.future)
   }
 
-  def exists(key: String): Future[Resp[Boolean]] = {
+  def exists(key: String): Future[Resp[Boolean]] = async{
     val p = Promise[Resp[Boolean]]()
     if (useCache) {
       redisClient.exists(key, new Handler[AsyncResult[lang.Long]] {
@@ -110,10 +111,10 @@ object RedisHelper extends LazyLogging {
     } else {
       p.success(Resp.success(false))
     }
-    p.future
+    await(p.future)
   }
 
-  def get(key: String): Future[Resp[String]] = {
+  def get(key: String): Future[Resp[String]] = async {
     val p = Promise[Resp[String]]()
     if (useCache) {
       redisClient.get(key, new Handler[AsyncResult[String]] {
@@ -129,7 +130,7 @@ object RedisHelper extends LazyLogging {
     } else {
       p.success(Resp.success(null))
     }
-    p.future
+    await(p.future)
   }
 
 }
