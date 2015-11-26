@@ -1,4 +1,4 @@
-package com.asto.ez.framework.helper
+package com.asto.ez.framework.storage.jdbc
 
 import java.lang
 import java.sql.SQLTransactionRollbackException
@@ -19,7 +19,7 @@ import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success}
 
 /**
-  * DB 异步操作处理辅助类
+  * JDBC 异步操作处理辅助类
   *
   * 包含了DB 的几类基础操作
   */
@@ -29,7 +29,7 @@ object DBHelper extends LazyLogging {
 
   def update(sql: String, parameters: List[Any] = null, retryTimes: Int = 0): Future[Resp[Void]] = {
     val p = Promise[Resp[Void]]()
-    logger.trace(s"DB update : $sql [$parameters]")
+    logger.trace(s"JDBC update : $sql [$parameters]")
     db.onComplete {
       case Success(conn) =>
         try {
@@ -47,16 +47,16 @@ object DBHelper extends LazyLogging {
                         if (retryTimes < 10) {
                           EZGlobal.vertx.setTimer(2000, new Handler[lang.Long] {
                             override def handle(event: lang.Long): Unit = {
-                              logger.debug(s"DB update problem try times [${retryTimes + 1}] : $sql [$parameters]")
+                              logger.debug(s"JDBC update problem try times [${retryTimes + 1}] : $sql [$parameters]")
                               update(sql, parameters, retryTimes + 1)
                             }
                           })
                         } else {
-                          logger.warn(s"DB update error and try times > 10 : $sql [$parameters]", event.cause())
+                          logger.warn(s"JDBC update error and try times > 10 : $sql [$parameters]", event.cause())
                           p.success(Resp.serverError(event.cause().getMessage))
                         }
                       case _ =>
-                        logger.warn(s"DB update error : $sql [$parameters]", event.cause())
+                        logger.warn(s"JDBC update error : $sql [$parameters]", event.cause())
                         p.success(Resp.serverError(event.cause().getMessage))
                     }
                   }
@@ -78,16 +78,16 @@ object DBHelper extends LazyLogging {
                         if (retryTimes < 10) {
                           EZGlobal.vertx.setTimer(2000, new Handler[lang.Long] {
                             override def handle(event: lang.Long): Unit = {
-                              logger.debug(s"DB update problem try times [${retryTimes + 1}] : $sql [$parameters]")
+                              logger.debug(s"JDBC update problem try times [${retryTimes + 1}] : $sql [$parameters]")
                               update(sql, parameters, retryTimes + 1)
                             }
                           })
                         } else {
-                          logger.warn(s"DB update error and try times > 10 : $sql [$parameters]", event.cause())
+                          logger.warn(s"JDBC update error and try times > 10 : $sql [$parameters]", event.cause())
                           p.success(Resp.serverError(event.cause().getMessage))
                         }
                       case _ =>
-                        logger.warn(s"DB update error : $sql [$parameters]", event.cause())
+                        logger.warn(s"JDBC update error : $sql [$parameters]", event.cause())
                         p.success(Resp.serverError(event.cause().getMessage))
                     }
                   }
@@ -98,7 +98,7 @@ object DBHelper extends LazyLogging {
         } catch {
           case ex: Throwable =>
             conn.close()
-            logger.error(s"DB execute error : $sql [$parameters]", ex)
+            logger.error(s"JDBC execute error : $sql [$parameters]", ex)
             p.success(Resp.serverError(ex.getMessage))
         }
       case Failure(ex) =>
@@ -109,7 +109,7 @@ object DBHelper extends LazyLogging {
 
   def batch(sql: String, parameterList: List[List[Any]] = null): Future[Resp[Void]] = {
     val p = Promise[Resp[Void]]()
-    logger.trace(s"DB update : $sql [$parameterList]")
+    logger.trace(s"JDBC update : $sql [$parameterList]")
     db.onComplete {
       case Success(conn) =>
         try {
@@ -121,7 +121,7 @@ object DBHelper extends LazyLogging {
                   new Handler[AsyncResult[UpdateResult]] {
                     override def handle(event: AsyncResult[UpdateResult]): Unit = {
                       if (!event.succeeded()) {
-                        logger.warn(s"DB execute error : $sql [$parameters]", event.cause())
+                        logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
                       }
                       if (counter.decrementAndGet() == 0) {
                         conn.close()
@@ -136,7 +136,7 @@ object DBHelper extends LazyLogging {
                   new Handler[AsyncResult[UpdateResult]] {
                     override def handle(event: AsyncResult[UpdateResult]): Unit = {
                       if (!event.succeeded()) {
-                        logger.warn(s"DB execute error : $sql [$parameters]", event.cause())
+                        logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
                       }
                       if (counter.decrementAndGet() == 0) {
                         conn.close()
@@ -150,7 +150,7 @@ object DBHelper extends LazyLogging {
         } catch {
           case ex: Throwable =>
             conn.close()
-            logger.error(s"DB execute error : $sql", ex)
+            logger.error(s"JDBC execute error : $sql", ex)
             p.success(Resp.serverError(ex.getMessage))
         }
       case Failure(ex) =>
@@ -161,7 +161,7 @@ object DBHelper extends LazyLogging {
 
   def get[E](sql: String, parameters: List[Any], resultClass: Class[E] = classOf[JsonObject]): Future[Resp[E]] = {
     val p = Promise[Resp[E]]()
-    logger.trace(s"DB get : $sql [$parameters]")
+    logger.trace(s"JDBC get : $sql [$parameters]")
     db.onComplete {
       case Success(conn) =>
         try {
@@ -191,7 +191,7 @@ object DBHelper extends LazyLogging {
                   }
                 } else {
                   conn.close()
-                  logger.warn(s"DB execute error : $sql [$parameters]", event.cause())
+                  logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
                   p.success(Resp.serverError(event.cause().getMessage))
                 }
               }
@@ -200,7 +200,7 @@ object DBHelper extends LazyLogging {
         } catch {
           case ex: Throwable =>
             conn.close()
-            logger.error(s"DB execute error : $sql [$parameters]", ex)
+            logger.error(s"JDBC execute error : $sql [$parameters]", ex)
             p.success(Resp.serverError(ex.getMessage))
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
@@ -210,7 +210,7 @@ object DBHelper extends LazyLogging {
 
   def find[E](sql: String, parameters: List[Any], resultClass: Class[E] = classOf[JsonObject]): Future[Resp[List[E]]] = {
     val p = Promise[Resp[List[E]]]()
-    logger.trace(s"DB find : $sql [$parameters]")
+    logger.trace(s"JDBC find : $sql [$parameters]")
     db.onComplete {
       case Success(conn) =>
         try {
@@ -234,7 +234,7 @@ object DBHelper extends LazyLogging {
                   }
                 } else {
                   conn.close()
-                  logger.warn(s"DB execute error : $sql [$parameters]", event.cause())
+                  logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
                   p.success(Resp.serverError(event.cause().getMessage))
                 }
               }
@@ -243,7 +243,7 @@ object DBHelper extends LazyLogging {
         } catch {
           case ex: Throwable =>
             conn.close()
-            logger.error(s"DB execute error : $sql [$parameters]", ex)
+            logger.error(s"JDBC execute error : $sql [$parameters]", ex)
             p.success(Resp.serverError(ex.getMessage))
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
@@ -253,7 +253,7 @@ object DBHelper extends LazyLogging {
 
   def page[E](sql: String, parameters: List[Any], pageNumber: Long = 1, pageSize: Int = 10, resultClass: Class[E] = classOf[JsonObject]): Future[Resp[Page[E]]] = {
     val p = Promise[Resp[Page[E]]]()
-    logger.trace(s"DB page : $sql [$parameters]")
+    logger.trace(s"JDBC page : $sql [$parameters]")
     db.onComplete {
       case Success(conn) =>
         try {
@@ -284,7 +284,7 @@ object DBHelper extends LazyLogging {
                         p.success(Resp.success(page))
                       } else {
                         conn.close()
-                        logger.warn(s"DB execute error : $sql [$parameters]", event.cause())
+                        logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
                         p.success(Resp.serverError(event.cause().getMessage))
                       }
                     }
@@ -298,7 +298,7 @@ object DBHelper extends LazyLogging {
         } catch {
           case ex: Throwable =>
             conn.close()
-            logger.error(s"DB execute error : $sql [$parameters]", ex)
+            logger.error(s"JDBC execute error : $sql [$parameters]", ex)
             p.success(Resp.serverError(ex.getMessage))
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
@@ -308,7 +308,7 @@ object DBHelper extends LazyLogging {
 
   def count(sql: String, parameters: List[Any]): Future[Resp[Long]] = {
     val p = Promise[Resp[Long]]()
-    logger.trace(s"DB count : $sql [$parameters]")
+    logger.trace(s"JDBC count : $sql [$parameters]")
     db.onComplete {
       case Success(conn) =>
         try {
@@ -322,7 +322,7 @@ object DBHelper extends LazyLogging {
                   p.success(result)
                 } else {
                   conn.close()
-                  logger.warn(s"DB execute error : $sql [$parameters]", event.cause())
+                  logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
                   p.success(Resp.serverError(event.cause().getMessage))
                 }
               }
@@ -331,7 +331,7 @@ object DBHelper extends LazyLogging {
         } catch {
           case ex: Throwable =>
             conn.close()
-            logger.error(s"DB execute error : $sql [$parameters]", ex)
+            logger.error(s"JDBC execute error : $sql [$parameters]", ex)
             p.success(Resp.serverError(ex.getMessage))
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
@@ -354,7 +354,7 @@ object DBHelper extends LazyLogging {
                 conn.close()
                 p.success(result)
               } else {
-                logger.warn(s"DB execute error : $sql [$parameters]", event.cause())
+                logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
                 conn.close()
                 p.success(Resp.serverError(event.cause().getMessage))
               }
@@ -368,7 +368,7 @@ object DBHelper extends LazyLogging {
 
   def exist(sql: String, parameters: List[Any]): Future[Resp[Boolean]] = {
     val p = Promise[Resp[Boolean]]()
-    logger.trace(s"DB exist : $sql [$parameters]")
+    logger.trace(s"JDBC exist : $sql [$parameters]")
     db.onComplete {
       case Success(conn) =>
         try {
@@ -386,7 +386,7 @@ object DBHelper extends LazyLogging {
                   }
                 } else {
                   conn.close()
-                  logger.warn(s"DB execute error : $sql [$parameters]", event.cause())
+                  logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
                   p.success(Resp.serverError(event.cause().getMessage))
                 }
               }
@@ -395,7 +395,7 @@ object DBHelper extends LazyLogging {
         } catch {
           case ex: Throwable =>
             conn.close()
-            logger.error(s"DB execute error : $sql [$parameters]", ex)
+            logger.error(s"JDBC execute error : $sql [$parameters]", ex)
             p.success(Resp.serverError(ex.getMessage))
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
@@ -410,7 +410,7 @@ object DBHelper extends LazyLogging {
         if (conn.succeeded()) {
           p.success(conn.result())
         } else {
-          logger.error("DB connecting fail .", conn.cause())
+          logger.error("JDBC connecting fail .", conn.cause())
           p.failure(conn.cause())
         }
       }

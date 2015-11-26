@@ -1,15 +1,15 @@
-package com.asto.ez.framework.storage.jdbc
+package com.asto.ez.framework.storage
 
 import java.util.Date
 
 import com.asto.ez.framework.EZContext
 import com.asto.ez.framework.helper.TimeHelper
-import com.ecfront.common.Resp
+import com.asto.ez.framework.storage.jdbc.Index
 
 import scala.beans.BeanProperty
-import scala.concurrent.Future
 
 trait SecureModel extends BaseModel {
+
   @Index
   @BeanProperty var create_user: String = _
   @Index
@@ -23,7 +23,7 @@ trait SecureModel extends BaseModel {
   @Index
   @BeanProperty var update_org: String = _
 
-  override def save(context: EZContext): Future[Resp[Void]] = {
+  def wrapSecureSave(context: EZContext): Unit = {
     val cnt = if (context == null) EZContext.build() else context
     val now = TimeHelper.msf.format(new Date()).toLong
     if (create_user == null) {
@@ -44,10 +44,9 @@ trait SecureModel extends BaseModel {
     if (update_org == null) {
       update_org = if (cnt.orgId != null) cnt.orgId else ""
     }
-    super.save(context)
   }
 
-  override def update(context: EZContext): Future[Resp[Void]] = {
+  def wrapSecureUpdate(context: EZContext): Unit = {
     val cnt = if (context == null) EZContext.build() else context
     val now = TimeHelper.msf.format(new Date()).toLong
     if (update_user == null) {
@@ -59,32 +58,8 @@ trait SecureModel extends BaseModel {
     if (update_org == null) {
       update_org = if (cnt.orgId != null) cnt.orgId else ""
     }
-    super.update(context)
   }
 
-  override def saveOrUpdate(context: EZContext): Future[Resp[Void]] = {
-    val cnt = if (context == null) EZContext.build() else context
-    val now = TimeHelper.msf.format(new Date()).toLong
-    if (create_user == null) {
-      create_user = if (cnt.userId != null) cnt.userId else ""
-    }
-    if (create_time == 0) {
-      create_time = now
-    }
-    if (create_org == null) {
-      create_org = if (cnt.orgId != null) cnt.orgId else ""
-    }
-    if (update_user == null) {
-      update_user = if (cnt.userId != null) cnt.userId else ""
-    }
-    if (update_time == 0) {
-      update_time = now
-    }
-    if (update_org == null) {
-      update_org = if (cnt.orgId != null) cnt.orgId else ""
-    }
-    super.saveOrUpdate(context)
-  }
 }
 
 object SecureModel {

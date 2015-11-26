@@ -1,10 +1,11 @@
 package com.asto.ez.framework
 
-import com.asto.ez.framework.helper.{DBHelper, HttpClientHelper, RedisHelper}
+import com.asto.ez.framework.helper.{HttpClientHelper, RedisHelper}
 import com.asto.ez.framework.rpc.AutoBuildingProcessor
 import com.asto.ez.framework.rpc.http.HttpProcessor
 import com.asto.ez.framework.rpc.websocket.WebSocketProcessor
 import com.asto.ez.framework.service.scheduler.SchedulerService
+import com.asto.ez.framework.storage.jdbc.DBHelper
 import com.asto.ez.framework.storage.mongo.MongoHelper
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core._
@@ -38,7 +39,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     preStartup()
     buildServiceContainer()
     startHttpServer()
-    startDBClient()
+    startJDBCClient()
     startMongoClient()
     startRedisClient()
     startScheduler()
@@ -71,20 +72,12 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     }
   }
 
-  def startDBClient(): Unit = {
-    if (EZGlobal.ez.containsKey("db")) {
-      val db = EZGlobal.ez.getJsonObject("db")
-      DBHelper.dbClient = JDBCClient.createShared(EZGlobal.vertx, new JsonObject()
-        .put("url", db.getString("jdbc"))
-        .put("driver_class", db.getString("driver_class"))
-        .put("user", db.getString("userName"))
-        .put("password", db.getString("userPassword"))
-        .put("max_pool_size", db.getInteger("max_pool_size"))
-        .put("max_idle_time", db.getInteger("max_idle_time"))
-        .put("idle_test_period", db.getInteger("idle_test_period"))
-        .put("validate", db.getBoolean("validate"))
-      )
-      logger.info(s"EZ Framework DB connected. ${db.getString("jdbc")}")
+
+  def startJDBCClient(): Unit = {
+    if (EZGlobal.ez.containsKey("jdbc")) {
+      val jdbc = EZGlobal.ez.getJsonObject("jdbc")
+      DBHelper.dbClient = JDBCClient.createShared(EZGlobal.vertx, jdbc)
+      logger.info(s"EZ Framework JDBC connected. ${jdbc.getString("jdbc")}")
     }
   }
 

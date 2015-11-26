@@ -3,11 +3,11 @@ package com.asto.ez.framework.storage.jdbc
 import com.ecfront.common.{BeanHelper, ClassScanHelper, FieldAnnotationInfo, Ignore}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
-object EntityContainer extends LazyLogging {
+object JDBCEntityContainer extends LazyLogging {
 
-  val CONTAINER = collection.mutable.Map[String, EntityInfo]()
+  val CONTAINER = collection.mutable.Map[String, JDBCEntityInfo]()
 
-  case class EntityInfo(
+  case class JDBCEntityInfo(
                          clazz: Class[_],
                          tableName: String,
                          tableDesc: String,
@@ -88,7 +88,7 @@ object EntityContainer extends LazyLogging {
         (field.annotation.asInstanceOf[ManyToMany], field.fieldName, BeanHelper.getClassByStr(allFields(field.fieldName)))
     }
 
-    CONTAINER += tableName -> EntityInfo(
+    CONTAINER += tableName -> JDBCEntityInfo(
       clazz,
       tableName,
       tableDesc,
@@ -118,7 +118,7 @@ object EntityContainer extends LazyLogging {
     initManyToManyRel(entityInfo)
   }
 
-  private def initManyToManyRel(entityInfo: EntityInfo): Unit = {
+  private def initManyToManyRel(entityInfo: JDBCEntityInfo): Unit = {
     entityInfo.manyToManyFields.foreach {
       ann =>
         val (masterFieldName, relFieldName) = getManyToManyRelTableFields(entityInfo, ann._1.mapping, ann._1.master)
@@ -132,7 +132,7 @@ object EntityContainer extends LazyLogging {
     }
   }
 
-  private def getManyToManyRelTableFields(entityInfo: EntityInfo, tableName: String, isMaster: Boolean): (String, String) = {
+  private def getManyToManyRelTableFields(entityInfo: JDBCEntityInfo, tableName: String, isMaster: Boolean): (String, String) = {
     if (isMaster) {
       (entityInfo.tableName + "_" + entityInfo.idFieldName, tableName + "_" + entityInfo.idFieldName)
     } else {
@@ -140,11 +140,11 @@ object EntityContainer extends LazyLogging {
     }
   }
 
-  private def getManyToManyRelTableName(entityInfo: EntityInfo, tableName: String, isMaster: Boolean): String = {
+  private def getManyToManyRelTableName(entityInfo: JDBCEntityInfo, tableName: String, isMaster: Boolean): String = {
     if (isMaster) {
-      BaseModel.REL_FLAG + "_" + entityInfo.tableName + "_" + tableName
+      JDBCBaseModel.REL_FLAG + "_" + entityInfo.tableName + "_" + tableName
     } else {
-      BaseModel.REL_FLAG + "_" + tableName + "_" + entityInfo.tableName
+      JDBCBaseModel.REL_FLAG + "_" + tableName + "_" + entityInfo.tableName
     }
   }
 }
