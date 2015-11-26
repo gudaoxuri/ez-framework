@@ -2,15 +2,14 @@ package com.asto.ez.framework.function
 
 import java.util.concurrent.CountDownLatch
 
+import com.asto.ez.framework.BasicSpec
 import com.asto.ez.framework.helper.RedisHelper
 import com.ecfront.common.JsonHelper
-import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.Vertx
-import org.scalatest.FunSuite
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class RedisHelperSpec extends FunSuite with LazyLogging {
+class RedisHelperSpec extends BasicSpec {
 
   test("RedisHelper Test") {
     val cdl = new CountDownLatch(1)

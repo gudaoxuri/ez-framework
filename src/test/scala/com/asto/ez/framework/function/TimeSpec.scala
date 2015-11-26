@@ -3,10 +3,9 @@ package com.asto.ez.framework.function
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date}
 
-import com.typesafe.scalalogging.slf4j.LazyLogging
-import org.scalatest.FunSuite
+import com.asto.ez.framework.BasicSpec
 
-class TimeSpec extends FunSuite with LazyLogging {
+class TimeSpec extends BasicSpec {
 
   test("ZeroTimeOffset Test") {
 
@@ -25,7 +24,7 @@ class TimeSpec extends FunSuite with LazyLogging {
     Thread.sleep(10000)
     println(getZeroTimeOffset)
     val calendar = Calendar.getInstance()
-    calendar.setTimeInMillis(new Date().getTime+getZeroTimeOffset)
+    calendar.setTimeInMillis(new Date().getTime + getZeroTimeOffset)
     println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(calendar.getTime))
 
   }

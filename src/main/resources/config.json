@@ -12,15 +12,30 @@
     },
     "servicePath": "com.asto.dop.core.module",
     "entityPath": "com.asto.dop.core.entity",
-    "db": {
+    "jdbc": {
       "driver_class": "com.mysql.jdbc.Driver",
-      "jdbc": "jdbc:mysql://192.168.4.99:3306/dop?characterEncoding=UTF-8&autoReconnect=true",
-      "userName": "root",
-      "userPassword": "123456",
+      "url": "jdbc:mysql://192.168.4.99:3306/dop?characterEncoding=UTF-8&autoReconnect=true",
+      "user": "root",
+      "password": "123456",
       "max_pool_size": 200,
       "max_idle_time": 1800,
       "idle_test_period": 120,
       "validate": true
+    },
+    "mongo": {
+      "hosts": [
+        {
+          "host": "192.168.4.99",
+          "port": 27017
+        }
+      ],
+      "db_name":"",
+      "maxPoolSize": 100,
+      "minPoolSize": 0,
+      "maxIdleTimeMS": 0,
+      "maxLifeTimeMS": 0,
+      "username": "john",
+      "password": "passw0rd"
     },
     "redis": {
       "host": "192.168.4.99",
@@ -31,6 +46,5 @@
     "useCache": false
   },
   "args": {
-
   }
 }

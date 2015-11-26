@@ -1,15 +1,12 @@
 package com.asto.ez.framework.storage.jdbc
 
 import com.asto.ez.framework.EZContext
-import com.asto.ez.framework.helper.Page
+import com.asto.ez.framework.storage.{Page, StatusModel}
 import com.ecfront.common.Resp
 
-import scala.beans.BeanProperty
 import scala.concurrent.Future
 
-trait StatusModel extends BaseModel {
-  @Index
-  @BeanProperty var enable: Boolean = _
+trait JDBCStatusModel extends JDBCBaseModel with StatusModel {
 
   def getEnabledByCond(condition: String, parameters: List[Any], context: EZContext = null): Future[Resp[this.type]] = {
     DBExecutor.get(_entityInfo, if (context == null) EZContext.build() else context, appendEnabled(condition), parameters)
@@ -35,10 +32,6 @@ trait StatusModel extends BaseModel {
     condition + " AND enable = true "
   }
 
-}
-
-object StatusModel {
-  val ENABLE_FLAG = "enable"
 }
 
 

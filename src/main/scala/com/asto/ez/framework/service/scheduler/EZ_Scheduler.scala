@@ -6,7 +6,7 @@ import com.ecfront.common.Ignore
 import scala.beans.BeanProperty
 
 @Entity("调度任务")
-case class EZ_Scheduler() extends SecureModel with StatusModel {
+case class EZ_Scheduler() extends JDBCSecureModel with JDBCStatusModel {
 
   @Id("seq")
   @BeanProperty
