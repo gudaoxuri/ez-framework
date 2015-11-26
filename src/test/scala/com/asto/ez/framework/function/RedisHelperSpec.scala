@@ -7,6 +7,7 @@ import com.asto.ez.framework.helper.RedisHelper
 import com.ecfront.common.JsonHelper
 import io.vertx.core.Vertx
 
+import scala.async.Async.{async, await}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class RedisHelperSpec extends BasicSpec {
@@ -48,6 +49,32 @@ class RedisHelperSpec extends BasicSpec {
 
     cdl.await()
   }
+
+  test("RedisHelper Async Test") {
+    RedisHelper.init(Vertx.vertx(), "192.168.4.99", 6379, 0)
+    val cdl = new CountDownLatch(1)
+    testRedisHelperAsync().onSuccess {
+      case resp =>
+        cdl.countDown()
+    }
+    cdl.await()
+  }
+
+  def testRedisHelperAsync() = async {
+    val exists1Resp = await(RedisHelper.exists("dop_test"))
+    assert(!exists1Resp.body)
+    await(RedisHelper.set("dop_test", s"""{"name":"jzy"}""", 10))
+    val exists2Resp = await(RedisHelper.exists("dop_test"))
+    assert(exists2Resp.body)
+    val get2Resp = await(RedisHelper.get("dop_test"))
+    assert(JsonHelper.toJson(get2Resp.body).get("name").asText() == "jzy")
+    Thread.sleep(10000)
+    val exists3Resp = await(RedisHelper.exists("dop_test"))
+    assert(!exists3Resp.body)
+    val get3Resp = await(RedisHelper.get("dop_test"))
+    assert(get3Resp.body == null)
+  }
+
 
 }
 
