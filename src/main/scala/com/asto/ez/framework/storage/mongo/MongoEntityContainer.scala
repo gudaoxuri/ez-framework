@@ -1,6 +1,6 @@
 package com.asto.ez.framework.storage.mongo
 
-import com.ecfront.common.{BeanHelper, ClassScanHelper, FieldAnnotationInfo, Ignore}
+import com.ecfront.common.BeanHelper
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.beans.BeanProperty
@@ -10,10 +10,10 @@ object MongoEntityContainer extends LazyLogging {
   val CONTAINER = collection.mutable.Map[String, MongoEntityInfo]()
 
   case class MongoEntityInfo(
-                         clazz: Class[_],
-                         tableName: String,
-                         persistentFields: List[String]
-                       )
+                              clazz: Class[_],
+                              tableName: String,
+                              persistentFields: List[String]
+                            )
 
 
   def initEntity(clazz: Class[_], tableName: String): Unit = {
@@ -21,7 +21,7 @@ object MongoEntityContainer extends LazyLogging {
   }
 
   def buildingEntityInfo(clazz: Class[_], tableName: String): Unit = {
-    val persistentFields = BeanHelper.findFieldAnnotations(clazz,Seq(classOf[Ignore])).map(_.fieldName).toSet -- Set("_modelClazz","_tableName")
+    val persistentFields = BeanHelper.findFieldAnnotations(clazz, Seq(classOf[BeanProperty])).map(_.fieldName).toSet -- Set("_modelClazz", "_tableName")
 
     CONTAINER += tableName -> MongoEntityInfo(
       clazz,

@@ -73,7 +73,7 @@ object MongoBaseModel {
   val Id_FLAG = "id"
 
   protected def convertToJsonObject(entityInfo: MongoEntityInfo, model: MongoBaseModel): JsonObject = {
-    new JsonObject(JsonHelper.toJsonString(BeanHelper.findValues(model, entityInfo.persistentFields)))
+    new JsonObject(JsonHelper.toJsonString(BeanHelper.findValues(model)))
   }
 
   protected def convertSort(sort: Map[String, SortEnum]): JsonObject = {

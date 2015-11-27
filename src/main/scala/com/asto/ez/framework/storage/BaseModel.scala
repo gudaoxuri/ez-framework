@@ -1,7 +1,7 @@
 package com.asto.ez.framework.storage
 
 import com.asto.ez.framework.EZContext
-import com.ecfront.common.{Ignore, Resp}
+import com.ecfront.common.{BeanHelper, Ignore, JsonHelper, Resp}
 
 import scala.concurrent.Future
 
@@ -23,6 +23,10 @@ trait BaseModel extends Serializable {
   def deleteById(id: Any, context: EZContext = null): Future[Resp[Void]]
 
   def getById(id: Any, context: EZContext = null): Future[Resp[this.type]]
+
+  def toPersistentJsonString = {
+    JsonHelper.toJsonString(BeanHelper.findValues(this))
+  }
 
 }
 
