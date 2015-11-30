@@ -13,7 +13,6 @@ import io.vertx.core.{AsyncResult, Handler}
 import io.vertx.ext.jdbc.JDBCClient
 import io.vertx.ext.sql.{ResultSet, SQLConnection, UpdateResult}
 
-import scala.async.Async.{async, await}
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
@@ -28,7 +27,7 @@ object DBHelper extends LazyLogging {
 
   var dbClient: JDBCClient = _
 
-  def update(sql: String, parameters: List[Any] = null, retryTimes: Int = 0): Future[Resp[Void]] = async {
+  def update(sql: String, parameters: List[Any] = null, retryTimes: Int = 0): Future[Resp[Void]] = {
     val p = Promise[Resp[Void]]()
     logger.trace(s"JDBC update : $sql [$parameters]")
     db.onComplete {
@@ -105,10 +104,10 @@ object DBHelper extends LazyLogging {
       case Failure(ex) =>
         p.success(Resp.serverUnavailable(ex.getMessage))
     }
-    await(p.future)
+    p.future
   }
 
-  def batch(sql: String, parameterList: List[List[Any]] = null): Future[Resp[Void]] = async {
+  def batch(sql: String, parameterList: List[List[Any]] = null): Future[Resp[Void]] = {
     val p = Promise[Resp[Void]]()
     logger.trace(s"JDBC update : $sql [$parameterList]")
     db.onComplete {
@@ -157,10 +156,10 @@ object DBHelper extends LazyLogging {
       case Failure(ex) =>
         p.success(Resp.serverUnavailable(ex.getMessage))
     }
-    await(p.future)
+    p.future
   }
 
-  def get[E](sql: String, parameters: List[Any], resultClass: Class[E]): Future[Resp[E]] = async {
+  def get[E](sql: String, parameters: List[Any], resultClass: Class[E]): Future[Resp[E]] =  {
     val p = Promise[Resp[E]]()
     logger.trace(s"JDBC get : $sql [$parameters]")
     db.onComplete {
@@ -206,10 +205,10 @@ object DBHelper extends LazyLogging {
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
     }
-    await(p.future)
+    p.future
   }
 
-  def find[E](sql: String, parameters: List[Any], resultClass: Class[E]): Future[Resp[List[E]]] = async {
+  def find[E](sql: String, parameters: List[Any], resultClass: Class[E]): Future[Resp[List[E]]] =  {
     val p = Promise[Resp[List[E]]]()
     logger.trace(s"JDBC find : $sql [$parameters]")
     db.onComplete {
@@ -249,10 +248,10 @@ object DBHelper extends LazyLogging {
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
     }
-    await(p.future)
+    p.future
   }
 
-  def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int, resultClass: Class[E]): Future[Resp[Page[E]]] = async {
+  def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int, resultClass: Class[E]): Future[Resp[Page[E]]] =  {
     val p = Promise[Resp[Page[E]]]()
     logger.trace(s"JDBC page : $sql [$parameters]")
     db.onComplete {
@@ -304,10 +303,10 @@ object DBHelper extends LazyLogging {
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
     }
-    await(p.future)
+    p.future
   }
 
-  def count(sql: String, parameters: List[Any]): Future[Resp[Long]] = async {
+  def count(sql: String, parameters: List[Any]): Future[Resp[Long]] =  {
     val p = Promise[Resp[Long]]()
     logger.trace(s"JDBC count : $sql [$parameters]")
     db.onComplete {
@@ -337,7 +336,7 @@ object DBHelper extends LazyLogging {
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
     }
-    await(p.future)
+    p.future
   }
 
   //此方法仅为分页请求提供
@@ -367,7 +366,7 @@ object DBHelper extends LazyLogging {
     p.future
   }
 
-  def exist(sql: String, parameters: List[Any]): Future[Resp[Boolean]] = async {
+  def exist(sql: String, parameters: List[Any]): Future[Resp[Boolean]] =  {
     val p = Promise[Resp[Boolean]]()
     logger.trace(s"JDBC exist : $sql [$parameters]")
     db.onComplete {
@@ -401,7 +400,7 @@ object DBHelper extends LazyLogging {
         }
       case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
     }
-    await(p.future)
+    p.future
   }
 
   private def db: Future[SQLConnection] = {

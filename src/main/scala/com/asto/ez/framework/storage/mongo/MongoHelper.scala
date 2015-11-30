@@ -7,7 +7,6 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.{AsyncResult, Handler}
 import io.vertx.ext.mongo.{FindOptions, MongoClient, UpdateOptions}
 
-import scala.async.Async.{async, await}
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
@@ -16,7 +15,7 @@ object MongoHelper extends LazyLogging {
 
   var mongoClient: MongoClient = _
 
-  def save(collection: String, save: JsonObject): Future[Resp[String]] = async {
+  def save(collection: String, save: JsonObject): Future[Resp[String]] = {
     val p = Promise[Resp[String]]()
     if (save.getValue(MongoBaseModel.Id_FLAG) != null) {
       save.put("_id", save.getString(MongoBaseModel.Id_FLAG))
@@ -34,10 +33,10 @@ object MongoHelper extends LazyLogging {
         }
       }
     })
-    await(p.future)
+    p.future
   }
 
-  def update(collection: String, id: String, update: JsonObject): Future[Resp[String]] = async {
+  def update(collection: String, id: String, update: JsonObject): Future[Resp[String]] = {
     val p = Promise[Resp[String]]()
     update.remove(MongoBaseModel.Id_FLAG)
     logger.trace(s"Mongo update : $collection -- $update")
@@ -51,10 +50,10 @@ object MongoHelper extends LazyLogging {
         }
       }
     })
-    await(p.future)
+    p.future
   }
 
-  def saveOrUpdate(collection: String, saveOrUpdate: JsonObject): Future[Resp[String]] = async {
+  def saveOrUpdate(collection: String, saveOrUpdate: JsonObject): Future[Resp[String]] = {
     val p = Promise[Resp[String]]()
     if (saveOrUpdate.getValue(MongoBaseModel.Id_FLAG) != null) {
       saveOrUpdate.put("_id", saveOrUpdate.getString(MongoBaseModel.Id_FLAG))
@@ -72,10 +71,10 @@ object MongoHelper extends LazyLogging {
         }
       }
     })
-    await(p.future)
+    p.future
   }
 
-  def updateByCond(collection: String, query: JsonObject, update: JsonObject): Future[Resp[Void]] = async {
+  def updateByCond(collection: String, query: JsonObject, update: JsonObject): Future[Resp[Void]] = {
     val p = Promise[Resp[Void]]()
     logger.trace(s"Mongo updateByCond : $collection -- $query -- $update")
     mongoClient.updateWithOptions(collection, query, update, new UpdateOptions().setMulti(true), new Handler[AsyncResult[Void]] {
@@ -89,10 +88,10 @@ object MongoHelper extends LazyLogging {
         }
       }
     })
-    await(p.future)
+    p.future
   }
 
-  def deleteByCond(collection: String, query: JsonObject): Future[Resp[Void]] = async {
+  def deleteByCond(collection: String, query: JsonObject): Future[Resp[Void]] = {
     val p = Promise[Resp[Void]]()
     logger.trace(s"Mongo deleteByCond : $collection -- $query")
     mongoClient.remove(collection, query, new Handler[AsyncResult[Void]] {
@@ -106,10 +105,10 @@ object MongoHelper extends LazyLogging {
         }
       }
     })
-    await(p.future)
+    p.future
   }
 
-  def deleteById(collection: String, id: String): Future[Resp[Void]] = async {
+  def deleteById(collection: String, id: String): Future[Resp[Void]] = {
     val p = Promise[Resp[Void]]()
     logger.trace(s"Mongo deleteById : $collection -- $id")
     mongoClient.removeOne(collection, new JsonObject().put("_id", id), new Handler[AsyncResult[Void]] {
@@ -123,10 +122,10 @@ object MongoHelper extends LazyLogging {
         }
       }
     })
-    await(p.future)
+    p.future
   }
 
-  def count(collection: String, query: JsonObject): Future[Resp[Long]] = async {
+  def count(collection: String, query: JsonObject): Future[Resp[Long]] = {
     val p = Promise[Resp[Long]]()
     logger.trace(s"Mongo count : $collection -- $query")
     mongoClient.count(collection, query, new Handler[AsyncResult[java.lang.Long]] {
@@ -140,10 +139,10 @@ object MongoHelper extends LazyLogging {
         }
       }
     })
-    await(p.future)
+    p.future
   }
 
-  def getById[E](collection: String, id: String, resultClass: Class[E]): Future[Resp[E]] = async {
+  def getById[E](collection: String, id: String, resultClass: Class[E]): Future[Resp[E]] = {
     val p = Promise[Resp[E]]()
     logger.trace(s"Mongo getById : $collection -- $id")
     mongoClient.findOne(collection, new JsonObject().put("_id", id), null, new Handler[AsyncResult[JsonObject]] {
@@ -167,10 +166,10 @@ object MongoHelper extends LazyLogging {
         }
       }
     })
-    await(p.future)
+    p.future
   }
 
-  def find[E](collection: String, query: JsonObject, sort: JsonObject, resultClass: Class[E]): Future[Resp[List[E]]] = async {
+  def find[E](collection: String, query: JsonObject, sort: JsonObject, resultClass: Class[E]): Future[Resp[List[E]]] = {
     val p = Promise[Resp[List[E]]]()
     logger.trace(s"Mongo find : $collection -- $query")
     mongoClient.findWithOptions(collection, query, new FindOptions().setSort(sort), new Handler[AsyncResult[java.util.List[JsonObject]]] {
@@ -199,10 +198,10 @@ object MongoHelper extends LazyLogging {
         }
       }
     })
-    await(p.future)
+    p.future
   }
 
-  def page[E](collection: String, query: JsonObject, pageNumber: Long, pageSize: Int, sort: JsonObject, resultClass: Class[E]): Future[Resp[Page[E]]] = async {
+  def page[E](collection: String, query: JsonObject, pageNumber: Long, pageSize: Int, sort: JsonObject, resultClass: Class[E]): Future[Resp[Page[E]]] = {
     val p = Promise[Resp[Page[E]]]()
     logger.trace(s"Mongo page [$pageNumber] [$pageSize] : $collection -- $query")
     count(collection, query).onSuccess {
@@ -238,7 +237,7 @@ object MongoHelper extends LazyLogging {
           }
         })
     }
-    await(p.future)
+    p.future
   }
 
 }

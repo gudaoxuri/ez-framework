@@ -13,11 +13,11 @@ object TimeHelper {
 
   def dateOffset(offsetValue: Int, offsetUnit: Int, currentTime: Long): Long = {
     val format = currentTime.toString.length match {
-      case 4 => df
-      case 6 => hf
-      case 8 => mf
-      case 10 => sf
-      case 13 => msf
+      case 8 => df
+      case 10 => hf
+      case 12 => mf
+      case 14 => sf
+      case 17 => msf
     }
     val calendar = Calendar.getInstance()
     calendar.setTime(format.parse(currentTime + ""))

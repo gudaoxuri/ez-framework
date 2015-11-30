@@ -72,7 +72,6 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     }
   }
 
-
   def startJDBCClient(): Unit = {
     if (EZGlobal.ez.containsKey("jdbc")) {
       val jdbc = EZGlobal.ez.getJsonObject("jdbc")
