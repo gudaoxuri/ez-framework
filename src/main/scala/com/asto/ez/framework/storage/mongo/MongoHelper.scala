@@ -169,10 +169,41 @@ object MongoHelper extends LazyLogging {
     p.future
   }
 
-  def find[E](collection: String, query: JsonObject, sort: JsonObject, resultClass: Class[E]): Future[Resp[List[E]]] = {
+  def getByCond[E](collection: String, query: JsonObject,resultClass: Class[E]): Future[Resp[E]] = {
+    val p = Promise[Resp[E]]()
+    logger.trace(s"Mongo getByCond : $collection -- $query")
+    mongoClient.findOne(collection, query, null, new Handler[AsyncResult[JsonObject]] {
+      override def handle(res: AsyncResult[JsonObject]): Unit = {
+        if (res.succeeded()) {
+          if (res.result() != null) {
+            val result = res.result()
+            result.put(MongoBaseModel.Id_FLAG, result.getString("_id"))
+            result.remove("_id")
+            if (resultClass != classOf[JsonObject]) {
+              p.success(Resp.success(JsonHelper.toObject(result.encode(), resultClass)))
+            } else {
+              p.success(Resp.success(result.asInstanceOf[E]))
+            }
+          } else {
+            p.success(Resp.success(null.asInstanceOf[E]))
+          }
+        } else {
+          logger.warn(s"Mongo getByCond error : $collection -- $query", res.cause())
+          p.success(Resp.serverError(res.cause().getMessage))
+        }
+      }
+    })
+    p.future
+  }
+
+  def find[E](collection: String, query: JsonObject, sort: JsonObject, limit: Int, resultClass: Class[E]): Future[Resp[List[E]]] = {
     val p = Promise[Resp[List[E]]]()
     logger.trace(s"Mongo find : $collection -- $query")
-    mongoClient.findWithOptions(collection, query, new FindOptions().setSort(sort), new Handler[AsyncResult[java.util.List[JsonObject]]] {
+    val opt = new FindOptions().setSort(sort)
+    if (limit != 0) {
+      opt.setLimit(limit)
+    }
+    mongoClient.findWithOptions(collection, query, opt, new Handler[AsyncResult[java.util.List[JsonObject]]] {
       override def handle(res: AsyncResult[java.util.List[JsonObject]]): Unit = {
         if (res.succeeded()) {
           if (resultClass != classOf[JsonObject]) {

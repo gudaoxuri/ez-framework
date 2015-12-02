@@ -2,10 +2,11 @@ package com.asto.ez.framework.storage
 
 import com.asto.ez.framework.EZContext
 import com.ecfront.common.{BeanHelper, Ignore, JsonHelper, Resp}
+import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.concurrent.Future
 
-trait BaseModel extends Serializable {
+trait BaseModel extends Serializable with LazyLogging{
 
   @Ignore
   protected val _modelClazz = this.getClass
