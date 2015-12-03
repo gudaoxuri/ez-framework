@@ -8,7 +8,9 @@ import com.ecfront.common.JsonHelper
 import io.vertx.core.Vertx
 
 import scala.async.Async.{async, await}
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
 
 class RedisHelperSpec extends BasicSpec {
 
@@ -17,6 +19,7 @@ class RedisHelperSpec extends BasicSpec {
 
     RedisHelper.init(Vertx.vertx(), "192.168.4.99", 6379, 0)
 
+    Await.result(RedisHelper.del("dop_test"), Duration.Inf)
     RedisHelper.exists("dop_test").onSuccess {
       case exists1Resp =>
         assert(!exists1Resp.body)
@@ -47,6 +50,17 @@ class RedisHelperSpec extends BasicSpec {
         }
     }
 
+    Await.result(RedisHelper.del("list_test"), Duration.Inf)
+    Await.result(RedisHelper.lmset("list_test", List("v1", "v2")), Duration.Inf)
+    Await.result(RedisHelper.lpush("list_test", "v3"), Duration.Inf)
+    Await.result(RedisHelper.lset("list_test", "v3_new", 0), Duration.Inf)
+    assert(Await.result(RedisHelper.llen("list_test"), Duration.Inf).body == 3)
+    assert(Await.result(RedisHelper.lpop("list_test"), Duration.Inf).body == "v3_new")
+    assert(Await.result(RedisHelper.llen("list_test"), Duration.Inf).body == 2)
+    assert(Await.result(RedisHelper.lindex("list_test", 1), Duration.Inf).body == "v1")
+    val listVals = Await.result(RedisHelper.lget("list_test"), Duration.Inf).body
+    assert(listVals.size == 2 && listVals == List("v2", "v1"))
+
     cdl.await()
   }
 
@@ -75,6 +89,7 @@ class RedisHelperSpec extends BasicSpec {
     val get3Resp = await(RedisHelper.get("n_test"))
     assert(get3Resp.body == null)
 
+    await(RedisHelper.del("hash_test"))
     await(RedisHelper.hmset("hash_test", Map("f1" -> "v1", "f2" -> "v2")))
     await(RedisHelper.hset("hash_test", "f3", "v3"))
     assert(await(RedisHelper.hget("hash_test", "f3")).body == "v3")
@@ -85,6 +100,18 @@ class RedisHelperSpec extends BasicSpec {
     assert(!await(RedisHelper.hexists("hash_test", "f3")).body)
     await(RedisHelper.del("hash_test"))
     assert(!await(RedisHelper.exists("hash_test")).body)
+
+    await(RedisHelper.del("list_test"))
+    await(RedisHelper.lmset("list_test", List("v1", "v2")))
+    await(RedisHelper.lpush("list_test", "v3"))
+    await(RedisHelper.lset("list_test", "v3_new", 2))
+    assert(await(RedisHelper.llen("list_test")).body == 3)
+    assert(await(RedisHelper.lpop("list_test")).body == "v1")
+    assert(await(RedisHelper.llen("list_test")).body == 2)
+    assert(await(RedisHelper.lindex("list_test", 1)).body == "v3_new")
+    val listVals = await(RedisHelper.lget("list_test")).body
+    assert(listVals.size == 2 && listVals == List("v2", "v3_new"))
+
 
     await(RedisHelper.del("int_test"))
     await(RedisHelper.incr("int_test", 10))

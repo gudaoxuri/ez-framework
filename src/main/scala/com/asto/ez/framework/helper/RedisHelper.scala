@@ -4,11 +4,12 @@ import java.lang
 
 import com.ecfront.common.{JsonHelper, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import io.vertx.core.json.JsonObject
+import io.vertx.core.json.{JsonArray, JsonObject}
 import io.vertx.core.{AsyncResult, Handler, Vertx}
 import io.vertx.redis.op.SetOptions
 import io.vertx.redis.{RedisClient, RedisOptions}
-
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.collection.JavaConversions._
 import scala.concurrent.{Future, Promise}
 
 /**
@@ -129,6 +130,159 @@ object RedisHelper extends LazyLogging {
             }
           }
         })
+      }
+    } else {
+      p.success(Resp.notImplemented("Redis service not found."))
+    }
+    p.future
+  }
+
+  def lmset(key: String, values: List[String], expire: Long = 0): Future[Resp[Void]] = {
+    val p = Promise[Resp[Void]]()
+    if (useCache) {
+      redisClient.lpushMany(key, values, new Handler[AsyncResult[lang.Long]] {
+        override def handle(event: AsyncResult[lang.Long]): Unit = {
+          if (event.succeeded()) {
+            if (expire != 0) {
+              redisClient.expire(key, expire.toInt, new Handler[AsyncResult[lang.Long]] {
+                override def handle(event: AsyncResult[lang.Long]): Unit = {
+                  if (event.succeeded()) {
+                    p.success(Resp.success(null))
+                  } else {
+                    logger.error(s"Redis lmset error.[$key] $values", event.cause())
+                    p.success(Resp.serverUnavailable(s"Redis lmset error.[$key] $values"))
+                  }
+                }
+              })
+            } else {
+              p.success(Resp.success(null))
+            }
+          } else {
+            logger.error(s"Redis lmset error.[$key] $values", event.cause())
+            p.success(Resp.serverUnavailable(s"Redis lmset error.[$key] $values"))
+          }
+        }
+      })
+    } else {
+      p.success(Resp.notImplemented("Redis service not found."))
+    }
+    p.future
+  }
+
+  def lpush(key: String, value: String): Future[Resp[Void]] = {
+    val p = Promise[Resp[Void]]()
+    if (useCache) {
+      redisClient.lpush(key, value, new Handler[AsyncResult[lang.Long]] {
+        override def handle(event: AsyncResult[lang.Long]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(null))
+          } else {
+            logger.error(s"Redis lpush error.[$key] $value", event.cause())
+            p.success(Resp.serverUnavailable(s"Redis lpush error.[$key] $value"))
+          }
+        }
+      })
+    } else {
+      p.success(Resp.notImplemented("Redis service not found."))
+    }
+    p.future
+  }
+
+  def lset(key: String, value: String, index: Long): Future[Resp[Void]] = {
+    val p = Promise[Resp[Void]]()
+    if (useCache) {
+      redisClient.lset(key, index, value, new Handler[AsyncResult[lang.String]] {
+        override def handle(event: AsyncResult[lang.String]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(null))
+          } else {
+            logger.error(s"Redis lset error.[$key] $value", event.cause())
+            p.success(Resp.serverUnavailable(s"Redis lset error.[$key] $value"))
+          }
+        }
+      })
+    } else {
+      p.success(Resp.notImplemented("Redis service not found."))
+    }
+    p.future
+  }
+
+  def lpop(key: String): Future[Resp[String]] = {
+    val p = Promise[Resp[String]]()
+    if (useCache) {
+      redisClient.lpop(key, new Handler[AsyncResult[lang.String]] {
+        override def handle(event: AsyncResult[lang.String]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(event.result()))
+          } else {
+            logger.error(s"Redis lpop error.[$key]", event.cause())
+            p.success(Resp.serverUnavailable(s"Redis lpop error.[$key]"))
+          }
+        }
+      })
+    } else {
+      p.success(Resp.notImplemented("Redis service not found."))
+    }
+    p.future
+  }
+
+  def lindex(key: String, index: Long): Future[Resp[String]] = {
+    val p = Promise[Resp[String]]()
+    if (useCache) {
+      redisClient.lindex(key, index.toInt, new Handler[AsyncResult[lang.String]] {
+        override def handle(event: AsyncResult[lang.String]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(event.result()))
+          } else {
+            logger.error(s"Redis lindex error.[$key]", event.cause())
+            p.success(Resp.serverUnavailable(s"Redis lindex error.[$key]"))
+          }
+        }
+      })
+    } else {
+      p.success(Resp.notImplemented("Redis service not found."))
+    }
+    p.future
+  }
+
+  def llen(key: String): Future[Resp[Long]] = {
+    val p = Promise[Resp[Long]]()
+    if (useCache) {
+      redisClient.llen(key, new Handler[AsyncResult[lang.Long]] {
+        override def handle(event: AsyncResult[lang.Long]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(event.result()))
+          } else {
+            logger.error(s"Redis llen error.[$key]", event.cause())
+            p.success(Resp.serverUnavailable(s"Redis llen error.[$key]"))
+          }
+        }
+      })
+    } else {
+      p.success(Resp.notImplemented("Redis service not found."))
+    }
+    p.future
+  }
+
+  def lget(key: String): Future[Resp[List[String]]] = {
+    val p = Promise[Resp[List[String]]]()
+    if (useCache) {
+      llen(key).onSuccess {
+        case lenResp =>
+          if (lenResp) {
+            redisClient.lrange(key, 0, lenResp.body, new Handler[AsyncResult[JsonArray]] {
+              override def handle(event: AsyncResult[JsonArray]): Unit = {
+                if (event.succeeded()) {
+                  p.success(Resp.success(JsonHelper.toObject(event.result().encode(), classOf[List[String]])))
+                } else {
+                  logger.error(s"Redis lget error.[$key]", event.cause())
+                  p.success(Resp.serverUnavailable(s"Redis lget error.[$key]"))
+                }
+              }
+            })
+          } else {
+            p.success(lenResp)
+          }
       }
     } else {
       p.success(Resp.notImplemented("Redis service not found."))
