@@ -124,9 +124,9 @@ class MongoSpec extends BasicSpec {
     getResult = await(Mongo_Test_Entity().getById(id)).body
     assert(getResult.name == "name_new")
     assert(getResult.parameters == Map("k1" -> "v1", "k2" -> 0, "k3" -> Map("k3-1" -> "v3-1")))
+    assert(await(Mongo_Test_Entity().existById(id)).body)
     await(Mongo_Test_Entity().deleteById(id)).body
-    getResult = await(Mongo_Test_Entity().getById(id)).body
-    assert(getResult == null)
+    assert(!await(Mongo_Test_Entity().existById(id)).body)
 
     mongo.name = "name_new_2"
     id=await(mongo.saveOrUpdate()).body

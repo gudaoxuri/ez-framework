@@ -169,7 +169,7 @@ object MongoHelper extends LazyLogging {
     p.future
   }
 
-  def getByCond[E](collection: String, query: JsonObject,resultClass: Class[E]): Future[Resp[E]] = {
+  def getByCond[E](collection: String, query: JsonObject, resultClass: Class[E]): Future[Resp[E]] = {
     val p = Promise[Resp[E]]()
     logger.trace(s"Mongo getByCond : $collection -- $query")
     mongoClient.findOne(collection, query, null, new Handler[AsyncResult[JsonObject]] {
@@ -268,6 +268,26 @@ object MongoHelper extends LazyLogging {
           }
         })
     }
+    p.future
+  }
+
+  def exist(collection: String, query: JsonObject): Future[Resp[Boolean]] = {
+    val p = Promise[Resp[Boolean]]()
+    logger.trace(s"Mongo exist : $collection -- $query")
+    mongoClient.findOne(collection, query, new JsonObject().put("_id", ""), new Handler[AsyncResult[JsonObject]] {
+      override def handle(res: AsyncResult[JsonObject]): Unit = {
+        if (res.succeeded()) {
+          if (res.result() != null) {
+            p.success(Resp.success(true))
+          } else {
+            p.success(Resp.success(false))
+          }
+        } else {
+          logger.warn(s"Mongo exist error : $collection -- $query", res.cause())
+          p.success(Resp.serverError(res.cause().getMessage))
+        }
+      }
+    })
     p.future
   }
 

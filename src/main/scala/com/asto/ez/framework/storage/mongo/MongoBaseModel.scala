@@ -69,6 +69,14 @@ trait MongoBaseModel extends BaseModel {
     MongoHelper.count(_tableName, query)
   }
 
+  def existById(id: Any, context: EZContext = null): Future[Resp[Boolean]] = {
+    MongoHelper.exist(_tableName, new JsonObject().put("_id", id))
+  }
+
+  def existByCond(query: JsonObject = new JsonObject(), context: EZContext = null): Future[Resp[Boolean]] = {
+    MongoHelper.exist(_tableName, query)
+  }
+
 }
 
 object MongoBaseModel {
