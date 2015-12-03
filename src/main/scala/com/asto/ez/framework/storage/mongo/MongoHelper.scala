@@ -3,7 +3,7 @@ package com.asto.ez.framework.storage.mongo
 import com.asto.ez.framework.storage.Page
 import com.ecfront.common.{JsonHelper, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import io.vertx.core.json.JsonObject
+import io.vertx.core.json.{JsonArray, JsonObject}
 import io.vertx.core.{AsyncResult, Handler}
 import io.vertx.ext.mongo.{FindOptions, MongoClient, UpdateOptions}
 
@@ -274,7 +274,7 @@ object MongoHelper extends LazyLogging {
   def exist(collection: String, query: JsonObject): Future[Resp[Boolean]] = {
     val p = Promise[Resp[Boolean]]()
     logger.trace(s"Mongo exist : $collection -- $query")
-    mongoClient.findOne(collection, query, new JsonObject().put("_id", ""), new Handler[AsyncResult[JsonObject]] {
+    mongoClient.findOne(collection, query, new JsonObject().put("_id", 1), new Handler[AsyncResult[JsonObject]] {
       override def handle(res: AsyncResult[JsonObject]): Unit = {
         if (res.succeeded()) {
           if (res.result() != null) {
@@ -288,6 +288,23 @@ object MongoHelper extends LazyLogging {
         }
       }
     })
+    p.future
+  }
+
+  def aggregate(collection: String, query: JsonArray): Future[Resp[JsonArray]] = {
+    val p = Promise[Resp[JsonArray]]()
+    logger.trace(s"Mongo aggregate : $collection -- $query")
+    mongoClient.runCommand("aggregate",
+      new JsonObject().put("aggregate", collection).put("pipeline", query), new Handler[AsyncResult[JsonObject]] {
+        override def handle(res: AsyncResult[JsonObject]): Unit = {
+          if (res.succeeded()) {
+            p.success(Resp.success(res.result().getJsonArray("result")))
+          } else {
+            logger.warn(s"Mongo aggregate error : $collection -- $query", res.cause())
+            p.success(Resp.serverError(res.cause().getMessage))
+          }
+        }
+      })
     p.future
   }
 

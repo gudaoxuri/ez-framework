@@ -5,7 +5,7 @@ import java.util.concurrent.CountDownLatch
 import com.asto.ez.framework.storage.SecureModel
 import com.asto.ez.framework.storage.mongo.{SortEnum, MongoHelper, MongoSecureModel, MongoStatusModel}
 import com.asto.ez.framework.{BasicSpec, EZGlobal}
-import io.vertx.core.json.JsonObject
+import io.vertx.core.json.{JsonArray, JsonObject}
 import io.vertx.ext.mongo.MongoClient
 
 import scala.beans.BeanProperty
@@ -87,6 +87,19 @@ class MongoSpec extends BasicSpec {
     assert(pageResult.recordTotal == 3)
     assert(pageResult.objects.size == 1)
     assert(pageResult.objects.head.name == "n1")
+
+    val arggregate= Await.result(Mongo_Test_Entity().aggregate(new JsonArray(
+      """
+        |[{ "$match": { "name": {"$ne" : "m4"} } },
+        | {
+        |   "$group": {
+        |      "_id": "$name",
+        |      "count": { "$sum": 1 }
+        | }
+        |}]
+      """.stripMargin
+    )), Duration.Inf).body
+    assert(arggregate.size()>0)
 
     getResult = Await.result(Mongo_Test_Entity().getById("aaa"), Duration.Inf).body
     assert(getResult != null)

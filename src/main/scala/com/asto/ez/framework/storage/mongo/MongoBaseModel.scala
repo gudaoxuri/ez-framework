@@ -5,7 +5,7 @@ import com.asto.ez.framework.storage.mongo.MongoEntityContainer.MongoEntityInfo
 import com.asto.ez.framework.storage.mongo.SortEnum.SortEnum
 import com.asto.ez.framework.storage.{BaseModel, Page}
 import com.ecfront.common.{BeanHelper, JsonHelper, Resp}
-import io.vertx.core.json.JsonObject
+import io.vertx.core.json.{JsonArray, JsonObject}
 
 import scala.beans.BeanProperty
 import scala.concurrent.Future
@@ -75,6 +75,10 @@ trait MongoBaseModel extends BaseModel {
 
   def existByCond(query: JsonObject = new JsonObject(), context: EZContext = null): Future[Resp[Boolean]] = {
     MongoHelper.exist(_tableName, query)
+  }
+
+  def aggregate(query: JsonArray, context: EZContext = null): Future[Resp[JsonArray]] = {
+    MongoHelper.aggregate(_tableName, query)
   }
 
 }
