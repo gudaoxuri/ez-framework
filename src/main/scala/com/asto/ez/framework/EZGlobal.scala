@@ -5,8 +5,8 @@ import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 
 /**
- * 全局数据存储类
- */
+  * 全局数据存储类
+  */
 object EZGlobal extends LazyLogging {
 
   var vertx: Vertx = _
@@ -14,9 +14,15 @@ object EZGlobal extends LazyLogging {
   var config: JsonObject = _
 
   lazy val ez = config.getJsonObject("ez")
+  lazy val ez_rpc = if (ez.containsKey("rpc")) ez.getJsonObject("rpc") else null
+  lazy val ez_rpc_http_resource_path = if (ez_rpc != null && ez_rpc.containsKey("http")) ez_rpc.getJsonObject("http").getString("resourcePath") else ""
+  lazy val ez_rpc_http_resource_url = if (ez_rpc != null && ez_rpc.containsKey("http")) ez_rpc.getJsonObject("http").getString("publicUriPrefix") else ""
+
+  lazy val ez_storage = if (ez.containsKey("storage")) ez.getJsonObject("storage") else null
+  lazy val ez_cache = if (ez.containsKey("cache")) ez.getJsonObject("cache") else null
+  lazy val ez_mail = if (ez.containsKey("mail")) ez.getJsonObject("mail") else null
+
   lazy val args = config.getJsonObject("args")
 
-  lazy val resource_path = ez.getJsonObject("publicServer").getString("resourcePath")
-  lazy val resource_url = ez.getJsonObject("publicServer").getString("publicUriPrefix")
 
 }

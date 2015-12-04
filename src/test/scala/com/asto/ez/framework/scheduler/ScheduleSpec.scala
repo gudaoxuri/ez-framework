@@ -1,8 +1,8 @@
-package com.asto.ez.framework.function
+package com.asto.ez.framework.scheduler
 
 import java.util.concurrent.CountDownLatch
 
-import com.asto.ez.framework.service.scheduler.{EZ_Scheduler, ScheduleJob, SchedulerService}
+import com.asto.ez.framework.storage.JDBCBasicSpec
 
 class ScheduleSpec extends JDBCBasicSpec {
 

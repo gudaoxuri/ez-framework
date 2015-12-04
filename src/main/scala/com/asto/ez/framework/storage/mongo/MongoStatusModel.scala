@@ -1,24 +1,37 @@
 package com.asto.ez.framework.storage.mongo
 
-import com.asto.ez.framework.storage.StatusModel
+import com.asto.ez.framework.EZContext
+import com.asto.ez.framework.storage.{Page, StatusModel}
+import com.ecfront.common.Resp
+import io.vertx.core.json.JsonObject
+
+import scala.concurrent.Future
 
 trait MongoStatusModel extends MongoBaseModel with StatusModel {
 
-  /*  def findEnabled(condition: String = " 1=1 ", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[List[this.type]]] = {
-      DBExecutor.find(_entityInfo, if (context == null) EZContext.build() else context, appendEnabled(condition), parameters)
-    }
+  override def getEnabledByCond(condition: String = "{}", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[this.type]] = {
+    getByCond(appendEnabled(new JsonObject(condition)).encode(), parameters, context)
+  }
 
-    def pageEnabled(condition: String = " 1=1 ", parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10, context: EZContext = null): Future[Resp[Page[this.type]]] = {
-      DBExecutor.page(_entityInfo, if (context == null) EZContext.build() else context, appendEnabled(condition), parameters, pageNumber, pageSize)
-    }
+  override def existEnabled(condition: String = "{}", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Boolean]] = {
+    existByCond(appendEnabled(new JsonObject(condition)).encode(), parameters, context)
+  }
 
-    def countEnabled(condition: String = " 1=1 ", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Long]] = {
-      DBExecutor.count(_entityInfo, if (context == null) EZContext.build() else context, appendEnabled(condition), parameters)
-    }
+  override def findEnabled(condition: String = "{}", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[List[this.type]]] = {
+    find(appendEnabled(new JsonObject(condition)).encode(), parameters, context)
+  }
 
-    private def appendEnabled(condition: String): String = {
-      condition + " AND enable = true "
-    }*/
+  override def pageEnabled(condition: String = "{}", parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10, context: EZContext = null): Future[Resp[Page[this.type]]] = {
+    page(appendEnabled(new JsonObject(condition)).encode(), parameters, pageNumber, pageSize, context)
+  }
+
+  override def countEnabled(condition: String = "{}", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Long]] = {
+    count(appendEnabled(new JsonObject(condition)).encode(), parameters, context)
+  }
+
+  private def appendEnabled(condition: JsonObject): JsonObject = {
+    condition.put(StatusModel.ENABLE_FLAG, true)
+  }
 
 }
 

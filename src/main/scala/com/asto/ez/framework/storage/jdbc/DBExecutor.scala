@@ -5,8 +5,8 @@ import com.asto.ez.framework.storage.Page
 import com.asto.ez.framework.storage.jdbc.JDBCEntityContainer.JDBCEntityInfo
 import com.ecfront.common.Resp
 
-import scala.concurrent.{Promise, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Future, Promise}
 
 object DBExecutor {
 
@@ -29,11 +29,11 @@ object DBExecutor {
            | SELECT ${(for (i <- 0 until richValueInfos.size) yield "?").mkString(",")}
            | FROM DUAL WHERE NOT EXISTS ( SELECT 1 FROM $tableName WHERE $idFieldName = ? )
        """.stripMargin
-      DBHelper.update(sql, richValueInfos.values.toList ++ List(idValue)).onSuccess{
+      DBProcessor.update(sql, richValueInfos.values.toList ++ List(idValue)).onSuccess {
         case resp =>
-          if(resp){
+          if (resp) {
             p.success(Resp.success(null))
-          }else{
+          } else {
             p.success(resp)
           }
       }
@@ -44,11 +44,11 @@ object DBExecutor {
            | (${richValueInfos.keys.mkString(",")})
            | VALUES ( ${(for (i <- 0 until richValueInfos.size) yield "?").mkString(",")} )
        """.stripMargin
-      DBHelper.update(sql, richValueInfos.values.toList).onSuccess{
+      DBProcessor.update(sql, richValueInfos.values.toList).onSuccess {
         case resp =>
-          if(resp){
+          if (resp) {
             p.success(Resp.success(null))
-          }else{
+          } else {
             p.success(resp)
           }
       }
@@ -65,11 +65,11 @@ object DBExecutor {
     //keys.toList.map ，toList 让map有序
     val newValues = richValueInfos.keys.toList.map(key => s"$key = ? ").mkString(",")
     val condition = s" $idFieldName = ? "
-    update(entityInfo, context, newValues, condition, richValueInfos.values.toList ++ List(idValue)).onSuccess{
+    update(entityInfo, context, newValues, condition, richValueInfos.values.toList ++ List(idValue)).onSuccess {
       case resp =>
-        if(resp){
+        if (resp) {
           p.success(Resp.success(null))
-        }else{
+        } else {
           p.success(resp)
         }
     }
@@ -95,11 +95,11 @@ object DBExecutor {
            | ON DUPLICATE KEY UPDATE
            | ${richValueInfos.keys.filterNot(_ == idFieldName).toList.map(key => s"$key = VALUES($key)").mkString(",")}
        """.stripMargin
-      DBHelper.update(sql, richValueInfos.values.toList).onSuccess{
+      DBProcessor.update(sql, richValueInfos.values.toList).onSuccess {
         case resp =>
-          if(resp){
+          if (resp) {
             p.success(Resp.success(null))
-          }else{
+          } else {
             p.success(resp)
           }
       }
@@ -111,7 +111,7 @@ object DBExecutor {
 
   def update(entityInfo: JDBCEntityInfo, context: EZContext, newValues: String, condition: String, parameters: List[Any]): Future[Resp[Void]] = {
     val tableName = entityInfo.tableName
-    DBHelper.update(
+    DBProcessor.update(
       s"UPDATE $tableName Set $newValues WHERE $condition",
       parameters
     )
@@ -120,7 +120,7 @@ object DBExecutor {
   def delete(entityInfo: JDBCEntityInfo, context: EZContext, idValue: Any): Future[Resp[Void]] = {
     val tableName = entityInfo.tableName
     val idFieldName = entityInfo.idFieldName
-    DBHelper.update(
+    DBProcessor.update(
       s"DELETE FROM $tableName WHERE $idFieldName = ? ",
       List(idValue)
     )
@@ -128,7 +128,7 @@ object DBExecutor {
 
   def delete(entityInfo: JDBCEntityInfo, context: EZContext, condition: String, parameters: List[Any]): Future[Resp[Void]] = {
     val tableName = entityInfo.tableName
-    DBHelper.update(
+    DBProcessor.update(
       s"DELETE FROM $tableName WHERE $condition ",
       parameters
     )
@@ -138,7 +138,7 @@ object DBExecutor {
     val tableName = entityInfo.tableName
     val idFieldName = entityInfo.idFieldName
     val clazz = entityInfo.clazz.asInstanceOf[Class[E]]
-    DBHelper.get(
+    DBProcessor.get(
       s"SELECT * FROM $tableName WHERE $idFieldName  = ? ",
       List(idValue),
       clazz
@@ -148,16 +148,25 @@ object DBExecutor {
   def get[E](entityInfo: JDBCEntityInfo, context: EZContext, condition: String, parameters: List[Any]): Future[Resp[E]] = {
     val tableName = entityInfo.tableName
     val clazz = entityInfo.clazz.asInstanceOf[Class[E]]
-    DBHelper.get(
+    DBProcessor.get(
       s"SELECT * FROM $tableName WHERE $condition ",
       parameters,
       clazz
     )
   }
 
-  def exist(entityInfo: JDBCEntityInfo, context: EZContext, condition: String, parameters: List[Any]): Future[Resp[Boolean]] = {
+  def existById(entityInfo: JDBCEntityInfo, context: EZContext, idValue: Any): Future[Resp[Boolean]] = {
     val tableName = entityInfo.tableName
-    DBHelper.exist(
+    val idFieldName = entityInfo.idFieldName
+    DBProcessor.exist(
+      s"SELECT 1 FROM $tableName WHERE $idFieldName  = ? ",
+      List(idValue)
+    )
+  }
+
+  def existByCond(entityInfo: JDBCEntityInfo, context: EZContext, condition: String, parameters: List[Any]): Future[Resp[Boolean]] = {
+    val tableName = entityInfo.tableName
+    DBProcessor.exist(
       s"SELECT 1 FROM $tableName WHERE $condition ",
       parameters
     )
@@ -166,7 +175,7 @@ object DBExecutor {
   def find[E](entityInfo: JDBCEntityInfo, context: EZContext, condition: String = " 1=1 ", parameters: List[Any] = List()): Future[Resp[List[E]]] = {
     val tableName = entityInfo.tableName
     val clazz = entityInfo.clazz.asInstanceOf[Class[E]]
-    DBHelper.find(
+    DBProcessor.find(
       s"SELECT * FROM $tableName WHERE $condition ",
       parameters,
       clazz
@@ -176,7 +185,7 @@ object DBExecutor {
   def page[E](entityInfo: JDBCEntityInfo, context: EZContext, condition: String = " 1=1 ", parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10): Future[Resp[Page[E]]] = {
     val tableName = entityInfo.tableName
     val clazz = entityInfo.clazz.asInstanceOf[Class[E]]
-    DBHelper.page(
+    DBProcessor.page(
       s"SELECT * FROM $tableName WHERE $condition ",
       parameters,
       pageNumber, pageSize,
@@ -186,7 +195,7 @@ object DBExecutor {
 
   def count(entityInfo: JDBCEntityInfo, context: EZContext, condition: String = " 1=1 ", parameters: List[Any] = List()): Future[Resp[Long]] = {
     val tableName = entityInfo.tableName
-    DBHelper.count(
+    DBProcessor.count(
       s"SELECT count(1) FROM $tableName WHERE $condition ",
       parameters
     )

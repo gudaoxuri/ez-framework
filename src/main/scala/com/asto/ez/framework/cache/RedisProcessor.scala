@@ -1,4 +1,4 @@
-package com.asto.ez.framework.helper
+package com.asto.ez.framework.cache
 
 import java.lang
 
@@ -8,14 +8,15 @@ import io.vertx.core.json.{JsonArray, JsonObject}
 import io.vertx.core.{AsyncResult, Handler, Vertx}
 import io.vertx.redis.op.SetOptions
 import io.vertx.redis.{RedisClient, RedisOptions}
-import scala.concurrent.ExecutionContext.Implicits.global
+
 import scala.collection.JavaConversions._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 
 /**
   * Redis 异步操作辅助类
   */
-object RedisHelper extends LazyLogging {
+object RedisProcessor extends LazyLogging {
 
   private var redisClient: RedisClient = _
   private var useCache = true
@@ -31,14 +32,14 @@ object RedisHelper extends LazyLogging {
               redisClient.select(db, new Handler[AsyncResult[String]] {
                 override def handle(event: AsyncResult[String]): Unit = {
                   if (event.succeeded()) {
-                    logger.info(s"DOP core app redis connected $host:$port")
+                    logger.info(s"EZ Framework Redis connected $host:$port")
                   } else {
-                    logger.error("Redis connection error.", event.cause())
+                    logger.error("EZ Framework Redis connection error.", event.cause())
                   }
                 }
               })
             } else {
-              logger.error("Redis connection error.", event.cause())
+              logger.error("EZ Framework Redis connection error.", event.cause())
             }
           }
         })
@@ -46,9 +47,9 @@ object RedisHelper extends LazyLogging {
         redisClient.select(db, new Handler[AsyncResult[String]] {
           override def handle(event: AsyncResult[String]): Unit = {
             if (event.succeeded()) {
-              logger.info(s"DOP core app redis connected $host:$port")
+              logger.info(s"EZ Framework Redis connected $host:$port")
             } else {
-              logger.error("Redis connection error.", event.cause())
+              logger.error("EZ Framework Redis connection error.", event.cause())
             }
           }
         })

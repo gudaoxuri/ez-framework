@@ -1,4 +1,4 @@
-package com.asto.ez.framework.service.scheduler
+package com.asto.ez.framework.scheduler
 
 import com.asto.ez.framework.storage.jdbc._
 import com.ecfront.common.Ignore

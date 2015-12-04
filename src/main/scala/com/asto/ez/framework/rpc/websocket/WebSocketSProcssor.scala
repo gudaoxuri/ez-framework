@@ -1,4 +1,4 @@
-package com.asto.ez.framework.helper
+package com.asto.ez.framework.rpc.websocket
 
 import com.ecfront.common.JsonHelper
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -11,7 +11,7 @@ import scala.collection.mutable.ListBuffer
   * Websocket 异步操作辅助类
   *
   */
-object WSHelper extends LazyLogging {
+object WebSocketSProcssor extends LazyLogging {
 
   private val websockets = collection.mutable.Map[String, ListBuffer[ServerWebSocket]]()
 

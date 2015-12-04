@@ -24,61 +24,69 @@ trait MongoBaseModel extends BaseModel {
 
   override def save(context: EZContext = null): Future[Resp[String]] = {
     val save = MongoBaseModel.convertToJsonObject(_entityInfo, this)
-    MongoHelper.save(_tableName, save)
+    MongoProcessor.save(_tableName, save)
   }
 
   override def update(context: EZContext = null): Future[Resp[String]] = {
     val update = MongoBaseModel.convertToJsonObject(_entityInfo, this)
-    MongoHelper.update(_tableName, this.id, update)
+    MongoProcessor.update(_tableName, this.id, update)
   }
 
-  override def saveOrUpdate(context: EZContext): Future[Resp[String]] = {
+  override def saveOrUpdate(context: EZContext = null): Future[Resp[String]] = {
     val saveOrUpdate = MongoBaseModel.convertToJsonObject(_entityInfo, this)
-    MongoHelper.saveOrUpdate(_tableName, saveOrUpdate)
+    MongoProcessor.saveOrUpdate(_tableName, saveOrUpdate)
+  }
+
+  override def updateByCond(newValues: String, condition: String, parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Void]] = {
+    MongoProcessor.updateByCond(_tableName, new JsonObject(condition), new JsonObject(newValues))
   }
 
   override def getById(id: Any, context: EZContext = null): Future[Resp[this.type]] = {
-    MongoHelper.getById(_tableName, id.asInstanceOf[String], _modelClazz).asInstanceOf[Future[Resp[this.type]]]
+    MongoProcessor.getById(_tableName, id.asInstanceOf[String], _modelClazz).asInstanceOf[Future[Resp[this.type]]]
   }
 
-  def getByCond(query: JsonObject, context: EZContext = null): Future[Resp[this.type]] = {
-    MongoHelper.getByCond(_tableName, query, _modelClazz).asInstanceOf[Future[Resp[this.type]]]
+  override def getByCond(condition: String, parameters: List[Any] = List(), context: EZContext = null): Future[Resp[MongoBaseModel.this.type]] = {
+    MongoProcessor.getByCond(_tableName, new JsonObject(condition), _modelClazz).asInstanceOf[Future[Resp[this.type]]]
   }
 
   override def deleteById(id: Any, context: EZContext = null): Future[Resp[Void]] = {
-    MongoHelper.deleteById(_tableName, id.asInstanceOf[String])
+    MongoProcessor.deleteById(_tableName, id.asInstanceOf[String])
   }
 
-  def updateByCond(query: JsonObject, update: JsonObject, context: EZContext = null): Future[Resp[Void]] = {
-    MongoHelper.updateByCond(_tableName, query, update)
+  override def deleteByCond(condition: String, parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Void]] = {
+    MongoProcessor.deleteByCond(_tableName, new JsonObject(condition))
   }
 
-  def deleteByCond(query: JsonObject = new JsonObject(), context: EZContext = null): Future[Resp[Void]] = {
-    MongoHelper.deleteByCond(_tableName, query)
+  override def count(condition: String = "{}", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Long]] = {
+    MongoProcessor.count(_tableName, new JsonObject(condition))
   }
 
-  def find(query: JsonObject = new JsonObject(), sort: Map[String, SortEnum] = null, limit: Int = 0, context: EZContext = null): Future[Resp[List[this.type]]] = {
-    MongoHelper.find(_tableName, query, MongoBaseModel.convertSort(sort), limit, _modelClazz).asInstanceOf[Future[Resp[List[this.type]]]]
+  override def existById(id: Any, context: EZContext = null): Future[Resp[Boolean]] = {
+    MongoProcessor.exist(_tableName, new JsonObject().put("_id", id))
   }
 
-  def page(query: JsonObject = new JsonObject(), pageNumber: Long = 1, pageSize: Int = 10, sort: Map[String, SortEnum] = null, context: EZContext = null): Future[Resp[Page[this.type]]] = {
-    MongoHelper.page(_tableName, query, pageNumber, pageSize, MongoBaseModel.convertSort(sort), _modelClazz).asInstanceOf[Future[Resp[Page[this.type]]]]
+  override def existByCond(condition: String = "{}", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Boolean]] = {
+    MongoProcessor.exist(_tableName, new JsonObject(condition))
   }
 
-  def count(query: JsonObject = new JsonObject(), context: EZContext = null): Future[Resp[Long]] = {
-    MongoHelper.count(_tableName, query)
+  override def find(condition: String = "{}", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[List[this.type]]] = {
+    MongoProcessor.find(_tableName, new JsonObject(condition), null, 0, _modelClazz).asInstanceOf[Future[Resp[List[this.type]]]]
   }
 
-  def existById(id: Any, context: EZContext = null): Future[Resp[Boolean]] = {
-    MongoHelper.exist(_tableName, new JsonObject().put("_id", id))
+  override def page(condition: String = "{}", parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10, context: EZContext = null): Future[Resp[Page[this.type]]] = {
+    MongoProcessor.page(_tableName, new JsonObject(condition), pageNumber, pageSize, null, _modelClazz).asInstanceOf[Future[Resp[Page[this.type]]]]
   }
 
-  def existByCond(query: JsonObject = new JsonObject(), context: EZContext = null): Future[Resp[Boolean]] = {
-    MongoHelper.exist(_tableName, query)
+  def findWithOpt(condition: String = "{}", sort: Map[String, SortEnum] = null, limit: Int = 0, context: EZContext = null): Future[Resp[List[this.type]]] = {
+    MongoProcessor.find(_tableName, new JsonObject(condition), MongoBaseModel.convertSort(sort), limit, _modelClazz).asInstanceOf[Future[Resp[List[this.type]]]]
+  }
+
+  def pageWithOpt(condition: String = "{}", pageNumber: Long = 1, pageSize: Int = 10, sort: Map[String, SortEnum] = null, context: EZContext = null): Future[Resp[Page[this.type]]] = {
+    MongoProcessor.page(_tableName, new JsonObject(condition), pageNumber, pageSize, MongoBaseModel.convertSort(sort), _modelClazz).asInstanceOf[Future[Resp[Page[this.type]]]]
   }
 
   def aggregate(query: JsonArray, context: EZContext = null): Future[Resp[JsonArray]] = {
-    MongoHelper.aggregate(_tableName, query)
+    MongoProcessor.aggregate(_tableName, query)
   }
 
 }

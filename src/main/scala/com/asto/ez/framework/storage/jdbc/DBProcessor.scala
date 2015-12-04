@@ -23,7 +23,7 @@ import scala.util.{Failure, Success}
   *
   * 包含了DB 的几类基础操作
   */
-object DBHelper extends LazyLogging {
+object DBProcessor extends LazyLogging {
 
   var dbClient: JDBCClient = _
 

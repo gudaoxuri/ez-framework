@@ -1,4 +1,4 @@
-package com.asto.ez.framework.function
+package com.asto.ez.framework.misc
 
 import java.util.concurrent.CountDownLatch
 

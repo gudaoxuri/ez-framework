@@ -1,16 +1,17 @@
-package com.asto.ez.framework.function
+package com.asto.ez.framework.rpc
 
 import java.util.concurrent.CountDownLatch
 
-import com.asto.ez.framework.helper.HttpClientHelper
+import com.asto.ez.framework.rpc.http.HttpClientProcessor
 import com.asto.ez.framework.{BasicSpec, EZGlobal}
 import com.fasterxml.jackson.databind.JsonNode
+
 import scala.async.Async.{async, await}
 import scala.concurrent.ExecutionContext.Implicits.global
-class HttpClientSpec extends BasicSpec {
+class HttpClientProcessorSpec extends BasicSpec {
 
   override def before2(): Any = {
-    HttpClientHelper.httpClient = EZGlobal.vertx.createHttpClient()
+    HttpClientProcessor.httpClient = EZGlobal.vertx.createHttpClient()
   }
 
   test("HttpClient Test")  {
@@ -24,7 +25,7 @@ class HttpClientSpec extends BasicSpec {
 
   def testHttpClient() = async {
 
-    val result = await(HttpClientHelper.get("http://doptest.yuanbaopu.com/query/realtime/summary/?time=today&index=pv",classOf[JsonNode])).body
+    val result = await(HttpClientProcessor.get("http://dop.yuanbaopu.com/query/realtime/summary/?time=today&index=pv",classOf[JsonNode])).body
     println(result)
     result
 

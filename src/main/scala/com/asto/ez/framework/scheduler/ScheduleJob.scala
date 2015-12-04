@@ -1,4 +1,4 @@
-package com.asto.ez.framework.service.scheduler
+package com.asto.ez.framework.scheduler
 
 
 trait ScheduleJob {

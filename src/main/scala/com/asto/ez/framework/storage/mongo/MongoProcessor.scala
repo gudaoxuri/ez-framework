@@ -11,7 +11,7 @@ import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 
-object MongoHelper extends LazyLogging {
+object MongoProcessor extends LazyLogging {
 
   var mongoClient: MongoClient = _
 

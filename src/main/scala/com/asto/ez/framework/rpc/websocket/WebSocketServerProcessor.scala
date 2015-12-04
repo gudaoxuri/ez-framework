@@ -3,7 +3,6 @@ package com.asto.ez.framework.rpc.websocket
 import java.net.URLDecoder
 
 import com.asto.ez.framework.EZContext
-import com.asto.ez.framework.helper.WSHelper
 import com.asto.ez.framework.rpc.{EChannel, Fun, Router}
 import com.ecfront.common.{JsonHelper, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -13,7 +12,7 @@ import io.vertx.core.http._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class WebSocketProcessor extends Handler[ServerWebSocket] with LazyLogging {
+class WebSocketServerProcessor extends Handler[ServerWebSocket] with LazyLogging {
 
   protected val FLAG_METHOD: String = "__method__"
 
@@ -66,7 +65,7 @@ class WebSocketProcessor extends Handler[ServerWebSocket] with LazyLogging {
       //TODO
       val context = EZContext()
       context.remoteIP = ip
-      WSHelper.createWS(method, path, request)
+      WebSocketSProcssor.createWS(method, path, request)
       fun.execute(parameters,if(body != null) JsonHelper.toObject(body, fun.requestClass) else null, context).onSuccess {
         case excResp =>
           returnContent(excResp, request)

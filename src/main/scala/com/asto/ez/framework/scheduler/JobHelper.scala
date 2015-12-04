@@ -1,4 +1,4 @@
-package com.asto.ez.framework.service.scheduler
+package com.asto.ez.framework.scheduler
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.quartz.impl.JobDetailImpl

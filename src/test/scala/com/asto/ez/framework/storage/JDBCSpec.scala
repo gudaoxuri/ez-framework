@@ -1,11 +1,11 @@
-package com.asto.ez.framework.function
+package com.asto.ez.framework.storage
 
 import java.util.concurrent.CountDownLatch
 
 import com.asto.ez.framework.storage.jdbc._
 
-import scala.beans.BeanProperty
 import scala.async.Async.{async, await}
+import scala.beans.BeanProperty
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -13,7 +13,7 @@ import scala.concurrent.duration.Duration
 class JDBCSpec extends JDBCBasicSpec {
 
   test("JDBC Test") {
-    val createFuture = DBHelper.update(
+    val createFuture = DBProcessor.update(
       """
         |CREATE TABLE IF NOT EXISTS jdbc_test_entity
         |(
@@ -77,7 +77,7 @@ class JDBCSpec extends JDBCBasicSpec {
     jdbc.name = "n4"
     jdbc.create_time = 0
     Await.result(jdbc.save(), Duration.Inf).body
-    Await.result(JDBC_Test_Entity().updateByCond("name =?", "id =?", List( "m4",200)), Duration.Inf).body
+    Await.result(JDBC_Test_Entity().updateByCond("name =?", "id =?", List("m4", 200)), Duration.Inf).body
 
     var findResult = Await.result(JDBC_Test_Entity().find(" 1=1 ORDER BY create_time ASC"), Duration.Inf).body
     assert(findResult.size == 4)
@@ -119,9 +119,9 @@ class JDBCSpec extends JDBCBasicSpec {
     }
     cdl.await()
   }
-  
-  def testJDBCAsync()=async{
-    val createFuture = DBHelper.update(
+
+  def testJDBCAsync() = async {
+    val createFuture = DBProcessor.update(
       """
         |CREATE TABLE IF NOT EXISTS jdbc_test_entity
         |(
@@ -185,7 +185,7 @@ class JDBCSpec extends JDBCBasicSpec {
     jdbc.name = "n4"
     jdbc.create_time = 0
     await(jdbc.save()).body
-    await(JDBC_Test_Entity().updateByCond("name =?", "id =?", List( "m4",200))).body
+    await(JDBC_Test_Entity().updateByCond("name =?", "id =?", List("m4", 200))).body
 
     var findResult = await(JDBC_Test_Entity().find(" 1=1 ORDER BY create_time ASC")).body
     assert(findResult.size == 4)

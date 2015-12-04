@@ -1,4 +1,4 @@
-package com.asto.ez.framework.service.scheduler
+package com.asto.ez.framework.scheduler
 
 import com.ecfront.common.JsonHelper
 import com.typesafe.scalalogging.slf4j.LazyLogging

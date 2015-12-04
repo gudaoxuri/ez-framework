@@ -3,7 +3,6 @@ package com.asto.ez.framework.rpc.http
 import java.io.File
 
 import com.asto.ez.framework.{EZContext, EZGlobal}
-import com.asto.ez.framework.helper.HttpClientHelper
 import com.asto.ez.framework.rpc.{EChannel, Fun, Router}
 import com.ecfront.common.{JsonHelper, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -14,11 +13,11 @@ import io.vertx.core.http.{HttpServerFileUpload, HttpServerRequest, HttpServerRe
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class HttpProcessor extends Handler[HttpServerRequest] with LazyLogging {
+class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
 
   override def handle(request: HttpServerRequest): Unit = {
     if (request.method().name() == "OPTIONS") {
-      HttpClientHelper.returnContent("", request.response(), "text/html")
+      HttpClientProcessor.returnContent("", request.response(), "text/html")
     } else if (request.path() != "/favicon.ico") {
       val ip =
         if (request.headers().contains("X-Forwarded-For") && request.getHeader("X-Forwarded-For").nonEmpty) {
@@ -32,7 +31,7 @@ class HttpProcessor extends Handler[HttpServerRequest] with LazyLogging {
       } catch {
         case ex: Throwable =>
           logger.error("Http process error.", ex)
-          HttpClientHelper.returnContent(s"请求处理错误：${ex.getMessage}", request.response(), "text/html")
+          HttpClientProcessor.returnContent(s"请求处理错误：${ex.getMessage}", request.response(), "text/html")
       }
     }
   }
@@ -63,10 +62,10 @@ class HttpProcessor extends Handler[HttpServerRequest] with LazyLogging {
                 upload.filename() + "_" + System.nanoTime()
               }
             }
-            val tPath = EZGlobal.resource_path + path + newName
+            val tPath = EZGlobal.ez_rpc_http_resource_path + path + newName
             upload.exceptionHandler(new Handler[Throwable] {
               override def handle(e: Throwable): Unit = {
-                HttpClientHelper.returnContent(Resp.serverError(e.getMessage), request.response(), accept)
+                HttpClientProcessor.returnContent(Resp.serverError(e.getMessage), request.response(), accept)
               }
             })
             upload.endHandler(new Handler[Void] {
@@ -89,7 +88,7 @@ class HttpProcessor extends Handler[HttpServerRequest] with LazyLogging {
         execute(request, parameters, null, result._2,ip, request.response(), contentType, accept)
       }
     } else {
-      HttpClientHelper.returnContent(result._1, request.response())
+      HttpClientProcessor.returnContent(result._1, request.response())
     }
   }
 
@@ -108,12 +107,12 @@ class HttpProcessor extends Handler[HttpServerRequest] with LazyLogging {
       context.remoteIP = ip
       fun.execute(parameters, b, context).onSuccess {
         case excResp =>
-          HttpClientHelper.returnContent(excResp, response, accept)
+          HttpClientProcessor.returnContent(excResp, response, accept)
       }
     } catch {
       case e: Exception =>
         logger.error("Execute function error.", e)
-        HttpClientHelper.returnContent(Resp.serverError(e.getMessage), response, accept)
+        HttpClientProcessor.returnContent(Resp.serverError(e.getMessage), response, accept)
     }
   }
 

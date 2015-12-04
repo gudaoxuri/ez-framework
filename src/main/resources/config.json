@@ -1,49 +1,56 @@
 {
   "ez": {
-    "publicServer": {
-      "host": "0.0.0.0",
-      "port": 8080,
-      "resourcePath": "c:/tmp/",
-      "publicUriPrefix": "/public/",
-      "authManage": false
+    "rpc":{
+      "http": {
+        "host": "0.0.0.0",
+        "port": 8080,
+        "resourcePath": "c:/tmp/",
+        "publicUriPrefix": "/public/",
+        "authManage": false
+      },
+      "cluster": {
+        "host": "127.0.0.1"
+      },
+      "servicePath": "com.asto.dop.core.module"
     },
-    "clusterServer": {
-      "host": "127.0.0.1"
+    "storage":{
+      "jdbc": {
+        "driver_class": "com.mysql.jdbc.Driver",
+        "url": "jdbc:mysql://192.168.4.99:3306/dop?characterEncoding=UTF-8&autoReconnect=true",
+        "user": "root",
+        "password": "123456",
+        "max_pool_size": 200,
+        "max_idle_time": 1800,
+        "idle_test_period": 120,
+        "validate": true
+      },
+      "mongo": {
+        "hosts": [
+          {
+            "host": "192.168.4.99",
+            "port": 27017
+          }
+        ],
+        "db_name":"test",
+        "maxPoolSize": 100,
+        "minPoolSize": 0,
+        "maxIdleTimeMS": 0,
+        "maxLifeTimeMS": 0,
+        "username": "",
+        "password": ""
+      },
+      "entityPath": "com.asto.dop.core.entity"
     },
-    "servicePath": "com.asto.dop.core.module",
-    "entityPath": "com.asto.dop.core.entity",
-    "jdbc": {
-      "driver_class": "com.mysql.jdbc.Driver",
-      "url": "jdbc:mysql://192.168.4.99:3306/dop?characterEncoding=UTF-8&autoReconnect=true",
-      "user": "root",
-      "password": "123456",
-      "max_pool_size": 200,
-      "max_idle_time": 1800,
-      "idle_test_period": 120,
-      "validate": true
+    "cache":{
+      "redis": {
+        "host": "192.168.4.99",
+        "port": 6379,
+        "auth": "",
+        "db": 0
+      },
+      "useCache": false
     },
-    "mongo": {
-      "hosts": [
-        {
-          "host": "192.168.4.99",
-          "port": 27017
-        }
-      ],
-      "db_name":"",
-      "maxPoolSize": 100,
-      "minPoolSize": 0,
-      "maxIdleTimeMS": 0,
-      "maxLifeTimeMS": 0,
-      "username": "john",
-      "password": "passw0rd"
-    },
-    "redis": {
-      "host": "192.168.4.99",
-      "port": 6379,
-      "auth": "",
-      "db": 0
-    },
-    "useCache": false
+    "scheduler":false
   },
   "args": {
   }

@@ -1,10 +1,11 @@
-package com.asto.ez.framework.helper
+package com.asto.ez.framework.rpc.http
 
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http._
+
 import scala.concurrent.{Future, Promise}
 
 /**
@@ -13,7 +14,7 @@ import scala.concurrent.{Future, Promise}
   * 包含了对HTTP GET POST PUT DELETE 四类常用操作
   *
   */
-object HttpClientHelper extends LazyLogging {
+object HttpClientProcessor extends LazyLogging {
 
   var httpClient: HttpClient = _
 
