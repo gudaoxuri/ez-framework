@@ -8,7 +8,7 @@ import scala.concurrent.Future
 
 trait JDBCBaseModel extends BaseModel {
 
-  protected val _entityInfo =
+  protected lazy val _entityInfo =
     if (JDBCEntityContainer.CONTAINER.contains(_tableName)) {
       JDBCEntityContainer.CONTAINER(_tableName)
     } else {

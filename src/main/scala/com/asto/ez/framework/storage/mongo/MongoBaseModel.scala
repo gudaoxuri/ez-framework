@@ -14,7 +14,7 @@ trait MongoBaseModel extends BaseModel {
 
   @BeanProperty var id: String = _
 
-  protected val _entityInfo =
+  protected lazy val _entityInfo =
     if (MongoEntityContainer.CONTAINER.contains(_tableName)) {
       MongoEntityContainer.CONTAINER(_tableName)
     } else {

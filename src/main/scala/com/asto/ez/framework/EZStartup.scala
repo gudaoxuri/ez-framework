@@ -59,7 +59,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
           override def run(): Unit = {
             AutoBuildingProcessor.autoBuilding(servicePath)
           }
-        })
+        }).start()
       }
       if (EZGlobal.ez_rpc.containsKey("http")) {
         val http = EZGlobal.ez_rpc.getJsonObject("http")
@@ -87,7 +87,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
           override def run(): Unit = {
             //TODO
           }
-        })
+        }).start()
       }
       if (EZGlobal.ez_storage.containsKey("jdbc")) {
         val jdbc = EZGlobal.ez_storage.getJsonObject("jdbc")
@@ -97,7 +97,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
       if (EZGlobal.ez_storage.containsKey("mongo")) {
         val mongo = EZGlobal.ez_storage.getJsonObject("mongo")
         MongoProcessor.mongoClient = MongoClient.createShared(EZGlobal.vertx, mongo)
-        logger.info(s"EZ Framework Mongo connected. ${mongo.getJsonObject("hosts")}")
+        logger.info(s"EZ Framework Mongo connected. ${mongo.getJsonArray("hosts")}")
       }
     }
   }

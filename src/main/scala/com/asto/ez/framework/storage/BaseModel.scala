@@ -9,9 +9,9 @@ import scala.concurrent.Future
 trait BaseModel extends Serializable with LazyLogging {
 
   @Ignore
-  protected val _modelClazz = this.getClass
+  protected lazy val _modelClazz = this.getClass
   @Ignore
-  protected val _tableName = _modelClazz.getSimpleName.toLowerCase
+  protected lazy val _tableName = _modelClazz.getSimpleName.toLowerCase
 
   def getTableName = _tableName
 
