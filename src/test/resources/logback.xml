@@ -24,7 +24,7 @@
     <logger name="org.redisson" level="INFO"/>
     <logger name="com.hazelcast" level="INFO"/>
     <logger name="io.netty" level="INFO"/>
-    <logger name="io.vertx" level="INFO"/>
+    <logger name="io.vertx" level="DEBUG"/>
     <logger name="com.mchange.v2" level="DEBUG"/>
 
 </configuration>

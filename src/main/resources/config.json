@@ -31,7 +31,7 @@
             "port": 27017
           }
         ],
-        "db_name":"test",
+        "db_name":"",
         "maxPoolSize": 100,
         "minPoolSize": 0,
         "maxIdleTimeMS": 0,

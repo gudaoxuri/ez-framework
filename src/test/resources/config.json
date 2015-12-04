@@ -1,6 +1,6 @@
 {
   "ez": {
-    "rpc":{
+    "rpc": {
       "http": {
         "host": "0.0.0.0",
         "port": 8080,
@@ -13,7 +13,7 @@
       },
       "servicePath": "com.asto.dop.core.module"
     },
-    "storage":{
+    "storage": {
       "jdbc": {
         "driver_class": "com.mysql.jdbc.Driver",
         "url": "jdbc:mysql://192.168.4.99:3306/dop?characterEncoding=UTF-8&autoReconnect=true",
@@ -31,17 +31,17 @@
             "port": 27017
           }
         ],
-        "db_name":"test",
+        "db_name": "test",
         "maxPoolSize": 100,
         "minPoolSize": 0,
         "maxIdleTimeMS": 0,
         "maxLifeTimeMS": 0
-/*        "username": "",
-        "password": ""*/
+        /*        "username": "",
+                "password": ""*/
       },
       "entityPath": "com.asto.dop.core.entity"
     },
-    "cache":{
+    "cache": {
       "redis": {
         "host": "192.168.4.99",
         "port": 6379,
@@ -50,7 +50,19 @@
       },
       "useCache": false
     },
-    "scheduler":false
+    "mail": {
+      "hostname": "smtp.exmail.qq.com",
+      "ownHostname": "smtp.exmail.qq.com",
+      "port": 465,
+      "starttls": "REQUIRED",
+      "login": "REQUIRED",
+      "ssl":true,
+      "authMethods": "LOGIN",
+      "username": "hi-sb@ecfront.com",
+      "password": "Hi123!qaz!",
+      "maxPoolSize": 10
+    },
+    "scheduler": false
   },
   "args": {
   }

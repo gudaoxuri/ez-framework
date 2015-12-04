@@ -1,6 +1,7 @@
 package com.asto.ez.framework
 
 import com.asto.ez.framework.cache.RedisProcessor
+import com.asto.ez.framework.mail.MailProcessor
 import com.asto.ez.framework.rpc.AutoBuildingProcessor
 import com.asto.ez.framework.rpc.http.{HttpClientProcessor, HttpServerProcessor}
 import com.asto.ez.framework.rpc.websocket.WebSocketServerProcessor
@@ -12,6 +13,7 @@ import io.vertx.core._
 import io.vertx.core.http.{HttpServer, HttpServerOptions}
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.jdbc.JDBCClient
+import io.vertx.ext.mail.{MailClient, MailConfig}
 import io.vertx.ext.mongo.MongoClient
 
 import scala.io.Source
@@ -45,6 +47,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     startRPCServer()
     startStorageConnection()
     startCacheConnection()
+    startMailClient()
     startScheduler()
   }
 
@@ -114,7 +117,14 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     }
   }
 
-  def startScheduler(): Unit = {
+  private def startMailClient(): Unit = {
+    if (EZGlobal.ez_mail != null) {
+      MailProcessor.init(MailClient.createShared(EZGlobal.vertx, new MailConfig(EZGlobal.ez_mail)))
+      logger.info(s"EZ Framework Mail client initialized. ${EZGlobal.ez.getJsonObject("mail").getString("hostname")}")
+    }
+  }
+
+  private def startScheduler(): Unit = {
     if (EZGlobal.ez.getBoolean("scheduler")) {
       SchedulerService.init(module)
     }
