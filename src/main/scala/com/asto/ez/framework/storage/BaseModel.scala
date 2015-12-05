@@ -8,11 +8,9 @@ import scala.concurrent.Future
 trait BaseModel extends Serializable {
 
   @Ignore
-  protected lazy val _modelClazz = this.getClass
-  @Ignore
-  protected lazy val _tableName = _modelClazz.getSimpleName.toLowerCase
+  protected def _modelClazz = this.getClass
 
-  def getTableName = _tableName
+  def getTableName = _modelClazz.getSimpleName.toLowerCase
 
   def save(context: EZContext = null): Future[Resp[String]]
 

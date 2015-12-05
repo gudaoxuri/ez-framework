@@ -8,12 +8,12 @@ import scala.concurrent.Future
 
 trait JDBCBaseModel extends BaseModel {
 
-  protected lazy val _entityInfo =
-    if (JDBCEntityContainer.CONTAINER.contains(_tableName)) {
-      JDBCEntityContainer.CONTAINER(_tableName)
+  protected def _entityInfo =
+    if (JDBCEntityContainer.CONTAINER.contains(getTableName)) {
+      JDBCEntityContainer.CONTAINER(getTableName)
     } else {
-      JDBCEntityContainer.initEntity(_modelClazz, _tableName)
-      JDBCEntityContainer.CONTAINER(_tableName)
+      JDBCEntityContainer.initEntity(_modelClazz, getTableName)
+      JDBCEntityContainer.CONTAINER(getTableName)
     }
 
   override def save(context: EZContext = null): Future[Resp[String]] =  {
