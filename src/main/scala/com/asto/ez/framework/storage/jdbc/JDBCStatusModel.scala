@@ -28,6 +28,15 @@ trait JDBCStatusModel extends JDBCBaseModel with StatusModel {
     count(appendEnabled(condition), parameters, context)
   }
 
+  override def enableById(id: Any, context: EZContext = null):  Future[Resp[Void]]={
+    updateByCond(" enable = true "," id = ?",List(id),context)
+  }
+
+  override def disableById(id: Any, context: EZContext = null):  Future[Resp[Void]]={
+    updateByCond(" enable = false "," id = ?",List(id),context)
+  }
+
+
   private def appendEnabled(condition: String): String = {
     condition + " AND enable = true "
   }

@@ -22,6 +22,10 @@ trait StatusModel extends BaseModel {
 
   def countEnabled(condition: String = "", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Long]]
 
+  def enableById(id: Any, context: EZContext = null): Future[Resp[Void]]
+
+  def disableById(id: Any, context: EZContext = null): Future[Resp[Void]]
+
 }
 
 object StatusModel {

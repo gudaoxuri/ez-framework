@@ -45,7 +45,7 @@ object DBProcessor extends LazyLogging {
                     event.cause() match {
                       case throws if classOf[SQLTransactionRollbackException].isAssignableFrom(throws.getClass) =>
                         if (retryTimes < 10) {
-                          EZGlobal.vertx.setTimer(2000, new Handler[lang.Long] {
+                          EZGlobal.vertx.setTimer(5000*(retryTimes+1), new Handler[lang.Long] {
                             override def handle(event: lang.Long): Unit = {
                               logger.debug(s"JDBC update problem try times [${retryTimes + 1}] : $sql [$parameters]")
                               update(sql, parameters, retryTimes + 1)
@@ -76,7 +76,7 @@ object DBProcessor extends LazyLogging {
                     event.cause() match {
                       case throws if classOf[SQLTransactionRollbackException].isAssignableFrom(throws.getClass) =>
                         if (retryTimes < 10) {
-                          EZGlobal.vertx.setTimer(2000, new Handler[lang.Long] {
+                          EZGlobal.vertx.setTimer(5000*(retryTimes+1), new Handler[lang.Long] {
                             override def handle(event: lang.Long): Unit = {
                               logger.debug(s"JDBC update problem try times [${retryTimes + 1}] : $sql [$parameters]")
                               update(sql, parameters, retryTimes + 1)

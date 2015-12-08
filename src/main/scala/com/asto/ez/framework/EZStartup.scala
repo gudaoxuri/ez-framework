@@ -31,6 +31,10 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
 
   protected def shutdown() = {}
 
+  override def start(startFuture: Future[Void]): Unit = {
+    super.start(startFuture)
+  }
+
   /**
     * 启动入口
     */

@@ -29,6 +29,14 @@ trait MongoStatusModel extends MongoBaseModel with StatusModel {
     count(appendEnabled(new JsonObject(condition)).encode(), parameters, context)
   }
 
+  override def enableById(id: Any, context: EZContext = null): Future[Resp[Void]] = {
+    updateByCond(s"""{"$$set":{"enable":true}}""",s"""{"_id":"$id"}""", List(id), context)
+  }
+
+  override def disableById(id: Any, context: EZContext = null): Future[Resp[Void]] = {
+    updateByCond(s"""{"$$set":{"enable":false}}""",s"""{"_id":"$id"}""", List(id), context)
+  }
+
   private def appendEnabled(condition: JsonObject): JsonObject = {
     condition.put(StatusModel.ENABLE_FLAG, true)
   }
