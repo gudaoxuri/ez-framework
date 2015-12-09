@@ -1,150 +1,57 @@
 package com.asto.ez.framework.storage.jdbc
 
-import com.ecfront.common.{BeanHelper, ClassScanHelper, FieldAnnotationInfo, Ignore}
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.asto.ez.framework.storage._
+import com.ecfront.common.{BeanHelper, FieldAnnotationInfo, Ignore}
 
-object JDBCEntityContainer extends LazyLogging {
+object JDBCEntityContainer extends BaseEntityContainer[JDBCEntityInfo] {
 
-  val CONTAINER = collection.mutable.Map[String, JDBCEntityInfo]()
-
-  case class JDBCEntityInfo(
-                         clazz: Class[_],
-                         tableName: String,
-                         tableDesc: String,
-                         idFieldName: String,
-                         idStrategy: String,
-                         fkFieldNames: List[String],
-                         fieldDesc: Map[String, String],
-                         allFields: Map[String, String],
-                         persistentFields: Map[String, String],
-                         indexFieldNames: List[String],
-                         uniqueFieldNames: List[String],
-                         textFieldNames: List[String],
-                         ignoreFieldNames: List[String],
-                         allAnnotations: List[FieldAnnotationInfo],
-                         oneToManyFields: List[(OneToMany, String, Class[_])],
-                         manyToManyFields: List[(ManyToMany, String, Class[_])]
-                       )
-
-  def autoBuilding(basePackage: String) = {
-    ClassScanHelper.scan[Entity](basePackage).foreach {
-      clazz =>
-        val tableName = clazz.getSimpleName.toLowerCase
-        initEntity(clazz, tableName)
-    }
-  }
-
-  def initEntity(clazz: Class[_], tableName: String): Unit = {
-    buildingEntityInfo(clazz, tableName)
-    initDBTable(clazz, tableName)
-  }
-
-  def buildingEntityInfo(clazz: Class[_], tableName: String): Unit = {
-    val entityAnnotation = BeanHelper.getClassAnnotation[Entity](clazz).get
-    val tableDesc = entityAnnotation.desc
-    val allAnnotations = BeanHelper.findFieldAnnotations(clazz).toList
+  override protected def buildingEntityInfo(model: JDBCEntityInfo, clazz: Class[_], allAnnotations: List[FieldAnnotationInfo]): Unit = {
     val idFieldInfo = allAnnotations.find(_.annotation.isInstanceOf[Id]).orNull
-    val fkFieldNames = allAnnotations.filter(_.annotation.isInstanceOf[FK]).map(_.fieldName)
-    val fieldDesc = allAnnotations.filter(_.annotation.isInstanceOf[Desc]).map {
-      field =>
-        field.fieldName -> field.annotation.asInstanceOf[Desc].desc
-    }.toMap
-    val indexFieldNames = allAnnotations.filter(_.annotation.isInstanceOf[Index]).map {
+    model.idFieldName = if (idFieldInfo != null) idFieldInfo.fieldName else ""
+    model.idStrategy = if (idFieldInfo != null) idFieldInfo.annotation.asInstanceOf[Id].strategy else ""
+    model.fkFieldNames = allAnnotations.filter(_.annotation.isInstanceOf[FK]).map(_.fieldName)
+    model.textFieldNames = allAnnotations.filter(_.annotation.isInstanceOf[Text]).map {
       field =>
         field.fieldName
     }
-    val uniqueFieldNames = allAnnotations.filter(_.annotation.isInstanceOf[Unique]).map {
-      field =>
-        field.fieldName
-    }
-    val textFieldNames = allAnnotations.filter(_.annotation.isInstanceOf[Text]).map {
-      field =>
-        field.fieldName
-    }
-    val allFields = BeanHelper.findFields(clazz, filterAnnotations = Seq()).map {
+    model.allFields = BeanHelper.findFields(clazz, filterAnnotations = Seq()).map {
       item =>
         val ttype = item._1 match {
-          case name if textFieldNames.contains(name) => "text"
+          case name if model.textFieldNames.contains(name) => "text"
           case name if idFieldInfo != null && idFieldInfo.fieldName == name && idFieldInfo.annotation.asInstanceOf[Id].strategy != "" =>
             idFieldInfo.annotation.asInstanceOf[Id].strategy
           case _ => item._2
         }
         item._1 -> ttype
     }
-    val ignoreFieldNames = allFields.filter {
+    model.ignoreFieldNames = model.allFields.filter {
       field =>
         allAnnotations.filter(_.fieldName == field._1).exists {
           ann =>
             ann.annotation.getClass == classOf[Ignore] || ann.annotation.getClass == classOf[ManyToMany] || ann.annotation.getClass == classOf[OneToMany]
         }
     }.keys.toList
-    val persistentFields = allFields.filter(field => !ignoreFieldNames.contains(field._1))
-    val oneToManyFields = allAnnotations.filter(_.annotation.isInstanceOf[OneToMany]).map {
+    model.persistentFields = model.allFields.filter(field => !model.ignoreFieldNames.contains(field._1))
+    model.oneToManyFields = allAnnotations.filter(_.annotation.isInstanceOf[OneToMany]).map {
       field =>
-        (field.annotation.asInstanceOf[OneToMany], field.fieldName, BeanHelper.getClassByStr(allFields(field.fieldName)))
+        (field.annotation.asInstanceOf[OneToMany], field.fieldName, BeanHelper.getClassByStr(model.allFields(field.fieldName)))
     }
-    val manyToManyFields = allAnnotations.filter(_.annotation.isInstanceOf[ManyToMany]).map {
+    model.manyToManyFields = allAnnotations.filter(_.annotation.isInstanceOf[ManyToMany]).map {
       field =>
-        (field.annotation.asInstanceOf[ManyToMany], field.fieldName, BeanHelper.getClassByStr(allFields(field.fieldName)))
-    }
-
-    CONTAINER += tableName -> JDBCEntityInfo(
-      clazz,
-      tableName,
-      tableDesc,
-      if (idFieldInfo != null) idFieldInfo.fieldName else "",
-      if (idFieldInfo != null) idFieldInfo.annotation.asInstanceOf[Id].strategy else "",
-      fkFieldNames,
-      fieldDesc,
-      allFields,
-      persistentFields,
-      indexFieldNames,
-      uniqueFieldNames,
-      textFieldNames,
-      ignoreFieldNames,
-      allAnnotations,
-      oneToManyFields,
-      manyToManyFields
-    )
-    logger.info( """Create model: %s""".format(clazz.getSimpleName))
-  }
-
-  def initDBTable(clazz: Class[_], tableName: String): Unit = {
-    val entityInfo = CONTAINER(tableName)
-    //TODO
-    /* JDBCStorable.db.createTableIfNotExist(
-       clazz.getSimpleName, entityInfo.tableDesc, entityInfo.persistentFields, entityInfo.fieldDesc, entityInfo.indexFieldNames, entityInfo.uniqueFieldNames, Model.ID_FLAG
-     )*/
-    initManyToManyRel(entityInfo)
-  }
-
-  private def initManyToManyRel(entityInfo: JDBCEntityInfo): Unit = {
-    entityInfo.manyToManyFields.foreach {
-      ann =>
-        val (masterFieldName, relFieldName) = getManyToManyRelTableFields(entityInfo, ann._1.mapping, ann._1.master)
-      //TODO
-      /* JDBCStorable.db.createTableIfNotExist(
-         getManyToManyRelTableName(entityInfo, ann._1.mapping, ann._1.master), "",
-         Map[String, String](
-           masterFieldName -> "String",
-           relFieldName -> "String"
-         ), null, null, null, null)*/
+        (field.annotation.asInstanceOf[ManyToMany], field.fieldName, BeanHelper.getClassByStr(model.allFields(field.fieldName)))
     }
   }
 
-  private def getManyToManyRelTableFields(entityInfo: JDBCEntityInfo, tableName: String, isMaster: Boolean): (String, String) = {
-    if (isMaster) {
-      (entityInfo.tableName + "_" + entityInfo.idFieldName, tableName + "_" + entityInfo.idFieldName)
-    } else {
-      (tableName + "_" + entityInfo.idFieldName, entityInfo.tableName + "_" + entityInfo.idFieldName)
-    }
-  }
+}
 
-  private def getManyToManyRelTableName(entityInfo: JDBCEntityInfo, tableName: String, isMaster: Boolean): String = {
-    if (isMaster) {
-      JDBCBaseModel.REL_FLAG + "_" + entityInfo.tableName + "_" + tableName
-    } else {
-      JDBCBaseModel.REL_FLAG + "_" + tableName + "_" + entityInfo.tableName
-    }
-  }
+case class JDBCEntityInfo() extends BaseEntityInfo() {
+  var idFieldName: String = _
+  var idStrategy: String = _
+  var fkFieldNames: List[String] = _
+  var allFields: Map[String, String] = _
+  var persistentFields: Map[String, String] = _
+  var textFieldNames: List[String] = _
+  var ignoreFieldNames: List[String] = _
+  var oneToManyFields: List[(OneToMany, String, Class[_])] = _
+  var manyToManyFields: List[(ManyToMany, String, Class[_])] = _
 }

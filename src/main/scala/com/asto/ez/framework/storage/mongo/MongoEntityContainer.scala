@@ -1,35 +1,17 @@
 package com.asto.ez.framework.storage.mongo
 
-import com.ecfront.common.BeanHelper
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.asto.ez.framework.storage.{BaseEntityContainer, BaseEntityInfo}
+import com.ecfront.common.{BeanHelper, FieldAnnotationInfo}
 
 import scala.beans.BeanProperty
 
-object MongoEntityContainer extends LazyLogging {
+object MongoEntityContainer extends BaseEntityContainer[MongoEntityInfo] {
 
-  val CONTAINER = collection.mutable.Map[String, MongoEntityInfo]()
-
-  case class MongoEntityInfo(
-                              clazz: Class[_],
-                              tableName: String,
-                              persistentFields: List[String]
-                            )
-
-
-  def initEntity(clazz: Class[_], tableName: String): Unit = {
-    buildingEntityInfo(clazz, tableName)
+  override def buildingEntityInfo(model: MongoEntityInfo, clazz: Class[_], allAnnotations: List[FieldAnnotationInfo]): Unit = {
+    model.persistentFields = (BeanHelper.findFieldAnnotations(clazz, Seq(classOf[BeanProperty])).map(_.fieldName).toSet -- Set("_modelClazz", "_tableName")).toList
   }
+}
 
-  def buildingEntityInfo(clazz: Class[_], tableName: String): Unit = {
-    val persistentFields = BeanHelper.findFieldAnnotations(clazz, Seq(classOf[BeanProperty])).map(_.fieldName).toSet -- Set("_modelClazz", "_tableName")
-
-    CONTAINER += tableName -> MongoEntityInfo(
-      clazz,
-      tableName,
-      persistentFields.toList
-    )
-    logger.info( """Create model: %s""".format(clazz.getSimpleName))
-  }
-
-
+case class MongoEntityInfo() extends BaseEntityInfo() {
+  var persistentFields: List[String] = _
 }

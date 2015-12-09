@@ -4,7 +4,6 @@ import java.util.Date
 
 import com.asto.ez.framework.EZContext
 import com.asto.ez.framework.helper.TimeHelper
-import com.asto.ez.framework.storage.jdbc.Index
 
 import scala.beans.BeanProperty
 

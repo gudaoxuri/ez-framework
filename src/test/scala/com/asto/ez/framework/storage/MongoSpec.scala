@@ -65,6 +65,18 @@ class MongoSpec extends BasicSpec {
     mongo.name = "n4"
     mongo.create_time = 0
     Await.result(mongo.save(), Duration.Inf).body
+
+    Thread.sleep(1)
+    mongo.id = "bbb"
+    mongo.name = "n4"
+    mongo.create_time = 0
+    assert(Await.result(mongo.save(), Duration.Inf).message.contains("姓名"))
+    assert(Await.result(Mongo_Test_Entity().getById("bbb"), Duration.Inf).body == null)
+    getResult = Await.result(Mongo_Test_Entity().getById("aaa"), Duration.Inf).body
+    getResult.name = "n2"
+    assert(Await.result(getResult.update(), Duration.Inf).message.contains("姓名"))
+
+
     Await.result(Mongo_Test_Entity().updateByCond(s"""{"$$set": {"name":"m4"}}""",s"""{"_id":"aaa"}"""), Duration.Inf).body
 
     var findResult = Await.result(Mongo_Test_Entity().find(), Duration.Inf).body
@@ -201,8 +213,9 @@ class MongoSpec extends BasicSpec {
 
 }
 
+@Entity("")
 case class Mongo_Test_Entity() extends MongoSecureModel with MongoStatusModel {
-
+  @Unique @Label("姓名")
   @BeanProperty var name: String = _
   @BeanProperty var parameters: Map[String, Any] = _
 

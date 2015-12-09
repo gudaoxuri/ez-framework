@@ -12,59 +12,59 @@ trait JDBCBaseModel extends BaseModel {
     if (JDBCEntityContainer.CONTAINER.contains(getTableName)) {
       JDBCEntityContainer.CONTAINER(getTableName)
     } else {
-      JDBCEntityContainer.initEntity(_modelClazz, getTableName)
+      JDBCEntityContainer.buildingEntityInfo(_modelClazz, getTableName)
       JDBCEntityContainer.CONTAINER(getTableName)
     }
 
-  override def save(context: EZContext = null): Future[Resp[String]] =  {
+  override def save(context: EZContext = null): Future[Resp[String]] = {
     DBExecutor.save(_entityInfo, if (context == null) EZContext.build() else context, JDBCBaseModel.getMapValue(this).filter(_._2 != null))
   }
 
-  override def update(context: EZContext = null): Future[Resp[String]] =  {
+  override def update(context: EZContext = null): Future[Resp[String]] = {
     DBExecutor.update(_entityInfo, if (context == null) EZContext.build() else context, JDBCBaseModel.getIdValue(this), JDBCBaseModel.getMapValue(this).filter(_._2 != null))
   }
 
-  override def saveOrUpdate(context: EZContext = null): Future[Resp[String]] =  {
+  override def saveOrUpdate(context: EZContext = null): Future[Resp[String]] = {
     DBExecutor.saveOrUpdate(_entityInfo, if (context == null) EZContext.build() else context, JDBCBaseModel.getIdValue(this), JDBCBaseModel.getMapValue(this).filter(_._2 != null))
   }
 
-  override def deleteById(id: Any, context: EZContext = null): Future[Resp[Void]] =  {
+  override def deleteById(id: Any, context: EZContext = null): Future[Resp[Void]] = {
     DBExecutor.delete(_entityInfo, if (context == null) EZContext.build() else context, id)
   }
 
-  override def getById(id: Any, context: EZContext = null): Future[Resp[this.type]] =  {
+  override def getById(id: Any, context: EZContext = null): Future[Resp[this.type]] = {
     DBExecutor.get(_entityInfo, if (context == null) EZContext.build() else context, id)
   }
 
-  override def updateByCond(newValues: String, condition: String, parameters: List[Any]=List(), context: EZContext = null): Future[Resp[Void]] =  {
+  override def updateByCond(newValues: String, condition: String, parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Void]] = {
     DBExecutor.update(_entityInfo, if (context == null) EZContext.build() else context, newValues, condition, parameters)
   }
 
-  override def deleteByCond(condition: String, parameters: List[Any]=List(), context: EZContext = null): Future[Resp[Void]] =  {
+  override def deleteByCond(condition: String, parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Void]] = {
     DBExecutor.delete(_entityInfo, if (context == null) EZContext.build() else context, condition, parameters)
   }
 
-  override def getByCond(condition: String=" 1=1 ", parameters: List[Any]=List(), context: EZContext = null): Future[Resp[this.type]] =  {
+  override def getByCond(condition: String = " 1=1 ", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[this.type]] = {
     DBExecutor.get(_entityInfo, if (context == null) EZContext.build() else context, condition, parameters)
   }
 
-  override def existById(id: Any, context: EZContext = null): Future[Resp[Boolean]] =  {
-    DBExecutor.existById(_entityInfo, if (context == null) EZContext.build() else context,id)
+  override def existById(id: Any, context: EZContext = null): Future[Resp[Boolean]] = {
+    DBExecutor.existById(_entityInfo, if (context == null) EZContext.build() else context, id)
   }
 
-  override def existByCond(condition: String=" 1=1 ", parameters: List[Any]=List(), context: EZContext = null): Future[Resp[Boolean]] =  {
+  override def existByCond(condition: String = " 1=1 ", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Boolean]] = {
     DBExecutor.existByCond(_entityInfo, if (context == null) EZContext.build() else context, condition, parameters)
   }
 
-  override def find(condition: String = " 1=1 ", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[List[this.type]]] =  {
+  override def find(condition: String = " 1=1 ", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[List[this.type]]] = {
     DBExecutor.find(_entityInfo, if (context == null) EZContext.build() else context, condition, parameters)
   }
 
-  override def page(condition: String = " 1=1 ", parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10, context: EZContext = null): Future[Resp[Page[this.type]]] =  {
+  override def page(condition: String = " 1=1 ", parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10, context: EZContext = null): Future[Resp[Page[this.type]]] = {
     DBExecutor.page(_entityInfo, if (context == null) EZContext.build() else context, condition, parameters, pageNumber, pageSize)
   }
 
-  override def count(condition: String = " 1=1 ", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Long]] =  {
+  override def count(condition: String = " 1=1 ", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Long]] = {
     DBExecutor.count(_entityInfo, if (context == null) EZContext.build() else context, condition, parameters)
   }
 

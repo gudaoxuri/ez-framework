@@ -77,7 +77,18 @@ class JDBCSpec extends JDBCBasicSpec {
     jdbc.name = "n4"
     jdbc.create_time = 0
     Await.result(jdbc.save(), Duration.Inf).body
-    Await.result(JDBC_Test_Entity().updateByCond("name =?", "id =?", List("m4", 200)), Duration.Inf).body
+
+    Thread.sleep(1)
+    jdbc.id = 300
+    jdbc.name = "n4"
+    jdbc.create_time = 0
+    assert(Await.result(jdbc.save(), Duration.Inf).message.contains("姓名"))
+    assert(Await.result(JDBC_Test_Entity().getById(300), Duration.Inf).body==null)
+    getResult = Await.result(JDBC_Test_Entity().getById(200), Duration.Inf).body
+    getResult.name="n2"
+    assert(Await.result(getResult.update(), Duration.Inf).message.contains("姓名"))
+
+    Await.result(JDBC_Test_Entity().updateByCond("name =?", "id =?", List("m4", 200)), Duration.Inf)
 
     var findResult = Await.result(JDBC_Test_Entity().find(" 1=1 ORDER BY create_time ASC"), Duration.Inf).body
     assert(findResult.size == 4)
@@ -185,7 +196,8 @@ class JDBCSpec extends JDBCBasicSpec {
     jdbc.name = "n4"
     jdbc.create_time = 0
     await(jdbc.save()).body
-    await(JDBC_Test_Entity().updateByCond("name =?", "id =?", List("m4", 200))).body
+
+    await(JDBC_Test_Entity().updateByCond("name =?", "id =?", List("m4", 200)))
 
     var findResult = await(JDBC_Test_Entity().find(" 1=1 ORDER BY create_time ASC")).body
     assert(findResult.size == 4)
@@ -225,6 +237,7 @@ case class JDBC_Test_Entity() extends JDBCSecureModel with JDBCStatusModel {
 
   @Id("seq")
   @BeanProperty var id: Long = _
+  @Unique @Label("姓名")
   @BeanProperty var name: String = _
   @BeanProperty var age: Int = _
 

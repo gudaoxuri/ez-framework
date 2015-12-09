@@ -1,13 +1,12 @@
 package com.asto.ez.framework.storage
 
 import com.asto.ez.framework.EZContext
-import com.ecfront.common.{BeanHelper, Ignore, JsonHelper, Resp}
+import com.ecfront.common.{BeanHelper, JsonHelper, Resp}
 
 import scala.concurrent.Future
 
 trait BaseModel extends Serializable {
 
-  @Ignore
   protected def _modelClazz = this.getClass
 
   def getTableName = _modelClazz.getSimpleName.toLowerCase

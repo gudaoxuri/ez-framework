@@ -1,6 +1,7 @@
 package com.asto.ez.framework.scheduler
 
 import com.asto.ez.framework.storage.jdbc._
+import com.asto.ez.framework.storage.{Entity, Id, Text}
 import com.ecfront.common.Ignore
 
 import scala.beans.BeanProperty
@@ -18,9 +19,11 @@ case class EZ_Scheduler() extends JDBCSecureModel with JDBCStatusModel {
   //回调执行的类
   @BeanProperty var clazz: String = _
   //任务参数
-  @BeanProperty @Ignore var parameters: Map[String,Any] = _
+  @BeanProperty
+  @Ignore var parameters: Map[String, Any] = _
   //任务参数(Map to JsonString)
-  @BeanProperty @Text var parameterstr: String = _
+  @BeanProperty
+  @Text var parameterstr: String = _
   //使用的模块
   @BeanProperty var module: String = _
 }

@@ -1,7 +1,6 @@
 package com.asto.ez.framework.storage.mongo
 
 import com.asto.ez.framework.EZContext
-import com.asto.ez.framework.storage.mongo.MongoEntityContainer.MongoEntityInfo
 import com.asto.ez.framework.storage.mongo.SortEnum.SortEnum
 import com.asto.ez.framework.storage.{BaseModel, Page}
 import com.ecfront.common.{BeanHelper, JsonHelper, Resp}
@@ -12,29 +11,29 @@ import scala.concurrent.Future
 
 trait MongoBaseModel extends BaseModel {
 
-  @BeanProperty var id: String = _
-
   protected def _entityInfo =
     if (MongoEntityContainer.CONTAINER.contains(getTableName)) {
       MongoEntityContainer.CONTAINER(getTableName)
     } else {
-      MongoEntityContainer.initEntity(_modelClazz, getTableName)
+      MongoEntityContainer.buildingEntityInfo(_modelClazz, getTableName)
       MongoEntityContainer.CONTAINER(getTableName)
     }
 
+  @BeanProperty var id: String = _
+
   override def save(context: EZContext = null): Future[Resp[String]] = {
     val save = MongoBaseModel.convertToJsonObject(_entityInfo, this)
-    MongoProcessor.save(getTableName, save)
+    MongoExecutor.save(_entityInfo,getTableName, save)
   }
 
   override def update(context: EZContext = null): Future[Resp[String]] = {
     val update = MongoBaseModel.convertToJsonObject(_entityInfo, this)
-    MongoProcessor.update(getTableName, this.id, update)
+    MongoExecutor.update(_entityInfo,getTableName, this.id,  update)
   }
 
   override def saveOrUpdate(context: EZContext = null): Future[Resp[String]] = {
     val saveOrUpdate = MongoBaseModel.convertToJsonObject(_entityInfo, this)
-    MongoProcessor.saveOrUpdate(getTableName, saveOrUpdate)
+    MongoExecutor.saveOrUpdate(_entityInfo,getTableName, this.id,  saveOrUpdate)
   }
 
   override def updateByCond(newValues: String, condition: String, parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Void]] = {

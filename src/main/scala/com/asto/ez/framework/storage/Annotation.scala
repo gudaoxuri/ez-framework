@@ -1,10 +1,22 @@
-package com.asto.ez.framework.storage.jdbc
+package com.asto.ez.framework.storage
 
 import com.ecfront.common.Ignore
 
 import scala.annotation.StaticAnnotation
 
 case class Entity(desc: String) extends StaticAnnotation
+
+@scala.annotation.meta.field
+case class Index() extends StaticAnnotation
+
+@scala.annotation.meta.field
+case class Unique() extends StaticAnnotation
+
+@scala.annotation.meta.field
+case class Label(label:String) extends StaticAnnotation
+
+@scala.annotation.meta.field
+case class Desc(desc: String) extends StaticAnnotation
 
 @scala.annotation.meta.field
 case class Id(strategy:String) extends StaticAnnotation
@@ -21,15 +33,6 @@ case class Text() extends StaticAnnotation
 case class Length(length:Int) extends StaticAnnotation
 
 @scala.annotation.meta.field
-case class Desc(desc: String) extends StaticAnnotation
-
-@scala.annotation.meta.field
-case class Index() extends StaticAnnotation
-
-@scala.annotation.meta.field
-case class Unique() extends StaticAnnotation
-
-@scala.annotation.meta.field
 case class FK() extends StaticAnnotation
 
 @scala.annotation.meta.field
@@ -37,9 +40,5 @@ case class ManyToMany(mapping: String, master: Boolean, fetch: Boolean) extends 
 
 @scala.annotation.meta.field
 case class OneToMany(mapping: String, relField: String, fetch: Boolean) extends Ignore
-
-
-
-
 
 

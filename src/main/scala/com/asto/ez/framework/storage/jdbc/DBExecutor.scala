@@ -1,10 +1,10 @@
 package com.asto.ez.framework.storage.jdbc
 
 import com.asto.ez.framework.EZContext
-import com.asto.ez.framework.storage.Page
-import com.asto.ez.framework.storage.jdbc.JDBCEntityContainer.JDBCEntityInfo
+import com.asto.ez.framework.storage.{Id, Page}
 import com.ecfront.common.Resp
 
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 
@@ -14,12 +14,42 @@ object DBExecutor {
     val p = Promise[Resp[String]]()
     val tableName = entityInfo.tableName
     val idFieldName = entityInfo.idFieldName
-    val clazz = entityInfo.clazz
     val richValueInfos = collection.mutable.Map[String, Any]()
     richValueInfos ++= valueInfos
     if (entityInfo.idStrategy == Id.STRATEGY_SEQ && richValueInfos.contains(idFieldName) && richValueInfos(idFieldName) == 0) {
       richValueInfos -= idFieldName
     }
+    if (entityInfo.uniqueFieldNames.nonEmpty) {
+      val existQuery = entityInfo.uniqueFieldNames.filter(richValueInfos.contains).map {
+        field =>
+          field + "= ?" -> richValueInfos(field)
+      }.toMap
+      existByCond(entityInfo, context, existQuery.keys.toList.mkString(" OR "), existQuery.values.toList.filter(_ != null)).onSuccess {
+        case existResp =>
+          if (existResp) {
+            if (existResp.body) {
+              p.success(Resp.badRequest(entityInfo.uniqueFieldNames.map {
+                field =>
+                  if (entityInfo.fieldLabel.contains(field)) {
+                    entityInfo.fieldLabel(field)
+                  } else {
+                    field
+                  }
+              }.mkString("[", ",", "]") + " 不唯一"))
+            } else {
+              doSave(tableName, idFieldName, richValueInfos, p)
+            }
+          } else {
+            p.success(existResp)
+          }
+      }
+    } else {
+      doSave(tableName, idFieldName, richValueInfos, p)
+    }
+    p.future
+  }
+
+  private def doSave(tableName: String, idFieldName: String, richValueInfos: mutable.Map[String, Any], p: Promise[Resp[String]]): Unit = {
     val idValue = if (richValueInfos.contains(idFieldName)) richValueInfos(idFieldName) else null
     if (idValue != null) {
       val sql =
@@ -45,66 +75,75 @@ object DBExecutor {
            | VALUES ( ${(for (i <- 0 until richValueInfos.size) yield "?").mkString(",")} )
        """.stripMargin
       DBProcessor.update(sql, richValueInfos.values.toList).onSuccess {
-        case resp =>
-          if (resp) {
-            p.success(Resp.success(null))
-          } else {
-            p.success(resp)
-          }
+        case saveResp =>
+          p.success(saveResp)
       }
     }
-    p.future
   }
 
   def update(entityInfo: JDBCEntityInfo, context: EZContext, idValue: Any, valueInfos: Map[String, Any]): Future[Resp[String]] = {
     val p = Promise[Resp[String]]()
     val idFieldName = entityInfo.idFieldName
-    val clazz = entityInfo.clazz
     val richValueInfos = collection.mutable.Map[String, Any]()
-    richValueInfos ++= valueInfos.filterNot(_._1 == entityInfo.idFieldName)
-    //keys.toList.map ，toList 让map有序
-    val newValues = richValueInfos.keys.toList.map(key => s"$key = ? ").mkString(",")
-    val condition = s" $idFieldName = ? "
-    update(entityInfo, context, newValues, condition, richValueInfos.values.toList ++ List(idValue)).onSuccess {
-      case resp =>
-        if (resp) {
-          p.success(Resp.success(null))
-        } else {
-          p.success(resp)
-        }
+    richValueInfos ++= valueInfos
+    if (entityInfo.uniqueFieldNames.nonEmpty) {
+      val existQuery = entityInfo.uniqueFieldNames.filter(richValueInfos.contains).map {
+        field =>
+          field + "= ?" -> richValueInfos(field)
+      }.toMap
+      existByCond(entityInfo, context, existQuery.keys.toList.mkString(" OR ") + s" AND $idFieldName != ? ", existQuery.values.toList.filter(_ != null) ++ List("?")).onSuccess {
+        case existResp =>
+          if (existResp) {
+            if (existResp.body) {
+              p.success(Resp.badRequest(entityInfo.uniqueFieldNames.map {
+                field =>
+                  if (entityInfo.fieldLabel.contains(field)) {
+                    entityInfo.fieldLabel(field)
+                  } else {
+                    field
+                  }
+              }.mkString("[", ",", "]") + " 不唯一"))
+            } else {
+              doUpdate(entityInfo.tableName, idFieldName, richValueInfos, p)
+            }
+          } else {
+            p.success(existResp)
+          }
+      }
+    } else {
+      doUpdate(entityInfo.tableName, idFieldName, richValueInfos, p)
     }
     p.future
   }
 
+  private def doUpdate(tableName: String, idFieldName: String, richValueInfos: mutable.Map[String, Any], p: Promise[Resp[String]]): Unit = {
+    val sql =
+      s"""
+         |INSERT INTO $tableName
+         | (${richValueInfos.keys.toList.mkString(",")})
+         | VALUES ( ${(for (i <- 0 until richValueInfos.size) yield "?").mkString(",")} )
+         | ON DUPLICATE KEY UPDATE
+         | ${richValueInfos.keys.filterNot(_ == idFieldName).toList.map(key => s"$key = VALUES($key)").mkString(",")}
+       """.stripMargin
+    DBProcessor.update(sql, richValueInfos.values.toList).onSuccess {
+      case updateResp =>
+        p.success(updateResp)
+    }
+  }
+
   def saveOrUpdate(entityInfo: JDBCEntityInfo, context: EZContext, idValue: Any, valueInfos: Map[String, Any]): Future[Resp[String]] = {
     val p = Promise[Resp[String]]()
-    val tableName = entityInfo.tableName
     val idFieldName = entityInfo.idFieldName
-    val idValue = if (valueInfos.contains(idFieldName)) valueInfos(idFieldName) else null
-    if (idValue != null) {
-      val richValueInfos = collection.mutable.Map[String, Any]()
-      richValueInfos ++= valueInfos
-      if (entityInfo.idStrategy == Id.STRATEGY_SEQ && richValueInfos.contains(idFieldName) && richValueInfos(idFieldName) == 0) {
-        richValueInfos -= idFieldName
-      }
-      val sql =
-        s"""
-           |INSERT INTO $tableName
-           | (${richValueInfos.keys.toList.mkString(",")})
-           | VALUES ( ${(for (i <- 0 until richValueInfos.size) yield "?").mkString(",")} )
-           | ON DUPLICATE KEY UPDATE
-           | ${richValueInfos.keys.filterNot(_ == idFieldName).toList.map(key => s"$key = VALUES($key)").mkString(",")}
-       """.stripMargin
-      DBProcessor.update(sql, richValueInfos.values.toList).onSuccess {
-        case resp =>
-          if (resp) {
-            p.success(Resp.success(null))
-          } else {
-            p.success(resp)
-          }
+    if (!valueInfos.contains(idFieldName) || entityInfo.idStrategy == Id.STRATEGY_SEQ && valueInfos.contains(idFieldName) && valueInfos(idFieldName) == 0) {
+      save(entityInfo, context, valueInfos).onSuccess {
+        case saveResp =>
+          p.success(saveResp)
       }
     } else {
-      save(entityInfo, context, valueInfos)
+      update(entityInfo, context, valueInfos(idFieldName), valueInfos).onSuccess {
+        case updateResp =>
+          p.success(updateResp)
+      }
     }
     p.future
   }

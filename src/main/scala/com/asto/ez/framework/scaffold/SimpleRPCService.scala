@@ -9,7 +9,7 @@ import com.asto.ez.framework.storage.mongo.MongoBaseModel
 import com.asto.ez.framework.storage.{BaseModel, Page, StatusModel}
 import com.ecfront.common.{AsyncResp, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
-
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.async.Async._
 import scala.concurrent.Future
 
@@ -28,7 +28,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     }
 
   protected val _isJDBCModel = classOf[JDBCIdModel].isAssignableFrom(_modelClazz)
-  protected val _modelObj = _modelClazz.newInstance()
+  protected val modelObj = _modelClazz.newInstance()
   protected val _emptyCondition = if (_isJDBCModel) "1=1" else "{}"
 
 
@@ -125,7 +125,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
         case preResp =>
           if (preResp) {
             val condition = if (preResp.body.contains("condition")) preResp.body("condition") else _emptyCondition
-            _modelObj.find(condition, List(), context).onSuccess {
+            modelObj.find(condition, List(), context).onSuccess {
               case findResp =>
                 if (findResp) {
                   postFind(preResp.body, findResp.body, context).onSuccess {
@@ -164,7 +164,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
             val condition = if (preResp.body.contains("condition")) preResp.body("condition") else _emptyCondition
             val pageNumber = if (preResp.body.contains("pageNumber")) preResp.body("pageNumber").toLong else 1L
             val pageSize = if (preResp.body.contains("pageSize")) preResp.body("pageSize").toInt else 10
-            _modelObj.page(condition, List(), pageNumber, pageSize, context).onSuccess {
+            modelObj.page(condition, List(), pageNumber, pageSize, context).onSuccess {
               case pageResp =>
                 if (pageResp) {
                   postPage(preResp.body, pageResp.body.asInstanceOf[Page[M]], context).onSuccess {
@@ -203,7 +203,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
         preGet(parameter, context).onSuccess {
           case preResp =>
             if (preResp) {
-              _modelObj.getById(id, context).onSuccess {
+              modelObj.getById(id, context).onSuccess {
                 case getResp =>
                   if (getResp) {
                     postGet(preResp.body, getResp.body, context).onSuccess {
@@ -230,7 +230,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
   protected def preDelete(parameter: Map[String, String], context: EZContext): Future[Resp[Map[String, String]]] = Future(Resp.success(parameter))
 
-  protected def postDelete(parameter: Map[String, String], context: EZContext): Future[Resp[Void]] = Future(Resp.success(Void))
+  protected def postDelete(parameter: Map[String, String], context: EZContext): Future[Resp[Void]] = Future(Resp.success(null))
 
   @DELETE(":id/")
   def _rpc_delete(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = async {
@@ -243,7 +243,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
         preDelete(parameter, context).onSuccess {
           case preResp =>
             if (preResp) {
-              _modelObj.deleteById(id, context).onSuccess {
+              modelObj.deleteById(id, context).onSuccess {
                 case deleteResp =>
                   if (deleteResp) {
                     postDelete(preResp.body, context).onSuccess {
@@ -270,7 +270,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
   protected def preEnable(parameter: Map[String, String], context: EZContext): Future[Resp[Map[String, String]]] = Future(Resp.success(parameter))
 
-  protected def postEnable(parameter: Map[String, String], context: EZContext): Future[Resp[Void]] = Future(Resp.success(Void))
+  protected def postEnable(parameter: Map[String, String], context: EZContext): Future[Resp[Void]] = Future(Resp.success(null))
 
   @GET(":id/enable/")
   def _rpc_enable(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = async {
@@ -283,7 +283,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
         preEnable(parameter, context).onSuccess {
           case preResp =>
             if (preResp) {
-              _modelObj.asInstanceOf[StatusModel].enableById(id, context).onSuccess {
+              modelObj.asInstanceOf[StatusModel].enableById(id, context).onSuccess {
                 case enableResp =>
                   if (enableResp) {
                     postEnable(preResp.body, context).onSuccess {
@@ -310,7 +310,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
   protected def preDisable(parameter: Map[String, String], context: EZContext): Future[Resp[Map[String, String]]] = Future(Resp.success(parameter))
 
-  protected def postDisable(parameter: Map[String, String], context: EZContext): Future[Resp[Void]] = Future(Resp.success(Void))
+  protected def postDisable(parameter: Map[String, String], context: EZContext): Future[Resp[Void]] = Future(Resp.success(null))
 
   @GET(":id/disable/")
   def _rpc_disable(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = async {
@@ -323,7 +323,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
         preDisable(parameter, context).onSuccess {
           case preResp =>
             if (preResp) {
-              _modelObj.asInstanceOf[StatusModel].enableById(id, context).onSuccess {
+              modelObj.asInstanceOf[StatusModel].enableById(id, context).onSuccess {
                 case disableResp =>
                   if (disableResp) {
                     postEnable(preResp.body, context).onSuccess {
