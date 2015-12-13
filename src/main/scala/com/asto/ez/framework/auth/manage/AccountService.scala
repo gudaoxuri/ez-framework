@@ -13,9 +13,8 @@ import scala.concurrent.Future
 object AccountService extends SimpleRPCService[EZ_Account] {
 
   override protected def preSave(model: EZ_Account, context: EZContext): Future[Resp[EZ_Account]] = {
-    super.preSave(model, context)
     if (model.login_id == null || model.login_id.trim.isEmpty || model.password == null || model.password.trim.isEmpty) {
-      Future(Resp.badRequest("Require LoginId and password."))
+      Future(Resp.badRequest("Require【Login_id】and【password】"))
     } else {
       model.password = packageEncryptPwd(model.login_id, model.password)
       Future(Resp.success(model))
@@ -23,9 +22,8 @@ object AccountService extends SimpleRPCService[EZ_Account] {
   }
 
   override protected def preUpdate(model: EZ_Account, context: EZContext): Future[Resp[EZ_Account]] = {
-    super.preUpdate(model, context)
     if (model.login_id == null || model.login_id.trim.isEmpty || model.password == null || model.password.trim.isEmpty) {
-      Future(Resp.badRequest("Require LoginId and password."))
+      Future(Resp.badRequest("Require【Login_id】and【password】"))
     } else {
       model.password = packageEncryptPwd(model.login_id, model.password)
       Future(Resp.success(model))

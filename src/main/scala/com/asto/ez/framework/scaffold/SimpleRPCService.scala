@@ -9,9 +9,10 @@ import com.asto.ez.framework.storage.mongo.MongoBaseModel
 import com.asto.ez.framework.storage.{BaseModel, Page, StatusModel}
 import com.ecfront.common.{AsyncResp, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import scala.concurrent.ExecutionContext.Implicits.global
+
 import scala.async.Async._
-import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Future, Promise}
 
 trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
@@ -31,13 +32,19 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
   protected val modelObj = _modelClazz.newInstance()
   protected val _emptyCondition = if (_isJDBCModel) "1=1" else "{}"
 
+  @POST("")
+  protected def _rpc_save(parameter: Map[String, String], body: M, p: AsyncResp[String], context: EZContext): Unit = {
+    save(parameter, body, context).onSuccess {
+      case resp => p.resp(resp)
+    }
+  }
 
   protected def preSave(model: M, context: EZContext): Future[Resp[M]] = Future(Resp.success(model))
 
   protected def postSave(model: M, savedResult: String, context: EZContext): Future[Resp[String]] = Future(Resp.success(savedResult))
 
-  @POST("")
-  def _rpc_save(parameter: Map[String, String], body: M, p: AsyncResp[String], context: EZContext): Unit = {
+  def save(parameter: Map[String, String], body: M, context: EZContext): Future[Resp[String]] = {
+    val p = Promise[Resp[String]]()
     if (_successful) {
       logger.trace(s" RPC simple save : $body")
       preSave(body, context).onSuccess {
@@ -48,22 +55,26 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
                 if (saveResp) {
                   postSave(preResp.body, saveResp.body, context).onSuccess {
                     case postResp =>
-                      if (postResp) {
-                        p.success(postResp.body)
-                      } else {
-                        p.resp(postResp)
-                      }
+                      p.success(postResp)
                   }
                 } else {
-                  p.resp(saveResp)
+                  p.success(saveResp)
                 }
             }
           } else {
-            p.resp(preResp)
+            p.success(preResp)
           }
       }
     } else {
-      p.notImplemented(_errorMsg)
+      p.success(Resp.notImplemented(_errorMsg))
+    }
+    p.future
+  }
+
+  @PUT(":id/")
+  protected def _rpc_update(parameter: Map[String, String], body: M, p: AsyncResp[String], context: EZContext): Unit = {
+    update(parameter, body, context).onSuccess {
+      case resp => p.resp(resp)
     }
   }
 
@@ -71,10 +82,10 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
   protected def postUpdate(model: M, updatedResult: String, context: EZContext): Future[Resp[String]] = Future(Resp.success(updatedResult))
 
-  @PUT(":id/")
-  def _rpc_update(parameter: Map[String, String], body: M, p: AsyncResp[String], context: EZContext): Unit = {
+  def update(parameter: Map[String, String], body: M, context: EZContext): Future[Resp[String]] = {
+    val p = Promise[Resp[String]]()
     if (!parameter.contains("id")) {
-      p.badRequest("【id】不能为空")
+      p.success(Resp.badRequest("【id】不能为空"))
     } else {
       if (_successful) {
         val id = parameter("id")
@@ -93,23 +104,27 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
                   if (updateResp) {
                     postUpdate(preResp.body, updateResp.body, context).onSuccess {
                       case postResp =>
-                        if (postResp) {
-                          p.success(postResp.body)
-                        } else {
-                          p.resp(postResp)
-                        }
+                        p.success(postResp)
                     }
                   } else {
-                    p.resp(updateResp)
+                    p.success(updateResp)
                   }
               }
             } else {
-              p.resp(preResp)
+              p.success(preResp)
             }
         }
       } else {
-        p.notImplemented(_errorMsg)
+        p.success(Resp.notImplemented(_errorMsg))
       }
+    }
+    p.future
+  }
+
+  @GET("")
+  protected def _rpc_find(parameter: Map[String, String], p: AsyncResp[List[M]], context: EZContext): Unit = {
+    find(parameter, context).onSuccess {
+      case resp => p.resp(resp)
     }
   }
 
@@ -117,8 +132,8 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
   protected def postFind(parameter: Map[String, String], foundResult: List[M], context: EZContext): Future[Resp[List[M]]] = Future(Resp.success(foundResult))
 
-  @GET("")
-  def _rpc_find(parameter: Map[String, String], p: AsyncResp[List[M]], context: EZContext): Unit = async {
+  def find(parameter: Map[String, String], context: EZContext): Future[Resp[List[M]]] = {
+    val p = Promise[Resp[List[M]]]()
     if (_successful) {
       logger.trace(s" RPC simple find : $parameter")
       preFind(parameter, context).onSuccess {
@@ -130,22 +145,26 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
                 if (findResp) {
                   postFind(preResp.body, findResp.body, context).onSuccess {
                     case postResp =>
-                      if (postResp) {
-                        p.success(postResp.body)
-                      } else {
-                        p.resp(postResp)
-                      }
+                      p.success(postResp)
                   }
                 } else {
-                  p.resp(findResp)
+                  p.success(findResp)
                 }
             }
           } else {
-            p.resp(preResp)
+            p.success(preResp)
           }
       }
     } else {
-      p.notImplemented(_errorMsg)
+      p.success(Resp.notImplemented(_errorMsg))
+    }
+    p.future
+  }
+
+  @GET("page/:pageNumber/:pageSize/")
+  protected def _rpc_page(parameter: Map[String, String], p: AsyncResp[Page[M]], context: EZContext): Unit = {
+    page(parameter, context).onSuccess {
+      case resp => p.resp(resp)
     }
   }
 
@@ -153,9 +172,8 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
   protected def postPage(parameter: Map[String, String], pagedResult: Page[M], context: EZContext): Future[Resp[Page[M]]] = Future(Resp.success(pagedResult))
 
-
-  @GET("page/:pageNumber/:pageSize/")
-  def _rpc_page(parameter: Map[String, String], p: AsyncResp[Page[M]], context: EZContext): Unit = async {
+  def page(parameter: Map[String, String], context: EZContext): Future[Resp[Page[M]]] = {
+    val p = Promise[Resp[Page[M]]]()
     if (_successful) {
       logger.trace(s" RPC simple page : $parameter")
       prePage(parameter, context).onSuccess {
@@ -169,22 +187,26 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
                 if (pageResp) {
                   postPage(preResp.body, pageResp.body.asInstanceOf[Page[M]], context).onSuccess {
                     case postResp =>
-                      if (postResp) {
-                        p.success(postResp.body)
-                      } else {
-                        p.resp(postResp)
-                      }
+                      p.success(postResp)
                   }
                 } else {
-                  p.resp(pageResp)
+                  p.success(pageResp)
                 }
             }
           } else {
-            p.resp(preResp)
+            p.success(preResp)
           }
       }
     } else {
-      p.notImplemented(_errorMsg)
+      p.success(Resp.notImplemented(_errorMsg))
+    }
+    p.future
+  }
+
+  @GET(":id/")
+  protected def _rpc_get(parameter: Map[String, String], p: AsyncResp[M], context: EZContext): Unit = {
+    get(parameter, context).onSuccess {
+      case resp => p.resp(resp)
     }
   }
 
@@ -192,10 +214,10 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
   protected def postGet(parameter: Map[String, String], getResult: M, context: EZContext): Future[Resp[M]] = Future(Resp.success(getResult))
 
-  @GET(":id/")
-  def _rpc_get(parameter: Map[String, String], p: AsyncResp[M], context: EZContext): Unit = async {
+  def get(parameter: Map[String, String], context: EZContext): Future[Resp[M]] = {
+    val p = Promise[Resp[M]]()
     if (!parameter.contains("id")) {
-      p.badRequest("【id】不能为空")
+      p.success(Resp.badRequest("【id】不能为空"))
     } else {
       if (_successful) {
         val id = parameter("id")
@@ -208,23 +230,27 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
                   if (getResp) {
                     postGet(preResp.body, getResp.body, context).onSuccess {
                       case postResp =>
-                        if (postResp) {
-                          p.success(postResp.body)
-                        } else {
-                          p.resp(postResp)
-                        }
+                        p.success(postResp)
                     }
                   } else {
-                    p.resp(getResp)
+                    p.success(getResp)
                   }
               }
             } else {
-              p.resp(preResp)
+              p.success(preResp)
             }
         }
       } else {
-        p.notImplemented(_errorMsg)
+        p.success(Resp.notImplemented(_errorMsg))
       }
+    }
+    p.future
+  }
+
+  @DELETE(":id/")
+  protected def _rpc_delete(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = {
+    delete(parameter, context).onSuccess {
+      case resp => p.resp(resp)
     }
   }
 
@@ -232,10 +258,10 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
   protected def postDelete(parameter: Map[String, String], context: EZContext): Future[Resp[Void]] = Future(Resp.success(null))
 
-  @DELETE(":id/")
-  def _rpc_delete(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = async {
+  def delete(parameter: Map[String, String], context: EZContext): Future[Resp[Void]] = {
+    val p = Promise[Resp[Void]]()
     if (!parameter.contains("id")) {
-      p.badRequest("【id】不能为空")
+      p.success(Resp.badRequest("【id】不能为空"))
     } else {
       if (_successful) {
         val id = parameter("id")
@@ -248,23 +274,27 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
                   if (deleteResp) {
                     postDelete(preResp.body, context).onSuccess {
                       case postResp =>
-                        if (postResp) {
-                          p.success(postResp.body)
-                        } else {
-                          p.resp(postResp)
-                        }
+                        p.success(postResp)
                     }
                   } else {
-                    p.resp(deleteResp)
+                    p.success(deleteResp)
                   }
               }
             } else {
-              p.resp(preResp)
+              p.success(preResp)
             }
         }
       } else {
-        p.notImplemented(_errorMsg)
+        p.success(Resp.notImplemented(_errorMsg))
       }
+    }
+    p.future
+  }
+
+  @GET(":id/enable/")
+  protected def _rpc_enable(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = {
+    enable(parameter, context).onSuccess {
+      case resp => p.resp(resp)
     }
   }
 
@@ -272,10 +302,10 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
   protected def postEnable(parameter: Map[String, String], context: EZContext): Future[Resp[Void]] = Future(Resp.success(null))
 
-  @GET(":id/enable/")
-  def _rpc_enable(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = async {
+  def enable(parameter: Map[String, String], context: EZContext): Future[Resp[Void]] = {
+    val p = Promise[Resp[Void]]()
     if (!parameter.contains("id")) {
-      p.badRequest("【id】不能为空")
+      p.success(Resp.badRequest("【id】不能为空"))
     } else {
       if (_successful) {
         val id = parameter("id")
@@ -288,23 +318,27 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
                   if (enableResp) {
                     postEnable(preResp.body, context).onSuccess {
                       case postResp =>
-                        if (postResp) {
-                          p.success(postResp.body)
-                        } else {
-                          p.resp(postResp)
-                        }
+                        p.success(postResp)
                     }
                   } else {
-                    p.resp(enableResp)
+                    p.success(enableResp)
                   }
               }
             } else {
-              p.resp(preResp)
+              p.success(preResp)
             }
         }
       } else {
-        p.notImplemented(_errorMsg)
+        p.success(Resp.notImplemented(_errorMsg))
       }
+    }
+    p.future
+  }
+
+  @GET(":id/disable/")
+  protected def _rpc_disable(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = {
+    disable(parameter, context).onSuccess {
+      case resp => p.resp(resp)
     }
   }
 
@@ -312,10 +346,10 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
   protected def postDisable(parameter: Map[String, String], context: EZContext): Future[Resp[Void]] = Future(Resp.success(null))
 
-  @GET(":id/disable/")
-  def _rpc_disable(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = async {
+  def disable(parameter: Map[String, String], context: EZContext): Future[Resp[Void]] = {
+    val p = Promise[Resp[Void]]()
     if (!parameter.contains("id")) {
-      p.badRequest("【id】不能为空")
+      p.success(Resp.badRequest("【id】不能为空"))
     } else {
       if (_successful) {
         val id = parameter("id")
@@ -328,24 +362,21 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
                   if (disableResp) {
                     postEnable(preResp.body, context).onSuccess {
                       case postResp =>
-                        if (postResp) {
-                          p.success(postResp.body)
-                        } else {
-                          p.resp(postResp)
-                        }
+                        p.success(postResp)
                     }
                   } else {
-                    p.resp(disableResp)
+                    p.success(disableResp)
                   }
               }
             } else {
-              p.resp(preResp)
+              p.success(preResp)
             }
         }
       } else {
-        p.notImplemented(_errorMsg)
+        p.success(Resp.notImplemented(_errorMsg))
       }
     }
+    p.future
   }
 
   @POST("upload/")
