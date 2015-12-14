@@ -7,7 +7,7 @@ import com.asto.ez.framework.rpc.{DELETE, GET, POST, PUT}
 import com.asto.ez.framework.storage.jdbc.JDBCIdModel
 import com.asto.ez.framework.storage.mongo.MongoBaseModel
 import com.asto.ez.framework.storage.{BaseModel, Page, StatusModel}
-import com.ecfront.common.AsyncResp
+import com.ecfront.common.{AsyncResp, JsonHelper}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,7 +18,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
   protected val _errorMsg = "RPC simple service initialized error: Model type must is JDBCIdModel or MongoBaseModel."
   protected val _successful =
-    if (classOf[JDBCIdModel].isAssignableFrom(_modelClazz) && classOf[MongoBaseModel].isAssignableFrom(_modelClazz)) {
+    if (classOf[JDBCIdModel].isAssignableFrom(_modelClazz) || classOf[MongoBaseModel].isAssignableFrom(_modelClazz)) {
       logger.info("RPC simple service initialized.")
       true
     } else {
@@ -31,10 +31,10 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
   protected val _emptyCondition = if (_isJDBCModel) "1=1" else "{}"
 
   @POST("")
-  protected def _rpc_save(parameter: Map[String, String], body: M, p: AsyncResp[String], context: EZContext): Unit = {
+  def _rpc_save(parameter: Map[String, String], body: String, p: AsyncResp[String], context: EZContext): Unit = {
     if (_successful) {
       logger.trace(s" RPC simple save : $body")
-      body.save(context).onSuccess {
+      JsonHelper.toObject(body, _modelClazz).save(context).onSuccess {
         case resp => p.resp(resp)
       }
     } else {
@@ -43,13 +43,21 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
   }
 
   @PUT(":id/")
-  protected def _rpc_update(parameter: Map[String, String], body: M, p: AsyncResp[String], context: EZContext): Unit = {
+  def _rpc_update(parameter: Map[String, String], body: String, p: AsyncResp[String], context: EZContext): Unit = {
     if (_successful) {
       if (!parameter.contains("id")) {
         p.badRequest("【id】不能为空")
       } else {
+        val id=parameter("id")
         logger.trace(s" RPC simple update : $body")
-        body.update(context).onSuccess {
+        val model=JsonHelper.toObject(body, _modelClazz)
+        model match {
+          case b: JDBCIdModel =>
+            b.id = id
+          case b: MongoBaseModel =>
+            b.id = id
+        }
+        model.update(context).onSuccess {
           case resp => p.resp(resp)
         }
       }
@@ -60,7 +68,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
 
   @GET("")
-  protected def _rpc_find(parameter: Map[String, String], p: AsyncResp[List[M]], context: EZContext): Unit = {
+  def _rpc_find(parameter: Map[String, String], p: AsyncResp[List[M]], context: EZContext): Unit = {
     if (_successful) {
       logger.trace(s" RPC simple find : $parameter")
       val condition = if (parameter.contains("condition")) parameter("condition") else _emptyCondition
@@ -74,12 +82,12 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
 
   @GET("page/:pageNumber/:pageSize/")
-  protected def _rpc_page(parameter: Map[String, String], p: AsyncResp[Page[M]], context: EZContext): Unit = {
+  def _rpc_page(parameter: Map[String, String], p: AsyncResp[Page[M]], context: EZContext): Unit = {
     if (_successful) {
       logger.trace(s" RPC simple page : $parameter")
       val condition = if (parameter.contains("condition")) parameter("condition") else _emptyCondition
-      val pageNumber = if (parameter.contains("page_number")) parameter("page_number").toLong else 1L
-      val pageSize = if (parameter.contains("page_size")) parameter("page_size").toInt else 10
+      val pageNumber = if (parameter.contains("pageNumber")) parameter("pageNumber").toLong else 1L
+      val pageSize = if (parameter.contains("pageSize")) parameter("pageSize").toInt else 10
       modelObj.page(condition, List(), pageNumber, pageSize, context).onSuccess {
         case resp => p.resp(resp)
       }
@@ -89,7 +97,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
   }
 
   @GET(":id/")
-  protected def _rpc_get(parameter: Map[String, String], p: AsyncResp[M], context: EZContext): Unit = {
+  def _rpc_get(parameter: Map[String, String], p: AsyncResp[M], context: EZContext): Unit = {
     if (_successful) {
       if (!parameter.contains("id")) {
         p.badRequest("【id】不能为空")
@@ -106,7 +114,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
   }
 
   @DELETE(":id/")
-  protected def _rpc_delete(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = {
+  def _rpc_delete(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = {
     if (_successful) {
       if (!parameter.contains("id")) {
         p.badRequest("【id】不能为空")
@@ -123,7 +131,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
   }
 
   @GET(":id/enable/")
-  protected def _rpc_enable(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = {
+  def _rpc_enable(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = {
     if (_successful) {
       if (!parameter.contains("id")) {
         p.badRequest("【id】不能为空")
@@ -145,7 +153,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
 
   @GET(":id/disable/")
-  protected def _rpc_disable(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = {
+  def _rpc_disable(parameter: Map[String, String], p: AsyncResp[Void], context: EZContext): Unit = {
     if (_successful) {
       if (!parameter.contains("id")) {
         p.badRequest("【id】不能为空")
@@ -157,7 +165,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
             case resp => p.resp(resp)
           }
         } else {
-          p.notImplemented("启用方法未实现")
+          p.notImplemented("停用方法未实现")
         }
       }
     } else {
