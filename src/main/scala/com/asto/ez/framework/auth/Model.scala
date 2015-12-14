@@ -1,9 +1,10 @@
 package com.asto.ez.framework.auth
 
+import com.asto.ez.framework.EZContext
 import com.asto.ez.framework.storage._
 import com.asto.ez.framework.storage.mongo.{MongoBaseModel, MongoSecureModel, MongoStatusModel}
-import com.ecfront.common.Resp
-
+import com.ecfront.common.{EncryptHelper, Resp}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.beans.BeanProperty
 import scala.concurrent.{Future, Promise}
 
@@ -18,10 +19,32 @@ case class EZ_Resource() extends MongoBaseModel with MongoSecureModel with Mongo
   @BeanProperty var method: String = _
   @BeanProperty var uri: String = _
   @BeanProperty var name: String = _
+
+  override protected def preSave(context: EZContext): Future[Resp[Void]] = {
+    if (method == null || method.trim.isEmpty || uri == null || uri.trim.isEmpty) {
+      Future(Resp.badRequest("Require【method】and【uri】"))
+    } else {
+      code = method + EZ_Resource.SPLIT + uri
+      Future(Resp.success(null))
+    }
+  }
+
+  override protected def preUpdate(context: EZContext): Future[Resp[Void]] = {
+    if (method == null || method.trim.isEmpty || uri == null || uri.trim.isEmpty) {
+      Future(Resp.badRequest("Require【method】and【uri】"))
+    } else {
+      code = method + EZ_Resource.SPLIT + uri
+      Future(Resp.success(null))
+    }
+  }
+
 }
 
 object EZ_Resource {
+
+  val model = EZ_Role()
   val SPLIT = "@"
+
 }
 
 /**
@@ -38,6 +61,7 @@ case class EZ_Role() extends MongoBaseModel with MongoSecureModel with MongoStat
 
 object EZ_Role {
 
+  val SYSTEM_ROLE_CODE = "system"
   val model = EZ_Role()
 
   def findByCodes(codes: List[String]): Future[Resp[List[model.type]]] = {
@@ -91,14 +115,38 @@ case class EZ_Account() extends MongoBaseModel with MongoSecureModel with MongoS
   @BeanProperty var ext_info: Map[String, String] = _
   @BeanProperty var organization_code: String = _
   @BeanProperty var role_codes: List[String] = List[String]()
+
+  override protected def preSave(context: EZContext): Future[Resp[Void]] = {
+    if (login_id == null || login_id.trim.isEmpty || password == null || password.trim.isEmpty) {
+      Future(Resp.badRequest("Require【Login_id】and【password】"))
+    } else {
+      password = EZ_Account.packageEncryptPwd(login_id, password)
+      Future(Resp.success(null))
+    }
+  }
+
+  override protected def preUpdate(context: EZContext): Future[Resp[Void]] = {
+    if (login_id == null || login_id.trim.isEmpty || password == null || password.trim.isEmpty) {
+      Future(Resp.badRequest("Require【Login_id】and【password】"))
+    } else {
+      password = EZ_Account.packageEncryptPwd(login_id, password)
+      Future(Resp.success(null))
+    }
+  }
+
 }
 
 object EZ_Account {
 
+  val SYSTEM_ACCOUNT_CODE = "sysadmin"
   val model = EZ_Account()
 
   def getByLoginId(login_id: String): Future[Resp[model.type]] = {
     model.getByCond(s"""{"login_id":"$login_id"}""")
+  }
+
+  def packageEncryptPwd(loginId: String, password: String): String = {
+    EncryptHelper.encrypt(loginId + password)
   }
 
 }

@@ -21,6 +21,8 @@ object EZGlobal extends LazyLogging {
   lazy val ez_storage = if (ez.containsKey("storage")) ez.getJsonObject("storage") else null
   lazy val ez_cache = if (ez.containsKey("cache")) ez.getJsonObject("cache") else null
   lazy val ez_mail = if (ez.containsKey("mail")) ez.getJsonObject("mail") else null
+  lazy val ez_scheduler = if (ez.containsKey("scheduler")) ez.getBoolean("scheduler") else null
+  lazy val ez_auth = if (ez.containsKey("auth")) ez.getJsonObject("auth") else null
 
   lazy val args = config.getJsonObject("args")
 

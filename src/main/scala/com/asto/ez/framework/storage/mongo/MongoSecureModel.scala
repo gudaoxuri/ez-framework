@@ -3,23 +3,24 @@ package com.asto.ez.framework.storage.mongo
 import com.asto.ez.framework.EZContext
 import com.asto.ez.framework.storage.SecureModel
 import com.ecfront.common.Resp
+
 import scala.concurrent.Future
 
 trait MongoSecureModel extends MongoBaseModel with SecureModel {
 
-  override def save(context: EZContext = null): Future[Resp[String]] =  {
+  override def doSave(context: EZContext): Future[Resp[String]] = {
     wrapSecureSave(context)
-    super.save(context)
+    super.doSave(context)
   }
 
-  override def update(context: EZContext = null): Future[Resp[String]] =  {
+  override def doUpdate(context: EZContext): Future[Resp[String]] = {
     wrapSecureUpdate(context)
-    super.update(context)
+    super.doUpdate(context)
   }
 
-  override def saveOrUpdate(context: EZContext = null): Future[Resp[String]] =  {
+  override def doSaveOrUpdate(context: EZContext): Future[Resp[String]] = {
     wrapSecureSave(context)
-    super.saveOrUpdate(context)
+    super.doSaveOrUpdate(context)
   }
 
 }

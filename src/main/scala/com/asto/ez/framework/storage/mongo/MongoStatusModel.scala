@@ -9,31 +9,31 @@ import scala.concurrent.Future
 
 trait MongoStatusModel extends MongoBaseModel with StatusModel {
 
-  override def getEnabledByCond(condition: String = "{}", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[this.type]] = {
+  override def doGetEnabledByCond(condition: String, parameters: List[Any], context: EZContext): Future[Resp[this.type]] = {
     getByCond(appendEnabled(new JsonObject(condition)).encode(), parameters, context)
   }
 
-  override def existEnabled(condition: String = "{}", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Boolean]] = {
+  override def doExistEnabledByCond(condition: String, parameters: List[Any], context: EZContext): Future[Resp[Boolean]] = {
     existByCond(appendEnabled(new JsonObject(condition)).encode(), parameters, context)
   }
 
-  override def findEnabled(condition: String = "{}", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[List[this.type]]] = {
+  override def doFindEnabled(condition: String, parameters: List[Any], context: EZContext): Future[Resp[List[this.type]]] = {
     find(appendEnabled(new JsonObject(condition)).encode(), parameters, context)
   }
 
-  override def pageEnabled(condition: String = "{}", parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10, context: EZContext = null): Future[Resp[Page[this.type]]] = {
+  override def doPageEnabled(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZContext): Future[Resp[Page[this.type]]] = {
     page(appendEnabled(new JsonObject(condition)).encode(), parameters, pageNumber, pageSize, context)
   }
 
-  override def countEnabled(condition: String = "{}", parameters: List[Any] = List(), context: EZContext = null): Future[Resp[Long]] = {
+  override def doCountEnabled(condition: String, parameters: List[Any], context: EZContext): Future[Resp[Long]] = {
     count(appendEnabled(new JsonObject(condition)).encode(), parameters, context)
   }
 
-  override def enableById(id: Any, context: EZContext = null): Future[Resp[Void]] = {
+  override def doEnableById(id: Any, context: EZContext): Future[Resp[Void]] = {
     updateByCond(s"""{"$$set":{"enable":true}}""",s"""{"_id":"$id"}""", List(id), context)
   }
 
-  override def disableById(id: Any, context: EZContext = null): Future[Resp[Void]] = {
+  override def doDisableById(id: Any, context: EZContext): Future[Resp[Void]] = {
     updateByCond(s"""{"$$set":{"enable":false}}""",s"""{"_id":"$id"}""", List(id), context)
   }
 

@@ -24,7 +24,7 @@ class MongoSpec extends BasicSpec {
 
     Await.result(Mongo_Test_Entity().deleteByCond("{}"), Duration.Inf).body
 
-    val mongo = Mongo_Test_Entity()
+    var mongo = Mongo_Test_Entity()
     mongo.name = "name1"
     mongo.parameters = Map("k1" -> "v1", "k2" -> 0, "k3" -> Map("k3-1" -> "v3-1"))
     var id = Await.result(mongo.save(), Duration.Inf).body
@@ -79,14 +79,14 @@ class MongoSpec extends BasicSpec {
 
     Await.result(Mongo_Test_Entity().updateByCond(s"""{"$$set": {"name":"m4"}}""",s"""{"_id":"aaa"}"""), Duration.Inf).body
 
-    var findResult = Await.result(Mongo_Test_Entity().find(), Duration.Inf).body
+    var findResult = Await.result(Mongo_Test_Entity().find("{}"), Duration.Inf).body
     assert(findResult.size == 4)
     assert(findResult.head.name == "n1")
     findResult = Await.result(Mongo_Test_Entity().findWithOpt(s"""{"name":{"$$regex":"^n"}}""", Map(SecureModel.CREATE_TIME_FLAG -> SortEnum.DESC)), Duration.Inf).body
     assert(findResult.size == 3)
     assert(findResult.head.name == "n3")
 
-    var pageResult = Await.result(Mongo_Test_Entity().page(), Duration.Inf).body
+    var pageResult = Await.result(Mongo_Test_Entity().page("{}"), Duration.Inf).body
     assert(pageResult.pageNumber == 1)
     assert(pageResult.pageSize == 10)
     assert(pageResult.recordTotal == 4)
@@ -118,8 +118,23 @@ class MongoSpec extends BasicSpec {
     getResult = Await.result(Mongo_Test_Entity().getById("aaa"), Duration.Inf).body
     assert(getResult == null)
     Await.result(Mongo_Test_Entity().deleteByCond("{}"), Duration.Inf).body
-    findResult = Await.result(Mongo_Test_Entity().find(), Duration.Inf).body
+    findResult = Await.result(Mongo_Test_Entity().find("{}"), Duration.Inf).body
     assert(findResult.isEmpty)
+
+
+    mongo = Mongo_Test_Entity()
+    mongo.name = "name1"
+    mongo.parameters = Map("k1" -> "v1", "k2" -> 0, "k3" -> Map("k3-1" -> "v3-1"))
+    id = Await.result(mongo.save(), Duration.Inf).body
+    mongo=Await.result(Mongo_Test_Entity().getById(id), Duration.Inf).body
+    assert(!mongo.enable)
+    mongo.enable = true
+    Await.result(mongo.update(), Duration.Inf)
+    assert(Await.result(Mongo_Test_Entity().getById(id), Duration.Inf).body.enable)
+    Await.result(Mongo_Test_Entity().disableById(id), Duration.Inf)
+    assert(!Await.result(Mongo_Test_Entity().getById(id), Duration.Inf).body.enable)
+    Await.result(Mongo_Test_Entity().enableById(id), Duration.Inf)
+    assert(Await.result(Mongo_Test_Entity().getById(id), Duration.Inf).body.enable)
 
   }
 
@@ -180,14 +195,14 @@ class MongoSpec extends BasicSpec {
     await(mongo.save()).body
     await(Mongo_Test_Entity().updateByCond(s"""{"$$set": {"name":"m4"}}""",s"""{"_id":"aaa"}""")).body
 
-    var findResult = await(Mongo_Test_Entity().find()).body
+    var findResult = await(Mongo_Test_Entity().find("{}")).body
     assert(findResult.size == 4)
     assert(findResult.head.name == "n1")
     findResult = await(Mongo_Test_Entity().findWithOpt(s"""{"name":{"$$regex":"^n"}}""", Map(SecureModel.CREATE_TIME_FLAG -> SortEnum.DESC))).body
     assert(findResult.size == 3)
     assert(findResult.head.name == "n3")
 
-    var pageResult = await(Mongo_Test_Entity().page()).body
+    var pageResult = await(Mongo_Test_Entity().page("{}")).body
     assert(pageResult.pageNumber == 1)
     assert(pageResult.pageSize == 10)
     assert(pageResult.recordTotal == 4)
@@ -206,7 +221,7 @@ class MongoSpec extends BasicSpec {
     getResult = await(Mongo_Test_Entity().getById("aaa")).body
     assert(getResult == null)
     await(Mongo_Test_Entity().deleteByCond("{}")).body
-    findResult = await(Mongo_Test_Entity().find()).body
+    findResult = await(Mongo_Test_Entity().find("{}")).body
     assert(findResult.isEmpty)
 
   }
@@ -215,7 +230,8 @@ class MongoSpec extends BasicSpec {
 
 @Entity("")
 case class Mongo_Test_Entity() extends MongoSecureModel with MongoStatusModel {
-  @Unique @Label("姓名")
+  @Unique
+  @Label("姓名")
   @BeanProperty var name: String = _
   @BeanProperty var parameters: Map[String, Any] = _
 

@@ -5,8 +5,7 @@
         "host": "0.0.0.0",
         "port": 8080,
         "resourcePath": "c:/tmp/",
-        "publicUriPrefix": "/public/",
-        "authManage": false
+        "publicUriPrefix": "/public/"
       },
       "cluster": {
         "host": "127.0.0.1"
@@ -62,7 +61,10 @@
       "password": "Hi123!qaz!",
       "maxPoolSize": 10
     },
-    "scheduler": false
+    "scheduler": false,
+    "auth":{
+      "useAuth":true
+    }
   },
   "args": {
   }

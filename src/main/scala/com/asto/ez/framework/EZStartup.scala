@@ -1,5 +1,6 @@
 package com.asto.ez.framework
 
+import com.asto.ez.framework.auth.manage.Initiator
 import com.asto.ez.framework.cache.RedisProcessor
 import com.asto.ez.framework.mail.MailProcessor
 import com.asto.ez.framework.rpc.AutoBuildingProcessor
@@ -51,6 +52,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     startRPCServer()
     startStorageConnection()
     startCacheConnection()
+    startAuth()
     startMailClient()
     startScheduler()
   }
@@ -121,6 +123,15 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     }
   }
 
+  private def startAuth(): Unit = {
+    if (EZGlobal.ez_auth != null) {
+      if (EZGlobal.ez_auth.getBoolean("useAuth")) {
+        AutoBuildingProcessor.autoBuilding("com.asto.ez.framework.auth")
+        Initiator.init()
+      }
+    }
+  }
+
   private def startMailClient(): Unit = {
     if (EZGlobal.ez_mail != null) {
       MailProcessor.init(MailClient.createShared(EZGlobal.vertx, new MailConfig(EZGlobal.ez_mail)))
@@ -129,8 +140,10 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
   }
 
   private def startScheduler(): Unit = {
-    if (EZGlobal.ez.getBoolean("scheduler")) {
-      SchedulerService.init(module)
+    if (EZGlobal.ez_scheduler != null) {
+      if (EZGlobal.ez_scheduler) {
+        SchedulerService.init(module)
+      }
     }
   }
 

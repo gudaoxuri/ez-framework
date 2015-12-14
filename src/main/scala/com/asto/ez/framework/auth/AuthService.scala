@@ -3,7 +3,6 @@ package com.asto.ez.framework.auth
 import java.util.UUID
 
 import com.asto.ez.framework.EZContext
-import com.asto.ez.framework.auth.manage.AccountService
 import com.asto.ez.framework.rpc.{GET, HTTP, POST, RPC}
 import com.ecfront.common.AsyncResp
 
@@ -34,7 +33,7 @@ object AuthService {
     val getResp = await(EZ_Account.getByLoginId(loginId))
     if (getResp && getResp.body != null) {
       val account = getResp.body
-      if (AccountService.packageEncryptPwd(loginId, password) == account.password) {
+      if (EZ_Account.packageEncryptPwd(loginId, password) == account.password) {
         val rolesResp = EZ_Role.findByCodes(account.role_codes)
         val orgResp = EZ_Organization.getByCode(account.organization_code)
         val tokenInfo = EZ_Token_Info()

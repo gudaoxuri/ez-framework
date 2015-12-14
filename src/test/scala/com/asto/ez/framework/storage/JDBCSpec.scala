@@ -116,7 +116,7 @@ class JDBCSpec extends JDBCBasicSpec {
     getResult = Await.result(JDBC_Test_Entity().getById(200), Duration.Inf).body
     assert(getResult == null)
     Await.result(JDBC_Test_Entity().deleteByCond("1=1", List()), Duration.Inf).body
-    findResult = Await.result(JDBC_Test_Entity().find(), Duration.Inf).body
+    findResult = Await.result(JDBC_Test_Entity().find("1=1"), Duration.Inf).body
     assert(findResult.isEmpty)
 
   }
@@ -225,7 +225,7 @@ class JDBCSpec extends JDBCBasicSpec {
     getResult = await(JDBC_Test_Entity().getById(200)).body
     assert(getResult == null)
     await(JDBC_Test_Entity().deleteByCond("1=1", List())).body
-    findResult = await(JDBC_Test_Entity().find()).body
+    findResult = await(JDBC_Test_Entity().find("1=1")).body
     assert(findResult.isEmpty)
 
   }
