@@ -419,3 +419,9 @@ trait BaseModel extends Serializable {
 
 }
 
+object BaseModel{
+
+  val SPLIT = "@"
+
+}
+

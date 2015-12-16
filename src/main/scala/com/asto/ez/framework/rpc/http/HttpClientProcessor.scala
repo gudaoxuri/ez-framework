@@ -75,20 +75,5 @@ object HttpClientProcessor extends LazyLogging {
     p.future
   }
 
-  def returnContent(result: Any, response: HttpServerResponse, accept: String = "application/json; charset=UTF-8") {
-    //支持CORS
-    val res = result match {
-      case r: String => r
-      case _ => JsonHelper.toJsonString(result)
-    }
-    logger.trace("Response: \r\n" + res)
-    response.setStatusCode(200).putHeader("Content-Type", accept)
-      .putHeader("Cache-Control", "no-cache")
-      .putHeader("Access-Control-Allow-Origin", "*")
-      .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-      .putHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, X-authentication, X-client")
-      .end(res)
-  }
-
 }
 

@@ -26,22 +26,22 @@ trait SecureModel extends BaseModel {
     val cnt = if (context == null) EZContext.build() else context
     val now = TimeHelper.msf.format(new Date()).toLong
     if (create_user == null) {
-      create_user = if (cnt.userId != null) cnt.userId else ""
+      create_user = if (cnt.login_Id != null) cnt.login_Id else ""
     }
     if (create_time == 0) {
       create_time = now
     }
     if (create_org == null) {
-      create_org = if (cnt.orgId != null) cnt.orgId else ""
+      create_org = if (cnt.organization_code != null) cnt.organization_code else ""
     }
     if (update_user == null) {
-      update_user = if (cnt.userId != null) cnt.userId else ""
+      update_user = if (cnt.login_Id != null) cnt.login_Id else ""
     }
     if (update_time == 0) {
       update_time = now
     }
     if (update_org == null) {
-      update_org = if (cnt.orgId != null) cnt.orgId else ""
+      update_org = if (cnt.organization_code != null) cnt.organization_code else ""
     }
   }
 
@@ -49,13 +49,13 @@ trait SecureModel extends BaseModel {
     val cnt = if (context == null) EZContext.build() else context
     val now = TimeHelper.msf.format(new Date()).toLong
     if (update_user == null) {
-      update_user = if (cnt.userId != null) cnt.userId else ""
+      update_user = if (cnt.login_Id != null) cnt.login_Id else ""
     }
     if (update_time == 0) {
       update_time = now
     }
     if (update_org == null) {
-      update_org = if (cnt.orgId != null) cnt.orgId else ""
+      update_org = if (cnt.organization_code != null) cnt.organization_code else ""
     }
   }
 

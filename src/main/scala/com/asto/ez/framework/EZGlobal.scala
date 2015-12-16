@@ -15,6 +15,7 @@ object EZGlobal extends LazyLogging {
 
   lazy val ez = config.getJsonObject("ez")
   lazy val ez_rpc = if (ez.containsKey("rpc")) ez.getJsonObject("rpc") else null
+  lazy val ez_rpc_http_public_uri_prefix_path = if (ez_rpc != null && ez_rpc.containsKey("http")&& ez_rpc.getJsonObject("http").containsKey("publicUriPrefix")) ez_rpc.getJsonObject("http").getString("publicUriPrefix") else null
   lazy val ez_rpc_http_resource_path = if (ez_rpc != null && ez_rpc.containsKey("http")) ez_rpc.getJsonObject("http").getString("resourcePath") else ""
   lazy val ez_rpc_http_resource_url = if (ez_rpc != null && ez_rpc.containsKey("http")) ez_rpc.getJsonObject("http").getString("publicUriPrefix") else ""
 

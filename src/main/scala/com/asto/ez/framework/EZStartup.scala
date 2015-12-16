@@ -1,10 +1,12 @@
 package com.asto.ez.framework
 
+import com.asto.ez.framework.auth.AuthHttpInterceptor
 import com.asto.ez.framework.auth.manage.Initiator
 import com.asto.ez.framework.cache.RedisProcessor
+import com.asto.ez.framework.interceptor.InterceptorProcessor
 import com.asto.ez.framework.mail.MailProcessor
 import com.asto.ez.framework.rpc.AutoBuildingProcessor
-import com.asto.ez.framework.rpc.http.{HttpClientProcessor, HttpServerProcessor}
+import com.asto.ez.framework.rpc.http.{HttpClientProcessor, HttpInterceptor, HttpServerProcessor}
 import com.asto.ez.framework.rpc.websocket.WebSocketServerProcessor
 import com.asto.ez.framework.scheduler.SchedulerService
 import com.asto.ez.framework.storage.jdbc.DBProcessor
@@ -127,6 +129,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     if (EZGlobal.ez_auth != null) {
       if (EZGlobal.ez_auth.getBoolean("useAuth")) {
         AutoBuildingProcessor.autoBuilding("com.asto.ez.framework.auth")
+        InterceptorProcessor.register(HttpInterceptor.category, List(AuthHttpInterceptor))
         Initiator.init()
       }
     }
