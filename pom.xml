@@ -24,6 +24,7 @@
     </scm>
 
     <properties>
+        <main.verticle>com.ecfront.foo</main.verticle>
     </properties>
 
     <dependencies>
@@ -87,8 +88,7 @@
 
     <repositories>
         <repository>
-            <id>offical</id>
-            <name>Maven Official Repository</name>
+            <id>official</id>
             <url>http://repo1.maven.org/maven2</url>
         </repository>
         <repository>
@@ -96,5 +96,11 @@
             <url>https://oss.sonatype.org/content/groups/staging/</url>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>official</id>
+            <url>http://repo1.maven.org/maven2</url>
+        </pluginRepository>
+    </pluginRepositories>
 
 </project>
