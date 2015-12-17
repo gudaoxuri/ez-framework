@@ -34,14 +34,13 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
 
   protected def shutdown() = {}
 
-  override def start(startFuture: Future[Void]): Unit = {
-    super.start(startFuture)
-  }
-
   /**
     * 启动入口
     */
   override def start(): Unit = {
+    System.setProperty("vertx.disableFileCaching", "true")
+    System.setProperty("vertx.disableFileCPResolving", "true")
+    System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
     EZGlobal.vertx = if (vertx != null) vertx else Vertx.vertx()
     EZGlobal.config = if (vertx != null) config() else new JsonObject(Source.fromFile(this.getClass.getResource("/").getPath + "config.json").mkString)
     HttpClientProcessor.httpClient = EZGlobal.vertx.createHttpClient()
