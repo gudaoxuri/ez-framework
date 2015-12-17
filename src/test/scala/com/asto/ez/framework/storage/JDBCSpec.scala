@@ -83,9 +83,9 @@ class JDBCSpec extends JDBCBasicSpec {
     jdbc.name = "n4"
     jdbc.create_time = 0
     assert(Await.result(jdbc.save(), Duration.Inf).message.contains("姓名"))
-    assert(Await.result(JDBC_Test_Entity().getById(300), Duration.Inf).body==null)
+    assert(Await.result(JDBC_Test_Entity().getById(300), Duration.Inf).body == null)
     getResult = Await.result(JDBC_Test_Entity().getById(200), Duration.Inf).body
-    getResult.name="n2"
+    getResult.name = "n2"
     assert(Await.result(getResult.update(), Duration.Inf).message.contains("姓名"))
 
     Await.result(JDBC_Test_Entity().updateByCond("name =?", "id =?", List("m4", 200)), Duration.Inf)
@@ -237,7 +237,8 @@ case class JDBC_Test_Entity() extends JDBCSecureModel with JDBCStatusModel {
 
   @Id("seq")
   @BeanProperty var id: Long = _
-  @Unique @Label("姓名")
+  @Unique
+  @Label("姓名")
   @BeanProperty var name: String = _
   @BeanProperty var age: Int = _
 
