@@ -91,7 +91,7 @@ object DBExecutor {
         field =>
           field + "= ?" -> richValueInfos(field)
       }.toMap
-      existByCond(entityInfo, context, existQuery.keys.toList.mkString(" OR ") + s" AND $idFieldName != ? ", existQuery.values.toList.filter(_ != null) ++ List("?")).onSuccess {
+      existByCond(entityInfo, context, existQuery.keys.toList.mkString(" OR ") + s" AND $idFieldName != ? ", existQuery.values.toList.filter(_ != null) ++ List(idValue)).onSuccess {
         case existResp =>
           if (existResp) {
             if (existResp.body) {

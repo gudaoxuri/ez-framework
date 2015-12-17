@@ -60,7 +60,7 @@ class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
     }
   }
 
-  private def execute(request: HttpServerRequest, fun: Fun[_], context: EZContext):Unit = {
+  private def execute(request: HttpServerRequest, fun: Fun[_], context: EZContext): Unit = {
     if (request.headers().contains("Content-Type") && request.headers.get("Content-Type").toLowerCase.startsWith("multipart/form-data")) {
       //上传处理
       request.setExpectMultipart(true)
@@ -106,34 +106,36 @@ class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
     }
   }
 
-  private def execute(request: HttpServerRequest, body: Any, fun: Fun[_], context: EZContext, response: HttpServerResponse):Unit= {
-    InterceptorProcessor.process[EZContext](HttpInterceptor.category, context, {
-      (info, interContext) =>
-        try {
-          val b = if (body != null) {
-            context.contentType match {
-              case t if t.contains("json") => JsonHelper.toObject(body, fun.requestClass)
-              case _ => logger.error("Not support content type:" + context.contentType)
+  private def execute(request: HttpServerRequest, body: Any, fun: Fun[_], context: EZContext, response: HttpServerResponse): Unit = {
+    InterceptorProcessor.process[EZContext](HttpInterceptor.category, context).onSuccess {
+      case interResp =>
+        if (interResp) {
+          val newContext = interResp.body._1
+          try {
+            val b = if (body != null) {
+              newContext.contentType match {
+                case t if t.contains("json") => JsonHelper.toObject(body, fun.requestClass)
+                case _ => logger.error("Not support content type:" + newContext.contentType)
+              }
+            } else {
+              null
             }
-          } else {
-            null
-          }
-          fun.execute(context.parameters, b, context).onSuccess {
-            case excResp =>
-              returnContent(excResp, response, context.accept)
-          }
-          Future(Resp.success(null))
-        } catch {
-          case e: Exception =>
-            logger.error("Execute function error.", e)
-            returnContent(Resp.serverError(e.getMessage), response, context.accept)
+            fun.execute(newContext.parameters, b, newContext).onSuccess {
+              case excResp =>
+                returnContent(excResp, response, newContext.accept)
+            }
             Future(Resp.success(null))
+          } catch {
+            case e: Exception =>
+              logger.error("Execute function error.", e)
+              returnContent(Resp.serverError(e.getMessage), response, newContext.accept)
+              Future(Resp.success(null))
+          }
+        } else {
+          returnContent(interResp, request.response())
+          Future(Resp.success(null))
         }
-    }, {
-      (resp, context) =>
-        returnContent(resp, request.response())
-        Future(Resp.success(null))
-    })
+    }
   }
 
   private def returnContent(result: Any, response: HttpServerResponse, accept: String = "application/json; charset=UTF-8") {

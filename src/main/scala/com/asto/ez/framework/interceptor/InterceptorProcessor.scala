@@ -14,35 +14,57 @@ object InterceptorProcessor extends LazyLogging {
     interceptor_container += category -> interceptors
   }
 
-  def process[E](category: String, obj: E, successFun: => (E, Map[String, Any]) => Future[Resp[Void]], errorFun: => (Resp[E], Map[String, Any]) => Future[Resp[Void]] = null) = {
-    val beforeP = Promise[Resp[E]]()
+  def process[E](category: String, obj: E, executeFun: => (E, Map[String, Any]) => Future[Resp[E]] = null): Future[Resp[(E, Map[String, Any])]] = {
+    val finishP = Promise[Resp[(E, Map[String, Any])]]()
     val context = collection.mutable.Map[String, Any]()
-    doProcess[E](obj, context, interceptor_container(category).asInstanceOf[List[EZInterceptor[E]]], isBefore = true, AsyncResp(beforeP))
-    beforeP.future.onSuccess {
-      case beforeResp =>
-        if (beforeResp) {
-          successFun(beforeResp.body, context.toMap).onSuccess {
-            case successResp =>
-              if (successResp) {
-                val afterP = Promise[Resp[E]]()
-                doProcess[E](obj, context, interceptor_container(category).asInstanceOf[List[EZInterceptor[E]]].reverse, isBefore = false, AsyncResp(afterP))
-                afterP.future.onSuccess {
-                  case afterResp =>
-                    if (!afterResp) {
-                      logger.warn(s"Execute interceptor error : ${afterResp.message}")
+    if (interceptor_container.contains(category)) {
+      val beforeP = Promise[Resp[E]]()
+      doProcess[E](obj, context, interceptor_container(category).asInstanceOf[List[EZInterceptor[E]]], isBefore = true, AsyncResp(beforeP))
+      beforeP.future.onSuccess {
+        case beforeResp =>
+          if (beforeResp) {
+            if (executeFun != null) {
+              executeFun(beforeResp.body, context.toMap).onSuccess {
+                case executeResp =>
+                  if (executeResp) {
+                    val afterP = Promise[Resp[E]]()
+                    doProcess[E](executeResp.body, context, interceptor_container(category).asInstanceOf[List[EZInterceptor[E]]].reverse, isBefore = false, AsyncResp(afterP))
+                    afterP.future.onSuccess {
+                      case afterResp =>
+                        if (!afterResp) {
+                          logger.warn(s"Execute after interceptor error : ${afterResp.message}")
+                          finishP.success(afterResp)
+                        } else {
+                          finishP.success(Resp.success((afterResp.body, context.toMap)))
+                        }
                     }
-                }
-              } else {
-                logger.warn(s"Execute interceptor error : ${successResp.message}")
+                  } else {
+                    logger.warn(s"Execute interceptor error : ${executeResp.message}")
+                    finishP.success(executeResp)
+                  }
               }
+            } else {
+              val afterP = Promise[Resp[E]]()
+              doProcess[E](beforeResp.body, context, interceptor_container(category).asInstanceOf[List[EZInterceptor[E]]].reverse, isBefore = false, AsyncResp(afterP))
+              afterP.future.onSuccess {
+                case afterResp =>
+                  if (!afterResp) {
+                    logger.warn(s"Execute after interceptor error : ${afterResp.message}")
+                    finishP.success(afterResp)
+                  } else {
+                    finishP.success(Resp.success((afterResp.body, context.toMap)))
+                  }
+              }
+            }
+          } else {
+            logger.warn(s"Execute before interceptor error : ${beforeResp.message}")
+            finishP.success(beforeResp)
           }
-        } else {
-          logger.warn(s"Execute interceptor error : ${beforeResp.message}")
-          if (errorFun != null) {
-            errorFun(beforeResp, context.toMap)
-          }
-        }
+      }
+    } else {
+      finishP.success(Resp.success((obj, context.toMap)))
     }
+    finishP.future
   }
 
   private def doProcess[E](obj: E, context: collection.mutable.Map[String, Any], interceptors: List[EZInterceptor[E]], isBefore: Boolean, interP: AsyncResp[E]): Unit = {
