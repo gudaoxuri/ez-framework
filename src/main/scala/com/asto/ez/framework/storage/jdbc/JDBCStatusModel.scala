@@ -1,14 +1,16 @@
 package com.asto.ez.framework.storage.jdbc
 
 import com.asto.ez.framework.EZContext
-import com.asto.ez.framework.storage.{Page, StatusModel}
+import com.asto.ez.framework.storage.{StatusStorage, Page, StatusModel}
 import com.ecfront.common.Resp
 
 import scala.concurrent.Future
 
-trait JDBCStatusModel extends JDBCBaseModel with StatusModel {
+trait JDBCStatusModel extends JDBCBaseModel with StatusModel
 
-  override def doGetEnabledByCond(condition: String, parameters: List[Any], context: EZContext): Future[Resp[this.type]] = {
+trait JDBCStatusStorage[M <: JDBCStatusModel] extends JDBCBaseStorage[M] with StatusStorage[M] {
+
+  override def doGetEnabledByCond(condition: String, parameters: List[Any], context: EZContext): Future[Resp[M]] = {
     getByCond(appendEnabled(condition), parameters, context)
   }
 
@@ -16,11 +18,11 @@ trait JDBCStatusModel extends JDBCBaseModel with StatusModel {
     existByCond(appendEnabled(condition), parameters, context)
   }
 
-  override def doFindEnabled(condition: String, parameters: List[Any], context: EZContext): Future[Resp[List[this.type]]] = {
+  override def doFindEnabled(condition: String, parameters: List[Any], context: EZContext): Future[Resp[List[M]]] = {
     find(appendEnabled(condition), parameters, context)
   }
 
-  override def doPageEnabled(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZContext): Future[Resp[Page[this.type]]] = {
+  override def doPageEnabled(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZContext): Future[Resp[Page[M]]] = {
     page(appendEnabled(condition), parameters, pageNumber, pageSize, context)
   }
 

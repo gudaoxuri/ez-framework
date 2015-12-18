@@ -14,7 +14,7 @@ class AuthSpec extends MockStartupSpec {
 
     Thread.sleep(4000)
 
-    val resources = Await.result(EZ_Resource.model.find("{}"), Duration.Inf).body
+    val resources = Await.result(EZ_Resource.find("{}"), Duration.Inf).body
     assert(
       resources.size == 14
         && resources.head.method == Method.GET
@@ -23,7 +23,7 @@ class AuthSpec extends MockStartupSpec {
         && resources.head.enable
     )
 
-    val roles = Await.result(EZ_Role.model.find("{}"), Duration.Inf).body
+    val roles = Await.result(EZ_Role.find("{}"), Duration.Inf).body
     assert(
       roles.size == 1
         && roles.head.code == BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE
@@ -33,7 +33,7 @@ class AuthSpec extends MockStartupSpec {
         && roles.head.resource_codes.head == s"GET${BaseModel.SPLIT}/auth/logininfo/"
     )
 
-    val accounts = Await.result(EZ_Account.model.find("{}"), Duration.Inf).body
+    val accounts = Await.result(EZ_Account.find("{}"), Duration.Inf).body
     assert(
       accounts.size == 1
         && accounts.head.login_id == EZ_Account.SYSTEM_ACCOUNT_CODE

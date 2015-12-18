@@ -22,42 +22,6 @@ trait SecureModel extends BaseModel {
   @Index
   @BeanProperty var update_org: String = _
 
-  def wrapSecureSave(context: EZContext): Unit = {
-    val cnt = if (context == null) EZContext.build() else context
-    val now = TimeHelper.msf.format(new Date()).toLong
-    if (create_user == null) {
-      create_user = if (cnt.login_Id != null) cnt.login_Id else ""
-    }
-    if (create_time == 0) {
-      create_time = now
-    }
-    if (create_org == null) {
-      create_org = if (cnt.organization_code != null) cnt.organization_code else ""
-    }
-    if (update_user == null) {
-      update_user = if (cnt.login_Id != null) cnt.login_Id else ""
-    }
-    if (update_time == 0) {
-      update_time = now
-    }
-    if (update_org == null) {
-      update_org = if (cnt.organization_code != null) cnt.organization_code else ""
-    }
-  }
-
-  def wrapSecureUpdate(context: EZContext): Unit = {
-    val cnt = if (context == null) EZContext.build() else context
-    val now = TimeHelper.msf.format(new Date()).toLong
-    if (update_user == null) {
-      update_user = if (cnt.login_Id != null) cnt.login_Id else ""
-    }
-    if (update_time == 0) {
-      update_time = now
-    }
-    if (update_org == null) {
-      update_org = if (cnt.organization_code != null) cnt.organization_code else ""
-    }
-  }
 
 }
 
@@ -73,3 +37,45 @@ object SecureModel {
   val UPDATE_TIME_FLAG = "update_time"
 
 }
+
+trait SecureStorage[M <: SecureModel] extends BaseStorage[M] {
+
+  def wrapSecureSave(model: M, context: EZContext): Unit = {
+    val cnt = if (context == null) EZContext.build() else context
+    val now = TimeHelper.msf.format(new Date()).toLong
+    if (model.create_user == null) {
+      model.create_user = if (cnt.login_Id != null) cnt.login_Id else ""
+    }
+    if (model.create_time == 0) {
+      model.create_time = now
+    }
+    if (model.create_org == null) {
+      model.create_org = if (cnt.organization_code != null) cnt.organization_code else ""
+    }
+    if (model.update_user == null) {
+      model.update_user = if (cnt.login_Id != null) cnt.login_Id else ""
+    }
+    if (model.update_time == 0) {
+      model.update_time = now
+    }
+    if (model.update_org == null) {
+      model.update_org = if (cnt.organization_code != null) cnt.organization_code else ""
+    }
+  }
+
+  def wrapSecureUpdate(model: M, context: EZContext): Unit = {
+    val cnt = if (context == null) EZContext.build() else context
+    val now = TimeHelper.msf.format(new Date()).toLong
+    if (model.update_user == null) {
+      model.update_user = if (cnt.login_Id != null) cnt.login_Id else ""
+    }
+    if (model.update_time == 0) {
+      model.update_time = now
+    }
+    if (model.update_org == null) {
+      model.update_org = if (cnt.organization_code != null) cnt.organization_code else ""
+    }
+  }
+
+}
+

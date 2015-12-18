@@ -12,14 +12,14 @@ object Initiator extends LazyLogging {
 
   def init() = async {
 
-    val exist = await(EZ_Resource.model.existByCond(s"""{"code":"${BaseModel.SPLIT + Method.GET + BaseModel.SPLIT + "/auth/logininfo/"}"}""")).body
+    val exist = await(EZ_Resource.existByCond(s"""{"code":"${BaseModel.SPLIT + Method.GET + BaseModel.SPLIT + "/auth/logininfo/"}"}""")).body
     if (!exist) {
 
       val org = EZ_Organization()
       org.code = ""
       org.name = "default"
       org.enable = true
-      await(org.save())
+      await(EZ_Organization.save(org))
 
       val res = EZ_Resource()
       res.method = Method.GET
@@ -27,71 +27,71 @@ object Initiator extends LazyLogging {
       res.name = s"Fetch Login Info"
       res.enable = true
 
-      await(res.save())
+      await(EZ_Resource.save(res))
       res.method = Method.GET
       res.uri = "/auth/logout/"
       res.name = s"Logout"
-      await(res.save())
+      await(EZ_Resource.save(res))
 
       res.method = Method.GET
       res.uri = "/auth/manage/account/:id/"
       res.name = s"Fetch Account By Id"
-      await(res.save())
+      await(EZ_Resource.save(res))
 
       res.method = Method.POST
       res.uri = "/auth/manage/account/"
       res.name = s"Save a new Account"
-      await(res.save())
+      await(EZ_Resource.save(res))
 
       res.method = Method.PUT
       res.uri = "/auth/manage/account/:id/"
       res.name = s"Update a exist Account By Id"
-      await(res.save())
+      await(EZ_Resource.save(res))
 
       res.method = Method.DELETE
       res.uri = "/auth/manage/account/:id/"
       res.name = s"Delete a exist Account By Id"
-      await(res.save())
+      await(EZ_Resource.save(res))
 
       res.method = Method.GET
       res.uri = "/auth/manage/role/:id/"
       res.name = s"Fetch Role By Id"
-      await(res.save())
+      await(EZ_Resource.save(res))
 
       res.method = Method.POST
       res.uri = "/auth/manage/role/"
       res.name = s"Save a new Role"
-      await(res.save())
+      await(EZ_Resource.save(res))
 
       res.method = Method.PUT
       res.uri = "/auth/manage/role/:id/"
       res.name = s"Update a exist Role By Id"
-      await(res.save())
+      await(EZ_Resource.save(res))
 
       res.method = Method.DELETE
       res.uri = "/auth/manage/role/:id/"
       res.name = s"Delete a exist Role By Id"
-      await(res.save())
+      await(EZ_Resource.save(res))
 
       res.method = Method.GET
       res.uri = "/auth/manage/resource/:id/"
       res.name = s"Fetch Resource By Id"
-      await(res.save())
+      await(EZ_Resource.save(res))
 
       res.method = Method.POST
       res.uri = "/auth/manage/resource/"
       res.name = s"Save a new Resource"
-      await(res.save())
+      await(EZ_Resource.save(res))
 
       res.method = Method.PUT
       res.uri = "/auth/manage/resource/:id/"
       res.name = s"Update a exist Resource By Id"
-      await(res.save())
+      await(EZ_Resource.save(res))
 
       res.method = Method.DELETE
       res.uri = "/auth/manage/resource/:id/"
       res.name = s"Delete a exist Resource By Id"
-      await(res.save())
+      await(EZ_Resource.save(res))
 
       val role = EZ_Role()
       role.flag = EZ_Role.SYSTEM_ROLE_CODE
@@ -114,7 +114,7 @@ object Initiator extends LazyLogging {
         s"PUT${BaseModel.SPLIT}/auth/manage/resource/:id/",
         s"DELETE${BaseModel.SPLIT}/auth/manage/resource/:id/"
       )
-      await(role.save())
+      await(EZ_Role.save(role))
 
       val account = EZ_Account()
       account.login_id = EZ_Account.SYSTEM_ACCOUNT_CODE
@@ -125,7 +125,7 @@ object Initiator extends LazyLogging {
       account.role_codes = List(
         BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE
       )
-      await(account.save())
+      await(EZ_Account.save(account))
       logger.info("Initialized auth basic data.")
     }
   }

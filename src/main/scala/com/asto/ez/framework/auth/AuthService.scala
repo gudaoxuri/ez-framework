@@ -48,9 +48,9 @@ object AuthService {
             } yield {
               tokenInfo.roles = rolesResp.body
               tokenInfo.organization = orgResp.body
-              EZ_Token_Info.model.deleteByCond(s"""{"login_id":"${tokenInfo.login_id}"}""").onSuccess {
+              EZ_Token_Info.deleteByCond(s"""{"login_id":"${tokenInfo.login_id}"}""").onSuccess {
                 case logoutResp =>
-                  tokenInfo.save().onSuccess {
+                  EZ_Token_Info.save(tokenInfo).onSuccess {
                     case saveResp =>
                       p.success(
                         Token_Info_VO(
@@ -85,7 +85,7 @@ object AuthService {
     *
     */
   def doLogout(token: String, p: AsyncResp[Void]) = {
-    EZ_Token_Info.model.deleteById(token).onSuccess {
+    EZ_Token_Info.deleteById(token).onSuccess {
       case logoutResp => p.resp(logoutResp)
     }
   }
@@ -100,7 +100,7 @@ object AuthService {
     *
     */
   def doGetLoginInfo(token: String, p: AsyncResp[Token_Info_VO]) = {
-    EZ_Token_Info.model.getById(token).onSuccess {
+    EZ_Token_Info.getById(token).onSuccess {
       case tokenResp =>
         if (tokenResp && tokenResp.body != null) {
           val tokenInfo = tokenResp.body

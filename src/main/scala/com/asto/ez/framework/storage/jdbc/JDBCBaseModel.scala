@@ -1,38 +1,46 @@
 package com.asto.ez.framework.storage.jdbc
 
 import com.asto.ez.framework.EZContext
-import com.asto.ez.framework.storage.{BaseModel, Page}
+import com.asto.ez.framework.storage.{BaseModel, BaseStorage, Page}
 import com.ecfront.common.{BeanHelper, Resp}
 
 import scala.concurrent.Future
 
-trait JDBCBaseModel extends BaseModel {
+trait JDBCBaseModel extends BaseModel
 
-  protected def _entityInfo =
-    if (JDBCEntityContainer.CONTAINER.contains(getTableName)) {
-      JDBCEntityContainer.CONTAINER(getTableName)
+object JDBCBaseModel {
+
+  val REL_FLAG = "rel"
+
+}
+
+trait JDBCBaseStorage[M <: JDBCBaseModel] extends BaseStorage[M] {
+
+  protected val _entityInfo =
+    if (JDBCEntityContainer.CONTAINER.contains(tableName)) {
+      JDBCEntityContainer.CONTAINER(tableName)
     } else {
-      JDBCEntityContainer.buildingEntityInfo(_modelClazz, getTableName)
-      JDBCEntityContainer.CONTAINER(getTableName)
+      JDBCEntityContainer.buildingEntityInfo(_modelClazz, tableName)
+      JDBCEntityContainer.CONTAINER(tableName)
     }
 
-  override def doSave(context: EZContext): Future[Resp[String]] = {
-    DBExecutor.save(_entityInfo, if (context == null) EZContext.build() else context, JDBCBaseModel.getMapValue(this).filter(_._2 != null))
+  override def doSave(model: M, context: EZContext): Future[Resp[String]] = {
+    DBExecutor.save(_entityInfo, if (context == null) EZContext.build() else context, getMapValue(model).filter(_._2 != null))
   }
 
-  override def doUpdate(context: EZContext): Future[Resp[String]] = {
-    DBExecutor.update(_entityInfo, if (context == null) EZContext.build() else context, JDBCBaseModel.getIdValue(this), JDBCBaseModel.getMapValue(this).filter(_._2 != null))
+  override def doUpdate(model: M, context: EZContext): Future[Resp[String]] = {
+    DBExecutor.update(_entityInfo, if (context == null) EZContext.build() else context, getIdValue(model), getMapValue(model).filter(_._2 != null))
   }
 
-  override def doSaveOrUpdate(context: EZContext): Future[Resp[String]] = {
-    DBExecutor.saveOrUpdate(_entityInfo, if (context == null) EZContext.build() else context, JDBCBaseModel.getIdValue(this), JDBCBaseModel.getMapValue(this).filter(_._2 != null))
+  override def doSaveOrUpdate(model: M, context: EZContext): Future[Resp[String]] = {
+    DBExecutor.saveOrUpdate(_entityInfo, if (context == null) EZContext.build() else context, getIdValue(model), getMapValue(model).filter(_._2 != null))
   }
 
   override def doDeleteById(id: Any, context: EZContext): Future[Resp[Void]] = {
     DBExecutor.delete(_entityInfo, if (context == null) EZContext.build() else context, id)
   }
 
-  override def doGetById(id: Any, context: EZContext): Future[Resp[this.type]] = {
+  override def doGetById(id: Any, context: EZContext): Future[Resp[M]] = {
     DBExecutor.get(_entityInfo, if (context == null) EZContext.build() else context, id)
   }
 
@@ -44,7 +52,7 @@ trait JDBCBaseModel extends BaseModel {
     DBExecutor.delete(_entityInfo, if (context == null) EZContext.build() else context, condition, parameters)
   }
 
-  override def doGetByCond(condition: String, parameters: List[Any], context: EZContext): Future[Resp[this.type]] = {
+  override def doGetByCond(condition: String, parameters: List[Any], context: EZContext): Future[Resp[M]] = {
     DBExecutor.get(_entityInfo, if (context == null) EZContext.build() else context, condition, parameters)
   }
 
@@ -56,11 +64,11 @@ trait JDBCBaseModel extends BaseModel {
     DBExecutor.existByCond(_entityInfo, if (context == null) EZContext.build() else context, condition, parameters)
   }
 
-  override def doFind(condition: String, parameters: List[Any], context: EZContext): Future[Resp[List[this.type]]] = {
+  override def doFind(condition: String, parameters: List[Any], context: EZContext): Future[Resp[List[M]]] = {
     DBExecutor.find(_entityInfo, if (context == null) EZContext.build() else context, condition, parameters)
   }
 
-  override def doPage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZContext): Future[Resp[Page[this.type]]] = {
+  override def doPage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZContext): Future[Resp[Page[M]]] = {
     DBExecutor.page(_entityInfo, if (context == null) EZContext.build() else context, condition, parameters, pageNumber, pageSize)
   }
 
@@ -68,20 +76,14 @@ trait JDBCBaseModel extends BaseModel {
     DBExecutor.count(_entityInfo, if (context == null) EZContext.build() else context, condition, parameters)
   }
 
-}
-
-object JDBCBaseModel {
-
-  val REL_FLAG = "rel"
-
   protected def getMapValue(model: JDBCBaseModel): Map[String, Any] = {
     //获取对象要持久化字段的值，忽略为null的id字段（由seq控制）
-    BeanHelper.findValues(model, model._entityInfo.ignoreFieldNames)
-      .filterNot(item => item._1 == model._entityInfo.idFieldName && (item._2 == null || item._2.toString.trim == ""))
+    BeanHelper.findValues(model, _entityInfo.ignoreFieldNames)
+      .filterNot(item => item._1 == _entityInfo.idFieldName && (item._2 == null || item._2.toString.trim == ""))
   }
 
   protected def getIdValue(model: JDBCBaseModel): Any = {
-    getValueByField(model, model._entityInfo.idFieldName)
+    getValueByField(model, _entityInfo.idFieldName)
   }
 
   protected def getValueByField(model: AnyRef, fieldName: String): Any = {
@@ -93,3 +95,4 @@ object JDBCBaseModel {
   }
 
 }
+

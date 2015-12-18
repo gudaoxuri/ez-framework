@@ -12,16 +12,16 @@ class OrganizationSpec extends MockStartupSpec {
 
   test("Organization test") {
 
-    EZ_Organization.model.deleteByCond(s"""{"code":"org1"}""")
-    EZ_Resource.model.deleteByCond(s"""{"code":"GET@/org/1/foo/"}""")
-    EZ_Role.model.deleteByCond(s"""{"code":"org1@user1"}""")
-    EZ_Account.model.deleteByCond(s"""{"login_id":"u1"}""")
+    EZ_Organization.deleteByCond(s"""{"code":"org1"}""")
+    EZ_Resource.deleteByCond(s"""{"code":"GET@/org/1/foo/"}""")
+    EZ_Role.deleteByCond(s"""{"code":"org1@user1"}""")
+    EZ_Account.deleteByCond(s"""{"login_id":"u1"}""")
 
     val org = EZ_Organization()
     org.code = "org1"
     org.name = "组织1"
     org.enable = true
-    Await.result(org.save(), Duration.Inf)
+    Await.result(EZ_Organization.save(org), Duration.Inf)
 
     val res = EZ_Resource()
     res.method = Method.GET
@@ -38,7 +38,7 @@ class OrganizationSpec extends MockStartupSpec {
       s"GET@/org/1/foo/",
       s"GET@/auth/manage/account/"
     )
-    Await.result(role.save(), Duration.Inf)
+    Await.result(EZ_Role.save(role), Duration.Inf)
 
     var account = EZ_Account()
     account.login_id = "u1"
@@ -49,7 +49,7 @@ class OrganizationSpec extends MockStartupSpec {
     account.role_codes = List(
       "org1@user1"
     )
-    Await.result(account.save(), Duration.Inf)
+    Await.result(EZ_Account.save(account), Duration.Inf)
 
     //login
     val loginP = Promise[Resp[Token_Info_VO]]()

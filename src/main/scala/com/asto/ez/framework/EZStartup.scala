@@ -144,7 +144,11 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
   private def startScheduler(): Unit = {
     if (EZGlobal.ez_scheduler != null) {
       if (EZGlobal.ez_scheduler) {
-        SchedulerService.init(module)
+        new Thread(new Runnable {
+          override def run(): Unit = {
+            SchedulerService.init(module)
+          }
+        }).start()
       }
     }
   }

@@ -26,4 +26,7 @@ case class EZ_Scheduler() extends JDBCSecureModel with JDBCStatusModel {
   @Text var parameterstr: String = _
   //使用的模块
   @BeanProperty var module: String = _
+
 }
+
+object EZ_Scheduler extends JDBCSecureStorage[EZ_Scheduler] with JDBCStatusStorage[EZ_Scheduler]

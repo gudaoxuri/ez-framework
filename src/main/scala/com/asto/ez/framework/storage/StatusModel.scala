@@ -6,17 +6,28 @@ import com.ecfront.common.Resp
 import scala.beans.BeanProperty
 import scala.concurrent.{Future, Promise}
 import scala.concurrent.ExecutionContext.Implicits.global
+
 trait StatusModel extends BaseModel {
 
   @Index
   @BeanProperty var enable: Boolean = _
 
+}
+
+object StatusModel {
+
+  val ENABLE_FLAG = "enable"
+
+}
+
+trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
+
   protected def preGetEnabledByCond(condition: String, parameters: List[Any], context: EZContext): Future[Resp[(String, List[Any])]] = Future(Resp.success((condition, parameters)))
 
-  protected def postGetEnabledByCond(condition: String, parameters: List[Any], doResult: this.type, context: EZContext): Future[Resp[this.type]] = Future(Resp.success(doResult))
+  protected def postGetEnabledByCond(condition: String, parameters: List[Any], doResult: M, context: EZContext): Future[Resp[M]] = Future(Resp.success(doResult))
 
-  def getEnabledByCond(condition: String, parameters: List[Any] = List(), context: EZContext = null): Future[Resp[this.type]] = {
-    val p = Promise[Resp[this.type]]()
+  def getEnabledByCond(condition: String, parameters: List[Any] = List(), context: EZContext = null): Future[Resp[M]] = {
+    val p = Promise[Resp[M]]()
     if (condition == null) {
       p.success(Resp.badRequest("【condition】不能为空"))
     } else {
@@ -42,14 +53,14 @@ trait StatusModel extends BaseModel {
     p.future
   }
 
-  protected def doGetEnabledByCond(condition: String, parameters: List[Any], context: EZContext): Future[Resp[this.type]]
+  protected def doGetEnabledByCond(condition: String, parameters: List[Any], context: EZContext): Future[Resp[M]]
 
   protected def preFindEnabled(condition: String, parameters: List[Any], context: EZContext): Future[Resp[(String, List[Any])]] = Future(Resp.success((condition, parameters)))
 
-  protected def postFindEnabled(condition: String, parameters: List[Any], doResult: List[this.type], context: EZContext): Future[Resp[List[this.type]]] = Future(Resp.success(doResult))
+  protected def postFindEnabled(condition: String, parameters: List[Any], doResult: List[M], context: EZContext): Future[Resp[List[M]]] = Future(Resp.success(doResult))
 
-  def findEnabled(condition: String, parameters: List[Any] = List(), context: EZContext = null): Future[Resp[List[this.type]]] = {
-    val p = Promise[Resp[List[this.type]]]()
+  def findEnabled(condition: String, parameters: List[Any] = List(), context: EZContext = null): Future[Resp[List[M]]] = {
+    val p = Promise[Resp[List[M]]]()
     preFindEnabled(condition, parameters, context).onSuccess {
       case preResp =>
         if (preResp) {
@@ -71,14 +82,14 @@ trait StatusModel extends BaseModel {
     p.future
   }
 
-  protected def doFindEnabled(condition: String, parameters: List[Any], context: EZContext): Future[Resp[List[this.type]]]
+  protected def doFindEnabled(condition: String, parameters: List[Any], context: EZContext): Future[Resp[List[M]]]
 
   protected def prePageEnabled(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZContext): Future[Resp[(String, List[Any])]] = Future(Resp.success((condition, parameters)))
 
-  protected def postPageEnabled(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, doResult: Page[this.type], context: EZContext): Future[Resp[Page[this.type]]] = Future(Resp.success(doResult))
+  protected def postPageEnabled(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, doResult: Page[M], context: EZContext): Future[Resp[Page[M]]] = Future(Resp.success(doResult))
 
-  def pageEnabled(condition: String, parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10, context: EZContext = null): Future[Resp[Page[this.type]]] = {
-    val p = Promise[Resp[Page[this.type]]]()
+  def pageEnabled(condition: String, parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10, context: EZContext = null): Future[Resp[Page[M]]] = {
+    val p = Promise[Resp[Page[M]]]()
     prePageEnabled(condition, parameters, pageNumber, pageSize, context).onSuccess {
       case preResp =>
         if (preResp) {
@@ -100,7 +111,7 @@ trait StatusModel extends BaseModel {
     p.future
   }
 
-  protected def doPageEnabled(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZContext): Future[Resp[Page[this.type]]]
+  protected def doPageEnabled(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZContext): Future[Resp[Page[M]]]
 
   protected def preExistEnabledByCond(condition: String, parameters: List[Any], context: EZContext): Future[Resp[(String, List[Any])]] = Future(Resp.success((condition, parameters)))
 
@@ -232,9 +243,6 @@ trait StatusModel extends BaseModel {
 
 }
 
-object StatusModel {
-  val ENABLE_FLAG = "enable"
-}
 
 
 

@@ -13,7 +13,7 @@ object SchedulerService extends LazyLogging {
   def save(scheduler: EZ_Scheduler): Unit = {
     scheduler.enable=true
     scheduler.parameterstr = JsonHelper.toJsonString(scheduler.parameters)
-    scheduler.save().onSuccess {
+    EZ_Scheduler.save(scheduler).onSuccess {
       case saveResp =>
         if (saveResp) {
           JobHelper.add(scheduler.name, scheduler.cron, classOf[VertxJob], packageScheduler(scheduler), quartzScheduler)
@@ -24,7 +24,7 @@ object SchedulerService extends LazyLogging {
   def update(scheduler: EZ_Scheduler): Unit = {
     scheduler.enable=true
     scheduler.parameterstr = JsonHelper.toJsonString(scheduler.parameters)
-    scheduler.update().onSuccess {
+    EZ_Scheduler.update(scheduler).onSuccess {
       case updateResp =>
         if (updateResp) {
           JobHelper.modify(scheduler.name, scheduler.cron, classOf[VertxJob], packageScheduler(scheduler), quartzScheduler)
@@ -42,7 +42,7 @@ object SchedulerService extends LazyLogging {
   }
 
   def delete(name: String): Unit = {
-    EZ_Scheduler().deleteByCond(" name =? ", List(name)).onSuccess {
+    EZ_Scheduler.deleteByCond(" name =? ", List(name)).onSuccess {
       case deleteResp =>
         if (deleteResp) {
           JobHelper.remove(name, quartzScheduler)
@@ -53,7 +53,7 @@ object SchedulerService extends LazyLogging {
   def init(module:String): Unit = {
     logger.debug("Startup scheduling.")
     quartzScheduler.start()
-    EZ_Scheduler().findEnabled("module =?",List(module)).onSuccess {
+    EZ_Scheduler.findEnabled("module =?",List(module)).onSuccess {
       case findResp =>
         if (findResp) {
           findResp.body.foreach {

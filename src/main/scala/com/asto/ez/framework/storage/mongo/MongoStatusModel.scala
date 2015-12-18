@@ -1,15 +1,17 @@
 package com.asto.ez.framework.storage.mongo
 
 import com.asto.ez.framework.EZContext
-import com.asto.ez.framework.storage.{Page, StatusModel}
+import com.asto.ez.framework.storage.{StatusStorage, Page, StatusModel}
 import com.ecfront.common.Resp
 import io.vertx.core.json.JsonObject
 
 import scala.concurrent.Future
 
-trait MongoStatusModel extends MongoBaseModel with StatusModel {
+trait MongoStatusModel extends MongoBaseModel with StatusModel
 
-  override def doGetEnabledByCond(condition: String, parameters: List[Any], context: EZContext): Future[Resp[this.type]] = {
+trait MongoStatusStorage[M <: MongoStatusModel] extends MongoBaseStorage[M] with StatusStorage[M] {
+
+  override def doGetEnabledByCond(condition: String, parameters: List[Any], context: EZContext): Future[Resp[M]] = {
     getByCond(appendEnabled(new JsonObject(condition)).encode(), parameters, context)
   }
 
@@ -17,11 +19,11 @@ trait MongoStatusModel extends MongoBaseModel with StatusModel {
     existByCond(appendEnabled(new JsonObject(condition)).encode(), parameters, context)
   }
 
-  override def doFindEnabled(condition: String, parameters: List[Any], context: EZContext): Future[Resp[List[this.type]]] = {
+  override def doFindEnabled(condition: String, parameters: List[Any], context: EZContext): Future[Resp[List[M]]] = {
     find(appendEnabled(new JsonObject(condition)).encode(), parameters, context)
   }
 
-  override def doPageEnabled(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZContext): Future[Resp[Page[this.type]]] = {
+  override def doPageEnabled(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZContext): Future[Resp[Page[M]]] = {
     page(appendEnabled(new JsonObject(condition)).encode(), parameters, pageNumber, pageSize, context)
   }
 
@@ -42,8 +44,6 @@ trait MongoStatusModel extends MongoBaseModel with StatusModel {
   }
 
 }
-
-
 
 
 

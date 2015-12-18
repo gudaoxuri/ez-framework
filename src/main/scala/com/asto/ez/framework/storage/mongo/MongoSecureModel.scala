@@ -1,26 +1,28 @@
 package com.asto.ez.framework.storage.mongo
 
 import com.asto.ez.framework.EZContext
-import com.asto.ez.framework.storage.SecureModel
+import com.asto.ez.framework.storage.{SecureModel, SecureStorage}
 import com.ecfront.common.Resp
 
 import scala.concurrent.Future
 
-trait MongoSecureModel extends MongoBaseModel with SecureModel {
+trait MongoSecureModel extends MongoBaseModel with SecureModel
 
-  override def doSave(context: EZContext): Future[Resp[String]] = {
-    wrapSecureSave(context)
-    super.doSave(context)
+trait MongoSecureStorage[M <: MongoSecureModel] extends MongoBaseStorage[M] with SecureStorage[M] {
+
+  override def doSave(model: M, context: EZContext): Future[Resp[String]] = {
+    wrapSecureSave(model, context)
+    super.doSave(model, context)
   }
 
-  override def doUpdate(context: EZContext): Future[Resp[String]] = {
-    wrapSecureUpdate(context)
-    super.doUpdate(context)
+  override def doUpdate(model: M, context: EZContext): Future[Resp[String]] = {
+    wrapSecureUpdate(model, context)
+    super.doUpdate(model, context)
   }
 
-  override def doSaveOrUpdate(context: EZContext): Future[Resp[String]] = {
-    wrapSecureSave(context)
-    super.doSaveOrUpdate(context)
+  override def doSaveOrUpdate(model: M, context: EZContext): Future[Resp[String]] = {
+    wrapSecureSave(model, context)
+    super.doSaveOrUpdate(model, context)
   }
 
 }

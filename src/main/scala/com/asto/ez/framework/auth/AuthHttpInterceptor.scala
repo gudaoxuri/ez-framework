@@ -17,14 +17,14 @@ object AuthHttpInterceptor extends HttpInterceptor {
       if (obj.token == "") {
         p.unAuthorized(s"【token】不存在，请确认请求参数包含【${EZ_Token_Info.TOKEN_FLAG}】")
       } else {
-        EZ_Token_Info.model.getById(obj.token).onSuccess {
+        EZ_Token_Info.getById(obj.token).onSuccess {
           case tokenResp =>
             if (tokenResp && tokenResp.body != null) {
               obj.login_Id = tokenResp.body.login_id
               obj.organization_code = tokenResp.body.organization.code
               val resourceCode = EZ_Resource.assembleCode(obj.method, obj.templateUri)
               if (!tokenResp.body.roles.exists(_.resource_codes.contains(resourceCode))) {
-                EZ_Resource.model.existByCond(s"""{"code":"$resourceCode"}""").onSuccess {
+                EZ_Resource.existByCond(s"""{"code":"$resourceCode"}""").onSuccess {
                   case resResp =>
                     if (resResp && !resResp.body) {
                       //所有登录用户都可以访问

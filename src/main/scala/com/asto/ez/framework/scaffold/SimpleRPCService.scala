@@ -5,13 +5,15 @@ import java.lang.reflect.ParameterizedType
 import com.asto.ez.framework.EZContext
 import com.asto.ez.framework.rpc.{DELETE, GET, POST, PUT}
 import com.asto.ez.framework.storage.jdbc.JDBCBaseModel
-import com.asto.ez.framework.storage.{BaseModel, Page, StatusModel}
+import com.asto.ez.framework.storage._
 import com.ecfront.common.{AsyncResp, JsonHelper}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
+
+  protected val storageObj:BaseStorage[M]
 
   protected val _modelClazz = this.getClass.getGenericInterfaces()(0).asInstanceOf[ParameterizedType].getActualTypeArguments()(0).asInstanceOf[Class[M]]
 
@@ -22,7 +24,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
   @POST("")
   def _rpc_save(parameter: Map[String, String], body: String, p: AsyncResp[String], context: EZContext): Unit = {
     logger.trace(s" RPC simple save : $body")
-    JsonHelper.toObject(body, _modelClazz).save(context).onSuccess {
+    storageObj.save(JsonHelper.toObject(body, _modelClazz),context).onSuccess {
       case resp => p.resp(resp)
     }
   }
@@ -33,7 +35,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
       p.badRequest("【id】不能为空")
     } else {
       logger.trace(s" RPC simple update : $body")
-      JsonHelper.toObject(body, _modelClazz).update(context).onSuccess {
+      storageObj.update(JsonHelper.toObject(body, _modelClazz),context).onSuccess {
         case resp => p.resp(resp)
       }
     }
@@ -44,7 +46,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
   def _rpc_find(parameter: Map[String, String], p: AsyncResp[List[M]], context: EZContext): Unit = {
     logger.trace(s" RPC simple find : $parameter")
     val condition = if (parameter.contains("condition")) parameter("condition") else _emptyCondition
-    modelObj.find(condition, List(), context).onSuccess {
+    storageObj.find(condition, List(), context).onSuccess {
       case resp => p.resp(resp)
     }
   }
@@ -56,7 +58,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     val condition = if (parameter.contains("condition")) parameter("condition") else _emptyCondition
     val pageNumber = if (parameter.contains("pageNumber")) parameter("pageNumber").toLong else 1L
     val pageSize = if (parameter.contains("pageSize")) parameter("pageSize").toInt else 10
-    modelObj.page(condition, List(), pageNumber, pageSize, context).onSuccess {
+    storageObj.page(condition, List(), pageNumber, pageSize, context).onSuccess {
       case resp => p.resp(resp)
     }
   }
@@ -68,7 +70,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     } else {
       val id = parameter("id")
       logger.trace(s" RPC simple get : $id")
-      modelObj.getById(id, context).onSuccess {
+      storageObj.getById(id, context).onSuccess {
         case resp => p.resp(resp)
       }
     }
@@ -81,7 +83,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     } else {
       val id = parameter("id")
       logger.trace(s" RPC simple delete : $id")
-      modelObj.deleteById(id, context).onSuccess {
+      storageObj.deleteById(id, context).onSuccess {
         case resp => p.resp(resp)
       }
     }
@@ -95,7 +97,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
       if (classOf[StatusModel].isAssignableFrom(_modelClazz)) {
         val id = parameter("id")
         logger.trace(s" RPC simple enable : $id")
-        modelObj.asInstanceOf[StatusModel].enableById(id, context).onSuccess {
+        storageObj.asInstanceOf[StatusStorage[_]].enableById(id, context).onSuccess {
           case resp => p.resp(resp)
         }
       } else {
@@ -113,7 +115,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
       if (classOf[StatusModel].isAssignableFrom(_modelClazz)) {
         val id = parameter("id")
         logger.trace(s" RPC simple enable : $id")
-        modelObj.asInstanceOf[StatusModel].disableById(id, context).onSuccess {
+        storageObj.asInstanceOf[StatusStorage[_]].disableById(id, context).onSuccess {
           case resp => p.resp(resp)
         }
       } else {
