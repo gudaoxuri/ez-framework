@@ -5,6 +5,7 @@
         "host": "0.0.0.0",
         "port": 8080,
         "resourcePath": "c:/tmp/",
+        "resourceUrl": "http://0.0.0.0:7070/",
         "publicUriPrefix": "/public/"
       },
       "cluster": {
@@ -21,7 +22,9 @@
         "max_pool_size": 200,
         "max_idle_time": 1800,
         "idle_test_period": 120,
-        "validate": true
+        "validate": true,
+        "update_timeout":30,
+        "query_timeout":30
       },
       "mongo": {
         "hosts": [

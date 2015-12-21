@@ -2,10 +2,10 @@ package com.asto.ez.framework.scaffold
 
 import java.lang.reflect.ParameterizedType
 
-import com.asto.ez.framework.EZContext
 import com.asto.ez.framework.rpc.{DELETE, GET, POST, PUT}
-import com.asto.ez.framework.storage.jdbc.JDBCBaseModel
 import com.asto.ez.framework.storage._
+import com.asto.ez.framework.storage.jdbc.JDBCBaseModel
+import com.asto.ez.framework.{EZContext, EZGlobal}
 import com.ecfront.common.{AsyncResp, JsonHelper}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
-  protected val storageObj:BaseStorage[M]
+  protected val storageObj: BaseStorage[M]
 
   protected val _modelClazz = this.getClass.getGenericInterfaces()(0).asInstanceOf[ParameterizedType].getActualTypeArguments()(0).asInstanceOf[Class[M]]
 
@@ -24,7 +24,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
   @POST("")
   def _rpc_save(parameter: Map[String, String], body: String, p: AsyncResp[String], context: EZContext): Unit = {
     logger.trace(s" RPC simple save : $body")
-    storageObj.save(JsonHelper.toObject(body, _modelClazz),context).onSuccess {
+    storageObj.save(JsonHelper.toObject(body, _modelClazz), context).onSuccess {
       case resp => p.resp(resp)
     }
   }
@@ -35,7 +35,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
       p.badRequest("【id】不能为空")
     } else {
       logger.trace(s" RPC simple update : $body")
-      storageObj.update(JsonHelper.toObject(body, _modelClazz),context).onSuccess {
+      storageObj.update(JsonHelper.toObject(body, _modelClazz), context).onSuccess {
         case resp => p.resp(resp)
       }
     }
@@ -125,10 +125,14 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
   }
 
 
-  @POST("upload/")
-  def _rpc_upload(parameter: Map[String, String], p: AsyncResp[String], context: EZContext): Unit = {
-    //TODO
-    p.success("")
+  @POST("res/")
+  def _rpc_res_upload(parameter: Map[String, String], filePath: String, p: AsyncResp[String], context: EZContext): Unit = {
+    p.success(EZGlobal.ez_rpc_http_resource_url + filePath)
+  }
+
+  @GET("res/:resName/")
+  def _rpc_res_get(parameter: Map[String, String], p: AsyncResp[String], context: EZContext): Unit = {
+    p.success(EZGlobal.ez_rpc_http_resource_path + parameter("resName"))
   }
 
 }

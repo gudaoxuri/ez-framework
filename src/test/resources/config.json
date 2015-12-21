@@ -21,7 +21,9 @@
         "max_pool_size": 200,
         "max_idle_time": 1800,
         "idle_test_period": 120,
-        "validate": true
+        "validate": true,
+        "update_timeout":10,
+        "query_timeout":10
       },
       "mongo": {
         "hosts": [

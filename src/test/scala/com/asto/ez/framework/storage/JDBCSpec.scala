@@ -13,6 +13,9 @@ import scala.concurrent.duration.Duration
 class JDBCSpec extends JDBCBasicSpec {
 
   test("JDBC Test") {
+
+   // Await.result(DBProcessor.find("select count(*) from testA join testB on testA.id = testB.id",List(),classOf[Long]),Duration.Inf)
+
     val createFuture = DBProcessor.update(
       """
         |CREATE TABLE IF NOT EXISTS jdbc_test_entity
