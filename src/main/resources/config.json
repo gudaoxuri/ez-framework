@@ -5,13 +5,12 @@
         "host": "0.0.0.0",
         "port": 8080,
         "resourcePath": "c:/tmp/",
-        "resourceUrl": "http://0.0.0.0:7070/",
         "publicUriPrefix": "/public/"
       },
       "cluster": {
         "host": "127.0.0.1"
       },
-      "servicePath": "com.asto.dop.core.module"
+      "servicePath": "com.asto.ez.framework.sample"
     },
     "storage":{
       "jdbc": {

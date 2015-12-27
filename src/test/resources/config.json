@@ -10,7 +10,7 @@
       "cluster": {
         "host": "127.0.0.1"
       },
-      "servicePath": "com.asto.dop.core.module"
+      "servicePath": "com.asto.ez.framework.rpc"
     },
     "storage": {
       "jdbc": {

@@ -19,7 +19,7 @@ class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
 
   override def handle(request: HttpServerRequest): Unit = {
     if (request.method().name() == "OPTIONS") {
-      returnContent("", request.response(), "text/html")
+      returnContent("", request.response(), "text/html", "text/html")
     } else if (request.path() != "/favicon.ico") {
       val ip =
         if (request.headers().contains("X-Forwarded-For") && request.getHeader("X-Forwarded-For").nonEmpty) {
@@ -33,43 +33,39 @@ class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
       } catch {
         case ex: Throwable =>
           logger.error("Http process error.", ex)
-          returnContent(s"请求处理错误：${ex.getMessage}", request.response(), "text/html")
+          returnContent(s"请求处理错误：${ex.getMessage}", request.response(), "text/html", "text/html")
       }
     }
   }
 
   private def router(request: HttpServerRequest, ip: String): Unit = {
     val accept =
-      if (request.headers().contains("Accept") && request.headers().get("Accept") != "*.*") request.headers().get("Accept").split(",")(0).toLowerCase else "application/json"
+      if (request.headers().contains("Accept") && request.headers().get("Accept") != "*.*") request.headers().get("Accept").split(",")(0).toLowerCase else "application/json; charset=UTF-8"
     val contentType =
       if (request.headers().contains("Content-Type")) request.headers().get("Content-Type").toLowerCase else "application/json; charset=UTF-8"
     val result = Router.getFunction(EChannel.HTTP, request.method().name(), request.path(), request.params().map(entry => entry.getKey -> entry.getValue).toMap)
     val parameters = result._3
+    val context = EZContext()
+    context.remoteIP = ip
+    context.method = request.method().name()
+    context.templateUri = result._4
+    context.realUri = request.path()
+    context.parameters = parameters
+    context.accept = accept.toLowerCase()
+    context.contentType = contentType.toLowerCase()
     if (result._1) {
-      val context = EZContext()
-      context.remoteIP = ip
-      context.method = request.method().name()
-      context.templateUri = result._4
-      context.realUri = request.path()
-      context.parameters = parameters
-      context.accept = accept
-      context.contentType = contentType
       execute(request, result._2, context)
     } else {
-      returnContent(result._1, request.response())
+      returnContent(result._1, request.response(), context.accept, context.contentType)
     }
   }
 
   private def execute(request: HttpServerRequest, fun: Fun[_], context: EZContext): Unit = {
-    if (request.headers().contains("Content-Type") && request.headers.get("Content-Type").toLowerCase.startsWith("multipart/form-data")) {
+    if (context.contentType.startsWith("multipart/form-data")) {
       //上传处理
       request.setExpectMultipart(true)
       request.uploadHandler(new Handler[HttpServerFileUpload] {
         override def handle(upload: HttpServerFileUpload): Unit = {
-          var path = if (request.params().contains("path")) request.params().get("path") else ""
-          if (path.nonEmpty && !path.endsWith(File.separator)) {
-            path += File.separator
-          }
           val newName = if (request.params().contains("name")) request.params().get("name")
           else {
             if (upload.filename().contains(".")) {
@@ -78,16 +74,16 @@ class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
               upload.filename() + "_" + System.nanoTime()
             }
           }
-          val tPath = EZGlobal.ez_rpc_http_resource_path + path + newName
+          val tPath = EZGlobal.ez_rpc_http_resource_path + newName
           upload.exceptionHandler(new Handler[Throwable] {
             override def handle(e: Throwable): Unit = {
-              returnContent(Resp.serverError(e.getMessage), request.response(), context.accept)
+              returnContent(Resp.serverError(e.getMessage), request.response(), context.accept, context.contentType)
             }
           })
           upload.endHandler(new Handler[Void] {
             override def handle(e: Void): Unit = {
               context.contentType = "application/json; charset=UTF-8"
-              execute(request, path + newName, fun, context, request.response())
+              execute(request, newName, fun, context, request.response())
             }
           })
           upload.streamToFileSystem(tPath)
@@ -122,35 +118,39 @@ class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
             }
             fun.execute(newContext.parameters, b, newContext).onSuccess {
               case excResp =>
-                returnContent(excResp, response, newContext.accept)
+                returnContent(excResp, response, newContext.accept, newContext.contentType)
             }
             Future(Resp.success(null))
           } catch {
             case e: Exception =>
               logger.error("Execute function error.", e)
-              returnContent(Resp.serverError(e.getMessage), response, newContext.accept)
+              returnContent(Resp.serverError(e.getMessage), response, newContext.accept, newContext.contentType)
               Future(Resp.success(null))
           }
         } else {
-          returnContent(interResp, request.response())
+          returnContent(interResp, request.response(), context.accept, context.contentType)
           Future(Resp.success(null))
         }
     }
   }
 
-  private def returnContent(result: Any, response: HttpServerResponse, accept: String = "application/json; charset=UTF-8") {
-    //支持CORS
-    val res = result match {
-      case r: String => r
-      case _ => JsonHelper.toJsonString(result)
+  private def returnContent(result: Any, response: HttpServerResponse, accept: String, contentType: String) {
+    if (!result.isInstanceOf[Resp[File]] || !result.asInstanceOf[Resp[File]]) {
+      //支持CORS
+      val res = result match {
+        case r: String => r
+        case _ => JsonHelper.toJsonString(result)
+      }
+      logger.trace("Response: \r\n" + res)
+      response.setStatusCode(200).putHeader("Content-Type", accept)
+        .putHeader("Cache-Control", "no-cache")
+        .putHeader("Access-Control-Allow-Origin", "*")
+        .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        .putHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, X-authentication, X-client")
+        .end(res)
+    } else {
+      response.sendFile(result.asInstanceOf[Resp[File]].body.getPath)
     }
-    logger.trace("Response: \r\n" + res)
-    response.setStatusCode(200).putHeader("Content-Type", accept)
-      .putHeader("Cache-Control", "no-cache")
-      .putHeader("Access-Control-Allow-Origin", "*")
-      .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-      .putHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, X-authentication, X-client")
-      .end(res)
   }
 
 }

@@ -10,7 +10,15 @@ object InterceptorProcessor extends LazyLogging {
 
   private val interceptor_container = collection.mutable.Map[String, List[EZInterceptor[_]]]()
 
-  def register[E](category: String, interceptors: List[EZInterceptor[E]]): Unit = {
+  def register(category: String, interceptor: EZInterceptor[_]): Unit = {
+    if (interceptor_container.contains(category)) {
+      interceptor_container += category -> (interceptor_container(category) ++ List(interceptor))
+    } else {
+      interceptor_container += category -> List(interceptor)
+    }
+  }
+
+  def register(category: String, interceptors: List[EZInterceptor[_]]): Unit = {
     interceptor_container += category -> interceptors
   }
 
