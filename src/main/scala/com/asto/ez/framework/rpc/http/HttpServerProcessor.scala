@@ -135,21 +135,22 @@ class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
   }
 
   private def returnContent(result: Any, response: HttpServerResponse, accept: String, contentType: String) {
-    if (!result.isInstanceOf[Resp[File]] || !result.asInstanceOf[Resp[File]]) {
-      //支持CORS
-      val res = result match {
-        case r: String => r
-        case _ => JsonHelper.toJsonString(result)
-      }
-      logger.trace("Response: \r\n" + res)
-      response.setStatusCode(200).putHeader("Content-Type", accept)
-        .putHeader("Cache-Control", "no-cache")
-        .putHeader("Access-Control-Allow-Origin", "*")
-        .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        .putHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, X-authentication, X-client")
-        .end(res)
-    } else {
-      response.sendFile(result.asInstanceOf[Resp[File]].body.getPath)
+    result match {
+      case value: Resp[_] if value && value.body.isInstanceOf[File] =>
+        response.sendFile(result.asInstanceOf[Resp[File]].body.getPath)
+      case _ =>
+        //支持CORS
+        val res = result match {
+          case r: String => r
+          case _ => JsonHelper.toJsonString(result)
+        }
+        logger.trace("Response: \r\n" + res)
+        response.setStatusCode(200).putHeader("Content-Type", accept)
+          .putHeader("Cache-Control", "no-cache")
+          .putHeader("Access-Control-Allow-Origin", "*")
+          .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+          .putHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, X-authentication, X-client")
+          .end(res)
     }
   }
 
