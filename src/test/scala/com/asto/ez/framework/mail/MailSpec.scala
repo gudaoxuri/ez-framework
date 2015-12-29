@@ -13,8 +13,7 @@ class MailSpec extends BasicSpec {
   }
 
   test("Mail Test") {
-
-    val sendResp = Await.result(MailProcessor.send("hi-sb@ecfront.com", "i@sunisle.org", "test 1", "<h1>h1</h1><br/>1\r\n2\r\n"), Duration.Inf)
+    val sendResp = Await.result(MailProcessor.send("hi-sb@ecfront.com", List("i@sunisle.org","364341806@qq.com"), "test 1", "<h1>h1</h1><br/>1\r\n2\r\n"), Duration.Inf)
     assert(sendResp)
 
   }

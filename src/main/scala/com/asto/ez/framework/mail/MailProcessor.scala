@@ -1,10 +1,13 @@
 package com.asto.ez.framework.mail
 
+import java.util.concurrent.atomic.AtomicInteger
+
+import com.asto.ez.framework.EZGlobal
 import com.ecfront.common.Resp
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.{AsyncResult, Handler}
-import io.vertx.ext.mail.{MailAttachment, MailClient, MailMessage, MailResult}
+import io.vertx.ext.mail._
 
 import scala.collection.JavaConversions._
 import scala.concurrent.{Future, Promise}
@@ -12,6 +15,16 @@ import scala.concurrent.{Future, Promise}
 object MailProcessor extends LazyLogging {
 
   private var mailClient: MailClient = _
+  private var mailConfig: MailConfig = _
+  private var maxPoolSize: Int = _
+  private val currentErrorCounter: AtomicInteger = new AtomicInteger(0)
+
+  def init(config: MailConfig): Unit = {
+    mailConfig = config
+    maxPoolSize = mailConfig.getMaxPoolSize
+    currentErrorCounter.set(0)
+    init(MailClient.createShared(EZGlobal.vertx, mailConfig))
+  }
 
   def init(_mailClient: MailClient): Unit = {
     mailClient = _mailClient
@@ -50,11 +63,17 @@ object MailProcessor extends LazyLogging {
             attachment.setData(attach._3)
             message.setAttachment(attachment)
         }
+      logger.trace(s"Send mail [$title]")
       mailClient.sendMail(message, new Handler[AsyncResult[MailResult]] {
         override def handle(event: AsyncResult[MailResult]): Unit = {
           if (event.succeeded()) {
             p.success(Resp.success(null))
           } else {
+            if (currentErrorCounter.incrementAndGet() == maxPoolSize) {
+              logger.debug(s"Send mail error times equals max pool size , reinitialize mail client.")
+              mailClient.close()
+              init(mailConfig)
+            }
             logger.error(s"Send mail [$title] error : ${event.cause().getMessage}", event.cause())
             p.success(Resp.serverUnavailable(s"Send mail [$title] error : ${event.cause().getMessage}"))
           }

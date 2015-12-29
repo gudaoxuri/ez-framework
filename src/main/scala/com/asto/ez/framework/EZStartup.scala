@@ -16,7 +16,7 @@ import io.vertx.core._
 import io.vertx.core.http.{HttpServer, HttpServerOptions}
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.jdbc.JDBCClient
-import io.vertx.ext.mail.{MailClient, MailConfig}
+import io.vertx.ext.mail.MailConfig
 import io.vertx.ext.mongo.MongoClient
 
 import scala.io.Source
@@ -140,7 +140,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
 
   private def startMailClient(): Unit = {
     if (EZGlobal.ez_mail != null) {
-      MailProcessor.init(MailClient.createShared(EZGlobal.vertx, new MailConfig(EZGlobal.ez_mail)))
+      MailProcessor.init(new MailConfig(EZGlobal.ez_mail))
       logger.info(s"EZ Framework Mail client initialized. ${EZGlobal.ez.getJsonObject("mail").getString("hostname")}")
     }
   }

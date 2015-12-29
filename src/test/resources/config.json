@@ -60,7 +60,7 @@
       "ssl":true,
       "authMethods": "LOGIN",
       "username": "hi-sb@ecfront.com",
-      "password": "Hi123!qaz!",
+      "password": "",
       "maxPoolSize": 10
     },
     "scheduler": false,
