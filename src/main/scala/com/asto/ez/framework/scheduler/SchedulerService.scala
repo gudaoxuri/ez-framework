@@ -1,5 +1,7 @@
 package com.asto.ez.framework.scheduler
 
+import java.util.concurrent.atomic.AtomicBoolean
+
 import com.ecfront.common.JsonHelper
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.quartz.impl.StdSchedulerFactory
@@ -9,6 +11,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object SchedulerService extends LazyLogging {
 
   private val quartzScheduler = StdSchedulerFactory.getDefaultScheduler
+  private val initialized = new AtomicBoolean(false)
 
   def save(scheduler: EZ_Scheduler): Unit = {
     scheduler.enable=true
@@ -51,17 +54,19 @@ object SchedulerService extends LazyLogging {
   }
 
   def init(module:String): Unit = {
-    logger.debug("Startup scheduling.")
-    quartzScheduler.start()
-    EZ_Scheduler.findEnabled("module =?",List(module)).onSuccess {
-      case findResp =>
-        if (findResp) {
-          findResp.body.foreach {
-            job =>
-              job.parameters = JsonHelper.toGenericObject[Map[String, Any]](job.parameterstr)
-              JobHelper.add(job.name, job.cron, classOf[VertxJob], packageScheduler(job), quartzScheduler)
+    if(!initialized.getAndSet(true)) {
+      logger.debug("Startup scheduling.")
+      quartzScheduler.start()
+      EZ_Scheduler.findEnabled("module =?", List(module)).onSuccess {
+        case findResp =>
+          if (findResp) {
+            findResp.body.foreach {
+              job =>
+                job.parameters = JsonHelper.toGenericObject[Map[String, Any]](job.parameterstr)
+                JobHelper.add(job.name, job.cron, classOf[VertxJob], packageScheduler(job), quartzScheduler)
+            }
           }
-        }
+      }
     }
   }
 

@@ -99,7 +99,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
       if (EZGlobal.ez_storage.containsKey("jdbc")) {
         val jdbc = EZGlobal.ez_storage.getJsonObject("jdbc")
         DBProcessor.dbClient = JDBCClient.createShared(EZGlobal.vertx, jdbc)
-        logger.info(s"EZ Framework JDBC connected. ${jdbc.getString("jdbc")}")
+        logger.info(s"EZ Framework JDBC connected. ${jdbc.getString("url")}")
       }
       if (EZGlobal.ez_storage.containsKey("mongo")) {
         val mongo = EZGlobal.ez_storage.getJsonObject("mongo")

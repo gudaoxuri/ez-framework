@@ -1,6 +1,7 @@
 package com.asto.ez.framework.cache
 
 import java.lang
+import java.util.concurrent.atomic.AtomicBoolean
 
 import com.ecfront.common.{JsonHelper, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -20,39 +21,42 @@ object RedisProcessor extends LazyLogging {
 
   private var redisClient: RedisClient = _
   private var useCache = true
+  private val initialized = new AtomicBoolean(false)
 
   def init(vertx: Vertx, host: String, port: Int, db: Integer, auth: String = null, _useCache: Boolean = true): Unit = {
-    useCache = _useCache
-    if (useCache) {
-      redisClient = RedisClient.create(vertx, new RedisOptions().setHost(host).setPort(port))
-      if (auth != null && auth.nonEmpty) {
-        redisClient.auth(auth, new Handler[AsyncResult[String]] {
-          override def handle(event: AsyncResult[String]): Unit = {
-            if (event.succeeded()) {
-              redisClient.select(db, new Handler[AsyncResult[String]] {
-                override def handle(event: AsyncResult[String]): Unit = {
-                  if (event.succeeded()) {
-                    logger.info(s"EZ Framework Redis connected $host:$port")
-                  } else {
-                    logger.error("EZ Framework Redis connection error.", event.cause())
+    if(!initialized.getAndSet(true)) {
+      useCache = _useCache
+      if (useCache) {
+        redisClient = RedisClient.create(vertx, new RedisOptions().setHost(host).setPort(port))
+        if (auth != null && auth.nonEmpty) {
+          redisClient.auth(auth, new Handler[AsyncResult[String]] {
+            override def handle(event: AsyncResult[String]): Unit = {
+              if (event.succeeded()) {
+                redisClient.select(db, new Handler[AsyncResult[String]] {
+                  override def handle(event: AsyncResult[String]): Unit = {
+                    if (event.succeeded()) {
+                      logger.info(s"EZ Framework Redis connected $host:$port")
+                    } else {
+                      logger.error("EZ Framework Redis connection error.", event.cause())
+                    }
                   }
-                }
-              })
-            } else {
-              logger.error("EZ Framework Redis connection error.", event.cause())
+                })
+              } else {
+                logger.error("EZ Framework Redis connection error.", event.cause())
+              }
             }
-          }
-        })
-      } else {
-        redisClient.select(db, new Handler[AsyncResult[String]] {
-          override def handle(event: AsyncResult[String]): Unit = {
-            if (event.succeeded()) {
-              logger.info(s"EZ Framework Redis connected $host:$port")
-            } else {
-              logger.error("EZ Framework Redis connection error.", event.cause())
+          })
+        } else {
+          redisClient.select(db, new Handler[AsyncResult[String]] {
+            override def handle(event: AsyncResult[String]): Unit = {
+              if (event.succeeded()) {
+                logger.info(s"EZ Framework Redis connected $host:$port")
+              } else {
+                logger.error("EZ Framework Redis connection error.", event.cause())
+              }
             }
-          }
-        })
+          })
+        }
       }
     }
   }

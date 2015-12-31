@@ -45,7 +45,7 @@ object DBProcessor extends LazyLogging {
                     event.cause() match {
                       case throws if classOf[SQLTransactionRollbackException].isAssignableFrom(throws.getClass) =>
                         if (retryTimes < 10) {
-                          EZGlobal.vertx.setTimer(5000*(retryTimes+1), new Handler[lang.Long] {
+                          EZGlobal.vertx.setTimer(5000 * (retryTimes + 1), new Handler[lang.Long] {
                             override def handle(event: lang.Long): Unit = {
                               logger.debug(s"JDBC update problem try times [${retryTimes + 1}] : $sql [$parameters]")
                               update(sql, parameters, retryTimes + 1)
@@ -76,7 +76,7 @@ object DBProcessor extends LazyLogging {
                     event.cause() match {
                       case throws if classOf[SQLTransactionRollbackException].isAssignableFrom(throws.getClass) =>
                         if (retryTimes < 10) {
-                          EZGlobal.vertx.setTimer(5000*(retryTimes+1), new Handler[lang.Long] {
+                          EZGlobal.vertx.setTimer(5000 * (retryTimes + 1), new Handler[lang.Long] {
                             override def handle(event: lang.Long): Unit = {
                               logger.debug(s"JDBC update problem try times [${retryTimes + 1}] : $sql [$parameters]")
                               update(sql, parameters, retryTimes + 1)
@@ -159,7 +159,7 @@ object DBProcessor extends LazyLogging {
     p.future
   }
 
-  def get[E](sql: String, parameters: List[Any], resultClass: Class[E]): Future[Resp[E]] =  {
+  def get[E](sql: String, parameters: List[Any], resultClass: Class[E]): Future[Resp[E]] = {
     val p = Promise[Resp[E]]()
     logger.trace(s"JDBC get : $sql [$parameters]")
     db.onComplete {
@@ -208,7 +208,7 @@ object DBProcessor extends LazyLogging {
     p.future
   }
 
-  def find[E](sql: String, parameters: List[Any], resultClass: Class[E]): Future[Resp[List[E]]] =  {
+  def find[E](sql: String, parameters: List[Any], resultClass: Class[E]): Future[Resp[List[E]]] = {
     val p = Promise[Resp[List[E]]]()
     logger.trace(s"JDBC find : $sql [$parameters]")
     db.onComplete {
@@ -251,7 +251,7 @@ object DBProcessor extends LazyLogging {
     p.future
   }
 
-  def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int, resultClass: Class[E]): Future[Resp[Page[E]]] =  {
+  def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int, resultClass: Class[E]): Future[Resp[Page[E]]] = {
     val p = Promise[Resp[Page[E]]]()
     logger.trace(s"JDBC page : $sql [$parameters]")
     db.onComplete {
@@ -306,7 +306,7 @@ object DBProcessor extends LazyLogging {
     p.future
   }
 
-  def count(sql: String, parameters: List[Any]): Future[Resp[Long]] =  {
+  def count(sql: String, parameters: List[Any]): Future[Resp[Long]] = {
     val p = Promise[Resp[Long]]()
     logger.trace(s"JDBC count : $sql [$parameters]")
     db.onComplete {
@@ -366,7 +366,7 @@ object DBProcessor extends LazyLogging {
     p.future
   }
 
-  def exist(sql: String, parameters: List[Any]): Future[Resp[Boolean]] =  {
+  def exist(sql: String, parameters: List[Any]): Future[Resp[Boolean]] = {
     val p = Promise[Resp[Boolean]]()
     logger.trace(s"JDBC exist : $sql [$parameters]")
     db.onComplete {

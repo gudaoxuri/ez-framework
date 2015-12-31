@@ -1,6 +1,6 @@
 package com.asto.ez.framework.mail
 
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 
 import com.asto.ez.framework.EZGlobal
 import com.ecfront.common.Resp
@@ -18,12 +18,15 @@ object MailProcessor extends LazyLogging {
   private var mailConfig: MailConfig = _
   private var maxPoolSize: Int = _
   private val currentErrorCounter: AtomicInteger = new AtomicInteger(0)
+  private val initialized = new AtomicBoolean(false)
 
   def init(config: MailConfig): Unit = {
-    mailConfig = config
-    maxPoolSize = mailConfig.getMaxPoolSize
-    currentErrorCounter.set(0)
-    init(MailClient.createShared(EZGlobal.vertx, mailConfig))
+    if(!initialized.getAndSet(true)) {
+      mailConfig = config
+      maxPoolSize = mailConfig.getMaxPoolSize
+      currentErrorCounter.set(0)
+      init(MailClient.createShared(EZGlobal.vertx, mailConfig))
+    }
   }
 
   def init(_mailClient: MailClient): Unit = {
@@ -72,6 +75,7 @@ object MailProcessor extends LazyLogging {
             if (currentErrorCounter.incrementAndGet() == maxPoolSize) {
               logger.debug(s"Send mail error times equals max pool size , reinitialize mail client.")
               mailClient.close()
+              initialized.set(false)
               init(mailConfig)
             }
             logger.error(s"Send mail [$title] error : ${event.cause().getMessage}", event.cause())
