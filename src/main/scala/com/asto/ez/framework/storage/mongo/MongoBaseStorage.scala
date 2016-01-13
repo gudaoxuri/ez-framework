@@ -6,22 +6,10 @@ import com.asto.ez.framework.storage.{BaseModel, BaseStorage, Page}
 import com.ecfront.common.{BeanHelper, JsonHelper, Resp}
 import io.vertx.core.json.{JsonArray, JsonObject}
 
-import scala.beans.BeanProperty
 import scala.concurrent.Future
 
-trait MongoBaseModel extends BaseModel {
 
-  @BeanProperty var id: String = _
-
-}
-
-object MongoBaseModel {
-
-  val Id_FLAG = "id"
-
-}
-
-trait MongoBaseStorage[M <: MongoBaseModel] extends BaseStorage[M] {
+trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
   protected val _entityInfo =
     if (MongoEntityContainer.CONTAINER.contains(tableName)) {

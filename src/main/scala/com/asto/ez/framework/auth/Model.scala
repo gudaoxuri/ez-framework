@@ -13,7 +13,7 @@ import scala.concurrent.{Future, Promise}
   * 组织实体
   */
 @Entity("Organization")
-case class EZ_Organization() extends MongoBaseModel with MongoSecureModel with MongoStatusModel {
+case class EZ_Organization() extends BaseModel with SecureModel with StatusModel {
 
   @Unique
   @Label("编码")
@@ -26,7 +26,7 @@ case class EZ_Organization() extends MongoBaseModel with MongoSecureModel with M
 object EZ_Organization extends MongoBaseStorage[EZ_Organization] with MongoSecureStorage[EZ_Organization] with MongoStatusStorage[EZ_Organization] {
 
   def getByCode(code: String): Future[Resp[EZ_Organization]] = {
-    getByCond(s"""{"code":"$code"}""")
+    getByCond( s"""{"code":"$code"}""")
   }
 
 }
@@ -35,7 +35,7 @@ object EZ_Organization extends MongoBaseStorage[EZ_Organization] with MongoSecur
   * 资源实体
   */
 @Entity("Resource")
-case class EZ_Resource() extends MongoBaseModel with MongoSecureModel with MongoStatusModel {
+case class EZ_Resource() extends BaseModel with SecureModel with StatusModel {
 
   @Unique
   @Label("编码（方法+路径）")
@@ -76,7 +76,7 @@ object EZ_Resource extends MongoBaseStorage[EZ_Resource] with MongoSecureStorage
   * 角色实体
   */
 @Entity("Role")
-case class EZ_Role() extends MongoBaseModel with MongoSecureModel with MongoStatusModel {
+case class EZ_Role() extends BaseModel with SecureModel with StatusModel {
 
   @Unique
   @Label("编码")
@@ -117,7 +117,7 @@ object EZ_Role extends MongoBaseStorage[EZ_Role] with MongoSecureStorage[EZ_Role
   def findByCodes(codes: List[String]): Future[Resp[List[EZ_Role]]] = {
     if (codes != null && codes.nonEmpty) {
       val strCodes = codes.mkString("\"", ",", "\"")
-      find(s"""{"code":{"$$in":[$strCodes]}}""")
+      find( s"""{"code":{"$$in":[$strCodes]}}""")
     } else {
       Future(Resp.success(List()))
     }
@@ -129,7 +129,7 @@ object EZ_Role extends MongoBaseStorage[EZ_Role] with MongoSecureStorage[EZ_Role
   * 账号实体
   */
 @Entity("Account")
-case class EZ_Account() extends MongoBaseModel with MongoSecureModel with MongoStatusModel {
+case class EZ_Account() extends BaseModel with SecureModel with StatusModel {
 
   @Unique
   @Label("登录名称")
@@ -170,7 +170,7 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
   }
 
   def getByLoginId(login_id: String): Future[Resp[EZ_Account]] = {
-    getByCond(s"""{"login_id":"$login_id"}""")
+    getByCond( s"""{"login_id":"$login_id"}""")
   }
 
   def packageEncryptPwd(loginId: String, password: String): String = {
@@ -180,7 +180,7 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
 }
 
 @Entity("Token Info")
-case class EZ_Token_Info() extends MongoBaseModel {
+case class EZ_Token_Info() extends BaseModel {
 
   @BeanProperty var login_id: String = _
   @BeanProperty var login_name: String = _
@@ -197,7 +197,7 @@ object EZ_Token_Info extends MongoBaseStorage[EZ_Token_Info] {
 
   def save(model: EZ_Token_Info, token: EZ_Token_Info): Future[Resp[String]] = {
     val p = Promise[Resp[String]]()
-    deleteByCond(s"""{"login_id":"${token.login_id}"}""").onSuccess {
+    deleteByCond( s"""{"login_id":"${token.login_id}"}""").onSuccess {
       case delResp =>
         save(model).onSuccess {
           case saveResp => p.success(saveResp)

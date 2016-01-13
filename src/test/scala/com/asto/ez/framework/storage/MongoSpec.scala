@@ -13,12 +13,7 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 
-class MongoSpec extends BasicSpec {
-
-  override def before2(): Any = {
-    val mongo = EZGlobal.ez_storage.getJsonObject("mongo")
-    MongoProcessor.mongoClient = MongoClient.createShared(EZGlobal.vertx, mongo)
-  }
+class MongoSpec extends MongoBasicSpec {
 
   test("Mongo Test") {
 
@@ -77,12 +72,12 @@ class MongoSpec extends BasicSpec {
     assert(Await.result(Mongo_Test_Entity.update(getResult), Duration.Inf).message.contains("姓名"))
 
 
-    Await.result(Mongo_Test_Entity.updateByCond(s"""{"$$set": {"name":"m4"}}""",s"""{"_id":"aaa"}"""), Duration.Inf).body
+    Await.result(Mongo_Test_Entity.updateByCond( s"""{"$$set": {"name":"m4"}}""", s"""{"_id":"aaa"}"""), Duration.Inf).body
 
     var findResult = Await.result(Mongo_Test_Entity.find("{}"), Duration.Inf).body
     assert(findResult.size == 4)
     assert(findResult.head.name == "n1")
-    findResult = Await.result(Mongo_Test_Entity.findWithOpt(s"""{"name":{"$$regex":"^n"}}""", Map(SecureModel.CREATE_TIME_FLAG -> SortEnum.DESC)), Duration.Inf).body
+    findResult = Await.result(Mongo_Test_Entity.findWithOpt( s"""{"name":{"$$regex":"^n"}}""", Map(SecureModel.CREATE_TIME_FLAG -> SortEnum.DESC)), Duration.Inf).body
     assert(findResult.size == 3)
     assert(findResult.head.name == "n3")
 
@@ -92,7 +87,7 @@ class MongoSpec extends BasicSpec {
     assert(pageResult.recordTotal == 4)
     assert(pageResult.objects.size == 4)
     assert(pageResult.objects.head.name == "n1")
-    pageResult = Await.result(Mongo_Test_Entity.pageWithOpt(s"""{"name":{"$$regex":"^n"}}""", 2, 2, Map(SecureModel.CREATE_TIME_FLAG -> SortEnum.DESC)), Duration.Inf).body
+    pageResult = Await.result(Mongo_Test_Entity.pageWithOpt( s"""{"name":{"$$regex":"^n"}}""", 2, 2, Map(SecureModel.CREATE_TIME_FLAG -> SortEnum.DESC)), Duration.Inf).body
     assert(pageResult.pageNumber == 2)
     assert(pageResult.pageSize == 2)
     assert(pageResult.recordTotal == 3)
@@ -114,7 +109,7 @@ class MongoSpec extends BasicSpec {
 
     getResult = Await.result(Mongo_Test_Entity.getById("aaa"), Duration.Inf).body
     assert(getResult != null)
-    Await.result(Mongo_Test_Entity.deleteByCond(s"""{"name":"m4"}"""), Duration.Inf).body
+    Await.result(Mongo_Test_Entity.deleteByCond( s"""{"name":"m4"}"""), Duration.Inf).body
     getResult = Await.result(Mongo_Test_Entity.getById("aaa"), Duration.Inf).body
     assert(getResult == null)
     Await.result(Mongo_Test_Entity.deleteByCond("{}"), Duration.Inf).body
@@ -193,12 +188,12 @@ class MongoSpec extends BasicSpec {
     mongo.name = "n4"
     mongo.create_time = 0
     await(Mongo_Test_Entity.save(mongo)).body
-    await(Mongo_Test_Entity.updateByCond(s"""{"$$set": {"name":"m4"}}""",s"""{"_id":"aaa"}""")).body
+    await(Mongo_Test_Entity.updateByCond( s"""{"$$set": {"name":"m4"}}""", s"""{"_id":"aaa"}""")).body
 
     var findResult = await(Mongo_Test_Entity.find("{}")).body
     assert(findResult.size == 4)
     assert(findResult.head.name == "n1")
-    findResult = await(Mongo_Test_Entity.findWithOpt(s"""{"name":{"$$regex":"^n"}}""", Map(SecureModel.CREATE_TIME_FLAG -> SortEnum.DESC))).body
+    findResult = await(Mongo_Test_Entity.findWithOpt( s"""{"name":{"$$regex":"^n"}}""", Map(SecureModel.CREATE_TIME_FLAG -> SortEnum.DESC))).body
     assert(findResult.size == 3)
     assert(findResult.head.name == "n3")
 
@@ -208,7 +203,7 @@ class MongoSpec extends BasicSpec {
     assert(pageResult.recordTotal == 4)
     assert(pageResult.objects.size == 4)
     assert(pageResult.objects.head.name == "n1")
-    pageResult = await(Mongo_Test_Entity.pageWithOpt(s"""{"name":{"$$regex":"^n"}}""", 2, 2, Map(SecureModel.CREATE_TIME_FLAG -> SortEnum.DESC))).body
+    pageResult = await(Mongo_Test_Entity.pageWithOpt( s"""{"name":{"$$regex":"^n"}}""", 2, 2, Map(SecureModel.CREATE_TIME_FLAG -> SortEnum.DESC))).body
     assert(pageResult.pageNumber == 2)
     assert(pageResult.pageSize == 2)
     assert(pageResult.recordTotal == 3)
@@ -217,7 +212,7 @@ class MongoSpec extends BasicSpec {
 
     getResult = await(Mongo_Test_Entity.getById("aaa")).body
     assert(getResult != null)
-    await(Mongo_Test_Entity.deleteByCond(s"""{"name":"m4"}""")).body
+    await(Mongo_Test_Entity.deleteByCond( s"""{"name":"m4"}""")).body
     getResult = await(Mongo_Test_Entity.getById("aaa")).body
     assert(getResult == null)
     await(Mongo_Test_Entity.deleteByCond("{}")).body
@@ -229,7 +224,7 @@ class MongoSpec extends BasicSpec {
 }
 
 @Entity("")
-case class Mongo_Test_Entity() extends MongoSecureModel with MongoStatusModel {
+case class Mongo_Test_Entity() extends SecureModel with StatusModel {
 
   @Unique
   @Label("姓名")

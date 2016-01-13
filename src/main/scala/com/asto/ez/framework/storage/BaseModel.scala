@@ -6,10 +6,14 @@ import com.asto.ez.framework.EZContext
 import com.ecfront.common.{BeanHelper, JsonHelper, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
+import scala.beans.BeanProperty
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 
-trait BaseModel extends Serializable{
+trait BaseModel extends Serializable {
+
+  @Id("seq")
+  @BeanProperty var id: String = _
 
   def toPersistentJsonString = {
     JsonHelper.toJsonString(BeanHelper.findValues(this))
@@ -19,6 +23,7 @@ trait BaseModel extends Serializable{
 
 object BaseModel {
 
+  val Id_FLAG = "id"
   val SPLIT = "@"
 
 }

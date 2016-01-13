@@ -7,8 +7,8 @@ object JDBCEntityContainer extends BaseEntityContainer[JDBCEntityInfo] {
 
   override protected def buildingEntityInfo(model: JDBCEntityInfo, clazz: Class[_], allAnnotations: List[FieldAnnotationInfo]): Unit = {
     val idFieldInfo = allAnnotations.find(_.annotation.isInstanceOf[Id]).orNull
-    model.idFieldName = if (idFieldInfo != null) idFieldInfo.fieldName else ""
-    model.idStrategy = if (idFieldInfo != null) idFieldInfo.annotation.asInstanceOf[Id].strategy else ""
+    model.idFieldName = if (idFieldInfo != null) idFieldInfo.fieldName else BaseModel.Id_FLAG
+    model.idStrategy = if (idFieldInfo != null) idFieldInfo.annotation.asInstanceOf[Id].strategy else "seq"
     model.fkFieldNames = allAnnotations.filter(_.annotation.isInstanceOf[FK]).map(_.fieldName)
     model.textFieldNames = allAnnotations.filter(_.annotation.isInstanceOf[Text]).map {
       field =>

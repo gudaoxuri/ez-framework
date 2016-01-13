@@ -1,5 +1,6 @@
 package com.asto.ez.framework.storage.mongo
 
+import com.asto.ez.framework.storage.BaseModel
 import com.ecfront.common.Resp
 import io.vertx.core.json.JsonObject
 
@@ -89,13 +90,13 @@ object MongoExecutor {
 
   def saveOrUpdate(entityInfo: MongoEntityInfo, collection: String, id: String, saveOrUpdate: JsonObject): Future[Resp[String]] = {
     val p = Promise[Resp[String]]()
-    if (saveOrUpdate.getValue(MongoBaseModel.Id_FLAG) == null) {
+    if (saveOrUpdate.getValue(BaseModel.Id_FLAG) == null) {
       save(entityInfo, collection, saveOrUpdate).onSuccess {
         case saveResp =>
           p.success(saveResp)
       }
     } else {
-      update(entityInfo, collection, saveOrUpdate.getString(MongoBaseModel.Id_FLAG), saveOrUpdate).onSuccess {
+      update(entityInfo, collection, saveOrUpdate.getString(BaseModel.Id_FLAG), saveOrUpdate).onSuccess {
         case updateResp =>
           p.success(updateResp)
       }

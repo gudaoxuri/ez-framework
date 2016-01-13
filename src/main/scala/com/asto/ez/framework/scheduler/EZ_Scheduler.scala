@@ -1,18 +1,17 @@
 package com.asto.ez.framework.scheduler
 
+import com.asto.ez.framework.storage._
 import com.asto.ez.framework.storage.jdbc._
-import com.asto.ez.framework.storage.{Entity, Id, Text}
+import com.asto.ez.framework.storage.mongo.{MongoStatusStorage, MongoSecureStorage}
 import com.ecfront.common.Ignore
 
 import scala.beans.BeanProperty
 
 @Entity("调度任务")
-case class EZ_Scheduler() extends JDBCSecureModel with JDBCStatusModel {
+case class EZ_Scheduler() extends SecureModel with StatusModel {
 
-  @Id("seq")
-  @BeanProperty
-  var id: Long = _
   //调度名称
+  @Unique @Label("调度名称")
   @BeanProperty var name: String = _
   //调度周期
   @BeanProperty var cron: String = _
@@ -29,4 +28,6 @@ case class EZ_Scheduler() extends JDBCSecureModel with JDBCStatusModel {
 
 }
 
-object EZ_Scheduler extends JDBCSecureStorage[EZ_Scheduler] with JDBCStatusStorage[EZ_Scheduler]
+object JDBC_EZ_Scheduler extends JDBCSecureStorage[EZ_Scheduler] with JDBCStatusStorage[EZ_Scheduler]
+
+object Mongo_EZ_Scheduler extends MongoSecureStorage[EZ_Scheduler] with MongoStatusStorage[EZ_Scheduler]

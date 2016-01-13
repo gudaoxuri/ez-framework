@@ -8,7 +8,7 @@ import com.asto.ez.framework.mail.MailProcessor
 import com.asto.ez.framework.rpc.AutoBuildingProcessor
 import com.asto.ez.framework.rpc.http.{HttpClientProcessor, HttpInterceptor, HttpServerProcessor}
 import com.asto.ez.framework.rpc.websocket.WebSocketServerProcessor
-import com.asto.ez.framework.scheduler.SchedulerService
+import com.asto.ez.framework.scheduler.{JDBC_EZ_Scheduler, Mongo_EZ_Scheduler, SchedulerService}
 import com.asto.ez.framework.storage.jdbc.DBProcessor
 import com.asto.ez.framework.storage.mongo.MongoProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -150,7 +150,11 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
       if (EZGlobal.ez_scheduler) {
         new Thread(new Runnable {
           override def run(): Unit = {
-            SchedulerService.init(module)
+            if (EZGlobal.ez_storage.containsKey("jdbc")) {
+              SchedulerService.init(module, JDBC_EZ_Scheduler)
+            } else if (EZGlobal.ez_storage.containsKey("mongo")) {
+              SchedulerService.init(module, Mongo_EZ_Scheduler)
+            }
           }
         }).start()
       }

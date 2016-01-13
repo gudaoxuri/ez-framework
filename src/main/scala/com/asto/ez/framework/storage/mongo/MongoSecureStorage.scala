@@ -1,4 +1,4 @@
-package com.asto.ez.framework.storage.jdbc
+package com.asto.ez.framework.storage.mongo
 
 import com.asto.ez.framework.EZContext
 import com.asto.ez.framework.storage.{SecureModel, SecureStorage}
@@ -6,9 +6,7 @@ import com.ecfront.common.Resp
 
 import scala.concurrent.Future
 
-trait JDBCSecureModel extends JDBCBaseModel with SecureModel
-
-trait JDBCSecureStorage[M <: JDBCSecureModel] extends JDBCBaseStorage[M] with SecureStorage[M] {
+trait MongoSecureStorage[M <: SecureModel] extends MongoBaseStorage[M] with SecureStorage[M] {
 
   override def doSave(model: M, context: EZContext): Future[Resp[String]] = {
     wrapSecureSave(model, context)

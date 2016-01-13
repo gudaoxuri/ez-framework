@@ -6,15 +6,7 @@ import com.ecfront.common.{BeanHelper, Resp}
 
 import scala.concurrent.Future
 
-trait JDBCBaseModel extends BaseModel
-
-object JDBCBaseModel {
-
-  val REL_FLAG = "rel"
-
-}
-
-trait JDBCBaseStorage[M <: JDBCBaseModel] extends BaseStorage[M] {
+trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
   protected val _entityInfo =
     if (JDBCEntityContainer.CONTAINER.contains(tableName)) {
@@ -76,14 +68,18 @@ trait JDBCBaseStorage[M <: JDBCBaseModel] extends BaseStorage[M] {
     DBExecutor.count(_entityInfo, if (context == null) EZContext.build() else context, condition, parameters)
   }
 
-  protected def getMapValue(model: JDBCBaseModel): Map[String, Any] = {
+  protected def getMapValue(model: BaseModel): Map[String, Any] = {
     //获取对象要持久化字段的值，忽略为null的id字段（由seq控制）
     BeanHelper.findValues(model, _entityInfo.ignoreFieldNames)
       .filterNot(item => item._1 == _entityInfo.idFieldName && (item._2 == null || item._2.toString.trim == ""))
   }
 
-  protected def getIdValue(model: JDBCBaseModel): Any = {
-    getValueByField(model, _entityInfo.idFieldName)
+  protected def getIdValue(model: BaseModel): Any = {
+    if (_entityInfo.idFieldName == BaseModel.Id_FLAG) {
+      model.id
+    } else {
+      getValueByField(model, _entityInfo.idFieldName)
+    }
   }
 
   protected def getValueByField(model: AnyRef, fieldName: String): Any = {

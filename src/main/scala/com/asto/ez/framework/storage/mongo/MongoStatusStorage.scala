@@ -1,15 +1,13 @@
 package com.asto.ez.framework.storage.mongo
 
 import com.asto.ez.framework.EZContext
-import com.asto.ez.framework.storage.{StatusStorage, Page, StatusModel}
+import com.asto.ez.framework.storage.{Page, StatusModel, StatusStorage}
 import com.ecfront.common.Resp
 import io.vertx.core.json.JsonObject
 
 import scala.concurrent.Future
 
-trait MongoStatusModel extends MongoBaseModel with StatusModel
-
-trait MongoStatusStorage[M <: MongoStatusModel] extends MongoBaseStorage[M] with StatusStorage[M] {
+trait MongoStatusStorage[M <: StatusModel] extends MongoBaseStorage[M] with StatusStorage[M] {
 
   override def doGetEnabledByCond(condition: String, parameters: List[Any], context: EZContext): Future[Resp[M]] = {
     getByCond(appendEnabled(new JsonObject(condition)).encode(), parameters, context)
@@ -32,11 +30,11 @@ trait MongoStatusStorage[M <: MongoStatusModel] extends MongoBaseStorage[M] with
   }
 
   override def doEnableById(id: Any, context: EZContext): Future[Resp[Void]] = {
-    updateByCond(s"""{"$$set":{"enable":true}}""",s"""{"_id":"$id"}""", List(id), context)
+    updateByCond( s"""{"$$set":{"enable":true}}""", s"""{"_id":"$id"}""", List(id), context)
   }
 
   override def doDisableById(id: Any, context: EZContext): Future[Resp[Void]] = {
-    updateByCond(s"""{"$$set":{"enable":false}}""",s"""{"_id":"$id"}""", List(id), context)
+    updateByCond( s"""{"$$set":{"enable":false}}""", s"""{"_id":"$id"}""", List(id), context)
   }
 
   private def appendEnabled(condition: JsonObject): JsonObject = {

@@ -4,8 +4,8 @@ import com.asto.ez.framework.EZContext
 import com.ecfront.common.Resp
 
 import scala.beans.BeanProperty
-import scala.concurrent.{Future, Promise}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Future, Promise}
 
 trait StatusModel extends BaseModel {
 

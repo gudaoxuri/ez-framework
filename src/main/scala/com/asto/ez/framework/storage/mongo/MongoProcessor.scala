@@ -1,6 +1,6 @@
 package com.asto.ez.framework.storage.mongo
 
-import com.asto.ez.framework.storage.Page
+import com.asto.ez.framework.storage.{BaseModel, Page}
 import com.ecfront.common.{JsonHelper, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.json.{JsonArray, JsonObject}
@@ -17,10 +17,10 @@ object MongoProcessor extends LazyLogging {
 
   def save(collection: String, save: JsonObject): Future[Resp[String]] = {
     val p = Promise[Resp[String]]()
-    if (save.getValue(MongoBaseModel.Id_FLAG) != null) {
-      save.put("_id", save.getString(MongoBaseModel.Id_FLAG))
+    if (save.getValue(BaseModel.Id_FLAG) != null) {
+      save.put("_id", save.getString(BaseModel.Id_FLAG))
     }
-    save.remove(MongoBaseModel.Id_FLAG)
+    save.remove(BaseModel.Id_FLAG)
     logger.trace(s"Mongo save : $collection -- $save")
     mongoClient.insert(collection, save, new Handler[AsyncResult[String]] {
       override def handle(res: AsyncResult[String]): Unit = {
@@ -38,7 +38,7 @@ object MongoProcessor extends LazyLogging {
 
   def update(collection: String, id: String, update: JsonObject): Future[Resp[String]] = {
     val p = Promise[Resp[String]]()
-    update.remove(MongoBaseModel.Id_FLAG)
+    update.remove(BaseModel.Id_FLAG)
     logger.trace(s"Mongo update : $collection -- $update")
     mongoClient.update(collection, new JsonObject().put("_id", id), new JsonObject().put("$set", update), new Handler[AsyncResult[Void]] {
       override def handle(res: AsyncResult[Void]): Unit = {
@@ -55,10 +55,10 @@ object MongoProcessor extends LazyLogging {
 
   def saveOrUpdate(collection: String, saveOrUpdate: JsonObject): Future[Resp[String]] = {
     val p = Promise[Resp[String]]()
-    if (saveOrUpdate.getValue(MongoBaseModel.Id_FLAG) != null) {
-      saveOrUpdate.put("_id", saveOrUpdate.getString(MongoBaseModel.Id_FLAG))
+    if (saveOrUpdate.getValue(BaseModel.Id_FLAG) != null) {
+      saveOrUpdate.put("_id", saveOrUpdate.getString(BaseModel.Id_FLAG))
     }
-    saveOrUpdate.remove(MongoBaseModel.Id_FLAG)
+    saveOrUpdate.remove(BaseModel.Id_FLAG)
     logger.trace(s"Mongo saveOrUpdate : $collection -- $saveOrUpdate")
     mongoClient.save(collection, saveOrUpdate, new Handler[AsyncResult[String]] {
       override def handle(res: AsyncResult[String]): Unit = {
@@ -150,7 +150,7 @@ object MongoProcessor extends LazyLogging {
         if (res.succeeded()) {
           if (res.result() != null) {
             val result = res.result()
-            result.put(MongoBaseModel.Id_FLAG, result.getString("_id"))
+            result.put(BaseModel.Id_FLAG, result.getString("_id"))
             result.remove("_id")
             if (resultClass != classOf[JsonObject]) {
               p.success(Resp.success(JsonHelper.toObject(result.encode(), resultClass)))
@@ -177,7 +177,7 @@ object MongoProcessor extends LazyLogging {
         if (res.succeeded()) {
           if (res.result() != null) {
             val result = res.result()
-            result.put(MongoBaseModel.Id_FLAG, result.getString("_id"))
+            result.put(BaseModel.Id_FLAG, result.getString("_id"))
             result.remove("_id")
             if (resultClass != classOf[JsonObject]) {
               p.success(Resp.success(JsonHelper.toObject(result.encode(), resultClass)))
@@ -209,7 +209,7 @@ object MongoProcessor extends LazyLogging {
           if (resultClass != classOf[JsonObject]) {
             val result = res.result().map {
               row =>
-                row.put(MongoBaseModel.Id_FLAG, row.getString("_id"))
+                row.put(BaseModel.Id_FLAG, row.getString("_id"))
                 row.remove("_id")
                 JsonHelper.toObject(row.encode(), resultClass)
             }.toList
@@ -217,7 +217,7 @@ object MongoProcessor extends LazyLogging {
           } else {
             val result = res.result().map {
               row =>
-                row.put(MongoBaseModel.Id_FLAG, row.getString("_id"))
+                row.put(BaseModel.Id_FLAG, row.getString("_id"))
                 row.remove("_id")
                 row
             }.asInstanceOf[List[E]]
@@ -248,14 +248,14 @@ object MongoProcessor extends LazyLogging {
               if (resultClass != classOf[JsonObject]) {
                 page.objects = res.result().map {
                   row =>
-                    row.put(MongoBaseModel.Id_FLAG, row.getString("_id"))
+                    row.put(BaseModel.Id_FLAG, row.getString("_id"))
                     row.remove("_id")
                     JsonHelper.toObject(row.encode(), resultClass)
                 }.toList
               } else {
                 page.objects = res.result().map {
                   row =>
-                    row.put(MongoBaseModel.Id_FLAG, row.getString("_id"))
+                    row.put(BaseModel.Id_FLAG, row.getString("_id"))
                     row.remove("_id")
                     row
                 }.asInstanceOf[List[E]]

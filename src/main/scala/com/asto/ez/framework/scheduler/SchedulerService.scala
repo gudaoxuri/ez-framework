@@ -2,6 +2,7 @@ package com.asto.ez.framework.scheduler
 
 import java.util.concurrent.atomic.AtomicBoolean
 
+import com.asto.ez.framework.storage.StatusStorage
 import com.ecfront.common.JsonHelper
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.quartz.impl.StdSchedulerFactory
@@ -13,10 +14,12 @@ object SchedulerService extends LazyLogging {
   private val quartzScheduler = StdSchedulerFactory.getDefaultScheduler
   private val initialized = new AtomicBoolean(false)
 
+  private var stroage: StatusStorage[EZ_Scheduler] = _
+
   def save(scheduler: EZ_Scheduler): Unit = {
-    scheduler.enable=true
+    scheduler.enable = true
     scheduler.parameterstr = JsonHelper.toJsonString(scheduler.parameters)
-    EZ_Scheduler.save(scheduler).onSuccess {
+    stroage.save(scheduler).onSuccess {
       case saveResp =>
         if (saveResp) {
           JobHelper.add(scheduler.name, scheduler.cron, classOf[VertxJob], packageScheduler(scheduler), quartzScheduler)
@@ -25,9 +28,9 @@ object SchedulerService extends LazyLogging {
   }
 
   def update(scheduler: EZ_Scheduler): Unit = {
-    scheduler.enable=true
+    scheduler.enable = true
     scheduler.parameterstr = JsonHelper.toJsonString(scheduler.parameters)
-    EZ_Scheduler.update(scheduler).onSuccess {
+    stroage.update(scheduler).onSuccess {
       case updateResp =>
         if (updateResp) {
           JobHelper.modify(scheduler.name, scheduler.cron, classOf[VertxJob], packageScheduler(scheduler), quartzScheduler)
@@ -45,7 +48,7 @@ object SchedulerService extends LazyLogging {
   }
 
   def delete(name: String): Unit = {
-    EZ_Scheduler.deleteByCond(" name =? ", List(name)).onSuccess {
+    stroage.deleteByCond(" name =? ", List(name)).onSuccess {
       case deleteResp =>
         if (deleteResp) {
           JobHelper.remove(name, quartzScheduler)
@@ -53,11 +56,16 @@ object SchedulerService extends LazyLogging {
     }
   }
 
-  def init(module:String): Unit = {
-    if(!initialized.getAndSet(true)) {
+  def init(module: String, _stroage: StatusStorage[EZ_Scheduler]): Unit = {
+    if (!initialized.getAndSet(true)) {
       logger.debug("Startup scheduling.")
+      stroage = _stroage
       quartzScheduler.start()
-      EZ_Scheduler.findEnabled("module =?", List(module)).onSuccess {
+     val enabledCond= _stroage match {
+        case JDBC_EZ_Scheduler =>"module =?"
+        case Mongo_EZ_Scheduler =>s"""{"module":"$module"}"""
+      }
+      stroage.findEnabled(enabledCond, List(module)).onSuccess {
         case findResp =>
           if (findResp) {
             findResp.body.foreach {

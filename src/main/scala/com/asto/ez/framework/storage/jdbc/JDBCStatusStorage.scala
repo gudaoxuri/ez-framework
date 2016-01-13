@@ -6,9 +6,7 @@ import com.ecfront.common.Resp
 
 import scala.concurrent.Future
 
-trait JDBCStatusModel extends JDBCBaseModel with StatusModel
-
-trait JDBCStatusStorage[M <: JDBCStatusModel] extends JDBCBaseStorage[M] with StatusStorage[M] {
+trait JDBCStatusStorage[M <: StatusModel] extends JDBCBaseStorage[M] with StatusStorage[M] {
 
   override def doGetEnabledByCond(condition: String, parameters: List[Any], context: EZContext): Future[Resp[M]] = {
     getByCond(appendEnabled(condition), parameters, context)

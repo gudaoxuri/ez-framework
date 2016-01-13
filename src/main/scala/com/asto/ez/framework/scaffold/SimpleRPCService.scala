@@ -8,7 +8,7 @@ import java.util.Date
 import com.asto.ez.framework.helper.TimeHelper
 import com.asto.ez.framework.rpc._
 import com.asto.ez.framework.storage._
-import com.asto.ez.framework.storage.jdbc.JDBCBaseModel
+import com.asto.ez.framework.storage.jdbc.JDBCBaseStorage
 import com.asto.ez.framework.{EZContext, EZGlobal}
 import com.ecfront.common.{AsyncResp, BeanHelper, JsonHelper}
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -24,7 +24,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
   }
   protected val _modelClazz = this.getClass.getGenericInterfaces()(0).asInstanceOf[ParameterizedType].getActualTypeArguments()(0).asInstanceOf[Class[M]]
 
-  protected val _isJDBCModel = classOf[JDBCBaseModel].isAssignableFrom(_modelClazz)
+  protected val _isJDBCModel = storageObj.isInstanceOf[JDBCBaseStorage[_]]
   protected val modelObj = _modelClazz.newInstance()
   protected val _emptyCondition = if (_isJDBCModel) "1=1" else "{}"
 
