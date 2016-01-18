@@ -147,7 +147,7 @@ class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
         logger.trace("Response: \r\n" + res)
         response.setStatusCode(200).putHeader("Content-Type", accept)
           .putHeader("Cache-Control", "no-cache")
-          .putHeader("Access-Control-Allow-Origin", "*")
+          .putHeader("Access-Control-Allow-Origin", EZGlobal.ez_rpc_http_access_control_allow_origin)
           .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
           .putHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, X-authentication, X-client")
           .end(res)

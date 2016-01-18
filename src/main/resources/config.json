@@ -5,7 +5,8 @@
         "host": "0.0.0.0",
         "port": 8080,
         "resourcePath": "c:/tmp/",
-        "publicUriPrefix": "/public/"
+        "publicUriPrefix": "/public/",
+        "accessControlAllowOrigin":"*"
       },
       "cluster": {
         "host": "127.0.0.1"
