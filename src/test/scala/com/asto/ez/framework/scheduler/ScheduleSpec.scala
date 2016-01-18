@@ -3,6 +3,7 @@ package com.asto.ez.framework.scheduler
 import java.util.concurrent.CountDownLatch
 
 import com.asto.ez.framework.storage.StroageSpec
+import com.ecfront.common.AsyncResp
 
 class ScheduleSpec extends StroageSpec {
 
@@ -10,7 +11,7 @@ class ScheduleSpec extends StroageSpec {
 
     val cdl = new CountDownLatch(1)
 
-    SchedulerService.init("testModule1", JDBC_EZ_Scheduler)
+    SchedulerService.init("testModule1", useMongo = false)
     val scheduler = EZ_Scheduler()
     scheduler.name = "测试"
     scheduler.cron = "* * * * * ?"
@@ -27,7 +28,7 @@ class ScheduleSpec extends StroageSpec {
 
     val cdl = new CountDownLatch(1)
 
-    SchedulerService.init("testModule1", Mongo_EZ_Scheduler)
+    SchedulerService.init("testModule1", useMongo = true)
     val scheduler = EZ_Scheduler()
     scheduler.name = "测试"
     scheduler.cron = "* * * * * ?"
@@ -44,11 +45,12 @@ class ScheduleSpec extends StroageSpec {
 
 object TestScheduleJob extends ScheduleJob {
 
-  override def execute(scheduler: EZ_Scheduler): Unit = {
+  override def execute(scheduler: EZ_Scheduler,p: AsyncResp[Void]): Unit = {
 
     assert(scheduler.clazz == TestScheduleJob.getClass.getName)
     assert(scheduler.parameters("p1") == 1)
     assert(scheduler.parameters("p2") == "1")
 
+    p.success(null)
   }
 }

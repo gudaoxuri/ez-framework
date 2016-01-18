@@ -20,3 +20,14 @@ CREATE TABLE IF NOT EXISTS ez_scheduler
     INDEX idx_update_org(update_org) ,
     INDEX idx_update_time(update_time)
 )ENGINE=innodb DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS ez_scheduler_log
+(
+    id INT NOT NULL AUTO_INCREMENT COMMENT '记录主键' ,
+    scheduler_id varchar(200) NOT NULL COMMENT '调度id' ,
+    start_time BIGINT NOT NULL COMMENT '开始时间(yyyyMMddHHmmssSSS)' ,
+    end_time BIGINT NOT NULL COMMENT '结束时间(yyyyMMddHHmmssSSS)' ,
+    success BOOLEAN NOT NULL COMMENT '是否成功' ,
+    desc varchar(500) NOT NULL COMMENT '描述' ,
+    PRIMARY KEY(id)
+)ENGINE=innodb DEFAULT CHARSET=utf8;
