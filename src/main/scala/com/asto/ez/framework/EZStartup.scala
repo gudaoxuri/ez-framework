@@ -28,7 +28,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
 
   protected def module: String
 
-  protected def initiator: Initiator = null
+  protected def initiator: EZInitiator = null
 
   protected def preStartup() = {}
 
@@ -48,7 +48,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     HttpClientProcessor.httpClient = EZGlobal.vertx.createHttpClient()
     preStartup()
     startEZService()
-    if (initiator != null && initiator.needinitialization) initiator.initialize()
+    if (initiator != null && initiator.needInitialization) initiator.initialize()
     postStartup()
   }
 
