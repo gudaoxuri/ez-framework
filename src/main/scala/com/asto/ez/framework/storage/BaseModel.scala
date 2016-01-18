@@ -15,10 +15,6 @@ trait BaseModel extends Serializable {
   @Id("seq")
   @BeanProperty var id: String = _
 
-  def toPersistentJsonString = {
-    JsonHelper.toJsonString(BeanHelper.findValues(this))
-  }
-
 }
 
 object BaseModel {

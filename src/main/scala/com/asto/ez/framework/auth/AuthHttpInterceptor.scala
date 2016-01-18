@@ -20,8 +20,7 @@ object AuthHttpInterceptor extends HttpInterceptor {
         EZ_Token_Info.getById(obj.token).onSuccess {
           case tokenResp =>
             if (tokenResp && tokenResp.body != null) {
-              obj.login_Id = tokenResp.body.login_id
-              obj.organization_code = tokenResp.body.organization.code
+              obj.login_info = tokenResp.body
               val resourceCode = EZ_Resource.assembleCode(obj.method, obj.templateUri)
               if (!tokenResp.body.roles.exists(_.resource_codes.contains(resourceCode))) {
                 EZ_Resource.existByCond(s"""{"code":"$resourceCode"}""").onSuccess {

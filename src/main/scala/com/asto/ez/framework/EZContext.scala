@@ -1,9 +1,10 @@
 package com.asto.ez.framework
 
+import com.asto.ez.framework.auth.EZ_Token_Info
+
 case class EZContext() {
   var token: String = _
-  var login_Id: String = _
-  var organization_code: String = _
+  var login_info: EZ_Token_Info = _
   var method: String = _
   var templateUri: String = _
   var realUri: String = _
@@ -18,8 +19,7 @@ object EZContext {
   def build() = {
     val context = EZContext()
     context.token = ""
-    context.login_Id = ""
-    context.organization_code = ""
+    context.login_info = null
     context.method = ""
     context.templateUri = ""
     context.realUri = ""

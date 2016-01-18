@@ -44,22 +44,22 @@ trait SecureStorage[M <: SecureModel] extends BaseStorage[M] {
     val cnt = if (context == null) EZContext.build() else context
     val now = TimeHelper.msf.format(new Date()).toLong
     if (model.create_user == null) {
-      model.create_user = if (cnt.login_Id != null) cnt.login_Id else ""
+      model.create_user = if (cnt.login_info != null) cnt.login_info.login_id else ""
     }
     if (model.create_time == 0) {
       model.create_time = now
     }
     if (model.create_org == null) {
-      model.create_org = if (cnt.organization_code != null) cnt.organization_code else ""
+      model.create_org = if (cnt.login_info != null) cnt.login_info.organization.code else ""
     }
     if (model.update_user == null) {
-      model.update_user = if (cnt.login_Id != null) cnt.login_Id else ""
+      model.update_user = if (cnt.login_info != null) cnt.login_info.login_id else ""
     }
     if (model.update_time == 0) {
       model.update_time = now
     }
     if (model.update_org == null) {
-      model.update_org = if (cnt.organization_code != null) cnt.organization_code else ""
+      model.update_org = if (cnt.login_info != null) cnt.login_info.organization.code else ""
     }
   }
 
@@ -67,13 +67,13 @@ trait SecureStorage[M <: SecureModel] extends BaseStorage[M] {
     val cnt = if (context == null) EZContext.build() else context
     val now = TimeHelper.msf.format(new Date()).toLong
     if (model.update_user == null) {
-      model.update_user = if (cnt.login_Id != null) cnt.login_Id else ""
+      model.update_user = if (cnt.login_info != null) cnt.login_info.login_id else ""
     }
     if (model.update_time == 0) {
       model.update_time = now
     }
     if (model.update_org == null) {
-      model.update_org = if (cnt.organization_code != null) cnt.organization_code else ""
+      model.update_org = if (cnt.login_info != null) cnt.login_info.organization.code else ""
     }
   }
 
