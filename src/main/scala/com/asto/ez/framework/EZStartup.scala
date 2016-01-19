@@ -48,7 +48,25 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     HttpClientProcessor.httpClient = EZGlobal.vertx.createHttpClient()
     preStartup()
     startEZService()
-    if (initiator != null && initiator.needInitialization) initiator.initialize()
+    if (initiator != null) {
+      initiator.needInitialization.onSuccess {
+        case needInitResp =>
+          if (needInitResp) {
+            if (needInitResp.body) {
+              initiator.initialize().onSuccess {
+                case initResp =>
+                  if (initResp) {
+                    logger.info(s"EZ Framework initiator Successful .")
+                  } else {
+                    logger.error(s"EZ Framework Initiator Error : ${needInitResp.message}")
+                  }
+              }
+            }
+          } else {
+            logger.error(s"EZ Framework Initiator Error : ${needInitResp.message}")
+          }
+      }
+    }
     postStartup()
   }
 
