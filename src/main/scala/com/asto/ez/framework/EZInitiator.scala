@@ -7,7 +7,7 @@ import scala.concurrent.Future
 
 trait EZInitiator extends LazyLogging {
 
-  def needInitialization: Future[Resp[Boolean]]
+  def isInitialized: Future[Resp[Boolean]]
 
   def initialize(): Future[Resp[Void]]
 

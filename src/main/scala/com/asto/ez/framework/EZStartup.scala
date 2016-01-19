@@ -19,6 +19,7 @@ import io.vertx.ext.jdbc.JDBCClient
 import io.vertx.ext.mail.MailConfig
 import io.vertx.ext.mongo.MongoClient
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
 
 /**
@@ -49,21 +50,23 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     preStartup()
     startEZService()
     if (initiator != null) {
-      initiator.needInitialization.onSuccess {
-        case needInitResp =>
-          if (needInitResp) {
-            if (needInitResp.body) {
+      initiator.isInitialized.onSuccess {
+        case isInitializedResp =>
+          if (isInitializedResp) {
+            if (!isInitializedResp.body) {
               initiator.initialize().onSuccess {
                 case initResp =>
                   if (initResp) {
-                    logger.info(s"EZ Framework initiator Successful .")
+                    logger.info(s"EZ Framework Initiator successful .")
                   } else {
-                    logger.error(s"EZ Framework Initiator Error : ${needInitResp.message}")
+                    logger.error(s"EZ Framework Initiator error : ${isInitializedResp.message}")
                   }
               }
+            } else {
+              logger.info(s"EZ Framework has initialized .")
             }
           } else {
-            logger.error(s"EZ Framework Initiator Error : ${needInitResp.message}")
+            logger.error(s"EZ Framework Initiator error : ${isInitializedResp.message}")
           }
       }
     }

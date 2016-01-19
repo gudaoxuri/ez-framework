@@ -3,9 +3,7 @@ package com.asto.ez.framework.storage
 import java.util.concurrent.CountDownLatch
 
 import com.asto.ez.framework.storage.mongo._
-import com.asto.ez.framework.{BasicSpec, EZGlobal}
 import io.vertx.core.json.JsonArray
-import io.vertx.ext.mongo.MongoClient
 
 import scala.async.Async.{async, await}
 import scala.beans.BeanProperty
