@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.ecfront</groupId>
         <artifactId>ez-vertx-verticle-parent</artifactId>
-        <version>0.1.9</version>
+        <version>0.2.0</version>
     </parent>
 
     <artifactId>ez-framework</artifactId>
@@ -25,9 +25,21 @@
 
     <properties>
         <main.verticle>com.ecfront.foo</main.verticle>
+        <ez-common.version>0.5.9</ez-common.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ez-common</artifactId>
+            <version>${ez-common.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.code.findbugs</groupId>
+                    <artifactId>jsr305</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>org.scala-lang.modules</groupId>
             <artifactId>scala-async_${scala.major.version}</artifactId>
