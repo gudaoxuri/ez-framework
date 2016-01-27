@@ -25,7 +25,7 @@
 
     <properties>
         <main.verticle>com.ecfront.foo</main.verticle>
-        <ez-common.version>0.5.9</ez-common.version>
+        <ez-common.version>0.6.0</ez-common.version>
     </properties>
 
     <dependencies>
