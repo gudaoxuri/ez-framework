@@ -17,6 +17,7 @@ class VertxJob extends Job with LazyLogging {
 
   override def execute(context: JobExecutionContext): Unit = {
     val scheduler = EZ_Scheduler()
+    scheduler.id = context.getMergedJobDataMap.getString("id")
     scheduler.name = context.getMergedJobDataMap.getString("name")
     scheduler.cron = context.getMergedJobDataMap.getString("cron")
     scheduler.clazz = context.getMergedJobDataMap.getString("clazz")
