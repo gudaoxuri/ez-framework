@@ -1,6 +1,7 @@
 package com.asto.ez.framework.rpc.http
 
 import java.io.File
+import java.net.URLDecoder
 
 import com.asto.ez.framework.interceptor.InterceptorProcessor
 import com.asto.ez.framework.rpc.{EChannel, Fun, Router}
@@ -50,7 +51,7 @@ class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
     context.method = request.method().name()
     context.templateUri = result._4
     context.realUri = request.path()
-    context.parameters = parameters
+    context.parameters = parameters.map { i => i._1 -> URLDecoder.decode(i._2, "UTF-8") }
     context.accept = accept.toLowerCase()
     context.contentType = contentType.toLowerCase()
     if (result._1) {
