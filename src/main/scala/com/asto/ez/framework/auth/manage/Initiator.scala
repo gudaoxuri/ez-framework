@@ -12,119 +12,87 @@ object Initiator extends LazyLogging {
 
   def init() = async {
 
-    val exist = await(EZ_Resource.existByCond(s"""{"code":"${BaseModel.SPLIT + Method.GET + BaseModel.SPLIT + "/auth/logininfo/"}"}""")).body
+    val exist = await(EZ_Resource.existByCond(s"""{"code":"${Method.GET + BaseModel.SPLIT + "/auth/manage/organization/"}"}""")).body
     if (!exist) {
 
-      val org = EZ_Organization()
-      org.code = ""
-      org.name = "default"
-      org.enable = true
+      val org = EZ_Organization("", "default")
       await(EZ_Organization.save(org))
 
-      val res = EZ_Resource()
-      res.method = Method.GET
-      res.uri = "/auth/logininfo/"
-      res.name = s"Fetch Login Info"
-      res.enable = true
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/organization/", s"Find Organizations")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/organization/page/:pageNumber/:pageSize/", s"Paging Organizations")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/organization/:id/", s"Fetch Organization By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.POST, "/auth/manage/organization/", s"Save a new Organization")))
+      await(EZ_Resource.save(EZ_Resource(Method.PUT, "/auth/manage/organization/:id/", s"Update a exist Organization By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.DELETE, "/auth/manage/organization/:id/", s"Delete a exist Organization By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/organization/:id/enable/", s"Enabled a exist Organization By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/organization/:id/disable/", s"Disabled a exist Organization By Id")))
 
-      await(EZ_Resource.save(res))
-      res.method = Method.GET
-      res.uri = "/auth/logout/"
-      res.name = s"Logout"
-      await(EZ_Resource.save(res))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/", s"Find Accounts")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/page/:pageNumber/:pageSize/", s"Paging Accounts")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/:id/", s"Fetch Account By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.POST, "/auth/manage/account/", s"Save a new Account")))
+      await(EZ_Resource.save(EZ_Resource(Method.PUT, "/auth/manage/account/:id/", s"Update a exist Account By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.DELETE, "/auth/manage/account/:id/", s"Delete a exist Account By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/:id/enable/", s"Enabled a exist Account By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/:id/disable/", s"Disabled a exist Account By Id")))
 
-      res.method = Method.GET
-      res.uri = "/auth/manage/account/:id/"
-      res.name = s"Fetch Account By Id"
-      await(EZ_Resource.save(res))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/role/", s"Find Roles")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/role/page/:pageNumber/:pageSize/", s"Paging Roles")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/role/:id/", s"Fetch Role By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.POST, "/auth/manage/role/", s"Save a new Role")))
+      await(EZ_Resource.save(EZ_Resource(Method.PUT, "/auth/manage/role/:id/", s"Update a exist Role By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.DELETE, "/auth/manage/role/:id/", s"Delete a exist Role By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/role/:id/enable/", s"Enabled a exist Role By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/role/:id/disable/", s"Disabled a exist Role By Id")))
 
-      res.method = Method.POST
-      res.uri = "/auth/manage/account/"
-      res.name = s"Save a new Account"
-      await(EZ_Resource.save(res))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/resource/", s"Find Resources")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/resource/page/:pageNumber/:pageSize/", s"Paging Resources")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/resource/:id/", s"Fetch Resource By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.POST, "/auth/manage/resource/", s"Save a new Resource")))
+      await(EZ_Resource.save(EZ_Resource(Method.PUT, "/auth/manage/resource/:id/", s"Update a exist Resource By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.DELETE, "/auth/manage/resource/:id/", s"Delete a exist Resource By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/resource/:id/enable/", s"Enabled a exist Resource By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/resource/:id/disable/", s"Disabled a exist Resource By Id")))
 
-      res.method = Method.PUT
-      res.uri = "/auth/manage/account/:id/"
-      res.name = s"Update a exist Account By Id"
-      await(EZ_Resource.save(res))
-
-      res.method = Method.DELETE
-      res.uri = "/auth/manage/account/:id/"
-      res.name = s"Delete a exist Account By Id"
-      await(EZ_Resource.save(res))
-
-      res.method = Method.GET
-      res.uri = "/auth/manage/role/:id/"
-      res.name = s"Fetch Role By Id"
-      await(EZ_Resource.save(res))
-
-      res.method = Method.POST
-      res.uri = "/auth/manage/role/"
-      res.name = s"Save a new Role"
-      await(EZ_Resource.save(res))
-
-      res.method = Method.PUT
-      res.uri = "/auth/manage/role/:id/"
-      res.name = s"Update a exist Role By Id"
-      await(EZ_Resource.save(res))
-
-      res.method = Method.DELETE
-      res.uri = "/auth/manage/role/:id/"
-      res.name = s"Delete a exist Role By Id"
-      await(EZ_Resource.save(res))
-
-      res.method = Method.GET
-      res.uri = "/auth/manage/resource/:id/"
-      res.name = s"Fetch Resource By Id"
-      await(EZ_Resource.save(res))
-
-      res.method = Method.POST
-      res.uri = "/auth/manage/resource/"
-      res.name = s"Save a new Resource"
-      await(EZ_Resource.save(res))
-
-      res.method = Method.PUT
-      res.uri = "/auth/manage/resource/:id/"
-      res.name = s"Update a exist Resource By Id"
-      await(EZ_Resource.save(res))
-
-      res.method = Method.DELETE
-      res.uri = "/auth/manage/resource/:id/"
-      res.name = s"Delete a exist Resource By Id"
-      await(EZ_Resource.save(res))
-
-      val role = EZ_Role()
-      role.flag = EZ_Role.SYSTEM_ROLE_CODE
-      role.name = "System Role"
-      role.organization_code = ""
-      role.enable = true
-      role.resource_codes = List(
-        s"GET${BaseModel.SPLIT}/auth/logininfo/",
-        s"GET${BaseModel.SPLIT}/auth/logout/",
-        s"GET${BaseModel.SPLIT}/auth/manage/account/:id/",
-        s"POST${BaseModel.SPLIT}/auth/manage/account/",
-        s"PUT${BaseModel.SPLIT}/auth/manage/account/:id/",
-        s"DELETE${BaseModel.SPLIT}/auth/manage/account/:id/",
-        s"GET${BaseModel.SPLIT}/auth/manage/role/:id/",
-        s"POST${BaseModel.SPLIT}/auth/manage/role/",
-        s"PUT${BaseModel.SPLIT}/auth/manage/role/:id/",
-        s"DELETE${BaseModel.SPLIT}/auth/manage/role/:id/",
-        s"GET${BaseModel.SPLIT}/auth/manage/resource/:id/",
-        s"POST${BaseModel.SPLIT}/auth/manage/resource/",
-        s"PUT${BaseModel.SPLIT}/auth/manage/resource/:id/",
-        s"DELETE${BaseModel.SPLIT}/auth/manage/resource/:id/"
-      )
+      val role = EZ_Role(EZ_Role.SYSTEM_ROLE_CODE, "System Role", List(
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/page/:pageNumber/:pageSize/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/:id/",
+        s"${Method.POST}${BaseModel.SPLIT}/auth/manage/organization/",
+        s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/organization/:id/",
+        s"${Method.DELETE}${BaseModel.SPLIT}/auth/manage/organization/:id/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/:id/enable/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/:id/disable/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/page/:pageNumber/:pageSize/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/:id/",
+        s"${Method.POST}${BaseModel.SPLIT}/auth/manage/account/",
+        s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/account/:id/",
+        s"${Method.DELETE}${BaseModel.SPLIT}/auth/manage/account/:id/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/:id/enable/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/:id/disable/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/page/:pageNumber/:pageSize/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/:id/",
+        s"${Method.POST}${BaseModel.SPLIT}/auth/manage/role/",
+        s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/role/:id/",
+        s"${Method.DELETE}${BaseModel.SPLIT}/auth/manage/role/:id/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/:id/enable/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/:id/disable/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/page/:pageNumber/:pageSize/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/:id/",
+        s"${Method.POST}${BaseModel.SPLIT}/auth/manage/resource/",
+        s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/resource/:id/",
+        s"${Method.DELETE}${BaseModel.SPLIT}/auth/manage/resource/:id/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/:id/enable/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/:id/disable/"
+      ))
       await(EZ_Role.save(role))
 
-      val account = EZ_Account()
-      account.login_id = EZ_Account.SYSTEM_ACCOUNT_CODE
-      account.name = "System Administrator"
-      account.password = "admin"
-      account.organization_code = ""
-      account.enable = true
-      account.role_codes = List(
+      val account = EZ_Account(EZ_Account.SYSTEM_ACCOUNT_CODE, "System Administrator", "admin", List(
         BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE
-      )
+      ))
       await(EZ_Account.save(account))
       logger.info("Initialized auth basic data.")
     }

@@ -17,17 +17,11 @@ class OrganizationSpec extends MockStartupSpec {
     EZ_Role.deleteByCond(s"""{"code":"org1@user1"}""")
     EZ_Account.deleteByCond(s"""{"login_id":"u1"}""")
 
-    val org = EZ_Organization()
-    org.code = "org1"
-    org.name = "组织1"
-    org.enable = true
+    val org = EZ_Organization("org1","组织1")
     Await.result(EZ_Organization.save(org), Duration.Inf)
 
-    val res = EZ_Resource()
-    res.method = Method.GET
-    res.uri = "/org/1/foo/"
-    res.name = s"Fetch org1 Info"
-    res.enable = true
+    val res = EZ_Resource(Method.GET,"/org/1/foo/",s"Fetch org1 Info")
+    Await.result(EZ_Resource.save(res), Duration.Inf)
 
     val role = EZ_Role()
     role.flag = "user1"

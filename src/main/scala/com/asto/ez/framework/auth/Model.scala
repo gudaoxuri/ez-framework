@@ -25,6 +25,14 @@ case class EZ_Organization() extends BaseModel with SecureModel with StatusModel
 
 object EZ_Organization extends MongoBaseStorage[EZ_Organization] with MongoSecureStorage[EZ_Organization] with MongoStatusStorage[EZ_Organization] {
 
+  def apply(code: String, name: String): EZ_Organization = {
+    val org = EZ_Organization()
+    org.code = code
+    org.name = name
+    org.enable = true
+    org
+  }
+
   def getByCode(code: String): Future[Resp[EZ_Organization]] = {
     getByCond( s"""{"code":"$code"}""")
   }
@@ -47,6 +55,15 @@ case class EZ_Resource() extends BaseModel with SecureModel with StatusModel {
 }
 
 object EZ_Resource extends MongoBaseStorage[EZ_Resource] with MongoSecureStorage[EZ_Resource] with MongoStatusStorage[EZ_Resource] {
+
+  def apply(method: String, uri: String, name: String): EZ_Resource = {
+    val res = EZ_Resource()
+    res.method = method
+    res.uri = uri
+    res.name = name
+    res.enable = true
+    res
+  }
 
   override protected def preSave(model: EZ_Resource, context: EZContext): Future[Resp[EZ_Resource]] = {
     if (model.method == null || model.method.trim.isEmpty || model.uri == null || model.uri.trim.isEmpty) {
@@ -91,6 +108,16 @@ case class EZ_Role() extends BaseModel with SecureModel with StatusModel {
 object EZ_Role extends MongoBaseStorage[EZ_Role] with MongoSecureStorage[EZ_Role] with MongoStatusStorage[EZ_Role] {
 
   val SYSTEM_ROLE_CODE = "system"
+
+  def apply(flag: String, name: String, resourceCodes: List[String]): EZ_Role = {
+    val role = EZ_Role()
+    role.flag = flag
+    role.name = name
+    role.organization_code = ""
+    role.enable = true
+    role.resource_codes = resourceCodes
+    role
+  }
 
   override protected def preSave(model: EZ_Role, context: EZContext): Future[Resp[EZ_Role]] = {
     if (model.flag == null || model.flag.trim.isEmpty) {
@@ -150,6 +177,17 @@ case class EZ_Account() extends BaseModel with SecureModel with StatusModel {
 object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[EZ_Account] with MongoStatusStorage[EZ_Account] {
 
   val SYSTEM_ACCOUNT_CODE = "sysadmin"
+
+  def apply(loginId: String, name: String, password: String, roleCodes: List[String]): EZ_Account = {
+    val account = EZ_Account()
+    account.login_id = loginId
+    account.name = name
+    account.password = password
+    account.organization_code = ""
+    account.enable = true
+    account.role_codes = roleCodes
+    account
+  }
 
   override protected def preSave(model: EZ_Account, context: EZContext): Future[Resp[EZ_Account]] = {
     if (model.login_id == null || model.login_id.trim.isEmpty || model.password == null || model.password.trim.isEmpty) {
