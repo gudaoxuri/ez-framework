@@ -247,3 +247,37 @@ object EZ_Token_Info extends MongoBaseStorage[EZ_Token_Info] {
 }
 
 
+/**
+  * 菜单实体
+  */
+@Entity("Menu")
+case class EZ_Menu() extends BaseModel with SecureModel with StatusModel {
+
+  @BeanProperty var uri: String = _
+  @BeanProperty var name: String = _
+  @BeanProperty var icon: String = ""
+  @BeanProperty var translate: String = ""
+  @BeanProperty var role_codes: List[String] = List[String]()
+  @BeanProperty var parent_uri: String = null
+
+}
+
+object EZ_Menu extends MongoBaseStorage[EZ_Menu] with MongoSecureStorage[EZ_Menu] with MongoStatusStorage[EZ_Menu] {
+
+  def apply(uri: String, name: String, parent_uri: String, roleCodes: List[String], icon: String = "", translate: String = ""): EZ_Menu = {
+    val menu = EZ_Menu()
+    menu.uri = uri
+    menu.name = name
+    menu.parent_uri = parent_uri
+    menu.icon = icon
+    menu.translate = translate
+    menu.role_codes = roleCodes
+    menu.enable = true
+    menu
+  }
+
+}
+
+
+
+

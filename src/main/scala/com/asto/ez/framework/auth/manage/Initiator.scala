@@ -58,6 +58,16 @@ object Initiator extends LazyLogging {
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/resource/:id/disable/", s"Disabled a exist Resource By Id")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/resource/res/", s"Upload Resource file")))
 
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/", s"Find Menus")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/page/:pageNumber/:pageSize/", s"Paging Menus")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/:id/", s"Fetch Menu By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.POST, "/auth/manage/menu/", s"Save a new Menu")))
+      await(EZ_Resource.save(EZ_Resource(Method.PUT, "/auth/manage/menu/:id/", s"Update a exist Menu By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.DELETE, "/auth/manage/menu/:id/", s"Delete a exist Menu By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/:id/enable/", s"Enabled a exist Menu By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/:id/disable/", s"Disabled a exist Menu By Id")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/res/", s"Upload Menu file")))
+
       val role = EZ_Role(EZ_Role.SYSTEM_ROLE_CODE, "System Role", List(
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/page/:pageNumber/:pageSize/",
@@ -94,7 +104,16 @@ object Initiator extends LazyLogging {
         s"${Method.DELETE}${BaseModel.SPLIT}/auth/manage/resource/:id/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/:id/enable/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/:id/disable/",
-        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/res/"
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/res/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/page/:pageNumber/:pageSize/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/:id/",
+        s"${Method.POST}${BaseModel.SPLIT}/auth/manage/menu/",
+        s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/menu/:id/",
+        s"${Method.DELETE}${BaseModel.SPLIT}/auth/manage/menu/:id/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/:id/enable/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/:id/disable/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/res/"
       ))
       await(EZ_Role.save(role))
 

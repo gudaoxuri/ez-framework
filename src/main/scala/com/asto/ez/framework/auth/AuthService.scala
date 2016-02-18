@@ -121,4 +121,33 @@ object AuthService {
     }
   }
 
+  @GET("/public/menu/")
+  def getMenus(parameter: Map[String, String], p: AsyncResp[List[EZ_Menu]], context: EZContext) = {
+    val tokenOpt = parameter.get(EZ_Token_Info.TOKEN_FLAG)
+    if (tokenOpt.isDefined) {
+      EZ_Token_Info.getById(tokenOpt.get).onSuccess {
+        case tokenResp =>
+          if (tokenResp && tokenResp.body != null) {
+            doGetMenus(tokenResp.body.roles.map(_.getCode), p)
+          } else {
+            p.unAuthorized(s"Token【${tokenOpt.get}】已失效")
+          }
+      }
+    } else {
+      doGetMenus(List(), p)
+    }
+  }
+
+  def doGetMenus(roleCodes: List[String], p: AsyncResp[List[EZ_Menu]]) = {
+    EZ_Menu.findEnabled("{}").onSuccess {
+      case allMenuResp =>
+        val roleCodeSet = roleCodes.toSet
+        val filteredMenus = allMenuResp.body.filter {
+          menu =>
+            menu.role_codes == null || menu.role_codes.isEmpty || (menu.role_codes.toSet & roleCodeSet).nonEmpty
+        }
+        p.success(filteredMenus)
+    }
+  }
+
 }
