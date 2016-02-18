@@ -1,6 +1,6 @@
 package com.asto.ez.framework.auth.manage
 
-import com.asto.ez.framework.auth.{EZ_Account, EZ_Organization, EZ_Resource, EZ_Role}
+import com.asto.ez.framework.auth._
 import com.asto.ez.framework.rpc.Method
 import com.asto.ez.framework.storage.BaseModel
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -121,6 +121,15 @@ object Initiator extends LazyLogging {
         BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE
       ))
       await(EZ_Account.save(account))
+
+      await(EZ_Menu.save(EZ_Menu("ez.dashboard", "Dashboard", "", List(), "icon-home", "sidebar.nav.DASHBARD")))
+      await(EZ_Menu.save(EZ_Menu("#sysManage", "System Manage", "", List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE), "icon-settings", "sidebar.nav.sysManage._")))
+      await(EZ_Menu.save(EZ_Menu("ez.sysmanage-organization-list", "Organization", "#sysManage", List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE), "icon-globe", "sidebar.nav.sysManage.Organization")))
+      await(EZ_Menu.save(EZ_Menu("ez.sysmanage-resource-list", "Resource", "#sysManage", List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE), "icon-basket-loaded", "sidebar.nav.sysManage.RESOURCE")))
+      await(EZ_Menu.save(EZ_Menu("ez.sysmanage-role-list", "Role", "#sysManage", List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE), "icon-shuffle", "sidebar.nav.sysManage.ROLE")))
+      await(EZ_Menu.save(EZ_Menu("ez.sysmanage-account-list", "Account", "#sysManage", List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE), "icon-people", "sidebar.nav.sysManage.ACCOUNT")))
+      await(EZ_Menu.save(EZ_Menu("ez.sysmanage-menu-list", "Menu", "#sysManage", List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE), "icon-grid", "sidebar.nav.sysManage.MENU")))
+
       logger.info("Initialized auth basic data.")
     }
   }
