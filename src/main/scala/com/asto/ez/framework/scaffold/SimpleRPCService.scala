@@ -19,6 +19,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
   protected val storageObj: BaseStorage[M]
   protected var baseUri = BeanHelper.getClassAnnotation[RPC](this.getClass).get.baseUri
+  baseUri=baseUri.substring(1)
   if (!baseUri.endsWith("/")) {
     baseUri += "/"
   }
