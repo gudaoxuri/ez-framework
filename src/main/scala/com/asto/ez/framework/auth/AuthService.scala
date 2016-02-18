@@ -4,6 +4,7 @@ import java.util.UUID
 
 import com.asto.ez.framework.EZContext
 import com.asto.ez.framework.rpc.{GET, HTTP, POST, RPC}
+import com.asto.ez.framework.storage.mongo.SortEnum
 import com.ecfront.common.AsyncResp
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -142,7 +143,7 @@ object AuthService {
   }
 
   def doGetMenus(roleCodes: List[String], p: AsyncResp[List[EZ_Menu]]) = {
-    EZ_Menu.findEnabled("{}").onSuccess {
+    EZ_Menu.findWithOpt(s"""{"enable":true}""", Map("sort" -> SortEnum.DESC)).onSuccess {
       case allMenuResp =>
         val roleCodeSet = roleCodes.toSet
         val filteredMenus = allMenuResp.body.filter {

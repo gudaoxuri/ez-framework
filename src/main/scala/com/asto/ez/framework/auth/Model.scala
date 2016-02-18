@@ -260,6 +260,7 @@ case class EZ_Menu() extends BaseModel with SecureModel with StatusModel {
   @BeanProperty var translate: String = ""
   @BeanProperty var role_codes: List[String] = List[String]()
   @BeanProperty var parent_uri: String = null
+  @BeanProperty var sort: Int = 0
 
 }
 
