@@ -222,6 +222,7 @@ case class EZ_Token_Info() extends BaseModel {
 
   @BeanProperty var login_id: String = _
   @BeanProperty var login_name: String = _
+  @BeanProperty var image: String = _
   @BeanProperty var organization: EZ_Organization = _
   @BeanProperty var roles: List[EZ_Role] = _
   @BeanProperty var ext_id: String = _

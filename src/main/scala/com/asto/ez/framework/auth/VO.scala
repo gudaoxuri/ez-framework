@@ -4,6 +4,7 @@ case class Token_Info_VO(
                           token: String,
                           login_id: String,
                           login_name: String,
+                          image: String,
                           organization_code: String,
                           organization_name: String,
                           role_info: Map[String, String],

@@ -40,6 +40,7 @@ object AuthService {
             tokenInfo.id = UUID.randomUUID().toString
             tokenInfo.login_id = account.login_id
             tokenInfo.login_name = account.name
+            tokenInfo.image = account.image
             tokenInfo.ext_id = account.ext_id
             tokenInfo.last_login_time = System.currentTimeMillis()
             for {
@@ -57,6 +58,7 @@ object AuthService {
                           tokenInfo.id,
                           tokenInfo.login_id,
                           tokenInfo.login_name,
+                          tokenInfo.image,
                           tokenInfo.organization.code,
                           tokenInfo.organization.name,
                           tokenInfo.roles.map { role => role.code -> role.name }.toMap,
@@ -109,6 +111,7 @@ object AuthService {
               tokenInfo.id,
               tokenInfo.login_id,
               tokenInfo.login_name,
+              tokenInfo.image,
               tokenInfo.organization.code,
               tokenInfo.organization.name,
               tokenInfo.roles.map { role => role.code -> role.name }.toMap,
