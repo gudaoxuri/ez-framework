@@ -26,7 +26,8 @@ object Initiator extends LazyLogging {
       await(EZ_Resource.save(EZ_Resource(Method.DELETE, "/auth/manage/organization/:id/", s"Delete a exist Organization By Id")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/organization/:id/enable/", s"Enabled a exist Organization By Id")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/organization/:id/disable/", s"Disabled a exist Organization By Id")))
-      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/organization/res/", s"Upload Organization file")))
+      await(EZ_Resource.save(EZ_Resource(Method.POST, "/auth/manage/organization/res/", s"Upload Organization file")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/organization/res/:date/:fileName", s"Download Organization file")))
 
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/", s"Find Accounts")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/page/:pageNumber/:pageSize/", s"Paging Accounts")))
@@ -36,7 +37,8 @@ object Initiator extends LazyLogging {
       await(EZ_Resource.save(EZ_Resource(Method.DELETE, "/auth/manage/account/:id/", s"Delete a exist Account By Id")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/:id/enable/", s"Enabled a exist Account By Id")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/:id/disable/", s"Disabled a exist Account By Id")))
-      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/res/", s"Upload Account file")))
+      await(EZ_Resource.save(EZ_Resource(Method.POST, "/auth/manage/account/res/", s"Upload Account file")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/res/:date/:fileName", s"Download Account file")))
 
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/role/", s"Find Roles")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/role/page/:pageNumber/:pageSize/", s"Paging Roles")))
@@ -46,7 +48,8 @@ object Initiator extends LazyLogging {
       await(EZ_Resource.save(EZ_Resource(Method.DELETE, "/auth/manage/role/:id/", s"Delete a exist Role By Id")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/role/:id/enable/", s"Enabled a exist Role By Id")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/role/:id/disable/", s"Disabled a exist Role By Id")))
-      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/role/res/", s"Upload Role file")))
+      await(EZ_Resource.save(EZ_Resource(Method.POST, "/auth/manage/role/res/", s"Upload Role file")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/role/res/:date/:fileName", s"Download Role file")))
 
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/resource/", s"Find Resources")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/resource/page/:pageNumber/:pageSize/", s"Paging Resources")))
@@ -56,7 +59,8 @@ object Initiator extends LazyLogging {
       await(EZ_Resource.save(EZ_Resource(Method.DELETE, "/auth/manage/resource/:id/", s"Delete a exist Resource By Id")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/resource/:id/enable/", s"Enabled a exist Resource By Id")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/resource/:id/disable/", s"Disabled a exist Resource By Id")))
-      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/resource/res/", s"Upload Resource file")))
+      await(EZ_Resource.save(EZ_Resource(Method.POST, "/auth/manage/resource/res/", s"Upload Resource file")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/resource/res/:date/:fileName", s"Download Resource file")))
 
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/", s"Find Menus")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/page/:pageNumber/:pageSize/", s"Paging Menus")))
@@ -66,7 +70,8 @@ object Initiator extends LazyLogging {
       await(EZ_Resource.save(EZ_Resource(Method.DELETE, "/auth/manage/menu/:id/", s"Delete a exist Menu By Id")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/:id/enable/", s"Enabled a exist Menu By Id")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/:id/disable/", s"Disabled a exist Menu By Id")))
-      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/res/", s"Upload Menu file")))
+      await(EZ_Resource.save(EZ_Resource(Method.POST, "/auth/manage/menu/res/", s"Upload Menu file")))
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/res/:date/:fileName", s"Download Menu file")))
 
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/bylogin/", s"Fetch Account By Login")))
       await(EZ_Resource.save(EZ_Resource(Method.PUT, "/auth/manage/account/bylogin/", s"Update Account By Login")))
@@ -80,7 +85,8 @@ object Initiator extends LazyLogging {
         s"${Method.DELETE}${BaseModel.SPLIT}/auth/manage/organization/:id/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/:id/enable/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/:id/disable/",
-        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/res/",
+        s"${Method.POST}${BaseModel.SPLIT}/auth/manage/organization/res/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/res/:date/:fileName",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/page/:pageNumber/:pageSize/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/:id/",
@@ -89,7 +95,8 @@ object Initiator extends LazyLogging {
         s"${Method.DELETE}${BaseModel.SPLIT}/auth/manage/account/:id/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/:id/enable/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/:id/disable/",
-        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/res/",
+        s"${Method.POST}${BaseModel.SPLIT}/auth/manage/account/res/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/res/:date/:fileName",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/page/:pageNumber/:pageSize/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/:id/",
@@ -98,7 +105,8 @@ object Initiator extends LazyLogging {
         s"${Method.DELETE}${BaseModel.SPLIT}/auth/manage/role/:id/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/:id/enable/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/:id/disable/",
-        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/res/",
+        s"${Method.POST}${BaseModel.SPLIT}/auth/manage/role/res/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/res/:date/:fileName",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/page/:pageNumber/:pageSize/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/:id/",
@@ -107,7 +115,8 @@ object Initiator extends LazyLogging {
         s"${Method.DELETE}${BaseModel.SPLIT}/auth/manage/resource/:id/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/:id/enable/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/:id/disable/",
-        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/res/",
+        s"${Method.POST}${BaseModel.SPLIT}/auth/manage/resource/res/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/resource/res/:date/:fileName",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/page/:pageNumber/:pageSize/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/:id/",
@@ -116,10 +125,15 @@ object Initiator extends LazyLogging {
         s"${Method.DELETE}${BaseModel.SPLIT}/auth/manage/menu/:id/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/:id/enable/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/:id/disable/",
-        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/res/"
+        s"${Method.POST}${BaseModel.SPLIT}/auth/manage/menu/res/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/res/:date/:fileName",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/bylogin/",
+        s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/account/bylogin/"
       ))
       await(EZ_Role.save(role))
       await(EZ_Role.save( EZ_Role(EZ_Role.USER_ROLE_CODE, "User",List(
+        s"${Method.POST}${BaseModel.SPLIT}/auth/manage/account/res/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/res/:date/:fileName",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/bylogin/",
         s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/account/bylogin/"
       ))))

@@ -38,8 +38,8 @@ object AccountService extends SimpleRPCService[EZ_Account] {
           MailProcessor.send(body.email, s"${EZGlobal.appName} activate your account",
             s"""
                | Please visit this link to activate your account:
-               | <a href="${EZGlobal.ez_rpc_http_base_url}/public/active/account/${body.email}/$encryption/">
-               | ${EZGlobal.ez_rpc_http_base_url}/public/active/account/${body.email}/$encryption/</a>
+               | <a href="${EZGlobal.ez_auth_active_url}?email=${body.email}&key=$encryption">
+               | ${EZGlobal.ez_auth_active_url}?email=${body.email}&key=$encryption</a>
               """.stripMargin).onSuccess {
             case emailResp =>
               p.resp(emailResp)
@@ -138,7 +138,7 @@ object AccountService extends SimpleRPCService[EZ_Account] {
   }
 
   @PUT("/public/findpassword/:email/")
-  def findPassword(parameter: Map[String, String], body: Map[String,String], p: AsyncResp[Void], context: EZContext) = {
+  def findPassword(parameter: Map[String, String], body: Map[String, String], p: AsyncResp[Void], context: EZContext) = {
     val email = parameter("email")
     EZ_Account.existByCond(s"""{"email":"$email"}""").onSuccess {
       case existResp =>
@@ -149,8 +149,8 @@ object AccountService extends SimpleRPCService[EZ_Account] {
           MailProcessor.send(email, s"${EZGlobal.appName} Found password",
             s"""
                | Please visit this link to activate your new password:
-               | <a href="${EZGlobal.ez_rpc_http_base_url}/public/active/password/$email/$encryption/">
-               | ${EZGlobal.ez_rpc_http_base_url}/public/active/password/$email/$encryption/</a>
+               | <a href="${EZGlobal.ez_auth_rest_password_url}?email=$email&key=$encryption">
+               | ${EZGlobal.ez_auth_rest_password_url}?email=$email&key=$encryption</a>
        """.stripMargin).onSuccess {
             case emailResp =>
               p.resp(emailResp)
@@ -173,7 +173,7 @@ object AccountService extends SimpleRPCService[EZ_Account] {
             case newPwdResp =>
               RedisProcessor.del(s"ez-rest_password_pwd_$email")
               if (newPwdResp && newPwdResp.body != null) {
-                val newPassword=newPwdResp.body
+                val newPassword = newPwdResp.body
                 EZ_Account.getByCond(s"""{"email":"$email"}""").onSuccess {
                   case accountResp =>
                     if (accountResp && accountResp.body != null) {
