@@ -2,7 +2,7 @@ package com.asto.ez.framework.storage.mongo
 
 import com.asto.ez.framework.storage.BaseModel
 import com.ecfront.common.Resp
-import io.vertx.core.json.JsonObject
+import io.vertx.core.json.{JsonArray, JsonObject}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
@@ -12,12 +12,12 @@ object MongoExecutor {
   def save(entityInfo: MongoEntityInfo, collection: String, save: JsonObject): Future[Resp[String]] = {
     val p = Promise[Resp[String]]()
     if (entityInfo.uniqueFieldNames.nonEmpty) {
-      val existQuery = new JsonObject()
+      val existQuery = new JsonArray()
       entityInfo.uniqueFieldNames.filter(save.containsKey).foreach {
         field =>
-          existQuery.put(field, save.getValue(field))
+          existQuery.add(new JsonObject().put(field, save.getValue(field)))
       }
-      MongoProcessor.exist(collection, existQuery).onSuccess {
+      MongoProcessor.exist(collection, new JsonObject().put("$or", existQuery)).onSuccess {
         case existResp =>
           if (existResp) {
             if (existResp.body) {

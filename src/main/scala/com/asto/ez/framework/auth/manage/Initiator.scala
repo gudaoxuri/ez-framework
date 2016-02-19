@@ -68,7 +68,10 @@ object Initiator extends LazyLogging {
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/:id/disable/", s"Disabled a exist Menu By Id")))
       await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/res/", s"Upload Menu file")))
 
-      val role = EZ_Role(EZ_Role.SYSTEM_ROLE_CODE, "System Role", List(
+      await(EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/bylogin/", s"Fetch Account By Login")))
+      await(EZ_Resource.save(EZ_Resource(Method.PUT, "/auth/manage/account/bylogin/", s"Update Account By Login")))
+
+      val role = EZ_Role(EZ_Role.SYSTEM_ROLE_CODE, "System", List(
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/page/:pageNumber/:pageSize/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/:id/",
@@ -116,13 +119,17 @@ object Initiator extends LazyLogging {
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/res/"
       ))
       await(EZ_Role.save(role))
+      await(EZ_Role.save( EZ_Role(EZ_Role.USER_ROLE_CODE, "User",List(
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/bylogin/",
+        s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/account/bylogin/"
+      ))))
 
-      val account = EZ_Account(EZ_Account.SYSTEM_ACCOUNT_CODE, "System Administrator", "admin", List(
+      val account = EZ_Account(EZ_Account.SYSTEM_ACCOUNT_CODE, "i@sunisle.org","System Administrator", "admin", List(
         BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE
       ))
       await(EZ_Account.save(account))
 
-      await(EZ_Menu.save(EZ_Menu("ez.dashboard", "Dashboard", "", List(), "icon-home", "sidebar.nav.DASHBARD")))
+      await(EZ_Menu.save(EZ_Menu("ez.dashboard", "Dashboard", "", List(BaseModel.SPLIT + EZ_Role.USER_ROLE_CODE,BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE), "icon-home", "sidebar.nav.DASHBARD")))
       await(EZ_Menu.save(EZ_Menu("#sysManage", "System Manage", "", List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE), "icon-settings", "sidebar.nav.sysManage._")))
       await(EZ_Menu.save(EZ_Menu("ez.sysmanage-organization-list", "Organization", "#sysManage", List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE), "icon-globe", "sidebar.nav.sysManage.Organization")))
       await(EZ_Menu.save(EZ_Menu("ez.sysmanage-resource-list", "Resource", "#sysManage", List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE), "icon-basket-loaded", "sidebar.nav.sysManage.RESOURCE")))

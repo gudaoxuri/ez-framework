@@ -21,7 +21,7 @@ object MailProcessor extends LazyLogging {
   private val initialized = new AtomicBoolean(false)
 
   def init(config: MailConfig): Unit = {
-    if(!initialized.getAndSet(true)) {
+    if (!initialized.getAndSet(true)) {
       mailConfig = config
       maxPoolSize = mailConfig.getMaxPoolSize
       currentErrorCounter.set(0)
@@ -31,6 +31,14 @@ object MailProcessor extends LazyLogging {
 
   def init(_mailClient: MailClient): Unit = {
     mailClient = _mailClient
+  }
+
+  def send(to: String, title: String, content: String): Future[Resp[Void]] = {
+    send(mailConfig.getUsername, List(to), null, null, title, content, List())
+  }
+
+  def send(to: List[String], title: String, content: String): Future[Resp[Void]] = {
+    send(mailConfig.getUsername, to, null, null, title, content, List())
   }
 
   def send(from: String, to: String, title: String, content: String): Future[Resp[Void]] = {

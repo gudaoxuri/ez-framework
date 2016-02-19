@@ -37,6 +37,7 @@ class OrganizationSpec extends MockStartupSpec {
     var account = EZ_Account()
     account.login_id = "u1"
     account.name = "u1"
+    account.email = "net@sunisle.org"
     account.password = "123"
     account.organization_code = "org1"
     account.enable = true

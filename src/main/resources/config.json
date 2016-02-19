@@ -1,30 +1,30 @@
 {
   "ez": {
-    "rpc":{
+    "appName":"EZ",
+    "rpc": {
       "http": {
         "host": "0.0.0.0",
         "port": 8080,
         "resourcePath": "c:/tmp/",
-        "publicUriPrefix": "/public/",
-        "accessControlAllowOrigin":"*"
+        "publicUriPrefix": "/public/"
       },
       "cluster": {
         "host": "127.0.0.1"
       },
-      "servicePath": "com.asto.ez.framework.sample"
+      "servicePath": "com.asto.ez.framework.rpc"
     },
-    "storage":{
+    "storage": {
       "jdbc": {
         "driver_class": "com.mysql.jdbc.Driver",
-        "url": "jdbc:mysql://192.168.4.99:3306/dop?characterEncoding=UTF-8&autoReconnect=true",
+        "url": "jdbc:mysql://192.168.4.99:3306/test?characterEncoding=UTF-8&autoReconnect=true",
         "user": "root",
         "password": "123456",
         "max_pool_size": 200,
         "max_idle_time": 1800,
         "idle_test_period": 120,
         "validate": true,
-        "update_timeout":30,
-        "query_timeout":30
+        "update_timeout":10,
+        "query_timeout":10
       },
       "mongo": {
         "hosts": [
@@ -33,17 +33,17 @@
             "port": 27017
           }
         ],
-        "db_name":"",
+        "db_name": "test",
         "maxPoolSize": 100,
         "minPoolSize": 0,
         "maxIdleTimeMS": 0,
-        "maxLifeTimeMS": 0,
-        "username": "",
-        "password": ""
+        "maxLifeTimeMS": 0
+        /*        "username": "",
+                "password": ""*/
       },
-      "entityPath": "com.asto.dop.core.entity"
+      "entityPath": ""
     },
-    "cache":{
+    "cache": {
       "redis": {
         "host": "192.168.4.99",
         "port": 6379,
@@ -52,7 +52,19 @@
       },
       "useCache": false
     },
-    "scheduler":false,
+    "mail": {
+      "hostname": "smtp.exmail.qq.com",
+      "ownHostname": "smtp.exmail.qq.com",
+      "port": 465,
+      "starttls": "REQUIRED",
+      "login": "REQUIRED",
+      "ssl":true,
+      "authMethods": "LOGIN",
+      "username": "hi-sb@ecfront.com",
+      "password": "",
+      "maxPoolSize": 10
+    },
+    "scheduler": false,
     "auth":{
       "useAuth":true
     }

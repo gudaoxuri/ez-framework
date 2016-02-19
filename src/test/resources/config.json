@@ -1,5 +1,6 @@
 {
   "ez": {
+    "appName":"EZ",
     "rpc": {
       "http": {
         "host": "0.0.0.0",
@@ -40,7 +41,7 @@
         /*        "username": "",
                 "password": ""*/
       },
-      "entityPath": "com.asto.dop.core.entity"
+      "entityPath": ""
     },
     "cache": {
       "redis": {
@@ -49,7 +50,7 @@
         "auth": "",
         "db": 0
       },
-      "useCache": false
+      "useCache": true
     },
     "mail": {
       "hostname": "smtp.exmail.qq.com",

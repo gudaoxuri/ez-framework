@@ -1,6 +1,7 @@
 package com.asto.ez.framework.auth
 
 import com.asto.ez.framework.EZContext
+import com.asto.ez.framework.helper.FormatHelper
 import com.asto.ez.framework.storage._
 import com.asto.ez.framework.storage.mongo._
 import com.ecfront.common.{EncryptHelper, Resp}
@@ -16,8 +17,11 @@ import scala.concurrent.{Future, Promise}
 case class EZ_Organization() extends BaseModel with SecureModel with StatusModel {
 
   @Unique
-  @Label("编码")
+  @Require
+  @Label("Code")
   @BeanProperty var code: String = _
+  @Require
+  @Label("Name")
   @BeanProperty var name: String = _
   @BeanProperty var image: String = _
 
@@ -46,10 +50,17 @@ object EZ_Organization extends MongoBaseStorage[EZ_Organization] with MongoSecur
 case class EZ_Resource() extends BaseModel with SecureModel with StatusModel {
 
   @Unique
-  @Label("编码（方法+路径）")
+  @Require
+  @Label("Code（Method+URI）")
   @BeanProperty var code: String = _
+  @Require
+  @Label("Method")
   @BeanProperty var method: String = _
+  @Require
+  @Label("URI")
   @BeanProperty var uri: String = _
+  @Require
+  @Label("Name")
   @BeanProperty var name: String = _
 
 }
@@ -96,9 +107,14 @@ object EZ_Resource extends MongoBaseStorage[EZ_Resource] with MongoSecureStorage
 case class EZ_Role() extends BaseModel with SecureModel with StatusModel {
 
   @Unique
-  @Label("编码")
+  @Require
+  @Label("Code")
   @BeanProperty var code: String = _
+  @Require
+  @Label("Flag")
   @BeanProperty var flag: String = _
+  @Require
+  @Label("Name")
   @BeanProperty var name: String = _
   @BeanProperty var resource_codes: List[String] = List[String]()
   @BeanProperty var organization_code: String = _
@@ -108,6 +124,7 @@ case class EZ_Role() extends BaseModel with SecureModel with StatusModel {
 object EZ_Role extends MongoBaseStorage[EZ_Role] with MongoSecureStorage[EZ_Role] with MongoStatusStorage[EZ_Role] {
 
   val SYSTEM_ROLE_CODE = "system"
+  val USER_ROLE_CODE = "user"
 
   def apply(flag: String, name: String, resourceCodes: List[String]): EZ_Role = {
     val role = EZ_Role()
@@ -159,13 +176,19 @@ object EZ_Role extends MongoBaseStorage[EZ_Role] with MongoSecureStorage[EZ_Role
 case class EZ_Account() extends BaseModel with SecureModel with StatusModel {
 
   @Unique
-  @Label("登录名称")
+  @Require
+  @Label("Login Id")
   @BeanProperty var login_id: String = _
+  @Require
+  @Label("Name")
   @BeanProperty var name: String = _
   @BeanProperty var image: String = _
+  @Require
+  @Label("Password")
   @BeanProperty var password: String = _
   @Unique
-  @Label("登录邮箱")
+  @Require
+  @Label("Email")
   @BeanProperty var email: String = _
   @BeanProperty var ext_id: String = _
   @BeanProperty var ext_info: Map[String, String] = _
@@ -178,9 +201,10 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
 
   val SYSTEM_ACCOUNT_CODE = "sysadmin"
 
-  def apply(loginId: String, name: String, password: String, roleCodes: List[String]): EZ_Account = {
+  def apply(loginId: String, email: String, name: String, password: String, roleCodes: List[String]): EZ_Account = {
     val account = EZ_Account()
     account.login_id = loginId
+    account.email = email
     account.name = name
     account.password = password
     account.organization_code = ""
@@ -190,20 +214,45 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
   }
 
   override protected def preSave(model: EZ_Account, context: EZContext): Future[Resp[EZ_Account]] = {
-    if (model.login_id == null || model.login_id.trim.isEmpty || model.password == null || model.password.trim.isEmpty) {
-      Future(Resp.badRequest("Require【Login_id】and【password】"))
+    if (model.login_id == null || model.login_id.trim.isEmpty
+      || model.password == null || model.password.trim.isEmpty
+      || model.email == null || model.email.trim.isEmpty) {
+      Future(Resp.badRequest("Require【Login_id】【password】【email】"))
     } else {
-      model.password = packageEncryptPwd(model.login_id, model.password)
-      Future(Resp.success(model))
+      if (FormatHelper.validEmail(model.email)) {
+        model.password = packageEncryptPwd(model.login_id, model.password)
+        super.preSave(model, context)
+      } else {
+        Future(Resp.badRequest("【email】format error"))
+      }
     }
   }
 
   override protected def preUpdate(model: EZ_Account, context: EZContext): Future[Resp[EZ_Account]] = {
-    if (model.login_id == null || model.login_id.trim.isEmpty || model.password == null || model.password.trim.isEmpty) {
-      Future(Resp.badRequest("Require【Login_id】and【password】"))
+    if (model.login_id == null || model.login_id.trim.isEmpty
+      || model.password == null || model.password.trim.isEmpty
+      || model.email == null || model.email.trim.isEmpty) {
+      Future(Resp.badRequest("Require【Login_id】【password】【email】"))
     } else {
-      model.password = packageEncryptPwd(model.login_id, model.password)
-      Future(Resp.success(model))
+      if (FormatHelper.validEmail(model.email)) {
+        super.preUpdate(model, context)
+      } else {
+        Future(Resp.badRequest("【email】format error"))
+      }
+    }
+  }
+
+  override protected def preSaveOrUpdate(model: EZ_Account, context: EZContext): Future[Resp[EZ_Account]] = {
+    if (model.login_id == null || model.login_id.trim.isEmpty
+      || model.password == null || model.password.trim.isEmpty
+      || model.email == null || model.email.trim.isEmpty) {
+      Future(Resp.badRequest("Require【Login_id】【password】【email】"))
+    } else {
+      if (FormatHelper.validEmail(model.email)) {
+        super.preSaveOrUpdate(model, context)
+      } else {
+        Future(Resp.badRequest("【email】format error"))
+      }
     }
   }
 
@@ -254,7 +303,12 @@ object EZ_Token_Info extends MongoBaseStorage[EZ_Token_Info] {
 @Entity("Menu")
 case class EZ_Menu() extends BaseModel with SecureModel with StatusModel {
 
+  @Unique
+  @Require
+  @Label("URI")
   @BeanProperty var uri: String = _
+  @Require
+  @Label("Name")
   @BeanProperty var name: String = _
   @BeanProperty var icon: String = ""
   @BeanProperty var translate: String = ""
@@ -279,7 +333,6 @@ object EZ_Menu extends MongoBaseStorage[EZ_Menu] with MongoSecureStorage[EZ_Menu
   }
 
 }
-
 
 
 

@@ -16,7 +16,7 @@ class AuthSpec extends MockStartupSpec {
 
     val resources = Await.result(EZ_Resource.find("{}"), Duration.Inf).body
     assert(
-      resources.size == 45
+      resources.size == 47
         && resources.head.method == Method.GET
         && resources.head.uri == "/auth/manage/organization/"
         && resources.head.code == Method.GET + BaseModel.SPLIT + "/auth/manage/organization/"
@@ -25,10 +25,10 @@ class AuthSpec extends MockStartupSpec {
 
     val roles = Await.result(EZ_Role.find("{}"), Duration.Inf).body
     assert(
-      roles.size == 1
+      roles.size == 2
         && roles.head.code == BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE
         && roles.head.flag == EZ_Role.SYSTEM_ROLE_CODE
-        && roles.head.name == "System Role"
+        && roles.head.name == "System"
         && roles.head.resource_codes.size == 45
         && roles.head.resource_codes.head == s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/"
     )
@@ -57,7 +57,7 @@ class AuthSpec extends MockStartupSpec {
       && loginResp.body.organization_code == ""
       && loginResp.body.organization_name == "default"
       && loginResp.body.role_info == Map(
-      BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE -> "System Role"
+      BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE -> "System"
     )
       && loginResp.body.ext_id == null
       && loginResp.body.last_login_time != 0
@@ -74,7 +74,7 @@ class AuthSpec extends MockStartupSpec {
       && loginInfoResp.body.organization_code == ""
       && loginInfoResp.body.organization_name == "default"
       && loginInfoResp.body.role_info == Map(
-      BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE -> "System Role"
+      BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE -> "System"
     )
       && loginInfoResp.body.ext_id == null
       && loginInfoResp.body.last_login_time != 0

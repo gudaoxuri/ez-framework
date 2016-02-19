@@ -10,3 +10,13 @@ case class Token_Info_VO(
                           role_info: Map[String, String],
                           ext_id: String,
                           last_login_time: Long)
+
+case class Account_VO() {
+  var id: String = _
+  var login_id: String = _
+  var name: String = _
+  var image: String = _
+  var email: String = _
+  var old_password: String = _
+  var new_password: String = _
+}
