@@ -13,6 +13,9 @@ case class Index() extends StaticAnnotation
 case class Unique() extends StaticAnnotation
 
 @scala.annotation.meta.field
+case class Require() extends StaticAnnotation
+
+@scala.annotation.meta.field
 case class Label(label:String) extends StaticAnnotation
 
 @scala.annotation.meta.field

@@ -3,6 +3,7 @@ package com.asto.ez.framework.storage
 import java.util.concurrent.CountDownLatch
 
 import com.asto.ez.framework.storage.mongo._
+import com.ecfront.common.StandardCode
 import io.vertx.core.json.JsonArray
 
 import scala.async.Async.{async, await}
@@ -18,8 +19,10 @@ class MongoSpec extends MongoBasicSpec {
     Await.result(Mongo_Test_Entity.deleteByCond("{}"), Duration.Inf).body
 
     var mongo = Mongo_Test_Entity()
-    mongo.name = "name1"
     mongo.parameters = Map("k1" -> "v1", "k2" -> 0, "k3" -> Map("k3-1" -> "v3-1"))
+    assert(Await.result(Mongo_Test_Entity.save(mongo), Duration.Inf).code==StandardCode.BAD_REQUEST)
+
+    mongo.name = "name1"
     var id = Await.result(Mongo_Test_Entity.save(mongo), Duration.Inf).body
     var getResult = Await.result(Mongo_Test_Entity.getById(id), Duration.Inf).body
     assert(getResult.name == "name1")
@@ -225,7 +228,7 @@ class MongoSpec extends MongoBasicSpec {
 case class Mongo_Test_Entity() extends SecureModel with StatusModel {
 
   @Unique
-  @Label("姓名")
+  @Label("姓名") @Require
   @BeanProperty var name: String = _
   @BeanProperty var parameters: Map[String, Any] = _
 

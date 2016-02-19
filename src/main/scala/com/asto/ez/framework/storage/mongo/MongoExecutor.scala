@@ -28,7 +28,7 @@ object MongoExecutor {
                   } else {
                     field
                   }
-              }.mkString("[", ",", "]") + " 不唯一"))
+              }.mkString("[", ",", "]") + " must be unique"))
             } else {
               MongoProcessor.save(collection, save).onSuccess {
                 case saveResp =>

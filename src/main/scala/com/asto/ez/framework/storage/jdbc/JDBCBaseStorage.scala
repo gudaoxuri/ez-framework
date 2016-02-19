@@ -5,6 +5,7 @@ import com.asto.ez.framework.storage.{BaseModel, BaseStorage, Page}
 import com.ecfront.common.{BeanHelper, Resp}
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
@@ -17,15 +18,30 @@ trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
     }
 
   override def doSave(model: M, context: EZContext): Future[Resp[String]] = {
-    DBExecutor.save(_entityInfo, if (context == null) EZContext.build() else context, getMapValue(model).filter(_._2 != null))
+    val requireResp = storageCheck(model, _entityInfo)
+    if (requireResp) {
+      DBExecutor.save(_entityInfo, if (context == null) EZContext.build() else context, getMapValue(model).filter(_._2 != null))
+    } else {
+      Future(Resp(requireResp.code, requireResp.message, null))
+    }
   }
 
   override def doUpdate(model: M, context: EZContext): Future[Resp[String]] = {
-    DBExecutor.update(_entityInfo, if (context == null) EZContext.build() else context, getIdValue(model), getMapValue(model).filter(_._2 != null))
+    val requireResp = storageCheck(model, _entityInfo)
+    if (requireResp) {
+      DBExecutor.update(_entityInfo, if (context == null) EZContext.build() else context, getIdValue(model), getMapValue(model).filter(_._2 != null))
+    } else {
+      Future(Resp(requireResp.code, requireResp.message, null))
+    }
   }
 
   override def doSaveOrUpdate(model: M, context: EZContext): Future[Resp[String]] = {
-    DBExecutor.saveOrUpdate(_entityInfo, if (context == null) EZContext.build() else context, getIdValue(model), getMapValue(model).filter(_._2 != null))
+    val requireResp = storageCheck(model, _entityInfo)
+    if (requireResp) {
+      DBExecutor.saveOrUpdate(_entityInfo, if (context == null) EZContext.build() else context, getIdValue(model), getMapValue(model).filter(_._2 != null))
+    } else {
+      Future(Resp(requireResp.code, requireResp.message, null))
+    }
   }
 
   override def doDeleteById(id: Any, context: EZContext): Future[Resp[Void]] = {

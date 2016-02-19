@@ -7,7 +7,7 @@ import com.ecfront.common.{BeanHelper, JsonHelper, Resp}
 import io.vertx.core.json.{JsonArray, JsonObject}
 
 import scala.concurrent.Future
-
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
@@ -20,18 +20,33 @@ trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
     }
 
   override def doSave(model: M, context: EZContext): Future[Resp[String]] = {
-    val save = convertToJsonObject(_entityInfo, model)
-    MongoExecutor.save(_entityInfo, tableName, save)
+    val requireResp = storageCheck(model, _entityInfo)
+    if (requireResp) {
+      val save = convertToJsonObject(_entityInfo, model)
+      MongoExecutor.save(_entityInfo, tableName, save)
+    } else {
+      Future(Resp(requireResp.code, requireResp.message, null))
+    }
   }
 
   override def doUpdate(model: M, context: EZContext): Future[Resp[String]] = {
-    val update = convertToJsonObject(_entityInfo, model)
-    MongoExecutor.update(_entityInfo, tableName, model.id, update)
+    val requireResp = storageCheck(model, _entityInfo)
+    if (requireResp) {
+      val update = convertToJsonObject(_entityInfo, model)
+      MongoExecutor.update(_entityInfo, tableName, model.id, update)
+    } else {
+      Future(Resp(requireResp.code, requireResp.message, null))
+    }
   }
 
   override def doSaveOrUpdate(model: M, context: EZContext): Future[Resp[String]] = {
-    val saveOrUpdate = convertToJsonObject(_entityInfo, model)
-    MongoExecutor.saveOrUpdate(_entityInfo, tableName, model.id, saveOrUpdate)
+    val requireResp = storageCheck(model, _entityInfo)
+    if (requireResp) {
+      val saveOrUpdate = convertToJsonObject(_entityInfo, model)
+      MongoExecutor.saveOrUpdate(_entityInfo, tableName, model.id, saveOrUpdate)
+    } else {
+      Future(Resp(requireResp.code, requireResp.message, null))
+    }
   }
 
   override def doUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZContext): Future[Resp[Void]] = {

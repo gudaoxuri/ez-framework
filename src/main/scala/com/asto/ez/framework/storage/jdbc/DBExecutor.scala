@@ -35,7 +35,7 @@ object DBExecutor {
                   } else {
                     field
                   }
-              }.mkString("[", ",", "]") + " 不唯一"))
+              }.mkString("[", ",", "]") + " must be unique"))
             } else {
               doSave(tableName, idFieldName, richValueInfos, p)
             }

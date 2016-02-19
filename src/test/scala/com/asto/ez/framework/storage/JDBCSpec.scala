@@ -1,6 +1,7 @@
 package com.asto.ez.framework.storage
 
 import com.asto.ez.framework.storage.jdbc._
+import com.ecfront.common.StandardCode
 
 import scala.beans.BeanProperty
 import scala.concurrent.Await
@@ -36,9 +37,11 @@ class JDBCSpec extends JDBCBasicSpec {
 
     val jdbc = JDBC_Test_Entity()
     jdbc.id = "1"
-    jdbc.name = "name1"
     jdbc.age = 10
+    assert(Await.result(JDBC_Test_Entity.save(jdbc), Duration.Inf).code==StandardCode.BAD_REQUEST)
+    jdbc.name = "name1"
     Await.result(JDBC_Test_Entity.save(jdbc), Duration.Inf).body
+
     var getResult = Await.result(JDBC_Test_Entity.getById("1"), Duration.Inf).body
     assert(getResult.name == "name1")
     getResult.name = "name_new"
@@ -124,7 +127,7 @@ class JDBCSpec extends JDBCBasicSpec {
 @Entity("")
 case class JDBC_Test_Entity() extends SecureModel with StatusModel {
 
-  @Unique
+  @Unique @Require
   @Label("姓名")
   @BeanProperty var name: String = _
   @BeanProperty var age: Int = _

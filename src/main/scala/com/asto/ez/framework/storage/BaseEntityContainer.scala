@@ -41,6 +41,10 @@ trait BaseEntityContainer[E <: BaseEntityInfo] extends LazyLogging {
       field =>
         field.fieldName
     }
+    val requireFieldNames = allAnnotations.filter(_.annotation.isInstanceOf[Require]).map {
+      field =>
+        field.fieldName
+    }
     val model = _modelClazz.newInstance()
     model.clazz = clazz
     model.tableName = tableName
@@ -49,6 +53,7 @@ trait BaseEntityContainer[E <: BaseEntityInfo] extends LazyLogging {
     model.fieldDesc = fieldDesc
     model.indexFieldNames = indexFieldNames
     model.uniqueFieldNames = uniqueFieldNames
+    model.requireFieldNames = requireFieldNames
     buildingEntityInfo(model,clazz,allAnnotations)
     CONTAINER += tableName -> model
     logger.info( """Create model: %s""".format(clazz.getSimpleName))
@@ -64,4 +69,5 @@ class BaseEntityInfo() {
   var fieldDesc: Map[String, String] = _
   var indexFieldNames: List[String] = _
   var uniqueFieldNames: List[String] = _
+  var requireFieldNames: List[String] = _
 }

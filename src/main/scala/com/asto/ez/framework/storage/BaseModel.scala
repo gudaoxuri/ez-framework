@@ -3,7 +3,7 @@ package com.asto.ez.framework.storage
 import java.lang.reflect.ParameterizedType
 
 import com.asto.ez.framework.EZContext
-import com.ecfront.common.{BeanHelper, JsonHelper, Resp}
+import com.ecfront.common.{BeanHelper, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.beans.BeanProperty
@@ -29,6 +29,26 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   protected val _modelClazz = this.getClass.getGenericInterfaces()(0).asInstanceOf[ParameterizedType].getActualTypeArguments()(0).asInstanceOf[Class[M]]
 
   val tableName = _modelClazz.getSimpleName.toLowerCase
+
+  protected def storageCheck[E <: BaseEntityInfo](model: M, entityInfo: E): Resp[Void] = {
+    if (entityInfo.requireFieldNames.nonEmpty) {
+      val errorFields = entityInfo.requireFieldNames.filter(BeanHelper.getValue(model, _).get == null).map {
+        requireField =>
+          if (entityInfo.fieldLabel.contains(requireField)) {
+            entityInfo.fieldLabel(requireField)
+          } else {
+            requireField
+          }
+      }
+      if (errorFields.nonEmpty) {
+        Resp.badRequest(errorFields.mkString("[", ",", "]") + " must be require")
+      } else {
+        Resp.success(null)
+      }
+    } else {
+      Resp.success(null)
+    }
+  }
 
   protected def preSave(model: M, context: EZContext): Future[Resp[M]] = Future(Resp.success(model))
 
