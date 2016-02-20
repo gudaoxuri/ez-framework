@@ -233,10 +233,14 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
       || model.email == null || model.email.trim.isEmpty) {
       Future(Resp.badRequest("Require【Login_id】【password】【email】"))
     } else {
-      if (FormatHelper.validEmail(model.email)) {
-        super.preUpdate(model, context)
+      if (model.login_id.contains("@")) {
+        Future(Resp.badRequest("【login id】can't use email address"))
       } else {
-        Future(Resp.badRequest("【email】format error"))
+        if (FormatHelper.validEmail(model.email)) {
+          super.preUpdate(model, context)
+        } else {
+          Future(Resp.badRequest("【email】format error"))
+        }
       }
     }
   }
@@ -247,17 +251,26 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
       || model.email == null || model.email.trim.isEmpty) {
       Future(Resp.badRequest("Require【Login_id】【password】【email】"))
     } else {
-      if (FormatHelper.validEmail(model.email)) {
-        super.preSaveOrUpdate(model, context)
+      if (model.login_id.contains("@")) {
+        Future(Resp.badRequest("【login id】can't use email address"))
       } else {
-        Future(Resp.badRequest("【email】format error"))
+        if (FormatHelper.validEmail(model.email)) {
+          super.preSaveOrUpdate(model, context)
+        } else {
+          Future(Resp.badRequest("【email】format error"))
+        }
       }
     }
   }
 
-  def getByLoginId(login_id: String): Future[Resp[EZ_Account]] = {
-    getByCond( s"""{"login_id":"$login_id"}""")
+  def getByLoginId(loginId: String): Future[Resp[EZ_Account]] = {
+    getByCond( s"""{"login_id":"$loginId"}""")
   }
+
+  def getByLoginIdOrEmail(loginIdOrEmail: String): Future[Resp[EZ_Account]] = {
+    getByCond( s"""{"$$or":[{"login_id":"$loginIdOrEmail"},{"email":"$loginIdOrEmail"}]}""")
+  }
+
 
   def packageEncryptPwd(loginId: String, password: String): String = {
     EncryptHelper.encrypt(loginId + password)

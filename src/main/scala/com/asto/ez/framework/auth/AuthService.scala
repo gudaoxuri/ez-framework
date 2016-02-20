@@ -29,12 +29,12 @@ object AuthService {
   /**
     * 登录
     */
-  def doLogin(loginId: String, password: String, p: AsyncResp[Token_Info_VO]) = {
-    EZ_Account.getByLoginId(loginId).onSuccess {
+  def doLogin(loginIdOrEmail: String, password: String, p: AsyncResp[Token_Info_VO]) = {
+    EZ_Account.getByLoginIdOrEmail(loginIdOrEmail).onSuccess {
       case getResp =>
         if (getResp && getResp.body != null) {
           val account = getResp.body
-          if (EZ_Account.packageEncryptPwd(loginId, password) == account.password) {
+          if (EZ_Account.packageEncryptPwd(account.login_id, password) == account.password) {
             if(account.enable) {
               val rolesF = EZ_Role.findByCodes(account.role_codes)
               val orgF = EZ_Organization.getByCode(account.organization_code)
@@ -77,7 +77,7 @@ object AuthService {
             p.notFound(s"【password】NOT match")
           }
         } else {
-          p.notFound(s"【 $loginId】NOT exist")
+          p.notFound(s"【 $loginIdOrEmail】NOT exist")
         }
     }
   }
