@@ -1,6 +1,6 @@
 package com.asto.ez.framework.scaffold
 
-import java.io.File
+import java.io.{BufferedWriter, File, FileWriter}
 import java.lang.reflect.ParameterizedType
 import java.nio.file.{Files, StandardCopyOption}
 import java.util.Date
@@ -19,15 +19,24 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
   protected val storageObj: BaseStorage[M]
   protected var baseUri = BeanHelper.getClassAnnotation[RPC](this.getClass).get.baseUri
-  baseUri=baseUri.substring(1)
+  baseUri = baseUri.substring(1)
   if (!baseUri.endsWith("/")) {
     baseUri += "/"
   }
+
   protected val _modelClazz = this.getClass.getGenericInterfaces()(0).asInstanceOf[ParameterizedType].getActualTypeArguments()(0).asInstanceOf[Class[M]]
 
   protected val _isJDBCModel = storageObj.isInstanceOf[JDBCBaseStorage[_]]
   protected val modelObj = _modelClazz.newInstance()
   protected val _emptyCondition = if (_isJDBCModel) "1=1" else "{}"
+
+  protected def allowUpload = true
+
+  protected def allowExport = true
+
+  protected def allowUploadTypes = List(FileType.TYPE_COMPRESS, FileType.TYPE_IMAGE, FileType.TYPE_OFFICE)
+
+  protected def allowExportFields = BeanHelper.findFields(_modelClazz).keys.toList
 
   @POST("")
   def _rpc_save(parameter: Map[String, String], body: String, p: AsyncResp[String], context: EZContext): Unit = {
@@ -135,24 +144,78 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
 
   @POST("res/")
   def _rpc_res_upload(parameter: Map[String, String], fileName: String, p: AsyncResp[String], context: EZContext): Unit = {
-    val createDate = TimeHelper.df.format(new Date())
-    val path=EZGlobal.ez_rpc_http_resource_path + resName + File.separator+createDate + File.separator
-    if(!new File(path).exists()){
-      new File(path).mkdirs()
+    logger.trace(s" RPC simple upload : $parameter")
+    val tmpFile = new File(EZGlobal.ez_rpc_http_resource_path + fileName)
+    if (allowUpload) {
+      val contextType = Files.probeContentType(tmpFile.toPath)
+      if (allowUploadTypes.flatten(FileType.types(_)).contains(contextType)) {
+        val createDate = TimeHelper.df.format(new Date())
+        val path = EZGlobal.ez_rpc_http_resource_path + resName + File.separator + createDate + File.separator
+        if (!new File(path).exists()) {
+          new File(path).mkdirs()
+        }
+        Files.move(tmpFile.toPath,
+          new File(path + fileName).toPath,
+          StandardCopyOption.ATOMIC_MOVE)
+        p.success(baseUri + "res/" + createDate + "/" + fileName)
+      } else {
+        tmpFile.delete()
+        p.badRequest(s"请求类型[$contextType]不允许")
+      }
+    } else {
+      tmpFile.delete()
+      p.notImplemented("此方法未实现")
     }
-    Files.move(new File(EZGlobal.ez_rpc_http_resource_path + fileName).toPath,
-      new File(path+ fileName).toPath,
-      StandardCopyOption.ATOMIC_MOVE)
-    p.success(baseUri + "res/" + createDate + "/" + fileName)
   }
 
   @GET("res/:date/:fileName")
   def _rpc_res_get(parameter: Map[String, String], p: AsyncResp[File], context: EZContext): Unit = {
-    val file = new File(EZGlobal.ez_rpc_http_resource_path + resName+File.separator + parameter("date") + File.separator + parameter("fileName"))
-    if (file.exists()) {
-      p.success(file)
+    logger.trace(s" RPC simple download : $parameter")
+    if (allowUpload) {
+      val file = new File(EZGlobal.ez_rpc_http_resource_path + resName + File.separator + parameter("date") + File.separator + parameter("fileName"))
+      if (file.exists()) {
+        p.success(file)
+      } else {
+        p.notFound(s"找不到此资源：${file.getPath}")
+      }
     } else {
-      p.notFound(s"找不到此资源：${file.getPath}")
+      p.notImplemented("此方法未实现")
+    }
+  }
+
+  @GET("export/")
+  def _rpc_export(parameter: Map[String, String], p: AsyncResp[File], context: EZContext): Unit = {
+    logger.trace(s" RPC simple export : $parameter")
+    if (allowExport) {
+      val condition = if (parameter.contains("condition")) parameter("condition") else _emptyCondition
+      storageObj.find(condition, List(), context).onSuccess {
+        case resp =>
+          var file: File = null
+          var bw: BufferedWriter = null
+          try {
+            file = File.createTempFile("export", ".csv")
+            file.deleteOnExit()
+            bw = new BufferedWriter(new FileWriter(file, true))
+            bw.write(allowExportFields.mkString(",") + "\r\n")
+            val lines = JsonHelper.toJson(resp.body).iterator()
+            while (lines.hasNext) {
+              val line = lines.next()
+              bw.write(allowExportFields.map {
+                f =>
+                  line.get(f).asText()
+              }.mkString(",") + "\r\n")
+            }
+            bw.close()
+            p.success(file)
+          } catch {
+            case e: Throwable =>
+              bw.close()
+              logger.error("文件生成错误", e)
+              p.serverError("文件生成错误")
+          }
+      }
+    } else {
+      p.notImplemented("此方法未实现")
     }
   }
 

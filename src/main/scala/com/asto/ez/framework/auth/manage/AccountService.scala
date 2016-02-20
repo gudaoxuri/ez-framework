@@ -2,7 +2,7 @@ package com.asto.ez.framework.auth.manage
 
 import java.util.UUID
 
-import com.asto.ez.framework.auth.{Account_VO, EZ_Account, EZ_Role}
+import com.asto.ez.framework.auth._
 import com.asto.ez.framework.cache.RedisProcessor
 import com.asto.ez.framework.mail.MailProcessor
 import com.asto.ez.framework.rpc._
@@ -19,34 +19,41 @@ object AccountService extends SimpleRPCService[EZ_Account] {
 
   override protected val storageObj: BaseStorage[EZ_Account] = EZ_Account
 
+  override protected def allowUploadTypes: List[String] = List(FileType.TYPE_IMAGE)
+
   @POST("/public/register/")
   def register(parameter: Map[String, String], body: Account_VO, p: AsyncResp[String], context: EZContext) = {
-    val account = EZ_Account()
-    account.login_id = body.login_id
-    account.name = body.name
-    account.email = body.email
-    account.password = body.new_password
-    account.image = body.image
-    account.enable = false
-    account.organization_code = ""
-    account.role_codes = List(BaseModel.SPLIT + EZ_Role.USER_ROLE_CODE)
-    EZ_Account.save(account, context).onSuccess {
-      case saveResp =>
-        if (saveResp) {
-          val encryption = UUID.randomUUID().toString + System.nanoTime()
-          RedisProcessor.set(s"ez-active_account_${body.email}", encryption, 60 * 60 * 24)
-          MailProcessor.send(body.email, s"${EZGlobal.appName} activate your account",
-            s"""
-               | Please visit this link to activate your account:
-               | <a href="${EZGlobal.ez_auth_active_url}?email=${body.email}&key=$encryption">
-               | ${EZGlobal.ez_auth_active_url}?email=${body.email}&key=$encryption</a>
+    if (EZGlobal.ez_auth_allow_register) {
+      val account = EZ_Account()
+      account.login_id = body.login_id
+      account.name = body.name
+      account.email = body.email
+      account.password = body.new_password
+      account.image = body.image
+      account.enable = false
+      account.organization_code = ""
+      account.role_codes = List(BaseModel.SPLIT + EZ_Role.USER_ROLE_CODE)
+      EZ_Account.save(account, context).onSuccess {
+        case saveResp =>
+          if (saveResp) {
+            val encryption = UUID.randomUUID().toString + System.nanoTime()
+            RedisProcessor.set(s"ez-active_account_${body.email}", encryption, 60 * 60 * 24)
+            MailProcessor.send(body.email, s"${EZGlobal.appName} activate your account",
+              s"""
+                 | Please visit this link to activate your account:
+                 | <a href="${EZGlobal.ez_auth_active_url}?email=${body.email}&key=$encryption">
+                 | ${EZGlobal.ez_auth_active_url}?email=${body.email}&key=$encryption</a>
               """.stripMargin).onSuccess {
-            case emailResp =>
-              p.resp(emailResp)
+              case emailResp =>
+                p.resp(
+                  emailResp)
+            }
+          } else {
+            p.resp(saveResp)
           }
-        } else {
-          p.resp(saveResp)
-        }
+      }
+    } else {
+      p.notImplemented("Register NOT allow")
     }
   }
 
@@ -117,7 +124,16 @@ object AccountService extends SimpleRPCService[EZ_Account] {
                 EZ_Account.update(account, context).onSuccess {
                   case updateResp =>
                     if (updateResp) {
-                      p.success(null)
+                      EZ_Token_Info.getById(context.token, context).onSuccess {
+                        case tokenInfoResp =>
+                          val tokenInfo = tokenInfoResp.body
+                          tokenInfo.login_name = account.name
+                          tokenInfo.image = account.image
+                          EZ_Token_Info.update(tokenInfo, context).onSuccess {
+                            case tokenResp =>
+                              p.success(null)
+                          }
+                      }
                     } else {
                       p.resp(updateResp)
                     }

@@ -4,7 +4,7 @@ import com.ecfront.common.Ignore
 
 import scala.annotation.StaticAnnotation
 
-case class Entity(desc: String) extends StaticAnnotation
+case class Entity(desc: String="") extends StaticAnnotation
 
 @scala.annotation.meta.field
 case class Index() extends StaticAnnotation
@@ -22,7 +22,7 @@ case class Label(label:String) extends StaticAnnotation
 case class Desc(desc: String) extends StaticAnnotation
 
 @scala.annotation.meta.field
-case class Id(strategy:String) extends StaticAnnotation
+case class Id(strategy:String="uuid") extends StaticAnnotation
 
 object Id{
   val STRATEGY_SEQ="seq"

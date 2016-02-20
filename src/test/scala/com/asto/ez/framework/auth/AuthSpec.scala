@@ -16,7 +16,7 @@ class AuthSpec extends MockStartupSpec {
 
     val resources = Await.result(EZ_Resource.find("{}"), Duration.Inf).body
     assert(
-      resources.size == 52
+      resources.size == 57
         && resources.head.method == Method.GET
         && resources.head.uri == "/auth/manage/organization/"
         && resources.head.code == Method.GET + BaseModel.SPLIT + "/auth/manage/organization/"
@@ -29,7 +29,7 @@ class AuthSpec extends MockStartupSpec {
         && roles.head.code == BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE
         && roles.head.flag == EZ_Role.SYSTEM_ROLE_CODE
         && roles.head.name == "System"
-        && roles.head.resource_codes.size == 52
+        && roles.head.resource_codes.size == 57
         && roles.head.resource_codes.head == s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/"
     )
 

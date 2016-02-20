@@ -69,6 +69,7 @@ class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
         override def handle(upload: HttpServerFileUpload): Unit = {
           val newName = if (request.params().contains("name")) request.params().get("name")
           else {
+            upload.contentType()
             if (upload.filename().contains(".")) {
               upload.filename().substring(0, upload.filename().lastIndexOf(".")) + "_" + System.nanoTime() + "." + upload.filename().substring(upload.filename().lastIndexOf(".") + 1)
             } else {
@@ -138,7 +139,9 @@ class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
   private def returnContent(result: Any, response: HttpServerResponse, accept: String, contentType: String) {
     result match {
       case value: Resp[_] if value && value.body.isInstanceOf[File] =>
-        response.sendFile(result.asInstanceOf[Resp[File]].body.getPath)
+        val file = value.body.asInstanceOf[File]
+        response.setStatusCode(200).putHeader("Content-disposition", "attachment; filename=" + file.getName)
+        response.sendFile(file.getPath)
       case _ =>
         //支持CORS
         val res = result match {

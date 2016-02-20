@@ -1,10 +1,9 @@
 package com.asto.ez.framework.auth
 
 import com.asto.ez.framework.EZContext
-import com.asto.ez.framework.helper.FormatHelper
 import com.asto.ez.framework.storage._
 import com.asto.ez.framework.storage.mongo._
-import com.ecfront.common.{EncryptHelper, Resp}
+import com.ecfront.common.{FormatHelper, EncryptHelper, Resp}
 
 import scala.beans.BeanProperty
 import scala.concurrent.ExecutionContext.Implicits.global

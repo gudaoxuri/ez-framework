@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.ecfront</groupId>
         <artifactId>ez-vertx-verticle-parent</artifactId>
-        <version>0.2.0</version>
+        <version>0.2.1</version>
     </parent>
 
     <artifactId>ez-framework</artifactId>
@@ -25,7 +25,7 @@
 
     <properties>
         <main.verticle>com.ecfront.foo</main.verticle>
-        <ez-common.version>0.6.0</ez-common.version>
+        <ez-common.version>0.6.1</ez-common.version>
     </properties>
 
     <dependencies>
@@ -50,12 +50,6 @@
                     <artifactId>scala-library</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-codegen</artifactId>
-            <version>${vertx.version}</version>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>

@@ -67,6 +67,7 @@
     "scheduler": false,
     "auth":{
       "useAuth":true,
+      "allow_register":true,
       "active_url":"",
       "rest_password_url":""
     }

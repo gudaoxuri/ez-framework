@@ -21,7 +21,7 @@ object EZGlobal extends LazyLogging {
   lazy val ez_rpc_http_access_control_allow_origin = if (ez_rpc != null && ez_rpc.containsKey("http") && ez_rpc.getJsonObject("http").containsKey("accessControlAllowOrigin")) ez_rpc.getJsonObject("http").getString("accessControlAllowOrigin") else "*"
   lazy val ez_rpc_http_base_url = if (ez_rpc != null && ez_rpc.containsKey("http"))
     "http://" + ez_rpc.getJsonObject("http").getString("host") + ":" + ez_rpc.getJsonObject("http").getInteger("port")
-    else ""
+  else ""
 
   lazy val ez_storage = if (ez.containsKey("storage")) ez.getJsonObject("storage") else null
   lazy val ez_storage_jdbc_update_timeout = if (ez_storage != null && ez_storage.containsKey("jdbc") && ez_storage.getJsonObject("jdbc").containsKey("update_timeout")) ez_storage.getJsonObject("jdbc").getInteger("update_timeout") else null
@@ -31,8 +31,9 @@ object EZGlobal extends LazyLogging {
   lazy val ez_mail = if (ez.containsKey("mail")) ez.getJsonObject("mail") else null
   lazy val ez_scheduler = if (ez.containsKey("scheduler")) ez.getBoolean("scheduler") else null
   lazy val ez_auth = if (ez.containsKey("auth")) ez.getJsonObject("auth") else null
-  lazy val ez_auth_active_url = if (ez_auth!=null) ez_auth.getString("active_url") else ""
-  lazy val ez_auth_rest_password_url = if (ez_auth!=null) ez_auth.getString("rest_password_url") else ""
+  lazy val ez_auth_allow_register:Boolean = if (ez_auth != null && ez_auth.containsKey("allow_register")) ez_auth.getBoolean("allow_register") else false
+  lazy val ez_auth_active_url = if (ez_auth != null && ez_auth.containsKey("active_url")) ez_auth.getString("active_url") else ""
+  lazy val ez_auth_rest_password_url = if (ez_auth != null && ez_auth.containsKey("rest_password_url")) ez_auth.getString("rest_password_url") else ""
 
   lazy val args = config.getJsonObject("args")
 
