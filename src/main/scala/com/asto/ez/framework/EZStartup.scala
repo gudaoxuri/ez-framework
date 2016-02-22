@@ -190,8 +190,10 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
         new Thread(new Runnable {
           override def run(): Unit = {
             AutoBuildingProcessor.autoBuilding("com.asto.ez.framework.auth")
-            Initiator.init()
-            p.success(Resp.success(null))
+            Initiator.init().onSuccess{
+              case _ =>
+                p.success(Resp.success(null))
+            }
           }
         }).start()
       }else{
