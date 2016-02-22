@@ -14,7 +14,6 @@ import io.vertx.core.http.{HttpServerFileUpload, HttpServerRequest, HttpServerRe
 
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
 
@@ -122,16 +121,13 @@ class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
               case excResp =>
                 returnContent(excResp, response, newContext.accept, newContext.contentType)
             }
-            Future(Resp.success(null))
           } catch {
             case e: Exception =>
               logger.error("Execute function error.", e)
               returnContent(Resp.serverError(e.getMessage), response, newContext.accept, newContext.contentType)
-              Future(Resp.success(null))
           }
         } else {
           returnContent(interResp, request.response(), context.accept, context.contentType)
-          Future(Resp.success(null))
         }
     }
   }

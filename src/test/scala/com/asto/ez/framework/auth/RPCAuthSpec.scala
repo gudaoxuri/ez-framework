@@ -11,7 +11,7 @@ class RPCAuthSpec extends MockStartupSpec {
 
   test("RPC auth test") {
 
-    Thread.sleep(4000)
+    Thread.sleep(8000)
     assert(Await.result(HttpClientProcessor.get("http://127.0.0.1:8080/auth/logout/?__ez_token__=1122222", classOf[Void]), Duration.Inf).code == StandardCode.UNAUTHORIZED)
     var loginInfoResp = Await.result(HttpClientProcessor.post("http://127.0.0.1:8080/public/auth/login/", Map("login_id" -> "admin", "password" -> "admin"), classOf[Token_Info_VO]), Duration.Inf)
     assert(!loginInfoResp)

@@ -12,7 +12,7 @@ class AuthSpec extends MockStartupSpec {
 
   test("Auth Test") {
 
-    Thread.sleep(4000)
+    Thread.sleep(8000)
 
     val resources = Await.result(EZ_Resource.find("{}"), Duration.Inf).body
     assert(

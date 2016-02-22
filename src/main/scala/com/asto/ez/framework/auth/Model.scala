@@ -3,7 +3,7 @@ package com.asto.ez.framework.auth
 import com.asto.ez.framework.EZContext
 import com.asto.ez.framework.storage._
 import com.asto.ez.framework.storage.mongo._
-import com.ecfront.common.{FormatHelper, EncryptHelper, Resp}
+import com.ecfront.common.{EncryptHelper, FormatHelper, Resp}
 
 import scala.beans.BeanProperty
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -332,7 +332,7 @@ case class EZ_Menu() extends BaseModel with SecureModel with StatusModel {
 
 object EZ_Menu extends MongoBaseStorage[EZ_Menu] with MongoSecureStorage[EZ_Menu] with MongoStatusStorage[EZ_Menu] {
 
-  def apply(uri: String, name: String, parent_uri: String, roleCodes: List[String], icon: String = "", translate: String = ""): EZ_Menu = {
+  def apply(uri: String, name: String, parent_uri: String, roleCodes: List[String], icon: String = "", translate: String = "", sort: Int = 0): EZ_Menu = {
     val menu = EZ_Menu()
     menu.uri = uri
     menu.name = name
@@ -340,6 +340,7 @@ object EZ_Menu extends MongoBaseStorage[EZ_Menu] with MongoSecureStorage[EZ_Menu
     menu.icon = icon
     menu.translate = translate
     menu.role_codes = roleCodes
+    menu.sort = sort
     menu.enable = true
     menu
   }

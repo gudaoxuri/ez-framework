@@ -1,7 +1,5 @@
 package com.asto.ez.framework
 
-import java.lang
-
 import com.asto.ez.framework.auth.AuthHttpInterceptor
 import com.asto.ez.framework.auth.manage.Initiator
 import com.asto.ez.framework.cache.RedisProcessor
@@ -13,6 +11,7 @@ import com.asto.ez.framework.rpc.websocket.WebSocketServerProcessor
 import com.asto.ez.framework.scheduler.SchedulerService
 import com.asto.ez.framework.storage.jdbc.DBProcessor
 import com.asto.ez.framework.storage.mongo.MongoProcessor
+import com.ecfront.common.{AsyncResp, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core._
 import io.vertx.core.http.{HttpServer, HttpServerOptions}
@@ -22,6 +21,7 @@ import io.vertx.ext.mail.MailConfig
 import io.vertx.ext.mongo.MongoClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Future, Promise}
 import scala.io.Source
 
 /**
@@ -33,9 +33,9 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
 
   protected def initiator: EZInitiator = null
 
-  protected def preStartup() = {}
+  protected def preStartup(p: AsyncResp[Void]) = p.success(null)
 
-  protected def postStartup() = {}
+  protected def postStartup(p: AsyncResp[Void]) = p.success(null)
 
   protected def shutdown() = {}
 
@@ -49,55 +49,75 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     EZGlobal.vertx = if (vertx != null) vertx else Vertx.vertx()
     EZGlobal.config = if (vertx != null) config() else new JsonObject(Source.fromFile(this.getClass.getResource("/").getPath + "config.json").mkString)
     HttpClientProcessor.httpClient = EZGlobal.vertx.createHttpClient()
-    preStartup()
-    startEZService()
-    if (initiator != null) {
-      //TODO
-      EZGlobal.vertx.setTimer(5000, new Handler[java.lang.Long] {
-        override def handle(e: lang.Long): Unit = {
-          initiator.isInitialized.onSuccess {
-            case isInitializedResp =>
-              if (isInitializedResp) {
-                if (!isInitializedResp.body) {
-                  initiator.initialize().onSuccess {
-                    case initResp =>
-                      if (initResp) {
-                        logger.info(s"EZ Framework Initiator successful .")
-                      } else {
-                        logger.error(s"EZ Framework Initiator error : ${isInitializedResp.message}")
-                      }
-                  }
-                } else {
-                  logger.info(s"EZ Framework has initialized .")
+    val preStartupP = Promise[Resp[Void]]()
+    preStartup(AsyncResp(preStartupP))
+    preStartupP.future.onSuccess {
+      case preStartupResp =>
+        if (preStartupResp) {
+          val startupP = Promise[Resp[Void]]()
+          startEZService(AsyncResp(startupP))
+          startupP.future.onSuccess {
+            case startupResp =>
+              if (startupResp) {
+                val postStartupP = Promise[Resp[Void]]()
+                postStartup(AsyncResp(postStartupP))
+                postStartupP.future.onSuccess {
+                  case postStartupResp =>
+                    if (postStartupResp) {
+                      logger.info(s"EZ Framework Startup successful")
+                    } else {
+                      logger.error(s"EZ Framework PostStartup fail : [${preStartupResp.code}] ${preStartupResp.message}")
+                    }
                 }
               } else {
-                logger.error(s"EZ Framework Initiator error : ${isInitializedResp.message}")
+                logger.error(s"EZ Framework Startup fail : [${preStartupResp.code}] ${preStartupResp.message}")
               }
           }
+        } else {
+          logger.error(s"EZ Framework PreStartup fail : [${preStartupResp.code}] ${preStartupResp.message}")
         }
-      })
     }
-    postStartup()
+
+
   }
 
-  private def startEZService(): Unit = {
-    startRPCServer()
-    startStorageConnection()
-    startCacheConnection()
-    startAuth()
-    startMailClient()
-    startScheduler()
+  private def startEZService(p: AsyncResp[Void]) = {
+    val rpcF = startRPCServer()
+    val storageF = startStorageConnection()
+    val cacheF = startCacheConnection()
+    val authF = startAuth()
+    val mailF = startMailClient()
+    val schedulerF = startScheduler()
+    for {
+      rpcResp <- rpcF
+      storageResp <- storageF
+      cacheResp <- cacheF
+      authResp <- authF
+      mailResp <- mailF
+      schedulerResp <- schedulerF
+      initiatorResp <- startInitiator()
+    } yield {
+      if (rpcResp && storageResp && cacheResp && authResp && mailResp && schedulerResp && initiatorResp) {
+        p.success(null)
+      } else {
+        p.serverError("")
+      }
+    }
   }
 
-  private def startRPCServer(): Unit = {
+  private def startRPCServer(): Future[Resp[Void]] = {
+    val p = Promise[Resp[Void]]()
     if (EZGlobal.ez_rpc != null) {
       val servicePath = EZGlobal.ez_rpc.getString("servicePath")
       if (servicePath.nonEmpty) {
         new Thread(new Runnable {
           override def run(): Unit = {
             AutoBuildingProcessor.autoBuilding(servicePath)
+            p.success(Resp.success(null))
           }
         }).start()
+      }else{
+        p.success(Resp.success(null))
       }
       if (EZGlobal.ez_rpc.containsKey("http")) {
         val http = EZGlobal.ez_rpc.getJsonObject("http")
@@ -113,10 +133,14 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
           }
         })
       }
+    }else{
+      p.success(Resp.success(null))
     }
+    p.future
   }
 
-  private def startStorageConnection(): Unit = {
+  private def startStorageConnection(): Future[Resp[Void]] = {
+    val p = Promise[Resp[Void]]()
     if (EZGlobal.ez_storage != null) {
       if (EZGlobal.ez_storage.containsKey("jdbc")) {
         val jdbc = EZGlobal.ez_storage.getJsonObject("jdbc")
@@ -128,10 +152,15 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
         MongoProcessor.mongoClient = MongoClient.createShared(EZGlobal.vertx, mongo)
         logger.info(s"EZ Framework Mongo connected. ${mongo.getJsonArray("hosts")}")
       }
+      p.success(Resp.success(null))
+    }else {
+      p.success(Resp.success(null))
     }
+    p.future
   }
 
-  private def startCacheConnection(): Unit = {
+  private def startCacheConnection(): Future[Resp[Void]] = {
+    val p = Promise[Resp[Void]]()
     if (EZGlobal.ez_cache != null) {
       if (EZGlobal.ez_cache.containsKey("redis")) {
         val redis = EZGlobal.ez_cache.getJsonObject("redis")
@@ -142,11 +171,19 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
           redis.getString("auth"),
           EZGlobal.ez_cache.getBoolean("useCache")
         )
+        p.success(Resp.success(null))
+      }else {
+        p.success(Resp.success(null))
       }
+      p.future
+    }else {
+      p.success(Resp.success(null))
     }
+    p.future
   }
 
-  private def startAuth(): Unit = {
+  private def startAuth(): Future[Resp[Void]] = {
+    val p = Promise[Resp[Void]]()
     if (EZGlobal.ez_auth != null) {
       if (EZGlobal.ez_auth.getBoolean("useAuth")) {
         InterceptorProcessor.register(HttpInterceptor.category, AuthHttpInterceptor)
@@ -154,33 +191,84 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
           override def run(): Unit = {
             AutoBuildingProcessor.autoBuilding("com.asto.ez.framework.auth")
             Initiator.init()
+            p.success(Resp.success(null))
           }
         }).start()
+      }else{
+        p.success(Resp.success(null))
       }
+    } else {
+      p.success(Resp.success(null))
     }
+    p.future
   }
 
-  private def startMailClient(): Unit = {
+  private def startMailClient(): Future[Resp[Void]] = {
+    val p = Promise[Resp[Void]]()
     if (EZGlobal.ez_mail != null) {
       MailProcessor.init(new MailConfig(EZGlobal.ez_mail))
       logger.info(s"EZ Framework Mail client initialized. ${EZGlobal.ez.getJsonObject("mail").getString("hostname")}")
+      p.success(Resp.success(null))
+    } else {
+      p.success(Resp.success(null))
     }
+    p.future
   }
 
-  private def startScheduler(): Unit = {
+  private def startScheduler(): Future[Resp[Void]] = {
+    val p = Promise[Resp[Void]]()
     if (EZGlobal.ez_scheduler != null) {
       if (EZGlobal.ez_scheduler) {
         new Thread(new Runnable {
           override def run(): Unit = {
             if (EZGlobal.ez_storage.containsKey("jdbc")) {
               SchedulerService.init(module, useMongo = false)
+              p.success(Resp.success(null))
             } else if (EZGlobal.ez_storage.containsKey("mongo")) {
               SchedulerService.init(module, useMongo = true)
+              p.success(Resp.success(null))
             }
           }
         }).start()
+      } else {
+        p.success(Resp.success(null))
       }
+    } else {
+      p.success(Resp.success(null))
     }
+    p.future
+  }
+
+  private def startInitiator(): Future[Resp[Void]] = {
+    val p = Promise[Resp[Void]]()
+    if (initiator != null) {
+      initiator.isInitialized.onSuccess {
+        case isInitializedResp =>
+          if (isInitializedResp) {
+            if (!isInitializedResp.body) {
+              initiator.initialize().onSuccess {
+                case initResp =>
+                  if (initResp) {
+                    logger.info(s"EZ Framework Initiator successful .")
+                    p.success(Resp.success(null))
+                  } else {
+                    logger.error(s"EZ Framework Initiator error : ${isInitializedResp.message}")
+                    p.success(Resp.serverError(""))
+                  }
+              }
+            } else {
+              logger.info(s"EZ Framework has initialized .")
+              p.success(Resp.success(null))
+            }
+          } else {
+            logger.error(s"EZ Framework Initiator error : ${isInitializedResp.message}")
+            p.success(Resp.serverError(""))
+          }
+      }
+    }else{
+      p.success(Resp.success(null))
+    }
+    p.future
   }
 
   /**
