@@ -1,5 +1,7 @@
 package com.asto.ez.framework
 
+import java.lang
+
 import com.asto.ez.framework.auth.AuthHttpInterceptor
 import com.asto.ez.framework.auth.manage.Initiator
 import com.asto.ez.framework.cache.RedisProcessor
@@ -41,8 +43,8 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     * 启动入口
     */
   override def start(): Unit = {
-   /* System.setProperty("vertx.disableFileCaching", "true")
-    System.setProperty("vertx.disableFileCPResolving", "true")*/
+    /* System.setProperty("vertx.disableFileCaching", "true")
+     System.setProperty("vertx.disableFileCPResolving", "true")*/
     System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
     EZGlobal.vertx = if (vertx != null) vertx else Vertx.vertx()
     EZGlobal.config = if (vertx != null) config() else new JsonObject(Source.fromFile(this.getClass.getResource("/").getPath + "config.json").mkString)
@@ -50,25 +52,30 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
     preStartup()
     startEZService()
     if (initiator != null) {
-      initiator.isInitialized.onSuccess {
-        case isInitializedResp =>
-          if (isInitializedResp) {
-            if (!isInitializedResp.body) {
-              initiator.initialize().onSuccess {
-                case initResp =>
-                  if (initResp) {
-                    logger.info(s"EZ Framework Initiator successful .")
-                  } else {
-                    logger.error(s"EZ Framework Initiator error : ${isInitializedResp.message}")
+      //TODO
+      EZGlobal.vertx.setTimer(5000, new Handler[java.lang.Long] {
+        override def handle(e: lang.Long): Unit = {
+          initiator.isInitialized.onSuccess {
+            case isInitializedResp =>
+              if (isInitializedResp) {
+                if (!isInitializedResp.body) {
+                  initiator.initialize().onSuccess {
+                    case initResp =>
+                      if (initResp) {
+                        logger.info(s"EZ Framework Initiator successful .")
+                      } else {
+                        logger.error(s"EZ Framework Initiator error : ${isInitializedResp.message}")
+                      }
                   }
+                } else {
+                  logger.info(s"EZ Framework has initialized .")
+                }
+              } else {
+                logger.error(s"EZ Framework Initiator error : ${isInitializedResp.message}")
               }
-            } else {
-              logger.info(s"EZ Framework has initialized .")
-            }
-          } else {
-            logger.error(s"EZ Framework Initiator error : ${isInitializedResp.message}")
           }
-      }
+        }
+      })
     }
     postStartup()
   }
@@ -106,20 +113,11 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
           }
         })
       }
-      //TODO cluster
     }
   }
 
   private def startStorageConnection(): Unit = {
     if (EZGlobal.ez_storage != null) {
-      val entityPath = EZGlobal.ez_storage.getString("entityPath")
-      if (entityPath.nonEmpty) {
-        new Thread(new Runnable {
-          override def run(): Unit = {
-            //TODO
-          }
-        }).start()
-      }
       if (EZGlobal.ez_storage.containsKey("jdbc")) {
         val jdbc = EZGlobal.ez_storage.getJsonObject("jdbc")
         DBProcessor.dbClient = JDBCClient.createShared(EZGlobal.vertx, jdbc)
