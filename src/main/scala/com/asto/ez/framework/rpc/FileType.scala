@@ -11,6 +11,7 @@ object FileType {
 
   val types = Map(
     "office" -> List(
+      FILE_TYPE.TXT.toString,
       FILE_TYPE.DOC.toString,
       FILE_TYPE.DOCX.toString,
       FILE_TYPE.XLS1.toString,
@@ -24,6 +25,7 @@ object FileType {
       FILE_TYPE.TXT.toString
     ),
     "compress" -> List(
+      FILE_TYPE.TXT.toString,
       FILE_TYPE.ZIP1.toString,
       FILE_TYPE.ZIP2.toString,
       FILE_TYPE.GZIP.toString,
@@ -33,6 +35,7 @@ object FileType {
       FILE_TYPE.RAR2.toString
     ),
     "image" -> List(
+      FILE_TYPE.TXT.toString,
       FILE_TYPE.GIF.toString,
       FILE_TYPE.JPG1.toString,
       FILE_TYPE.JPG2.toString,
@@ -41,11 +44,13 @@ object FileType {
       FILE_TYPE.BMP2.toString
     ),
     "audio" -> List(
+      FILE_TYPE.TXT.toString,
       FILE_TYPE.MP3.toString,
       FILE_TYPE.WAV.toString,
       FILE_TYPE.WMA.toString
     ),
     "video" -> List(
+      FILE_TYPE.TXT.toString,
       FILE_TYPE.MP4.toString,
       FILE_TYPE.MOV.toString,
       FILE_TYPE.MOVIE.toString,
