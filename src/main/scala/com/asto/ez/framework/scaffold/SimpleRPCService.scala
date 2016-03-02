@@ -41,8 +41,15 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
   @POST("")
   def _rpc_save(parameter: Map[String, String], body: String, p: AsyncResp[String], context: EZContext): Unit = {
     logger.trace(s" RPC simple save : $body")
-    storageObj.save(JsonHelper.toObject(body, _modelClazz), context).onSuccess {
-      case resp => p.resp(resp)
+    try {
+      val model = JsonHelper.toObject(body, _modelClazz)
+      storageObj.save(model, context).onSuccess {
+        case resp => p.resp(resp)
+      }
+    } catch {
+      case e: Throwable =>
+        logger.error("RPC simple save error : " + e.getMessage, e)
+        p.badRequest("RPC simple save error : " + e.getMessage)
     }
   }
 
@@ -52,12 +59,31 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
       p.badRequest("【id】不能为空")
     } else {
       logger.trace(s" RPC simple update : $body")
-      storageObj.update(JsonHelper.toObject(body, _modelClazz), context).onSuccess {
-        case resp => p.resp(resp)
+      try {
+        val model = JsonHelper.toObject(body, _modelClazz)
+        storageObj.update(model, context).onSuccess {
+          case resp => p.resp(resp)
+        }
+      } catch {
+        case e: Throwable =>
+          logger.error("RPC simple save error : " + e.getMessage, e)
+          p.badRequest("RPC simple save error : " + e.getMessage)
       }
     }
   }
 
+  @GET("enable/")
+  def _rpc_findEnable(parameter: Map[String, String], p: AsyncResp[List[M]], context: EZContext): Unit = {
+    logger.trace(s" RPC simple find enable : $parameter")
+    if (classOf[StatusModel].isAssignableFrom(_modelClazz)) {
+      val condition = if (parameter.contains("condition")) parameter("condition") else _emptyCondition
+      storageObj.asInstanceOf[StatusStorage[_]].findEnabled(condition, List(), context).onSuccess {
+        case resp => p.resp(resp)
+      }
+    } else {
+      p.notImplemented("启用方法未实现")
+    }
+  }
 
   @GET("")
   def _rpc_find(parameter: Map[String, String], p: AsyncResp[List[M]], context: EZContext): Unit = {

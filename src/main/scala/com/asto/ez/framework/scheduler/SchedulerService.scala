@@ -49,11 +49,14 @@ object SchedulerService extends LazyLogging {
     )
   }
 
-  def delete(name: String): Unit = {
-    schedulerStorage.deleteByCond(" name =? ", List(name)).onSuccess {
-      case deleteResp =>
-        if (deleteResp) {
-          JobHelper.remove(name, quartzScheduler)
+  def delete(id: String): Unit = {
+    schedulerStorage.getById(id).onSuccess {
+      case getResp =>
+        schedulerStorage.deleteById(id).onSuccess {
+          case deleteResp =>
+            if (deleteResp) {
+              JobHelper.remove(getResp.body.name, quartzScheduler)
+            }
         }
     }
   }
