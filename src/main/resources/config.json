@@ -1,8 +1,9 @@
 {
   "ez": {
-    "appName":"EZ",
+    "appName": "EZ",
     "rpc": {
       "http": {
+        "publicUrl": "https://5604e291.all123.net:8080/",
         "host": "0.0.0.0",
         "port": 8080,
         "resourcePath": "c:/tmp/",
@@ -16,15 +17,13 @@
     "storage": {
       "jdbc": {
         "driver_class": "com.mysql.jdbc.Driver",
-        "url": "jdbc:mysql://192.168.4.99:3306/test?characterEncoding=UTF-8&autoReconnect=true",
+        "url": "jdbc:mysql://192.168.4.99:3306/mock?characterEncoding=UTF-8&autoReconnect=true",
         "user": "root",
         "password": "123456",
         "max_pool_size": 200,
         "max_idle_time": 1800,
         "idle_test_period": 120,
-        "validate": true,
-        "update_timeout":10,
-        "query_timeout":10
+        "validate": true
       },
       "mongo": {
         "hosts": [
@@ -33,7 +32,7 @@
             "port": 27017
           }
         ],
-        "db_name": "test",
+        "db_name": "mock",
         "maxPoolSize": 100,
         "minPoolSize": 0,
         "maxIdleTimeMS": 0,
@@ -57,18 +56,32 @@
       "port": 465,
       "starttls": "REQUIRED",
       "login": "REQUIRED",
-      "ssl":true,
+      "ssl": true,
       "authMethods": "LOGIN",
-      "username": "hi-sb@ecfront.com",
+      "username": "admin@ecfront.com",
       "password": "",
       "maxPoolSize": 10
     },
     "scheduler": false,
-    "auth":{
-      "useAuth":true,
-      "allow_register":true,
-      "active_url":"",
-      "rest_password_url":""
+    "auth": {
+      "useAuth": true,
+      "allow_register": true,
+      "active_url": "",
+      "rest_password_url": "",
+      "oauth2": {
+        "github": {
+          "clientID": "",
+          "clientSecret": ""
+        },
+        "weixin_mp": {
+          "clientID": "wx7b758a31f520f4bb",
+          "clientSecret": "097c19f1cc0895a346b6f0de5e347165"
+        },
+        "weixin_open": {
+          "clientID": "",
+          "clientSecret": ""
+        }
+      }
     }
   },
   "args": {

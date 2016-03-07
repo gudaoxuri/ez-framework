@@ -1,4 +1,6 @@
-package com.asto.ez.framework
+package com.asto.ez.framework.mock
+
+import com.asto.ez.framework.EZStartup
 
 class MockStartup extends EZStartup {
 

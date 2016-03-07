@@ -2,6 +2,7 @@ package com.asto.ez.framework
 
 import com.asto.ez.framework.auth.AuthHttpInterceptor
 import com.asto.ez.framework.auth.manage.Initiator
+import com.asto.ez.framework.auth.oauth2.OAuth2Service
 import com.asto.ez.framework.cache.RedisProcessor
 import com.asto.ez.framework.interceptor.InterceptorProcessor
 import com.asto.ez.framework.mail.MailProcessor
@@ -116,7 +117,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
             p.success(Resp.success(null))
           }
         }).start()
-      }else{
+      } else {
         p.success(Resp.success(null))
       }
       if (EZGlobal.ez_rpc.containsKey("http")) {
@@ -133,7 +134,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
           }
         })
       }
-    }else{
+    } else {
       p.success(Resp.success(null))
     }
     p.future
@@ -153,7 +154,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
         logger.info(s"EZ Framework Mongo connected. ${mongo.getJsonArray("hosts")}")
       }
       p.success(Resp.success(null))
-    }else {
+    } else {
       p.success(Resp.success(null))
     }
     p.future
@@ -172,11 +173,11 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
           EZGlobal.ez_cache.getBoolean("useCache")
         )
         p.success(Resp.success(null))
-      }else {
+      } else {
         p.success(Resp.success(null))
       }
       p.future
-    }else {
+    } else {
       p.success(Resp.success(null))
     }
     p.future
@@ -190,13 +191,16 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
         new Thread(new Runnable {
           override def run(): Unit = {
             AutoBuildingProcessor.autoBuilding("com.asto.ez.framework.auth")
-            Initiator.init().onSuccess{
+            Initiator.init().onSuccess {
               case _ =>
+                if (EZGlobal.ez_auth_oauth2 != null) {
+                  OAuth2Service.init(EZGlobal.ez_auth_oauth2)
+                }
                 p.success(Resp.success(null))
             }
           }
         }).start()
-      }else{
+      } else {
         p.success(Resp.success(null))
       }
     } else {
@@ -267,7 +271,7 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
             p.success(Resp.serverError(""))
           }
       }
-    }else{
+    } else {
       p.success(Resp.success(null))
     }
     p.future

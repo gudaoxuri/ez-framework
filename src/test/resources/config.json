@@ -1,8 +1,9 @@
 {
   "ez": {
-    "appName":"EZ",
+    "appName": "EZ",
     "rpc": {
       "http": {
+        "publicUrl": "http://localhost:8080/",
         "host": "0.0.0.0",
         "port": 8080,
         "resourcePath": "c:/tmp/",
@@ -22,9 +23,7 @@
         "max_pool_size": 200,
         "max_idle_time": 1800,
         "idle_test_period": 120,
-        "validate": true,
-        "update_timeout":10,
-        "query_timeout":10
+        "validate": true
       },
       "mongo": {
         "hosts": [
@@ -40,8 +39,7 @@
         "maxLifeTimeMS": 0
         /*        "username": "",
                 "password": ""*/
-      },
-      "entityPath": ""
+      }
     },
     "cache": {
       "redis": {
@@ -50,7 +48,7 @@
         "auth": "",
         "db": 0
       },
-      "useCache": true
+      "useCache": false
     },
     "mail": {
       "hostname": "smtp.exmail.qq.com",
@@ -58,18 +56,28 @@
       "port": 465,
       "starttls": "REQUIRED",
       "login": "REQUIRED",
-      "ssl":true,
+      "ssl": true,
       "authMethods": "LOGIN",
-      "username": "hi-sb@ecfront.com",
+      "username": "admin@ecfront.com",
       "password": "",
       "maxPoolSize": 10
     },
     "scheduler": false,
-    "auth":{
-      "useAuth":true,
-      "allow_register":true,
-      "active_url":"",
-      "rest_password_url":""
+    "auth": {
+      "useAuth": true,
+      "allow_register": true,
+      "active_url": "",
+      "rest_password_url": "",
+      "oauth2": {
+        "github": {
+          "clientID": "",
+          "clientSecret": ""
+        },
+        "weixin": {
+          "clientID": "",
+          "clientSecret": ""
+        }
+      }
     }
   },
   "args": {

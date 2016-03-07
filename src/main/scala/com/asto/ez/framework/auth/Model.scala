@@ -191,6 +191,7 @@ case class EZ_Account() extends BaseModel with SecureModel with StatusModel {
   @BeanProperty var email: String = _
   @BeanProperty var ext_id: String = _
   @BeanProperty var ext_info: Map[String, String] = _
+  @BeanProperty var oauth: Map[String, String] = _
   @BeanProperty var organization_code: String = _
   @BeanProperty var role_codes: List[String] = List[String]()
 
@@ -199,6 +200,8 @@ case class EZ_Account() extends BaseModel with SecureModel with StatusModel {
 object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[EZ_Account] with MongoStatusStorage[EZ_Account] {
 
   val SYSTEM_ACCOUNT_CODE = "sysadmin"
+
+  val VIRTUAL_EMAIL = "@virtual.is"
 
   def apply(loginId: String, email: String, name: String, password: String, roleCodes: List[String]): EZ_Account = {
     val account = EZ_Account()
@@ -209,6 +212,8 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
     account.organization_code = ""
     account.enable = true
     account.role_codes = roleCodes
+    account.ext_id = ""
+    account.ext_info = Map()
     account
   }
 
@@ -218,8 +223,16 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
       || model.email == null || model.email.trim.isEmpty) {
       Future(Resp.badRequest("Require【Login_id】【password】【email】"))
     } else {
-      if (FormatHelper.validEmail(model.email)) {
+      if (model.oauth.isEmpty && model.login_id.contains("@")) {
+        Future(Resp.badRequest("【login id】can't use email address"))
+      } else if (FormatHelper.validEmail(model.email)) {
         model.password = packageEncryptPwd(model.login_id, model.password)
+        if (model.ext_id == null) {
+          model.ext_id = ""
+        }
+        if (model.ext_info == null) {
+          model.ext_info = Map()
+        }
         super.preSave(model, context)
       } else {
         Future(Resp.badRequest("【email】format error"))
@@ -233,10 +246,16 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
       || model.email == null || model.email.trim.isEmpty) {
       Future(Resp.badRequest("Require【Login_id】【password】【email】"))
     } else {
-      if (model.login_id.contains("@")) {
+      if (model.oauth.isEmpty && model.login_id.contains("@")) {
         Future(Resp.badRequest("【login id】can't use email address"))
       } else {
         if (FormatHelper.validEmail(model.email)) {
+          if (model.ext_id == null) {
+            model.ext_id = ""
+          }
+          if (model.ext_info == null) {
+            model.ext_info = Map()
+          }
           super.preUpdate(model, context)
         } else {
           Future(Resp.badRequest("【email】format error"))
@@ -251,7 +270,7 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
       || model.email == null || model.email.trim.isEmpty) {
       Future(Resp.badRequest("Require【Login_id】【password】【email】"))
     } else {
-      if (model.login_id.contains("@")) {
+      if (model.oauth.isEmpty && model.login_id.contains("@")) {
         Future(Resp.badRequest("【login id】can't use email address"))
       } else {
         if (FormatHelper.validEmail(model.email)) {
@@ -271,6 +290,10 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
     getByCond( s"""{"$$or":[{"login_id":"$loginIdOrEmail"},{"email":"$loginIdOrEmail"}]}""")
   }
 
+  def getByOAuth(authId: String, appName: String): Future[Resp[EZ_Account]] = {
+    getByCond( s"""{"oauth.$appName":"$authId"}""")
+  }
+
 
   def packageEncryptPwd(loginId: String, password: String): String = {
     EncryptHelper.encrypt(loginId + password)
@@ -287,6 +310,7 @@ case class EZ_Token_Info() extends BaseModel {
   @BeanProperty var organization: EZ_Organization = _
   @BeanProperty var roles: List[EZ_Role] = _
   @BeanProperty var ext_id: String = _
+  @BeanProperty var ext_info: Map[String, String] = _
   @BeanProperty var last_login_time: Long = _
 
 }

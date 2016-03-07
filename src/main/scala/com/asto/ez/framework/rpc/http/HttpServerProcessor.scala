@@ -4,7 +4,7 @@ import java.io.File
 import java.net.URLDecoder
 
 import com.asto.ez.framework.interceptor.InterceptorProcessor
-import com.asto.ez.framework.rpc.{EChannel, Fun, Router}
+import com.asto.ez.framework.rpc.{EChannel, Fun, Resp_Redirect, Router}
 import com.asto.ez.framework.{EZContext, EZGlobal}
 import com.ecfront.common.{JsonHelper, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -138,6 +138,10 @@ class HttpServerProcessor extends Handler[HttpServerRequest] with LazyLogging {
         val file = value.body.asInstanceOf[File]
         response.setStatusCode(200).putHeader("Content-disposition", "attachment; filename=" + file.getName)
         response.sendFile(file.getPath)
+      case value: Resp[_] if value && value.body.isInstanceOf[Resp_Redirect] =>
+        response.putHeader("Location", value.body.asInstanceOf[Resp_Redirect].url)
+          .setStatusCode(302)
+          .end()
       case _ =>
         //支持CORS
         val res = result match {

@@ -9,6 +9,7 @@ case class Token_Info_VO(
                           organization_name: String,
                           role_info: Map[String, String],
                           ext_id: String,
+                          ext_info: Map[String, String],
                           last_login_time: Long)
 
 case class Account_VO() {
@@ -19,4 +20,6 @@ case class Account_VO() {
   var email: String = _
   var old_password: String = _
   var new_password: String = _
+  var ext_id: String = _
+  var ext_info: Map[String,String] = _
 }

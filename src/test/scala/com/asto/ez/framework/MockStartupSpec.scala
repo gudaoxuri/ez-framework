@@ -1,5 +1,7 @@
 package com.asto.ez.framework
 
+import com.asto.ez.framework.mock.MockStartup
+
 abstract class MockStartupSpec extends BasicSpec {
 
   val startup = new MockStartup()

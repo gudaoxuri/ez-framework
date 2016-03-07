@@ -96,6 +96,8 @@ object AccountService extends SimpleRPCService[EZ_Account] {
             vo.name = account.name
             vo.email = account.email
             vo.image = account.image
+            vo.ext_id = account.ext_id
+            vo.ext_info = account.ext_info
             p.success(vo)
           } else {
             p.unAuthorized("")

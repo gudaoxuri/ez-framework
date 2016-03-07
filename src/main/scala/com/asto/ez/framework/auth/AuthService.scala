@@ -35,50 +35,56 @@ object AuthService {
         if (getResp && getResp.body != null) {
           val account = getResp.body
           if (EZ_Account.packageEncryptPwd(account.login_id, password) == account.password) {
-            if(account.enable) {
-              val rolesF = EZ_Role.findByCodes(account.role_codes)
-              val orgF = EZ_Organization.getByCode(account.organization_code)
-              val tokenInfo = EZ_Token_Info()
-              tokenInfo.id = UUID.randomUUID().toString
-              tokenInfo.login_id = account.login_id
-              tokenInfo.login_name = account.name
-              tokenInfo.image = account.image
-              tokenInfo.ext_id = account.ext_id
-              tokenInfo.last_login_time = System.currentTimeMillis()
-              for {
-                rolesResp <- rolesF
-                orgResp <- orgF
-              } yield {
-                tokenInfo.roles = rolesResp.body
-                tokenInfo.organization = orgResp.body
-                EZ_Token_Info.deleteByCond(s"""{"login_id":"${tokenInfo.login_id}"}""").onSuccess {
-                  case logoutResp =>
-                    EZ_Token_Info.save(tokenInfo).onSuccess {
-                      case saveResp =>
-                        p.success(
-                          Token_Info_VO(
-                            tokenInfo.id,
-                            tokenInfo.login_id,
-                            tokenInfo.login_name,
-                            tokenInfo.image,
-                            tokenInfo.organization.code,
-                            tokenInfo.organization.name,
-                            tokenInfo.roles.map { role => role.code -> role.name }.toMap,
-                            tokenInfo.ext_id,
-                            tokenInfo.last_login_time
-                          ))
-                    }
-                }
-              }
-            }else{
-              p.notFound(s"Account disabled")
-            }
+            addLoginInfo(account, p)
           } else {
             p.notFound(s"【password】NOT match")
           }
         } else {
           p.notFound(s"【 $loginIdOrEmail】NOT exist")
         }
+    }
+  }
+
+  def addLoginInfo(account: EZ_Account, p: AsyncResp[Token_Info_VO]): Unit = {
+    if (account.enable) {
+      val rolesF = EZ_Role.findByCodes(account.role_codes)
+      val orgF = EZ_Organization.getByCode(account.organization_code)
+      val tokenInfo = EZ_Token_Info()
+      tokenInfo.id = UUID.randomUUID().toString
+      tokenInfo.login_id = account.login_id
+      tokenInfo.login_name = account.name
+      tokenInfo.image = account.image
+      tokenInfo.ext_id = account.ext_id
+      tokenInfo.ext_info = account.ext_info
+      tokenInfo.last_login_time = System.currentTimeMillis()
+      for {
+        rolesResp <- rolesF
+        orgResp <- orgF
+      } yield {
+        tokenInfo.roles = rolesResp.body
+        tokenInfo.organization = orgResp.body
+        EZ_Token_Info.deleteByCond(s"""{"login_id":"${tokenInfo.login_id}"}""").onSuccess {
+          case logoutResp =>
+            EZ_Token_Info.save(tokenInfo).onSuccess {
+              case saveResp =>
+                p.success(
+                  Token_Info_VO(
+                    tokenInfo.id,
+                    tokenInfo.login_id,
+                    tokenInfo.login_name,
+                    tokenInfo.image,
+                    tokenInfo.organization.code,
+                    tokenInfo.organization.name,
+                    tokenInfo.roles.map { role => role.code -> role.name }.toMap,
+                    tokenInfo.ext_id,
+                    tokenInfo.ext_info,
+                    tokenInfo.last_login_time
+                  ))
+            }
+        }
+      }
+    } else {
+      p.notFound(s"Account disabled")
     }
   }
 
@@ -121,6 +127,7 @@ object AuthService {
               tokenInfo.organization.name,
               tokenInfo.roles.map { role => role.code -> role.name }.toMap,
               tokenInfo.ext_id,
+              tokenInfo.ext_info,
               tokenInfo.last_login_time
             ))
         } else {

@@ -1,7 +1,7 @@
 package com.asto.ez.framework.auth
 
+import com.asto.ez.framework.MockStartupSpec
 import com.asto.ez.framework.rpc.http.HttpClientProcessor
-import com.asto.ez.framework.{EZGlobal, MockStartupSpec}
 import com.ecfront.common.{AsyncResp, Resp, StandardCode}
 
 import scala.concurrent.duration.Duration
@@ -16,23 +16,23 @@ class UserSpec extends MockStartupSpec {
     account.login_id = "u1"
     account.new_password = "123"
     assert(Await.result(HttpClientProcessor.post(
-      s"${EZGlobal.ez_rpc_http_base_url}/public/register/",
+      s"http://127.0.0.1:8080/public/register/",
       account, classOf[String]), Duration.Inf).code == StandardCode.BAD_REQUEST)
 
     account.email = "net@"
     assert(Await.result(HttpClientProcessor.post(
-      s"${EZGlobal.ez_rpc_http_base_url}/public/register/",
+      s"http://127.0.0.1:8080/public/register/",
       account, classOf[String]), Duration.Inf).message == "【email】format error")
 
     account.name = "u1"
     account.email = "i@sunisle.org"
     assert(Await.result(HttpClientProcessor.post(
-      s"${EZGlobal.ez_rpc_http_base_url}/public/register/",
+      s"http://127.0.0.1:8080/public/register/",
       account, classOf[String]), Duration.Inf).message.contains("unique"))
 
     account.email = "net@sunisle.org"
     assert(Await.result(HttpClientProcessor.post(
-      s"${EZGlobal.ez_rpc_http_base_url}/public/register/",
+      s"http://127.0.0.1:8080/public/register/",
       account, classOf[String]), Duration.Inf))
 
   }
