@@ -17,6 +17,7 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core._
 import io.vertx.core.http.{HttpServer, HttpServerOptions}
 import io.vertx.core.json.JsonObject
+import io.vertx.core.net.JksOptions
 import io.vertx.ext.jdbc.JDBCClient
 import io.vertx.ext.mail.MailConfig
 import io.vertx.ext.mongo.MongoClient
@@ -120,16 +121,21 @@ abstract class EZStartup extends AbstractVerticle with LazyLogging {
       } else {
         p.success(Resp.success(null))
       }
-      if (EZGlobal.ez_rpc.containsKey("http")) {
-        val http = EZGlobal.ez_rpc.getJsonObject("http")
-        EZGlobal.vertx.createHttpServer(new HttpServerOptions().setCompressionSupported(true).setTcpKeepAlive(true))
+      if (EZGlobal.ez_rpc_http != null) {
+        val opt = new HttpServerOptions()
+        if (EZGlobal.ez_rpc_https != null) {
+          opt.setSsl(true).setKeyStoreOptions(
+            new JksOptions().setPath(EZGlobal.ez_rpc_https_key_path).setPassword(EZGlobal.ez_rpc_https_key_password)
+          )
+        }
+        EZGlobal.vertx.createHttpServer(opt.setCompressionSupported(true).setTcpKeepAlive(true))
           //注册了自定义路由器：HttpRouter
-          .requestHandler(new HttpServerProcessor).websocketHandler(new WebSocketServerProcessor).listen(http.getInteger("port"), http.getString("host"), new Handler[AsyncResult[HttpServer]] {
+          .requestHandler(new HttpServerProcessor).websocketHandler(new WebSocketServerProcessor).listen(EZGlobal.ez_rpc_http.getInteger("port"), EZGlobal.ez_rpc_http.getString("host"), new Handler[AsyncResult[HttpServer]] {
           override def handle(event: AsyncResult[HttpServer]): Unit = {
             if (event.succeeded()) {
-              logger.info(s"EZ Framework HTTP start successful. http://${http.getString("host")}:${http.getInteger("port")}/")
+              logger.info(s"EZ Framework HTTP${if (EZGlobal.ez_rpc_https != null) "s" else ""} start successful. http://${EZGlobal.ez_rpc_http.getString("host")}:${EZGlobal.ez_rpc_http.getInteger("port")}/")
             } else {
-              logger.error("EZ Framework HTTP start fail .", event.cause())
+              logger.error(s"EZ Framework HTTP${if (EZGlobal.ez_rpc_https != null) "s" else ""} start fail .", event.cause())
             }
           }
         })

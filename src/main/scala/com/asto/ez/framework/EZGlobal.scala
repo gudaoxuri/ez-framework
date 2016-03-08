@@ -22,6 +22,9 @@ object EZGlobal extends LazyLogging {
   lazy val ez_rpc_http_public_uri_prefix_path = if (ez_rpc_http != null &&ez_rpc_http.containsKey("publicUriPrefix")) ez_rpc_http.getString("publicUriPrefix") else null
   lazy val ez_rpc_http_resource_path = if (ez_rpc_http != null && ez_rpc_http.containsKey("resourcePath")) ez_rpc_http.getString("resourcePath") else ""
   lazy val ez_rpc_http_access_control_allow_origin = if (ez_rpc_http != null && ez_rpc_http.containsKey("accessControlAllowOrigin")) ez_rpc_http.getString("accessControlAllowOrigin") else "*"
+  lazy val ez_rpc_https = if (ez_rpc_http != null && ez_rpc_http.containsKey("ssh")) ez_rpc_http.getJsonObject("ssh") else null
+  lazy val ez_rpc_https_key_path = if (ez_rpc_https != null && ez_rpc_https.containsKey("keyPath")) ez_rpc_https.getString("keyPath") else null
+  lazy val ez_rpc_https_key_password = if (ez_rpc_https != null && ez_rpc_https.containsKey("keyPassword")) ez_rpc_https.getString("keyPassword") else null
 
   lazy val ez_storage = if (ez.containsKey("storage")) ez.getJsonObject("storage") else null
 
