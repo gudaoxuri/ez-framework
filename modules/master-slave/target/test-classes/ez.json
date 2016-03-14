@@ -1,0 +1,23 @@
+{
+  "ez": {
+    "app": "",
+    "module": "testModule",
+    "services": {
+      "masterslave": {
+        "clusterId": "ez.test",
+        "category": {
+          "m": {
+            "pool": 5,
+            "newThread": true
+          }
+        }
+      },
+      "kafka": {
+        "brokerList": "192.168.4.99:9092",
+        "zkList": "192.168.4.99:2181"
+      }
+    }
+  },
+  "args": {
+  }
+}

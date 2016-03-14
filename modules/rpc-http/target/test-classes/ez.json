@@ -1,0 +1,32 @@
+{
+  "ez": {
+    "app": "",
+    "module": "",
+    "services": {
+      "rpc.http": {
+        "servicePath": "com.ecfront.ez.framework.service.rpc.http.test",
+        "publicUrl": "https://mock.ecfront.com:8080/",
+        "host": "0.0.0.0",
+        "port": 8080,
+        "resourcePath": "c:/tmp/",
+        "accessControlAllowOrigin": "*"
+        /*,
+                "ssl":{
+                  "keyPath":"server-keystore.jks",
+                  "keyPassword":"123456"
+                }*/
+      },
+      "storage.mongo": {
+        "hosts": [
+          {
+            "host": "192.168.4.99",
+            "port": 27017
+          }
+        ],
+        "db_name": "ez_test"
+      }
+    }
+  },
+  "args": {
+  }
+}
