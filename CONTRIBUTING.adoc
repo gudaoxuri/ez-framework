@@ -1,0 +1,17 @@
+= 开发环境
+
+. JDK 1.8
+. Scala 2.11
+
+= 构建
+
+. `git clone https://github.com/gudaoxuri/ez-framework.git`
+. 使用IDE导入Maven工程，各组件都是独立Maven工程
+
+= 提交申请
+
+. 提交前请确保:
+
+  已完成变更代码的单元测试
+  代码风格检查（mvn scalastyle:check）通过：0 errors 0 warnings
+

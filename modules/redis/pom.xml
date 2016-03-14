@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.ecfront</groupId>
+        <artifactId>ez-parent</artifactId>
+        <version>0.1.7</version>
+    </parent>
+
+    <artifactId>ezf-redis</artifactId>
+    <name>EZ Framework Redis</name>
+    <description>EZ框架Redis服务</description>
+    <url>https://github.com/gudaoxuri/ez-framework</url>
+    <packaging>jar</packaging>
+    <version>3.0.0-SNAPSHOT</version>
+
+    <scm>
+        <connection>scm:git:git@github.com:gudaoxuri/ez-framework.git</connection>
+        <developerConnection>scm:git:git@github.com:gudaoxuri/ez-framework.git</developerConnection>
+        <url>git@github.com:gudaoxuri/ez-framework.git</url>
+    </scm>
+
+    <properties>
+        <ezf-version>3.0.0-SNAPSHOT</ezf-version>
+        <vertx.version>3.2.1</vertx.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-core</artifactId>
+            <version>${ezf-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-redis-client</artifactId>
+            <version>${vertx.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

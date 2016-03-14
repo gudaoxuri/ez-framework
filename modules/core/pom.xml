@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.ecfront</groupId>
+        <artifactId>ez-parent</artifactId>
+        <version>0.1.7</version>
+    </parent>
+
+    <artifactId>ezf-core</artifactId>
+    <name>EZ Framework Core Module</name>
+    <description>EZ框架核心模块</description>
+    <url>https://github.com/gudaoxuri/ez-framework</url>
+    <packaging>jar</packaging>
+    <version>3.0.0-SNAPSHOT</version>
+
+    <scm>
+        <connection>scm:git:git@github.com:gudaoxuri/ez-framework.git</connection>
+        <developerConnection>scm:git:git@github.com:gudaoxuri/ez-framework.git</developerConnection>
+        <url>git@github.com:gudaoxuri/ez-framework.git</url>
+    </scm>
+
+    <properties>
+        <ez-common.version>0.6.3</ez-common.version>
+		<vertx.version>3.2.1</vertx.version>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ez-common</artifactId>
+            <version>${ez-common.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.code.findbugs</groupId>
+                    <artifactId>jsr305</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-core</artifactId>
+            <version>${vertx.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-codegen</artifactId>
+            <version>${vertx.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scala.major.version}</artifactId>
+            <version>${scalatest.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.scala-lang</groupId>
+                    <artifactId>scala-library</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+    </dependencies>
+
+</project>

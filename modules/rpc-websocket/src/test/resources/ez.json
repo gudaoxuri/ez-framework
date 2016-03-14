@@ -1,0 +1,24 @@
+{
+  "ez": {
+    "app": "",
+    "module": "",
+    "services": {
+      "rpc.websocket": {
+        "servicePath": "com.ecfront.ez.framework.service.rpc.websocket.test",
+        "host": "0.0.0.0",
+        "port": 8081
+      },
+      "storage.mongo": {
+        "hosts": [
+          {
+            "host": "192.168.4.99",
+            "port": 27017
+          }
+        ],
+        "db_name": "ez_test"
+      }
+    }
+  },
+  "args": {
+  }
+}

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.ecfront</groupId>
+        <artifactId>ez-parent</artifactId>
+        <version>0.1.7</version>
+    </parent>
+
+    <artifactId>ezf-rpc-websocket</artifactId>
+    <name>EZ Framework RPC Websocket</name>
+    <description>EZ框架Websocket RPC服务</description>
+    <url>https://github.com/gudaoxuri/ez-framework</url>
+    <packaging>jar</packaging>
+    <version>3.0.0-SNAPSHOT</version>
+
+    <scm>
+        <connection>scm:git:git@github.com:gudaoxuri/ez-framework.git</connection>
+        <developerConnection>scm:git:git@github.com:gudaoxuri/ez-framework.git</developerConnection>
+        <url>git@github.com:gudaoxuri/ez-framework.git</url>
+    </scm>
+
+    <properties>
+	<ezf-version>3.0.0-SNAPSHOT</ezf-version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-rpc-foundation</artifactId>
+            <version>${ezf-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-storage-mongo</artifactId>
+            <version>${ezf-version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
