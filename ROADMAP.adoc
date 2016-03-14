@@ -11,15 +11,14 @@
 . storage-mongo [OK]
 . storage-jdbc [OK]
 . rpc-http [OK]
-. rpc-websocket []
-. auth []
-. oauth2 []
+. rpc-websocket [Coding...]
+. auth [Testing...]
+. oauth2 [Coding...]
 . email [OK]
 . redis [OK]
 . scheduler [OK]
 . kafka [OK]
 . master-slave [OK]
+. common-distributed-services [Plan]
 
 = 3.1.0
-
-. 实现常用分布式服务
