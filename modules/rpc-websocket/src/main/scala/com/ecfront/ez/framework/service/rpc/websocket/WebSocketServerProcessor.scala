@@ -26,7 +26,7 @@ class WebSocketServerProcessor extends Handler[ServerWebSocket] with LazyLogging
       router(request, ip)
     } catch {
       case ex: Throwable =>
-        logger.error("Http process error.", ex)
+        logger.error("WS process error.", ex)
         returnContent(s"Request process error：${ex.getMessage}", request)
     }
   }
@@ -42,7 +42,13 @@ class WebSocketServerProcessor extends Handler[ServerWebSocket] with LazyLogging
       } else {
         Map[String, String]()
       }
-    val method = if (request.headers().contains(FLAG_METHOD)) request.headers.get(FLAG_METHOD).toUpperCase else "GET"
+    val method = if (parameters.contains(FLAG_METHOD)) {
+      val _method = parameters(FLAG_METHOD).toUpperCase
+      parameters = parameters - FLAG_METHOD
+      _method
+    } else {
+      "GET"
+    }
     val result = Router.getFunction("WebSocket", method, request.path(), parameters)
     parameters = result._3
     if (result._1) {

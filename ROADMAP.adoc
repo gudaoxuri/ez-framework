@@ -10,7 +10,7 @@
 . core [OK]
 . storage-mongo [OK]
 . storage-jdbc [OK]
-. rpc-http []
+. rpc-http [OK]
 . rpc-websocket []
 . auth []
 . oauth2 []

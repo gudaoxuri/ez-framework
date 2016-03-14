@@ -19,6 +19,7 @@ case class EZ_Organization() extends BaseModel with SecureModel with StatusModel
   @Require
   @Label("Name")
   @BeanProperty var name: String = _
+  @Label("Image")
   @BeanProperty var image: String = _
 
 }
@@ -186,8 +187,11 @@ case class EZ_Account() extends BaseModel with SecureModel with StatusModel {
   @Require
   @Label("Email")
   @BeanProperty var email: String = _
+  @Label("Ext Id")
   @BeanProperty var ext_id: String = _
+  @Label("Ext Info")
   @BeanProperty var ext_info: Map[String, String] = _
+  @Label("OAuth Info")
   @BeanProperty var oauth: Map[String, String] = _
   @BeanProperty var organization_code: String = _
   @BeanProperty var role_codes: List[String] = List[String]()
@@ -220,7 +224,7 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
       || model.email == null || model.email.trim.isEmpty) {
       Resp.badRequest("Require【Login_id】【password】【email】")
     } else {
-      if ((model.oauth==null || model.oauth.isEmpty) && model.login_id.contains("@")) {
+      if ((model.oauth == null || model.oauth.isEmpty) && model.login_id.contains("@")) {
         Resp.badRequest("【login id】can't use email address")
       } else if (FormatHelper.validEmail(model.email)) {
         model.password = packageEncryptPwd(model.login_id, model.password)
@@ -243,7 +247,7 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
       || model.email == null || model.email.trim.isEmpty) {
       Resp.badRequest("Require【Login_id】【password】【email】")
     } else {
-      if ((model.oauth==null || model.oauth.isEmpty) && model.login_id.contains("@")) {
+      if ((model.oauth == null || model.oauth.isEmpty) && model.login_id.contains("@")) {
         Resp.badRequest("【login id】can't use email address")
       } else {
         if (FormatHelper.validEmail(model.email)) {
@@ -267,7 +271,7 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
       || model.email == null || model.email.trim.isEmpty) {
       Resp.badRequest("Require【Login_id】【password】【email】")
     } else {
-      if ((model.oauth==null || model.oauth.isEmpty) && model.login_id.contains("@")) {
+      if ((model.oauth == null || model.oauth.isEmpty) && model.login_id.contains("@")) {
         Resp.badRequest("【login id】can't use email address")
       } else {
         if (FormatHelper.validEmail(model.email)) {
@@ -322,7 +326,6 @@ object EZ_Token_Info extends MongoBaseStorage[EZ_Token_Info] {
   }
 
 }
-
 
 /**
   * 菜单实体

@@ -15,6 +15,12 @@ import io.vertx.core.{AsyncResult, Future, Handler}
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 
+/**
+  * HTTP 服务操作
+  *
+  * @param resourcePath             路径根路径
+  * @param accessControlAllowOrigin 允许跨域的域名
+  */
 class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String = "*") extends Handler[HttpServerRequest] with LazyLogging {
 
   override def handle(request: HttpServerRequest): Unit = {
@@ -149,18 +155,19 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
     }
   }
 
-  private def returnContent(result: Any, response: HttpServerResponse, accept: String, contentType: String):Unit= {
+  private def returnContent(result: Any, response: HttpServerResponse, accept: String, contentType: String): Unit = {
     result match {
       case value: Resp[_] if value && value.body.isInstanceOf[File] =>
         val file = value.body.asInstanceOf[File]
-        response.setStatusCode(200).putHeader("Content-disposition", "attachment; filename=" + file.getName)
+        response.setStatusCode(200)
+          .putHeader("Content-disposition", "attachment; filename=" + file.getName)
         response.sendFile(file.getPath)
       case value: Resp[_] if value && value.body.isInstanceOf[RespRedirect] =>
         response.putHeader("Location", value.body.asInstanceOf[RespRedirect].url)
           .setStatusCode(302)
           .end()
       case _ =>
-        //支持CORS
+        // 支持CORS
         val res = result match {
           case r: String => r
           case _ => JsonHelper.toJsonString(result)

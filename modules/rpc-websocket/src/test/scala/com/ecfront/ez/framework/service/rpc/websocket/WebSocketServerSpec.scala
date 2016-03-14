@@ -12,7 +12,7 @@ class WebSocketServerSpec extends MockStartupSpec {
 
     EZ_Resource.deleteByCond("")
 
-    WebSocketProcessor.ws(Method.POST, "/resource/", EZ_Resource("1", "GET", "/1s"))
+   // WebSocketProcessor.ws(Method.POST, "/resource/", EZ_Resource("1", "GET", "/1s"))
     Thread.sleep(10000)
     WebSocketProcessor.ws(Method.POST, "/resource/", EZ_Resource("2", "GET", "/2s"))
     new CountDownLatch(1).await()

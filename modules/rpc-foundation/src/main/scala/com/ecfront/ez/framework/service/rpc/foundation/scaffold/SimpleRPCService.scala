@@ -7,8 +7,15 @@ import com.ecfront.ez.framework.service.rpc.foundation._
 import com.ecfront.ez.framework.service.storage.foundation._
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
-trait SimpleRPCService[M <: BaseModel,C <: EZRPCContext] extends LazyLogging {
+/**
+  * 简单RPC服务
+  *
+  * @tparam M 对应的实体类型
+  * @tparam C 对应的RPC上下文
+  */
+trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
 
+  // 持久化对象
   protected val storageObj: BaseStorage[M]
 
   protected val modelClazz = this.getClass.getGenericInterfaces()(0).asInstanceOf[ParameterizedType].getActualTypeArguments()(0).asInstanceOf[Class[M]]
@@ -17,6 +24,14 @@ trait SimpleRPCService[M <: BaseModel,C <: EZRPCContext] extends LazyLogging {
 
   val DEFAULT_PAGE_SIZE: Int = 10
 
+  /**
+    * 保存操作
+    *
+    * @param parameter 请求参数
+    * @param body      原始（字符串类型）请求体
+    * @param context   PRC上下文
+    * @return 保存结果
+    */
   @POST("")
   def rpcSave(parameter: Map[String, String], body: String, context: C): Resp[M] = {
     logger.trace(s" RPC simple save : $body")
@@ -24,6 +39,14 @@ trait SimpleRPCService[M <: BaseModel,C <: EZRPCContext] extends LazyLogging {
     storageObj.save(model, context)
   }
 
+  /**
+    * 更新操作
+    *
+    * @param parameter 请求参数，必须包含`id`
+    * @param body      原始（字符串类型）请求体
+    * @param context   PRC上下文
+    * @return 更新结果
+    */
   @PUT(":id/")
   def rpcUpdate(parameter: Map[String, String], body: String, context: C): Resp[M] = {
     if (!parameter.contains("id")) {
@@ -35,6 +58,13 @@ trait SimpleRPCService[M <: BaseModel,C <: EZRPCContext] extends LazyLogging {
     }
   }
 
+  /**
+    * 查找启用记录操作，对应的实体必须继承[[StatusModel]]
+    *
+    * @param parameter 请求参数，可以包含`condition` 用于筛选条件
+    * @param context   PRC上下文
+    * @return 查找到的结果
+    */
   @GET("enable/")
   def rpcFindEnable(parameter: Map[String, String], context: C): Resp[List[M]] = {
     logger.trace(s" RPC simple find enable : $parameter")
@@ -46,6 +76,13 @@ trait SimpleRPCService[M <: BaseModel,C <: EZRPCContext] extends LazyLogging {
     }
   }
 
+  /**
+    * 查找操作
+    *
+    * @param parameter 请求参数，可以包含`condition` 用于筛选条件
+    * @param context   PRC上下文
+    * @return 查找到的结果
+    */
   @GET("")
   def rpcFind(parameter: Map[String, String], context: C): Resp[List[M]] = {
     logger.trace(s" RPC simple find : $parameter")
@@ -53,6 +90,16 @@ trait SimpleRPCService[M <: BaseModel,C <: EZRPCContext] extends LazyLogging {
     storageObj.find(condition, List(), context)
   }
 
+  /**
+    * 分页操作
+    *
+    * @param parameter 请求参数，可以包含
+    *                  `condition` 用于筛选条件，
+    *                  `pageNumber` 用于设定当前页码，页码从1开始，
+    *                  `pageSize` 用于设定每页显示记录数
+    * @param context   PRC上下文
+    * @return 查找到的结果
+    */
   @GET("page/:pageNumber/:pageSize/")
   def rpcPage(parameter: Map[String, String], context: C): Resp[Page[M]] = {
     logger.trace(s" RPC simple page : $parameter")
@@ -62,6 +109,13 @@ trait SimpleRPCService[M <: BaseModel,C <: EZRPCContext] extends LazyLogging {
     storageObj.page(condition, List(), pageNumber, pageSize, context)
   }
 
+  /**
+    * 获取单条记录操作
+    *
+    * @param parameter 请求参数，必须包含`id`
+    * @param context   PRC上下文
+    * @return 获取的结果
+    */
   @GET(":id/")
   def rpcGet(parameter: Map[String, String], context: C): Resp[M] = {
     if (!parameter.contains("id")) {
@@ -73,6 +127,13 @@ trait SimpleRPCService[M <: BaseModel,C <: EZRPCContext] extends LazyLogging {
     }
   }
 
+  /**
+    * 删除单条记录操作
+    *
+    * @param parameter 请求参数，必须包含`id`
+    * @param context   PRC上下文
+    * @return 删除的结果
+    */
   @DELETE(":id/")
   def rpcDelete(parameter: Map[String, String], context: C): Resp[Void] = {
     if (!parameter.contains("id")) {
@@ -84,6 +145,13 @@ trait SimpleRPCService[M <: BaseModel,C <: EZRPCContext] extends LazyLogging {
     }
   }
 
+  /**
+    * 启用单条记录操作
+    *
+    * @param parameter 请求参数，必须包含`id`，对应的实体必须继承[[StatusModel]]
+    * @param context   PRC上下文
+    * @return 启用的结果
+    */
   @GET(":id/enable/")
   def rpcEnable(parameter: Map[String, String], context: C): Resp[Void] = {
     if (!parameter.contains("id")) {
@@ -99,6 +167,13 @@ trait SimpleRPCService[M <: BaseModel,C <: EZRPCContext] extends LazyLogging {
     }
   }
 
+  /**
+    * 禁用单条记录操作
+    *
+    * @param parameter 请求参数，必须包含`id`，对应的实体必须继承[[StatusModel]]
+    * @param context   PRC上下文
+    * @return 禁用的结果
+    */
   @GET(":id/disable/")
   def rpcDisable(parameter: Map[String, String], context: C): Resp[Void] = {
     if (!parameter.contains("id")) {

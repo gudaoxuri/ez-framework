@@ -12,12 +12,15 @@ object AutoBuildingProcessor extends LazyLogging {
   private val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
 
   /**
-    * 使用基于注解的自动构建，此方法必须在服务启动“startup”后才能调用
+    * 使用基于注解的自动构建
     *
-    * @param basePackage 服务类所在的根包名
+    * @param rootPackage 服务类所在的根包名
+    * @param annClazz    要解析的注解
+    * @tparam A 要解析的注解typeTag
+    * @return 当前实例
     */
-  def autoBuilding[A: TypeTag](basePackage: String, annClazz: Class[_ <: StaticAnnotation]): this.type = {
-    ClassScanHelper.scan[RPC](basePackage).foreach {
+  def autoBuilding[A: TypeTag](rootPackage: String, annClazz: Class[_ <: StaticAnnotation]): this.type = {
+    ClassScanHelper.scan[RPC](rootPackage).foreach {
       clazz =>
         if (clazz.getSimpleName.endsWith("$")) {
           process[A](runtimeMirror.reflectModule(runtimeMirror.staticModule(clazz.getName)).instance.asInstanceOf[AnyRef], annClazz)
@@ -28,7 +31,7 @@ object AutoBuildingProcessor extends LazyLogging {
     this
   }
 
-  def process[A: TypeTag](instance: AnyRef, annClazz: Class[_ <: StaticAnnotation]): Unit = {
+  private def process[A: TypeTag](instance: AnyRef, annClazz: Class[_ <: StaticAnnotation]): Unit = {
     // 根路径
     var baseUri = BeanHelper.getClassAnnotation[RPC](instance.getClass).get.baseUri
     if (!baseUri.endsWith("/")) {
@@ -59,7 +62,7 @@ object AutoBuildingProcessor extends LazyLogging {
     }
   }
 
-  def fun(method: String, methodMirror: universe.MethodMirror): (Map[String, String], Any, EZRPCContext) => Resp[Any] = {
+  private def fun(method: String, methodMirror: universe.MethodMirror): (Map[String, String], Any, EZRPCContext) => Resp[Any] = {
     (parameter, body, context) =>
       try {
         if (method == Method.GET || method == Method.DELETE) {

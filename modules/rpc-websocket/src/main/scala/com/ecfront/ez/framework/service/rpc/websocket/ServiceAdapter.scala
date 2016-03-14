@@ -3,9 +3,8 @@ package com.ecfront.ez.framework.service.rpc.websocket
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.{EZContext, EZServiceAdapter}
 import com.ecfront.ez.framework.service.rpc.foundation.AutoBuildingProcessor
-import io.vertx.core.http.{HttpServer, HttpServerOptions}
+import io.vertx.core.http.HttpServer
 import io.vertx.core.json.JsonObject
-import io.vertx.core.net.JksOptions
 import io.vertx.core.{AsyncResult, Handler}
 
 import scala.concurrent.duration.Duration
@@ -31,8 +30,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
           }
         }
       })
-    val serviceR = Await.result(p.future, Duration.Inf)
-    serviceR
+    Await.result(p.future, Duration.Inf)
   }
 
   override def destroy(parameter: JsonObject): Resp[String] = {

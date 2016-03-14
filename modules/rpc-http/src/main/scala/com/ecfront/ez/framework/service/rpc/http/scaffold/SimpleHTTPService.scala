@@ -11,6 +11,12 @@ import com.ecfront.ez.framework.service.rpc.foundation.scaffold.SimpleRPCService
 import com.ecfront.ez.framework.service.rpc.http.ServiceAdapter
 import com.ecfront.ez.framework.service.storage.foundation._
 
+/**
+  * 简单HTTP服务
+  *
+  * @tparam M 对应的实体类型
+  * @tparam C 对应的RPC上下文
+  */
 trait SimpleHttpService[M <: BaseModel, C <: EZRPCContext] extends SimpleRPCService[M, C] {
 
   protected var baseUri = BeanHelper.getClassAnnotation[RPC](this.getClass).get.baseUri
@@ -19,16 +25,46 @@ trait SimpleHttpService[M <: BaseModel, C <: EZRPCContext] extends SimpleRPCServ
     baseUri += "/"
   }
 
+  /**
+    * 是否允许上传操作
+    *
+    * @return 是否允许上传操作
+    */
   protected def allowUpload = true
 
+  /**
+    * 是否允许导出操作
+    *
+    * @return 是否允许导出操作
+    */
   protected def allowExport = true
 
+  /**
+    * 上传类型限定
+    *
+    * @return 允许的类型
+    */
   protected def allowUploadTypes = List(FileType.TYPE_COMPRESS, FileType.TYPE_IMAGE, FileType.TYPE_OFFICE)
 
+  /**
+    * 导出字段限定
+    *
+    * @return 允许导出的字段
+    */
   protected def allowExportFields = BeanHelper.findFields(modelClazz).keys.toList
 
   val resName = modelClazz.getSimpleName.toLowerCase
 
+  /**
+    * 上传操作
+    *
+    * 按 资源类型+时间戳+文件名 存储
+    *
+    * @param parameter 请求参数，此处暂无作用
+    * @param fileName  默认保存文件名
+    * @param context   PRC上下文
+    * @return 下载URL
+    */
   @POST("res/")
   def rpcResUpload(parameter: Map[String, String], fileName: String, context: C): Resp[String] = {
     logger.trace(s" RPC simple upload : $parameter")
@@ -55,6 +91,13 @@ trait SimpleHttpService[M <: BaseModel, C <: EZRPCContext] extends SimpleRPCServ
     }
   }
 
+  /**
+    * 下载操作
+    *
+    * @param parameter 请求参数
+    * @param context   PRC上下文
+    * @return 要下载的资源
+    */
   @GET("res/:date/:fileName")
   def rpcResGet(parameter: Map[String, String], context: C): Resp[File] = {
     logger.trace(s" RPC simple download : $parameter")
@@ -70,6 +113,13 @@ trait SimpleHttpService[M <: BaseModel, C <: EZRPCContext] extends SimpleRPCServ
     }
   }
 
+  /**
+    * 导出操作
+    *
+    * @param parameter 请求参数，可以包含`condition` 用于筛选条件
+    * @param context   PRC上下文
+    * @return 导出文件
+    */
   @GET("export/")
   def rpcExport(parameter: Map[String, String], context: C): Resp[File] = {
     logger.trace(s" RPC simple export : $parameter")
