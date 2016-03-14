@@ -23,10 +23,17 @@
 
 [source]
 ----
+<!-- 核心包 -->
 <dependency>
     <groupId>com.ecfront</groupId>
-    <artifactId>ez-framework</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <artifactId>ezf-core</artifactId>
+    <version>3.0.0-SNAPSHOT</version>
+</dependency>
+<!-- 各服务模块包 -->
+<dependency>
+    <groupId>com.ecfront</groupId>
+    <artifactId>ezf-<服务模块></artifactId>
+    <version>3.0.0-SNAPSHOT</version>
 </dependency>
 ----
 
