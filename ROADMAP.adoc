@@ -17,8 +17,8 @@
 . email [OK]
 . redis [OK]
 . scheduler [OK]
-. kafka []
-. master-slave []
+. kafka [OK]
+. master-slave [OK]
 
 = 3.1
 

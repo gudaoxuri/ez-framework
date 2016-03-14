@@ -30,7 +30,7 @@ class MasterSlaveSpec extends MockStartupSpec {
         counter.countDown()
     })
 
-    Assigner.Master.send(ExecReqDTO(
+    Assigner.Master.send(TaskPrepareDTO(
       instanceId = "111",
       worker = "testModule",
       category = "m",
@@ -44,7 +44,7 @@ class MasterSlaveSpec extends MockStartupSpec {
 
 }
 
-object MockWorkProcessor extends BaseProcessor[MockTask] {
+object MockWorkProcessor extends TaskBaseProcessor[MockTask] {
 
   override val category: String = "m"
 

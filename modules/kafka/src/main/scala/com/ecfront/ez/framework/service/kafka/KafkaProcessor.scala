@@ -14,6 +14,9 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.{Future, Promise}
 
+/**
+  * Kafka操作
+  */
 object KafkaProcessor extends LazyLogging {
 
   private val DEFAULT_AUTO_COMMIT_INTERVAL: Long = 1000
@@ -23,19 +26,36 @@ object KafkaProcessor extends LazyLogging {
   private var brokerList: String = _
   private var zkList: String = _
 
+  /**
+    * 初始化
+    *
+    * @param _brokerList kafka broker 列表，逗号分隔
+    * @param _zkList     zookeeper 列表，逗号分隔
+    */
   def init(_brokerList: String, _zkList: String): Unit = {
     brokerList = _brokerList
     zkList = _zkList
   }
 
+  // 生产者集合
   private val producers = ArrayBuffer[Producer]()
+  // 消费者集合
   private val consumers = ArrayBuffer[Consumer]()
 
+  /**
+    * 关闭
+    */
   def close(): Unit = {
     producers.foreach(_.close())
     consumers.foreach(_.close())
   }
 
+  /**
+    * 生产者类
+    *
+    * @param topic    主题
+    * @param clientId 客户端ID
+    */
   case class Producer(topic: String, clientId: String) {
 
     producers += this
@@ -47,12 +67,23 @@ object KafkaProcessor extends LazyLogging {
     props.put(ProducerConfig.CLIENT_ID_CONFIG, clientId)
     private val producer: KafkaProducer[String, String] = new KafkaProducer[String, String](props)
 
+    /**
+      * 发送消息
+      *
+      * @param message 消息
+      */
     def send(message: String): Unit = {
       val id = UUID.randomUUID().toString
       logger.trace(s"Kafka topic [$topic] send a message : $message")
       producer.send(new ProducerRecord[String, String](topic, id, message))
     }
 
+    /**
+      * 发送消息
+      *
+      * @param message 消息
+      * @return 是否成功 ,返回对应的消息ID（自动生成）和message
+      */
     def sendFuture(message: String): Future[Resp[(String, String)]] = {
       val p = Promise[Resp[(String, String)]]()
       val id = UUID.randomUUID().toString
@@ -76,6 +107,14 @@ object KafkaProcessor extends LazyLogging {
 
   }
 
+  /**
+    * 消费者类
+    *
+    * @param groupId            组ID，用于发布-订阅模式
+    * @param topic              主题
+    * @param autoCommit         是否自动提交
+    * @param autoCommitInterval 自动提供间隔
+    */
   case class Consumer(groupId: String, topic: String, autoCommit: Boolean = false, autoCommitInterval: Long = DEFAULT_AUTO_COMMIT_INTERVAL) {
 
     consumers += this
@@ -88,6 +127,11 @@ object KafkaProcessor extends LazyLogging {
 
     val consumer = kafka.consumer.Consumer.createJavaConsumerConnector(new kafka.consumer.ConsumerConfig(props))
 
+    /**
+      * 接收消息
+      *
+      * @param callback 收到消息后的回调方法
+      */
     def receive(callback: => String => Resp[Void]): Unit = {
       executeService.execute(new Runnable {
         override def run(): Unit = {

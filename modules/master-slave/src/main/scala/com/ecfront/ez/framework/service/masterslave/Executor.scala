@@ -4,11 +4,21 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.annotation.tailrec
 
-case class Executor(dto: ExecReqDTO) extends LazyLogging {
+/**
+  * 执行器
+  *
+  * @param dto 任务准备DTO
+  */
+case class Executor(dto: TaskPrepareDTO) extends LazyLogging {
 
   val category: String = dto.category
   var running: Boolean = false
 
+  /**
+    * 触发执行
+    *
+    * @param useNewThread 是否在新线程中执行
+    */
   def run(useNewThread: Boolean): Unit = {
     logger.debug(s"Executor Running [${dto.instanceId}]")
     running = true
@@ -34,23 +44,28 @@ object Executor extends Serializable with LazyLogging {
 
   private[masterslave] def maxTryTime: Int = DEFAULT_MAX_TRY_TIME
 
-  private var processorContainer = Map[String, BaseProcessor[_]]()
+  private var processorContainer = Map[String, TaskBaseProcessor[_]]()
 
-  private[masterslave] def registerProcessors(processors: List[BaseProcessor[_]]): Unit = {
+  private[masterslave] def registerProcessors(processors: List[TaskBaseProcessor[_]]): Unit = {
     processorContainer = processors.map {
       processor =>
         processor.category -> processor
     }.toMap
   }
 
-  private[masterslave] def execute(dto: ExecReqDTO): Unit = {
-    Assigner.Worker.startTask(ExecStartRespDTO(dto.instanceId))
+  /**
+    * 开始执行
+    * @param dto 任务准备DTO
+    */
+  private[masterslave] def execute(dto: TaskPrepareDTO): Unit = {
+    // 先通知开始任务
+    Assigner.Worker.startTask(TaskStartDTO(dto.instanceId))
     val processorOpt = processorContainer.get(dto.category)
     if (processorOpt.isDefined) {
       doExecute(dto, processorOpt.get, 0)
     } else {
       logger.error("Processor NOT exist " + dto.category)
-      Assigner.Worker.finishTask(ExecFinishRespDTO(
+      Assigner.Worker.finishTask(TaskFinishDTO(
         dto.instanceId,
         isSuccess = false,
         hasChange = false,
@@ -62,7 +77,7 @@ object Executor extends Serializable with LazyLogging {
   }
 
   @tailrec
-  private def doExecute(dto: ExecReqDTO, processor: BaseProcessor[_], tryTimes: Int): Unit = {
+  private def doExecute(dto: TaskPrepareDTO, processor: TaskBaseProcessor[_], tryTimes: Int): Unit = {
     try {
       if (tryTimes != 0) {
         logger.warn(s"Worker process error try [$tryTimes] times ")
@@ -73,7 +88,7 @@ object Executor extends Serializable with LazyLogging {
           logger.debug(s"Worker process execute [${dto.instanceId}]")
           val resp = processor.execute(dto.taskInfo, dto.taskVar, dto.instanceParameters, tryTimes != 0)
           if (resp) {
-            Assigner.Worker.finishTask(ExecFinishRespDTO(
+            Assigner.Worker.finishTask(TaskFinishDTO(
               dto.instanceId,
               isSuccess = true,
               hasChange = true,
@@ -82,7 +97,7 @@ object Executor extends Serializable with LazyLogging {
               resp.body._2
             ))
           } else {
-            Assigner.Worker.finishTask(ExecFinishRespDTO(
+            Assigner.Worker.finishTask(TaskFinishDTO(
               dto.instanceId,
               isSuccess = false,
               hasChange = false,
@@ -92,7 +107,7 @@ object Executor extends Serializable with LazyLogging {
             ))
           }
         } else {
-          Assigner.Worker.finishTask(ExecFinishRespDTO(
+          Assigner.Worker.finishTask(TaskFinishDTO(
             dto.instanceId,
             isSuccess = true,
             hasChange = false,
@@ -102,7 +117,8 @@ object Executor extends Serializable with LazyLogging {
           ))
         }
       } else {
-        Assigner.Worker.finishTask(ExecFinishRespDTO(
+        // 没有变更
+        Assigner.Worker.finishTask(TaskFinishDTO(
           dto.instanceId,
           isSuccess = false,
           hasChange = false,
@@ -116,7 +132,7 @@ object Executor extends Serializable with LazyLogging {
         if (tryTimes < maxTryTime) {
           doExecute(dto, processor, tryTimes + 1)
         } else {
-          Assigner.Worker.finishTask(ExecFinishRespDTO(
+          Assigner.Worker.finishTask(TaskFinishDTO(
             dto.instanceId,
             isSuccess = false,
             hasChange = false,

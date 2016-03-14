@@ -9,17 +9,20 @@ class KafkaSpec extends MockStartupSpec {
 
   test("Kafka test") {
 
+    val counter = new CountDownLatch(1)
+
     val consumer = KafkaProcessor.Consumer("group1", "test")
     consumer.receive({
       message =>
         println(message)
+        counter.countDown()
         Resp.success(null)
     })
     val producer = KafkaProcessor.Producer("test", "client1")
 
     producer.send("haha...")
 
-    new CountDownLatch(1).await()
+    counter.await()
   }
 
 }
