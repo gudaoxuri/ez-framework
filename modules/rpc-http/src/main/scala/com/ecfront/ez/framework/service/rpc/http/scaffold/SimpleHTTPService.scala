@@ -5,10 +5,10 @@ import java.nio.file.{Files, StandardCopyOption}
 import java.util.Date
 
 import com.ecfront.common.{BeanHelper, JsonHelper, Resp}
-import com.ecfront.ez.framework.core.helper.TimeHelper
+import com.ecfront.ez.framework.core.helper.{FileType, TimeHelper}
 import com.ecfront.ez.framework.service.rpc.foundation._
 import com.ecfront.ez.framework.service.rpc.foundation.scaffold.SimpleRPCService
-import com.ecfront.ez.framework.service.rpc.http.{FileType, ServiceAdapter}
+import com.ecfront.ez.framework.service.rpc.http.ServiceAdapter
 import com.ecfront.ez.framework.service.storage.foundation._
 
 trait SimpleHttpService[M <: BaseModel, C <: EZRPCContext] extends SimpleRPCService[M, C] {
@@ -35,7 +35,7 @@ trait SimpleHttpService[M <: BaseModel, C <: EZRPCContext] extends SimpleRPCServ
     val tmpFile = new File(ServiceAdapter.resourcePath + fileName)
     if (allowUpload) {
       val contextType = Files.probeContentType(tmpFile.toPath)
-      if (allowUploadTypes.flatten(FileType.types(_)).contains(contextType)) {
+      if (allowUploadTypes.flatten.contains(contextType)) {
         val createDate = TimeHelper.df.format(new Date())
         val path = ServiceAdapter.resourcePath + resName + File.separator + createDate + File.separator
         if (!new File(path).exists()) {

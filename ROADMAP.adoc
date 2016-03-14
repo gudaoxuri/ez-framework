@@ -5,6 +5,21 @@
 . 完善注释注解
 . 添加示例代码
 
+== 模块进度
+
+. core [OK]
+. storage-mongo [OK]
+. storage-jdbc [OK]
+. rpc-http []
+. rpc-websocket []
+. auth []
+. oauth2 []
+. email [OK]
+. redis [OK]
+. scheduler [OK]
+. kafka []
+. master-slave []
+
 = 3.1
 
 . 实现常用分布式服务

@@ -5,6 +5,11 @@ import com.ecfront.ez.framework.service.storage.foundation.{BaseModel, BaseStora
 import com.ecfront.ez.framework.service.storage.mongo.SortEnum.SortEnum
 import io.vertx.core.json.{JsonArray, JsonObject}
 
+/**
+  * Mongo基础持久化实现
+  *
+  * @tparam M 实体类型
+  */
 trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
   protected val _entityInfo =
@@ -89,7 +94,9 @@ trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
     MongoProcessor.find(tableName, packageCondition(condition), convertSort(sort), limit, _modelClazz)
   }
 
-  def pageWithOpt(condition: String = "{}", pageNumber: Long = 1, pageSize: Int = 10, sort: Map[String, SortEnum] = Map(), context: EZStorageContext = null): Resp[Page[M]] = {
+  def pageWithOpt(
+                   condition: String = "{}", pageNumber: Long = 1, pageSize: Int = 10,
+                   sort: Map[String, SortEnum] = Map(), context: EZStorageContext = null): Resp[Page[M]] = {
     MongoProcessor.page(tableName, packageCondition(condition), pageNumber, pageSize, convertSort(sort), _modelClazz)
   }
 
@@ -110,9 +117,9 @@ trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
   }
 
   protected def convertSort(sort: Map[String, SortEnum]): JsonObject = {
-    if (sort == null || sort.isEmpty)
+    if (sort == null || sort.isEmpty) {
       null
-    else {
+    } else {
       val s = new JsonObject()
       sort.foreach(i => s.put(i._1, i._2.id))
       s
@@ -121,7 +128,9 @@ trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
 }
 
-
+/**
+  * 排序枚举
+  */
 object SortEnum extends Enumeration {
   type SortEnum = Value
   val DESC = Value(-1)

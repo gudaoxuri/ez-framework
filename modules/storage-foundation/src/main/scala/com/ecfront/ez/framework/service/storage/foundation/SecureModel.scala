@@ -7,6 +7,10 @@ import com.ecfront.ez.framework.core.helper.TimeHelper
 
 import scala.beans.BeanProperty
 
+/**
+  * 带操作信息的实体基类
+  * 默认情况下操作信息会根据上下文自动注入
+  */
 trait SecureModel extends BaseModel {
 
   @Index
@@ -55,6 +59,12 @@ trait SecureStorage[M <: SecureModel] extends BaseStorage[M] {
     super.preSaveOrUpdate(model, context)
   }
 
+  /**
+    * 注入操作信息
+    *
+    * @param model   实体对象
+    * @param context 上下文
+    */
   private def wrapSecureSave(model: M, context: EZStorageContext = EZStorageContext()): Unit = {
     val now = TimeHelper.msf.format(new Date()).toLong
     if (model.create_user == null) {
@@ -77,6 +87,12 @@ trait SecureStorage[M <: SecureModel] extends BaseStorage[M] {
     }
   }
 
+  /**
+    * 注入操作信息
+    *
+    * @param model   实体对象
+    * @param context 上下文
+    */
   private def wrapSecureUpdate(model: M, context: EZStorageContext = EZStorageContext()): Unit = {
     val now = TimeHelper.msf.format(new Date()).toLong
     if (model.update_user == null) {

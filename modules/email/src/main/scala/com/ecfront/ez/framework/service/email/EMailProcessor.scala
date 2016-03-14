@@ -176,7 +176,7 @@ object EmailProcessor extends LazyLogging {
       * @param bcc         bcc
       * @param title       标题
       * @param content     正文
-      * @param attachments 附件
+      * @param attachments 附件，格式：Name - ContentType -  Data
       * @return 发送结果
       */
     def send(from: String, to: List[String], cc: List[String], bcc: List[String],

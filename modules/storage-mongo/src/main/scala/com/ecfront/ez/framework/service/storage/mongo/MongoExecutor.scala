@@ -5,7 +5,7 @@ import com.ecfront.ez.framework.service.storage.foundation.BaseModel
 import io.vertx.core.json.{JsonArray, JsonObject}
 
 
-object MongoExecutor {
+private[mongo] object MongoExecutor {
 
   def save[M](entityInfo: MongoEntityInfo, collection: String, save: JsonObject, clazz: Class[M]): Resp[M] = {
     if (entityInfo.uniqueFieldNames.nonEmpty) {

@@ -4,12 +4,13 @@ import java.util.UUID
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZContext
+import com.ecfront.ez.framework.core.helper.FileType
 import com.ecfront.ez.framework.service.auth._
 import com.ecfront.ez.framework.service.email.EmailProcessor
 import com.ecfront.ez.framework.service.redis.RedisProcessor
 import com.ecfront.ez.framework.service.rpc.foundation.{GET, POST, PUT, RPC}
 import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHttpService
-import com.ecfront.ez.framework.service.rpc.http.{FileType, HTTP}
+import com.ecfront.ez.framework.service.rpc.http.HTTP
 import com.ecfront.ez.framework.service.storage.foundation.{BaseModel, BaseStorage}
 
 @RPC("/auth/manage/account/")

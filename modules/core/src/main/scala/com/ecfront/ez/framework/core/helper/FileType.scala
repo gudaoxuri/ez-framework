@@ -1,69 +1,69 @@
-package com.ecfront.ez.framework.service.rpc.http
+package com.ecfront.ez.framework.core.helper
 
 object FileType {
 
-  val TYPE_OFFICE = "office"
-  val TYPE_TXT = "txt"
-  val TYPE_COMPRESS = "compress"
-  val TYPE_IMAGE = "image"
-  val TYPE_AUDIO = "audio"
-  val TYPE_VIDEO = "video"
-
-  val types = Map(
+  private val types = Map(
     "office" -> List(
-      FILE_TYPE.TXT.toString,
-      FILE_TYPE.DOC.toString,
-      FILE_TYPE.DOCX.toString,
-      FILE_TYPE.XLS1.toString,
-      FILE_TYPE.XLS2.toString,
-      FILE_TYPE.XLSX.toString,
-      FILE_TYPE.PPT1.toString,
-      FILE_TYPE.PPT2.toString,
-      FILE_TYPE.PPTX.toString
+      EFileType.TXT.toString,
+      EFileType.DOC.toString,
+      EFileType.DOCX.toString,
+      EFileType.XLS1.toString,
+      EFileType.XLS2.toString,
+      EFileType.XLSX.toString,
+      EFileType.PPT1.toString,
+      EFileType.PPT2.toString,
+      EFileType.PPTX.toString
     ),
     "txt" -> List(
-      FILE_TYPE.TXT.toString
+      EFileType.TXT.toString
     ),
     "compress" -> List(
-      FILE_TYPE.TXT.toString,
-      FILE_TYPE.ZIP1.toString,
-      FILE_TYPE.ZIP2.toString,
-      FILE_TYPE.GZIP.toString,
-      FILE_TYPE.SEVENZ1.toString,
-      FILE_TYPE.SEVENZ2.toString,
-      FILE_TYPE.RAR1.toString,
-      FILE_TYPE.RAR2.toString
+      EFileType.TXT.toString,
+      EFileType.ZIP1.toString,
+      EFileType.ZIP2.toString,
+      EFileType.GZIP.toString,
+      EFileType.SEVENZ1.toString,
+      EFileType.SEVENZ2.toString,
+      EFileType.RAR1.toString,
+      EFileType.RAR2.toString
     ),
     "image" -> List(
-      FILE_TYPE.TXT.toString,
-      FILE_TYPE.GIF.toString,
-      FILE_TYPE.JPG1.toString,
-      FILE_TYPE.JPG2.toString,
-      FILE_TYPE.PNG.toString,
-      FILE_TYPE.BMP1.toString,
-      FILE_TYPE.BMP2.toString
+      EFileType.TXT.toString,
+      EFileType.GIF.toString,
+      EFileType.JPG1.toString,
+      EFileType.JPG2.toString,
+      EFileType.PNG.toString,
+      EFileType.BMP1.toString,
+      EFileType.BMP2.toString
     ),
     "audio" -> List(
-      FILE_TYPE.TXT.toString,
-      FILE_TYPE.MP3.toString,
-      FILE_TYPE.WAV.toString,
-      FILE_TYPE.WMA.toString
+      EFileType.TXT.toString,
+      EFileType.MP3.toString,
+      EFileType.WAV.toString,
+      EFileType.WMA.toString
     ),
     "video" -> List(
-      FILE_TYPE.TXT.toString,
-      FILE_TYPE.MP4.toString,
-      FILE_TYPE.MOV.toString,
-      FILE_TYPE.MOVIE.toString,
-      FILE_TYPE.WEBM.toString,
-      FILE_TYPE.RM.toString,
-      FILE_TYPE.RMVB.toString,
-      FILE_TYPE.AVI.toString
+      EFileType.TXT.toString,
+      EFileType.MP4.toString,
+      EFileType.MOV.toString,
+      EFileType.MOVIE.toString,
+      EFileType.WEBM.toString,
+      EFileType.RM.toString,
+      EFileType.RMVB.toString,
+      EFileType.AVI.toString
     )
   )
 
+  val TYPE_OFFICE = types("office")
+  val TYPE_TXT =  types("txt")
+  val TYPE_COMPRESS =  types("compress")
+  val TYPE_IMAGE =  types("image")
+  val TYPE_AUDIO =  types("audio")
+  val TYPE_VIDEO =  types("video")
+
 }
 
-object FILE_TYPE extends Enumeration {
+object EFileType extends Enumeration {
   type FILE_TYPE = Value
   val HTML = Value("text/html")
   val XML = Value("text/xml")

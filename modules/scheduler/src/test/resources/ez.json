@@ -1,7 +1,7 @@
 {
   "ez": {
     "app": "",
-    "module": "",
+    "module": "scheduler",
     "services": {
       "scheduler":{
         "storage":"mongo" // mongo or jdbc

@@ -6,27 +6,28 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.json.JsonArray
 import io.vertx.core.{AsyncResult, Handler}
 import io.vertx.ext.sql.{ResultSet, UpdateResult}
-import scala.concurrent.ExecutionContext.Implicits.global
+
 import scala.collection.JavaConversions._
 import scala.collection.mutable
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Promise}
 import scala.util.Success
 
-object JDBCExecutor extends LazyLogging {
+private[jdbc] object JDBCExecutor extends LazyLogging {
 
-  def save[M](entityInfo: JDBCEntityInfo, valueInfos: Map[String, Any], clazz: Class[M]): Resp[M] = {
+  def save[M](entityInfo: JDBCEntityInfo, valueInfo: Map[String, Any], clazz: Class[M]): Resp[M] = {
     val tableName = entityInfo.tableName
     val idFieldName = entityInfo.idFieldName
-    val richValueInfos = collection.mutable.Map[String, Any]()
-    richValueInfos ++= valueInfos
-    if (entityInfo.idStrategy == Id.STRATEGY_SEQ && richValueInfos.contains(idFieldName) && richValueInfos(idFieldName) == 0) {
-      richValueInfos -= idFieldName
+    val richValueInfo = collection.mutable.Map[String, Any]()
+    richValueInfo ++= valueInfo
+    if (entityInfo.idStrategy == Id.STRATEGY_SEQ && richValueInfo.contains(idFieldName) && richValueInfo(idFieldName) == 0) {
+      richValueInfo -= idFieldName
     }
     if (entityInfo.uniqueFieldNames.nonEmpty) {
-      val existQuery = entityInfo.uniqueFieldNames.filter(richValueInfos.contains).map {
+      val existQuery = entityInfo.uniqueFieldNames.filter(richValueInfo.contains).map {
         field =>
-          field + "= ?" -> richValueInfos(field)
+          field + "= ?" -> richValueInfo(field)
       }.toMap
       val existR = JDBCProcessor.exist(
         s"SELECT 1 FROM $tableName WHERE ${existQuery.keys.toList.mkString(" OR ")} ",
@@ -43,13 +44,13 @@ object JDBCExecutor extends LazyLogging {
               }
           }.mkString("[", ",", "]") + " must be unique")
         } else {
-          doSave(tableName, idFieldName, richValueInfos, clazz)
+          doSave(tableName, idFieldName, richValueInfo, clazz)
         }
       } else {
         existR
       }
     } else {
-      doSave(tableName, idFieldName, richValueInfos, clazz)
+      doSave(tableName, idFieldName, richValueInfo, clazz)
     }
   }
 
@@ -77,6 +78,7 @@ object JDBCExecutor extends LazyLogging {
            | (${richValueInfos.keys.mkString(",")})
            | VALUES ( ${(for (i <- 0 until richValueInfos.size) yield "?").mkString(",")} )
        """.stripMargin
+      // 要获取保存后的id
       JDBCProcessor.Async.db.onComplete {
         case Success(conn) =>
           conn.updateWithParams(sql,
@@ -120,15 +122,15 @@ object JDBCExecutor extends LazyLogging {
     }
   }
 
-  def update[M](entityInfo: JDBCEntityInfo, idValue: Any, valueInfos: Map[String, Any], clazz: Class[M]): Resp[M] = {
+  def update[M](entityInfo: JDBCEntityInfo, idValue: Any, valueInfo: Map[String, Any], clazz: Class[M]): Resp[M] = {
     val tableName = entityInfo.tableName
     val idFieldName = entityInfo.idFieldName
-    val richValueInfos = collection.mutable.Map[String, Any]()
-    richValueInfos ++= valueInfos
+    val richValueInfo = collection.mutable.Map[String, Any]()
+    richValueInfo ++= valueInfo
     if (entityInfo.uniqueFieldNames.nonEmpty) {
-      val existQuery = entityInfo.uniqueFieldNames.filter(richValueInfos.contains).map {
+      val existQuery = entityInfo.uniqueFieldNames.filter(richValueInfo.contains).map {
         field =>
-          field + "= ?" -> richValueInfos(field)
+          field + "= ?" -> richValueInfo(field)
       }.toMap
       val existR = JDBCProcessor.exist(
         s"SELECT 1 FROM $tableName WHERE ${existQuery.keys.toList.mkString(" OR ") + s" AND $idFieldName != ? "} ",
@@ -145,13 +147,13 @@ object JDBCExecutor extends LazyLogging {
               }
           }.mkString("[", ",", "]") + " must be unique")
         } else {
-          doUpdate(tableName, idFieldName, idValue, richValueInfos, clazz)
+          doUpdate(tableName, idFieldName, idValue, richValueInfo, clazz)
         }
       } else {
         existR
       }
     } else {
-      doUpdate(tableName, idFieldName, idValue, richValueInfos, clazz)
+      doUpdate(tableName, idFieldName, idValue, richValueInfo, clazz)
     }
   }
 

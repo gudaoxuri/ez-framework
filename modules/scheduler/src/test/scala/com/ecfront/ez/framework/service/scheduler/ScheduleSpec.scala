@@ -14,7 +14,7 @@ class ScheduleSpec extends MockStartupSpec {
     val scheduler = EZ_Scheduler()
     scheduler.name = "测试"
     scheduler.cron = "* * * * * ?"
-    scheduler.module = "testModule1"
+    scheduler.module = "scheduler"
     scheduler.clazz = TestScheduleJob.getClass.getName
     scheduler.parameters = Map("p1" -> 1, "p2" -> "1")
     SchedulerProcessor.save(scheduler)
