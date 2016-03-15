@@ -30,7 +30,18 @@ object EZManager extends LazyLogging {
     */
   private def startInParseConfig(): Resp[EZConfig] = {
     try {
-      val jsonConfig = new JsonObject(Source.fromFile(this.getClass.getResource("/").getPath + "ez.json").mkString)
+      var confPath = System.getProperty("conf")
+      if (confPath == null) {
+        val classPath = this.getClass.getResource("/")
+        if (classPath != null) {
+          confPath = classPath.getPath + "ez.json"
+        } else {
+          var currentPath = this.getClass.getProtectionDomain.getCodeSource.getLocation.toURI.getPath
+          currentPath = currentPath.substring(0, currentPath.lastIndexOf("/"))
+          confPath = currentPath + "/config/ez.json"
+        }
+      }
+      val jsonConfig = new JsonObject(Source.fromFile(confPath, "UTF-8").mkString)
       Resp.success(JsonHelper.toObject(jsonConfig.encode(), classOf[EZConfig]))
     } catch {
       case e: Throwable =>
@@ -106,7 +117,7 @@ object EZManager extends LazyLogging {
   /**
     * 启动EZ服务
     */
-  def start(): Unit = {
+  def start(): Resp[String] = {
     EZContext.vertx = Vertx.vertx()
     logEnter("Starting...")
     logger.info("\r\n=== Parse Config ...")
@@ -115,7 +126,7 @@ object EZManager extends LazyLogging {
       val ezConfig = ezConfigR.body
       EZContext.app = ezConfig.ez.app
       EZContext.module = ezConfig.ez.module
-      EZContext.args = ezConfig.args
+      EZContext.args = new JsonObject(JsonHelper.toJsonString(ezConfig.args))
       ezServiceConfig = ezConfig.ez.services
       logger.info("\r\n=== Discover Services ...")
       val ezServicesR = startInDiscoverServices()
@@ -165,28 +176,30 @@ object EZManager extends LazyLogging {
   /**
     * 停止EZ服务
     */
-  private def shutdown(): Unit = {
+  private def shutdown(): Resp[String] = {
     logEnter("Stopping...")
     var isSuccess = true
     var message = ""
-    ezServices.foreach {
-      service =>
-        if (isSuccess) {
-          logger.info(s"\r\n>>> Destroy ${service.serviceName}")
-          try {
-            val destroyR = service.innerDestroy(ezServiceConfig(service.serviceName))
-            if (!destroyR) {
-              message = s"Destroy [${service.serviceName}] Service error : [${destroyR.code}] [${destroyR.message}]"
-              isSuccess = false
-            } else {
-              logger.info(s"\r\n>>> ${destroyR.body}")
+    if (ezServices != null) {
+      ezServices.foreach {
+        service =>
+          if (isSuccess) {
+            logger.info(s"\r\n>>> Destroy ${service.serviceName}")
+            try {
+              val destroyR = service.innerDestroy(ezServiceConfig(service.serviceName))
+              if (!destroyR) {
+                message = s"Destroy [${service.serviceName}] Service error : [${destroyR.code}] [${destroyR.message}]"
+                isSuccess = false
+              } else {
+                logger.info(s"\r\n>>> ${destroyR.body}")
+              }
+            } catch {
+              case e: Throwable =>
+                message = s"Destroy [${service.serviceName}] Service error : ${e.getMessage}"
+                isSuccess = false
             }
-          } catch {
-            case e: Throwable =>
-              message = s"Destroy [${service.serviceName}] Service error : ${e.getMessage}"
-              isSuccess = false
           }
-        }
+      }
     }
     if (isSuccess) {
       logSuccess("Stopped , Bye")
@@ -207,20 +220,22 @@ object EZManager extends LazyLogging {
          |-----------------------------------------""".stripMargin)
   }
 
-  private def logError(message: String): Unit = {
+  private def logError(message: String): Resp[String] = {
     logger.error(
       s"""
          |-----------------------------------------
          |=== EZ Framework $message
          |==========================================""".stripMargin)
+    Resp("", message)
   }
 
-  private def logSuccess(message: String): Unit = {
+  private def logSuccess(message: String): Resp[String] = {
     logger.info(
       s"""
          |-----------------------------------------
          |=== EZ Framework $message
          |==========================================""".stripMargin)
+    Resp.success(message)
   }
 
   private val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)

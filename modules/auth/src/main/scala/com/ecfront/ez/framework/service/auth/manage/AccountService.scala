@@ -9,8 +9,8 @@ import com.ecfront.ez.framework.service.auth._
 import com.ecfront.ez.framework.service.email.EmailProcessor
 import com.ecfront.ez.framework.service.redis.RedisProcessor
 import com.ecfront.ez.framework.service.rpc.foundation.{GET, POST, PUT, RPC}
-import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHttpService
 import com.ecfront.ez.framework.service.rpc.http.HTTP
+import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHttpService
 import com.ecfront.ez.framework.service.storage.foundation.{BaseModel, BaseStorage}
 
 @RPC("/auth/manage/account/")
@@ -19,7 +19,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
 
   override protected val storageObj: BaseStorage[EZ_Account] = EZ_Account
 
-  override protected def allowUploadTypes: List[String] = List(FileType.TYPE_IMAGE)
+  override protected def allowUploadTypes = List(FileType.TYPE_IMAGE)
 
   @POST("/public/register/")
   def register(parameter: Map[String, String], body: Account_VO, context: EZAuthContext): Resp[Void] = {
@@ -73,7 +73,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
 
   @GET("bylogin/")
   def getAccountByLoginId(parameter: Map[String, String], context: EZAuthContext): Resp[Account_VO] = {
-    if (context.token.isDefined&&context.loginInfo.isDefined) {
+    if (context.token.isDefined && context.loginInfo.isDefined) {
       val accountR = EZ_Account.getByLoginId(context.loginInfo.get.login_id)
       if (accountR) {
         if (accountR.body != null && accountR.body.enable) {
@@ -100,7 +100,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
 
   @PUT("bylogin/")
   def updateAccountByLoginId(parameter: Map[String, String], body: Account_VO, context: EZAuthContext): Resp[Void] = {
-    if (context.token.isDefined&&context.loginInfo.isDefined) {
+    if (context.token.isDefined && context.loginInfo.isDefined) {
       if (body.login_id == context.loginInfo.get.login_id) {
         val accountR = EZ_Account.getByLoginId(context.loginInfo.get.login_id)
         if (accountR) {

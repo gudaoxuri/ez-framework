@@ -2,8 +2,8 @@ package com.ecfront.ez.framework.service.masterslave
 
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.EZContext
-import com.ecfront.ez.framework.service.kafka.KafkaProcessor
 import com.ecfront.ez.framework.service.kafka.KafkaProcessor.Producer
+import com.ecfront.ez.framework.service.kafka.{KafkaProcessor, ReceivedCallback}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 /**
@@ -41,15 +41,17 @@ object Assigner extends LazyLogging {
       */
     def register(finishCallback: => TaskFinishDTO => Unit, startCallback: => TaskStartDTO => Unit): Unit = {
       masterTaskProducer = KafkaProcessor.Producer(clusterId + "_prepare", module)
-      KafkaProcessor.Consumer(module, clusterId + "_start", autoCommit = true).receive({
-        message =>
+      KafkaProcessor.Consumer(module, clusterId + "_start", autoCommit = true).receive(new ReceivedCallback {
+        override def callback(message: String): Resp[Void] = {
           startCallback(JsonHelper.toObject(message, classOf[TaskStartDTO]))
           Resp.success(null)
+        }
       })
-      KafkaProcessor.Consumer(module, clusterId + "_finish", autoCommit = true).receive({
-        message =>
+      KafkaProcessor.Consumer(module, clusterId + "_finish", autoCommit = true).receive(new ReceivedCallback {
+        override def callback(message: String): Resp[Void] = {
           finishCallback(JsonHelper.toObject(message, classOf[TaskFinishDTO]))
           Resp.success(null)
+        }
       })
     }
 
@@ -58,7 +60,7 @@ object Assigner extends LazyLogging {
       *
       * @param dto 执行任务信息
       */
-    def send(dto: TaskPrepareDTO): Unit = {
+    def prepareTask(dto: TaskPrepareDTO): Unit = {
       if (masterTaskProducer != null) {
         masterTaskProducer.send(JsonHelper.toJsonString(dto))
       } else {
@@ -86,14 +88,15 @@ object Assigner extends LazyLogging {
       Executor.registerProcessors(processors)
       startTaskProducer = KafkaProcessor.Producer(clusterId + "_start", module)
       finishTaskProducer = KafkaProcessor.Producer(clusterId + "_finish", module)
-      KafkaProcessor.Consumer(module, clusterId + "_prepare").receive({
-        message =>
+      KafkaProcessor.Consumer(module, clusterId + "_prepare").receive(new ReceivedCallback {
+        override def callback(message: String): Resp[Void] = {
           val dto = JsonHelper.toObject(message, classOf[TaskPrepareDTO])
           if (worker == dto.worker) {
             logger.trace(s"Received a message : $message")
             ExecutorPool.addExecute(Executor(dto))
           }
           Resp.success(null)
+        }
       })
     }
 

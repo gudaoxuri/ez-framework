@@ -11,6 +11,9 @@ import scala.collection.mutable.ArrayBuffer
   */
 object ExecutorPool {
 
+  val DEFAULT_MAX_NUMBER = 5
+  val DEFAULT_IS_NEW_TREAD = true
+
   private val maxPool = collection.mutable.Map[String, Int]()
   private val useNewThread = collection.mutable.Map[String, Boolean]()
   private val currentPool = collection.mutable.Map[String, ArrayBuffer[Executor]]()
@@ -24,7 +27,7 @@ object ExecutorPool {
     * @param maxNumber 最大并发数量
     * @param newThread 是否在新线程中执行
     */
-  def initPool(category: String, maxNumber: Int, newThread: Boolean): Unit = {
+  def initPool(category: String, maxNumber: Int = DEFAULT_MAX_NUMBER, newThread: Boolean = DEFAULT_IS_NEW_TREAD): Unit = {
     maxPool += category -> maxNumber
     useNewThread += category -> newThread
     currentPool += category -> ArrayBuffer()
@@ -36,6 +39,11 @@ object ExecutorPool {
     * @param executor 执行任务
     */
   def addExecute(executor: Executor): Unit = {
+    if (!currentPool.contains(executor.category)) {
+      this.synchronized {
+        initPool(executor.category)
+      }
+    }
     currentPool(executor.category) += executor
     tryStartExecute(executor.category)
   }

@@ -10,8 +10,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     RedisProcessor.init(
       EZContext.vertx, parameter.getString("host"),
       parameter.getInteger("port"),
-      parameter.getInteger("db"),
-      parameter.getString("auth")
+      parameter.getInteger("db",0),
+      parameter.getString("auth", null)
     )
   }
 

@@ -16,8 +16,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
         item =>
           ExecutorPool.initPool(
             item.getKey,
-            item.getValue.asInstanceOf[JsonObject].getInteger("pool"),
-            item.getValue.asInstanceOf[JsonObject].getBoolean("newThread")
+            item.getValue.asInstanceOf[JsonObject].getInteger("pool", ExecutorPool.DEFAULT_MAX_NUMBER),
+            item.getValue.asInstanceOf[JsonObject].getBoolean("newThread", ExecutorPool.DEFAULT_IS_NEW_TREAD)
           )
       }
     }

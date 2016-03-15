@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.ecfront</groupId>
         <artifactId>ez-parent</artifactId>
-        <version>0.1.7</version>
+        <version>0.1.8</version>
     </parent>
 
     <artifactId>ezf-core</artifactId>
@@ -24,8 +24,8 @@
     </scm>
 
     <properties>
-        <ez-common.version>0.6.3</ez-common.version>
-		<vertx.version>3.2.1</vertx.version>
+        <ez-common.version>0.6.5</ez-common.version>
+        <vertx.version>3.2.1</vertx.version>
     </properties>
 
     <dependencies>
@@ -57,9 +57,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-codegen</artifactId>
-            <version>${vertx.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${log4j.version}</version>
         </dependency>
 
         <dependency>
@@ -74,7 +74,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
     </dependencies>
 
 </project>

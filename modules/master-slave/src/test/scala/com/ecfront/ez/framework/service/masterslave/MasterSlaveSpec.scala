@@ -30,7 +30,7 @@ class MasterSlaveSpec extends MockStartupSpec {
         counter.countDown()
     })
 
-    Assigner.Master.send(TaskPrepareDTO(
+    Assigner.Master.prepareTask(TaskPrepareDTO(
       instanceId = "111",
       worker = "testModule",
       category = "m",

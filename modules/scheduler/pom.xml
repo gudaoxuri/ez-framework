@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.ecfront</groupId>
         <artifactId>ez-parent</artifactId>
-        <version>0.1.7</version>
+        <version>0.1.8</version>
     </parent>
 
     <artifactId>ezf-scheduler</artifactId>
@@ -28,21 +28,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.ecfront</groupId>
-            <artifactId>ezf-rpc-http</artifactId>
-            <version>${ezf-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.ecfront</groupId>
-            <artifactId>ezf-redis</artifactId>
-            <version>${ezf-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.ecfront</groupId>
-            <artifactId>ezf-email</artifactId>
-            <version>${ezf-version}</version>
-        </dependency>
         <dependency>
             <groupId>com.ecfront</groupId>
             <artifactId>ezf-storage-mongo</artifactId>

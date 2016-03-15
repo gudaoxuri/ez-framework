@@ -17,8 +17,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   var publicUrl: String = ""
 
   override def init(parameter: JsonObject): Resp[String] = {
-    resourcePath = parameter.getString("resourcePath")
-    publicUrl = parameter.getString("publicUrl")
+    resourcePath = parameter.getString("resourcePath", "/tmp/")
+    publicUrl = parameter.getString("publicUrl", "http://" + parameter.getString("host") + ":" + parameter.getInteger("port") + "/")
     val servicePath = parameter.getString("servicePath")
     AutoBuildingProcessor.autoBuilding[HTTP](servicePath, classOf[HTTP])
     val opt = new HttpServerOptions()
@@ -32,7 +32,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     EZContext.vertx
       .createHttpServer(opt.setCompressionSupported(true)
         .setTcpKeepAlive(true))
-      .requestHandler(new HttpServerProcessor(resourcePath, parameter.getString("accessControlAllowOrigin")))
+      .requestHandler(new HttpServerProcessor(resourcePath, parameter.getString("accessControlAllowOrigin", "*")))
       .listen(parameter.getInteger("port"), parameter.getString("host"), new Handler[AsyncResult[HttpServer]] {
         override def handle(event: AsyncResult[HttpServer]): Unit = {
           if (event.succeeded()) {

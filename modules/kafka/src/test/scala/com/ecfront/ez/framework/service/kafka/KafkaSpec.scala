@@ -12,11 +12,12 @@ class KafkaSpec extends MockStartupSpec {
     val counter = new CountDownLatch(1)
 
     val consumer = KafkaProcessor.Consumer("group1", "test")
-    consumer.receive({
-      message =>
+    consumer.receive(new ReceivedCallback {
+      override def callback(message: String): Resp[Void] = {
         println(message)
         counter.countDown()
         Resp.success(null)
+      }
     })
     val producer = KafkaProcessor.Producer("test", "client1")
 

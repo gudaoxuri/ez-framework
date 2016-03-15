@@ -130,9 +130,9 @@ object KafkaProcessor extends LazyLogging {
     /**
       * 接收消息
       *
-      * @param callback 收到消息后的回调方法
+      * @param fun 收到消息后的回调方法
       */
-    def receive(callback: => String => Resp[Void]): Unit = {
+    def receive(fun: ReceivedCallback): Unit = {
       executeService.execute(new Runnable {
         override def run(): Unit = {
           val consumerMap = consumer.createMessageStreams(new util.HashMap[String, Integer] {
@@ -144,21 +144,21 @@ object KafkaProcessor extends LazyLogging {
             partition =>
               val it = partition.iterator()
               while (it.hasNext()) {
-                val message = new String(it.next().message())
-                logger.trace(s"Kafka topic [$topic] at gorup [$groupId] partition [${partition.toString()}] received a message : $message")
+                val message: String = new String(it.next().message())
+                logger.trace(s"Kafka topic [$topic] at group [$groupId] partition [${partition.toString()}] received a message : $message")
                 try {
-                  val resp = callback(message)
+                  val resp = fun.callback(message)
                   if (resp) {
                     if (!autoCommit) {
                       consumer.commitOffsets()
                     }
                   } else {
-                    logger.warn(s"Kafka topic [$topic] at gorup [$groupId] partition [${partition.toString()}]" +
+                    logger.warn(s"Kafka topic [$topic] at group [$groupId] partition [${partition.toString()}]" +
                       s" process error  : $message [${resp.code}] ${resp.message}")
                   }
                 } catch {
                   case e: Throwable =>
-                    logger.warn(s"Kafka topic [$topic] at gorup [$groupId] partition [${partition.toString()}] received a error message : $message", e)
+                    logger.warn(s"Kafka topic [$topic] at group [$groupId] partition [${partition.toString()}] received a error message : $message", e)
                 }
               }
           }
@@ -172,4 +172,9 @@ object KafkaProcessor extends LazyLogging {
 
   }
 
+}
+
+// TODO 用匿名方法会导致打包后被调用时报 'noSuchMethodError'  原因不明
+trait ReceivedCallback {
+  def callback(message: String): Resp[Void]
 }

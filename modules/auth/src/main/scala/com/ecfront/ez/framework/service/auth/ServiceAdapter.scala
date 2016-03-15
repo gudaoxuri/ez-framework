@@ -15,8 +15,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   var restPasswordUrl: String = ""
 
   override def init(parameter: JsonObject): Resp[String] = {
-    publicUriPrefix = parameter.getString("publicUriPrefix")
-    allowRegister = parameter.getBoolean("allowRegister")
+    publicUriPrefix = parameter.getString("publicUriPrefix","/public/")
+    allowRegister = parameter.getBoolean("allowRegister",true)
     activeUrl = parameter.getString("activeUrl")
     restPasswordUrl = parameter.getString("restPasswordUrl")
 

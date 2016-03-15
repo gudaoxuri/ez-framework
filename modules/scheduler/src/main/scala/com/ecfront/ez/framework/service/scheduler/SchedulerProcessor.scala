@@ -83,18 +83,17 @@ object SchedulerProcessor extends LazyLogging {
     */
   def init(module: String, useMongo: Boolean): Unit = {
     logger.debug("Startup scheduling.")
-    if (useMongo) {
-      schedulerStorage = Mongo_EZ_Scheduler
-      logStorage = Mongo_EZ_Scheduler_Log
-    } else {
-      schedulerStorage = JDBC_EZ_Scheduler
-      logStorage = JDBC_EZ_Scheduler_Log
-    }
+    val enabledCond =
+      if (useMongo) {
+        schedulerStorage = Mongo_EZ_Scheduler
+        logStorage = Mongo_EZ_Scheduler_Log
+        s"""{"module":"$module"}"""
+      } else {
+        schedulerStorage = JDBC_EZ_Scheduler
+        logStorage = JDBC_EZ_Scheduler_Log
+        "module =?"
+      }
     quartzScheduler.start()
-    val enabledCond = schedulerStorage match {
-      case JDBC_EZ_Scheduler => "module =?"
-      case Mongo_EZ_Scheduler => s"""{"module":"$module"}"""
-    }
     val findR = schedulerStorage.findEnabled(enabledCond, List(module))
     if (findR) {
       findR.body.foreach {
