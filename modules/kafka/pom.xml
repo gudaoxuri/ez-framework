@@ -6,8 +6,9 @@
 
     <parent>
         <groupId>com.ecfront</groupId>
-        <artifactId>ez-parent</artifactId>
-        <version>0.1.8</version>
+        <artifactId>ezf-parent</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>ezf-kafka</artifactId>
@@ -15,7 +16,7 @@
     <description>EZ框架Kafka服务</description>
     <url>https://github.com/gudaoxuri/ez-framework</url>
     <packaging>jar</packaging>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>${ezf-version}</version>
 
     <scm>
         <connection>scm:git:git@github.com:gudaoxuri/ez-framework.git</connection>
@@ -24,7 +25,6 @@
     </scm>
 
     <properties>
-        <ezf-version>3.0.0-SNAPSHOT</ezf-version>
         <kafka.version>0.8.2.2</kafka.version>
     </properties>
 

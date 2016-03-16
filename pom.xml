@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.ecfront</groupId>
+        <artifactId>ez-parent</artifactId>
+        <version>0.1.8</version>
+    </parent>
+
+    <artifactId>ezf-parent</artifactId>
+    <name>EZ Framework Parent</name>
+    <description>EZ框架Parent POM</description>
+    <url>https://github.com/gudaoxuri/ez-framework</url>
+    <packaging>pom</packaging>
+    <version>3.0.0-SNAPSHOT</version>
+
+    <properties>
+        <ezf-version>3.0.0-SNAPSHOT</ezf-version>
+        <vertx.version>3.2.1</vertx.version>
+    </properties>
+
+    <modules>
+        <module>modules/core</module>
+        <module>modules/storage-foundation</module>
+        <module>modules/storage-mongo</module>
+        <module>modules/storage-jdbc</module>
+        <module>modules/email</module>
+        <module>modules/redis</module>
+        <module>modules/rpc-foundation</module>
+        <module>modules/rpc-http</module>
+        <module>modules/rpc-websocket</module>
+        <module>modules/auth</module>
+        <module>modules/oauth2</module>
+        <module>modules/scheduler</module>
+        <module>modules/kafka</module>
+        <module>modules/master-slave</module>
+    </modules>
+
+    <dependencies>
+
+    </dependencies>
+
+</project>

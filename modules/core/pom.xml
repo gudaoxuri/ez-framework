@@ -6,16 +6,17 @@
 
     <parent>
         <groupId>com.ecfront</groupId>
-        <artifactId>ez-parent</artifactId>
-        <version>0.1.8</version>
+        <artifactId>ezf-parent</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>ezf-core</artifactId>
-    <name>EZ Framework Core Module</name>
+    <name>EZ Framework Core</name>
     <description>EZ框架核心模块</description>
     <url>https://github.com/gudaoxuri/ez-framework</url>
     <packaging>jar</packaging>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>${ezf-version}</version>
 
     <scm>
         <connection>scm:git:git@github.com:gudaoxuri/ez-framework.git</connection>
@@ -25,7 +26,6 @@
 
     <properties>
         <ez-common.version>0.6.5</ez-common.version>
-        <vertx.version>3.2.1</vertx.version>
     </properties>
 
     <dependencies>
