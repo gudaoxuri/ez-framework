@@ -29,6 +29,7 @@
         <module>modules/storage-jdbc</module>
         <module>modules/email</module>
         <module>modules/redis</module>
+        <module>modules/distributed</module>
         <module>modules/rpc-foundation</module>
         <module>modules/rpc-http</module>
         <module>modules/rpc-websocket</module>

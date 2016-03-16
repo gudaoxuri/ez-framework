@@ -1,0 +1,17 @@
+{
+  "ez": {
+    "app": "",
+    "module": "",
+    "services": {
+      "distributed":{},
+      "redis": {
+        "host": "192.168.4.99",
+        "port": 6379,
+        "auth": "",
+        "db": 0
+      }
+    }
+  },
+  "args": {
+  }
+}

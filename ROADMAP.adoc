@@ -19,7 +19,7 @@
 . scheduler [OK]
 . kafka [OK]
 . master-slave [OK]
-. common-distributed-services [Plan]
+. distributed-services [OK]
 
 = 3.0.0
 
