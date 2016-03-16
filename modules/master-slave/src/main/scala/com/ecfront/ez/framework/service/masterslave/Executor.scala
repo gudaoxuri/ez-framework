@@ -130,8 +130,10 @@ object Executor extends Serializable with LazyLogging {
     } catch {
       case e: Throwable =>
         if (tryTimes < maxTryTime) {
+          logger.error("Worker process execute error , try again",e)
           doExecute(dto, processor, tryTimes + 1)
         } else {
+          logger.error("Worker process execute error",e)
           Assigner.Worker.finishTask(TaskFinishDTO(
             dto.instanceId,
             isSuccess = false,
