@@ -20,7 +20,6 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     Resp.success("")
   }
 
-
   override def getDynamicDependents(parameter: JsonObject): Set[String] = {
     if (parameter.getString("storage") == "mongo") {
       Set(com.ecfront.ez.framework.service.storage.mongo.ServiceAdapter.serviceName)
@@ -28,6 +27,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
       Set(com.ecfront.ez.framework.service.storage.jdbc.ServiceAdapter.serviceName)
     }
   }
+
+  override var serviceName: String = "scheduler"
 
 }
 

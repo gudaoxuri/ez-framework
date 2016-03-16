@@ -37,6 +37,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     Resp.success("")
   }
 
+  override var serviceName: String = "websocket"
 }
 
 

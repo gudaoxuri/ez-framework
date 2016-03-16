@@ -17,7 +17,7 @@ import scala.reflect.runtime._
 trait EZServiceAdapter[E] extends Serializable with LazyLogging {
 
   // 服务名称，框架会使用`服务标识`做为默认服务名称
-  var serviceName: String = ""
+  var serviceName: String
 
   // 服务依赖，用于定义此服务的依赖服务的`服务标识`
   lazy val dependents: collection.mutable.Set[String] = collection.mutable.Set()

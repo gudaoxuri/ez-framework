@@ -8,19 +8,31 @@ import com.ecfront.ez.framework.core.helper.FileType
 import com.ecfront.ez.framework.service.auth._
 import com.ecfront.ez.framework.service.email.EmailProcessor
 import com.ecfront.ez.framework.service.redis.RedisProcessor
-import com.ecfront.ez.framework.service.rpc.foundation.{GET, POST, PUT, RPC}
+import com.ecfront.ez.framework.service.rpc.foundation._
 import com.ecfront.ez.framework.service.rpc.http.HTTP
 import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHttpService
 import com.ecfront.ez.framework.service.storage.foundation.{BaseModel, BaseStorage}
 
+/**
+  * 账号管理
+  */
 @RPC("/auth/manage/account/")
 @HTTP
 object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
 
   override protected val storageObj: BaseStorage[EZ_Account] = EZ_Account
 
+  // 只能上传图片类型
   override protected def allowUploadTypes = List(FileType.TYPE_IMAGE)
 
+  /**
+    * 注册账号，需要激活
+    *
+    * @param parameter 请求参数
+    * @param body      账号VO
+    * @param context   PRC上下文
+    * @return 是否成功
+    */
   @POST("/public/register/")
   def register(parameter: Map[String, String], body: Account_VO, context: EZAuthContext): Resp[Void] = {
     if (ServiceAdapter.allowRegister) {
@@ -37,11 +49,13 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
       if (saveR) {
         val encryption = UUID.randomUUID().toString + System.nanoTime()
         RedisProcessor.set(s"ez-active_account_${body.email}", encryption, 60 * 60 * 24)
+        val activeUrl = com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.publicUrl +
+          s"public/active/account/${body.email}/$encryption/"
         EmailProcessor.send(body.email, s"${EZContext.app} activate your account",
           s"""
              | Please visit this link to activate your account:
-             | <a href="${ServiceAdapter.activeUrl}?email=${body.email}&key=$encryption">
-             | ${ServiceAdapter.activeUrl}?email=${body.email}&key=$encryption</a>
+             | <a href="$activeUrl">
+             | $activeUrl</a>
               """.stripMargin)
         Resp.success(null)
       } else {
@@ -52,8 +66,15 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
     }
   }
 
+  /**
+    * 激活账号
+    *
+    * @param parameter 请求参数
+    * @param context   PRC上下文
+    * @return 是否成功，成功后跳转到登录url，带 `action=active` 参数
+    */
   @GET("/public/active/account/:email/:encryption/")
-  def activeNewAccount(parameter: Map[String, String], context: EZAuthContext): Resp[String] = {
+  def activeNewAccount(parameter: Map[String, String], context: EZAuthContext): Resp[RespRedirect] = {
     val email = parameter("email")
     val encryption = parameter("encryption")
     val keyR = RedisProcessor.get(s"ez-active_account_$email")
@@ -63,6 +84,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
       if (accountR && accountR.body != null) {
         accountR.body.enable = true
         EZ_Account.update(accountR.body, context)
+        Resp.success(RespRedirect(ServiceAdapter.loginUrl + "?action=active"))
       } else {
         Resp.notFound("Link illegal")
       }
@@ -71,6 +93,13 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
     }
   }
 
+  /**
+    * 获取登录账号的信息
+    *
+    * @param parameter 请求参数
+    * @param context   PRC上下文
+    * @return 登录账号的信息
+    */
   @GET("bylogin/")
   def getAccountByLoginId(parameter: Map[String, String], context: EZAuthContext): Resp[Account_VO] = {
     if (context.token.isDefined && context.loginInfo.isDefined) {
@@ -98,6 +127,14 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
     }
   }
 
+  /**
+    * 更新登录账号的信息
+    *
+    * @param parameter 请求参数
+    * @param body      账号VO
+    * @param context   PRC上下文
+    * @return 是否成功
+    */
   @PUT("bylogin/")
   def updateAccountByLoginId(parameter: Map[String, String], body: Account_VO, context: EZAuthContext): Resp[Void] = {
     if (context.token.isDefined && context.loginInfo.isDefined) {
@@ -106,7 +143,8 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
         if (accountR) {
           if (accountR.body != null) {
             val account = accountR.body
-            if (EZ_Account.packageEncryptPwd(account.login_id, body.old_password) == account.password) {
+            // 验证密码
+            if (EZ_Account.packageEncryptPwd(account.login_id, body.current_password) == account.password) {
               if (body.new_password != null && body.new_password.nonEmpty) {
                 account.password = EZ_Account.packageEncryptPwd(account.login_id, body.new_password)
               }
@@ -140,6 +178,14 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
     }
   }
 
+  /**
+    * 找回密码，需求确认
+    *
+    * @param parameter 请求参数
+    * @param body      包含 newPassword 参数，表示新的密码
+    * @param context   PRC上下文
+    * @return 是否成功
+    */
   @PUT("/public/findpassword/:email/")
   def findPassword(parameter: Map[String, String], body: Map[String, String], context: EZAuthContext): Resp[Void] = {
     val email = parameter("email")
@@ -148,19 +194,28 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
       val encryption = UUID.randomUUID().toString + System.nanoTime()
       RedisProcessor.set(s"ez-rest_password_key_$email", encryption, 60 * 60 * 24)
       RedisProcessor.set(s"ez-rest_password_pwd_$email", body("newPassword"), 60 * 60 * 24)
+      val activeUrl = com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.publicUrl +
+        s"public/active/password/$email/$encryption/"
       EmailProcessor.send(email, s"${EZContext.app} Found password",
         s"""
            | Please visit this link to activate your new password:
-           | <a href="${ServiceAdapter.restPasswordUrl}?email=$email&key=$encryption">
-           | ${ServiceAdapter.restPasswordUrl}?email=$email&key=$encryption</a>
+           | <a href="$activeUrl">
+           | $activeUrl</a>
        """.stripMargin)
     } else {
       Resp.notFound("Not found this email")
     }
   }
 
+  /**
+    * 激活（确认）新密码
+    *
+    * @param parameter 请求参数
+    * @param context   PRC上下文
+    * @return 是否成功，成功后跳转到登录url，带 `action=findpassword` 参数
+    */
   @GET("/public/active/password/:email/:encryption/")
-  def activeNewPassword(parameter: Map[String, String], context: EZAuthContext): Resp[String] = {
+  def activeNewPassword(parameter: Map[String, String], context: EZAuthContext): Resp[RespRedirect] = {
     val email = parameter("email")
     val encryption = parameter("encryption")
     val keyR = RedisProcessor.get(s"ez-rest_password_key_$email")
@@ -174,6 +229,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
         if (accountR && accountR.body != null) {
           accountR.body.password = EZ_Account.packageEncryptPwd(accountR.body.login_id, newPassword)
           EZ_Account.update(accountR.body, context)
+          Resp.success(RespRedirect(ServiceAdapter.loginUrl + "?action=findpassword"))
         } else {
           Resp.notFound("Link illegal")
         }

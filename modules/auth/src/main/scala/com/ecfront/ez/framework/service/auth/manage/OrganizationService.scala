@@ -6,6 +6,9 @@ import com.ecfront.ez.framework.service.rpc.http.HTTP
 import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHttpService
 import com.ecfront.ez.framework.service.storage.foundation.BaseStorage
 
+/**
+  * 组织（租户）管理
+  */
 @RPC("/auth/manage/organization/")
 @HTTP
 object OrganizationService extends SimpleHttpService[EZ_Organization, EZAuthContext] {

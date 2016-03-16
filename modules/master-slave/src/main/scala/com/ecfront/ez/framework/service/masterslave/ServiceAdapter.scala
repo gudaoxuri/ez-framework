@@ -33,6 +33,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     com.ecfront.ez.framework.service.kafka.ServiceAdapter.serviceName
   )
 
+  override var serviceName: String = "masterslave"
+
 }
 
 

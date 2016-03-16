@@ -15,6 +15,8 @@ object ServiceAdapter extends EZServiceAdapter[Test3Sub1Context] {
     Resp.success("")
   }
 
+  override var serviceName: String = "test3.sub1"
+
 }
 
 case class Test3Sub1Context(field1: String)

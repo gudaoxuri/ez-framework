@@ -7,7 +7,7 @@ import com.ecfront.ez.framework.service.storage.mongo.{MongoBaseStorage, MongoSe
 import scala.beans.BeanProperty
 
 /**
-  * 组织实体
+  * 组织（租户）实体
   */
 @Entity("Organization")
 case class EZ_Organization() extends BaseModel with SecureModel with StatusModel {
@@ -224,6 +224,7 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
       || model.email == null || model.email.trim.isEmpty) {
       Resp.badRequest("Require【Login_id】【password】【email】")
     } else {
+      // 当账号不是oauth类型且登录ld包含@时，拒绝保存
       if ((model.oauth == null || model.oauth.isEmpty) && model.login_id.contains("@")) {
         Resp.badRequest("【login id】can't use email address")
       } else if (FormatHelper.validEmail(model.email)) {
@@ -247,6 +248,7 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
       || model.email == null || model.email.trim.isEmpty) {
       Resp.badRequest("Require【Login_id】【password】【email】")
     } else {
+      // 当账号不是oauth类型且登录ld包含@时，拒绝保存
       if ((model.oauth == null || model.oauth.isEmpty) && model.login_id.contains("@")) {
         Resp.badRequest("【login id】can't use email address")
       } else {
@@ -271,6 +273,7 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
       || model.email == null || model.email.trim.isEmpty) {
       Resp.badRequest("Require【Login_id】【password】【email】")
     } else {
+      // 当账号不是oauth类型且登录ld包含@时，拒绝保存
       if ((model.oauth == null || model.oauth.isEmpty) && model.login_id.contains("@")) {
         Resp.badRequest("【login id】can't use email address")
       } else {
@@ -318,6 +321,7 @@ case class EZ_Token_Info() extends BaseModel {
 
 object EZ_Token_Info extends MongoBaseStorage[EZ_Token_Info] {
 
+  // 前端传入的token标识
   val TOKEN_FLAG = "__ez_token__"
 
   def save(model: EZ_Token_Info, token: EZ_Token_Info): Resp[EZ_Token_Info] = {

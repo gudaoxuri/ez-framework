@@ -4,6 +4,12 @@ import com.ecfront.ez.framework.service.rpc.foundation.Method
 import com.ecfront.ez.framework.service.storage.foundation.BaseModel
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
+/**
+  * RBAC 实体初始化器
+  *
+  * 添加默认的多个资源，2个角色、1号系统管理员账号、1个组织
+  *
+  */
 object Initiator extends LazyLogging {
 
   def init(): Unit = {

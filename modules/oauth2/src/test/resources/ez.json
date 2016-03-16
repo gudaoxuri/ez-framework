@@ -3,6 +3,26 @@
     "app": "",
     "module": "",
     "services": {
+      "oauth2": {
+        "github": {
+          "clientID": "",
+          "clientSecret": ""
+        },
+        "weixin_mp": {
+          "clientID": "wx7b758a31f520f4bb",
+          "clientSecret": "097c19f1cc0895a346b6f0de5e347165"
+        },
+        "weixin_open": {
+          "clientID": "",
+          "clientSecret": ""
+        }
+      },
+      "auth": {
+        "allowRegister": true,
+        "publicUriPrefix": "/public/",
+        "activeUrl": "",
+        "restPasswordUrl": ""
+      },
       "storage.mongo": {
         "hosts": [
           {
@@ -18,11 +38,24 @@
         "host": "0.0.0.0",
         "port": 8080,
         "resourcePath": "c:/tmp/",
-        "accessControlAllowOrigin":"*"/*,
-        "ssl":{
-          "keyPath":"server-keystore.jks",
-          "keyPassword":"123456"
-        }*/
+        "accessControlAllowOrigin": "*"
+      },
+      "email": {
+        "hostname": "smtp.exmail.qq.com",
+        "ownHostname": "smtp.exmail.qq.com",
+        "port": 465,
+        "starttls": "REQUIRED",
+        "login": "REQUIRED",
+        "ssl": true,
+        "authMethods": "LOGIN",
+        "username": "admin@ecfront.com",
+        "password": ""
+      },
+      "redis": {
+        "host": "192.168.4.99",
+        "port": 6379,
+        "auth": "",
+        "db": 0
       }
     }
   },

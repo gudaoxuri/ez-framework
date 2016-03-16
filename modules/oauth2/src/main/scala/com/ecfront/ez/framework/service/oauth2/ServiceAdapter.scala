@@ -19,6 +19,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     com.ecfront.ez.framework.service.auth.ServiceAdapter.serviceName
   )
 
+  override var serviceName: String = "oauth2"
+
 }
 
 

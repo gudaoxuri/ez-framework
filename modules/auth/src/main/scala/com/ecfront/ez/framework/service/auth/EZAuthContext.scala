@@ -6,9 +6,14 @@ import com.ecfront.ez.framework.service.storage.foundation.EZStorageContext
 
 import scala.beans.BeanProperty
 
+/**
+  * RPC上下文，带权限信息
+  */
 class EZAuthContext extends EZRPCContext {
-  @BeanProperty  var token: Option[String] = None
-  @BeanProperty  var loginInfo: Option[EZ_Token_Info] = None
+  // 请求token
+  @BeanProperty var token: Option[String] = None
+  // 登录信息
+  @BeanProperty var loginInfo: Option[EZ_Token_Info] = None
 }
 
 object EZAuthContext {

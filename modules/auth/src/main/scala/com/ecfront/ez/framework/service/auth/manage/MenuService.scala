@@ -8,10 +8,20 @@ import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHttpService
 import com.ecfront.ez.framework.service.storage.foundation.BaseStorage
 import com.ecfront.ez.framework.service.storage.mongo.SortEnum
 
+/**
+  * 菜单管理
+  */
 @RPC("/auth/manage/menu/")
 @HTTP
 object MenuService extends SimpleHttpService[EZ_Menu, EZAuthContext] {
 
+  /**
+    * 查找所有菜单记录，按 `sort` 字段倒序排
+    *
+    * @param parameter 请求参数，可以包含`condition` 用于筛选条件
+    * @param context   PRC上下文
+    * @return 查找到的结果
+    */
   @GET("")
   override def rpcFind(parameter: Map[String, String], context: EZAuthContext): Resp[List[EZ_Menu]] = {
     EZ_Menu.findWithOpt(s"""{}""", Map("sort" -> SortEnum.DESC))

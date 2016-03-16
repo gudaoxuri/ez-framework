@@ -1,27 +1,12 @@
 {
   "ez": {
-    "app": "",
+    "app": "ez-framework",
     "module": "",
     "services": {
-      "oauth2": {
-        "github": {
-          "clientID": "",
-          "clientSecret": ""
-        },
-        "weixin_mp": {
-          "clientID": "wx7b758a31f520f4bb",
-          "clientSecret": "097c19f1cc0895a346b6f0de5e347165"
-        },
-        "weixin_open": {
-          "clientID": "",
-          "clientSecret": ""
-        }
-      },
       "auth": {
         "allowRegister": true,
         "publicUriPrefix": "/public/",
-        "activeUrl": "",
-        "restPasswordUrl": ""
+        "loginUrl": "#/auth/login"
       },
       "storage.mongo": {
         "hosts": [
@@ -34,11 +19,10 @@
       },
       "rpc.http": {
         "servicePath": "com.ecfront.ez.framework.service.rpc.http.test",
-        "publicUrl": "https://mock.ecfront.com:8080/",
+        "webUrl": "http://127.0.0.1/",
+        "publicUrl": "http://127.0.0.1:8080/",
         "host": "0.0.0.0",
-        "port": 8080,
-        "resourcePath": "c:/tmp/",
-        "accessControlAllowOrigin": "*"
+        "port": 8080
       },
       "email": {
         "hostname": "smtp.exmail.qq.com",
@@ -48,14 +32,12 @@
         "login": "REQUIRED",
         "ssl": true,
         "authMethods": "LOGIN",
-        "username": "admin@ecfront.com",
-        "password": ""
+        "username": "hi-sb@ecfront.com",
+        "password": "HI123!qaz@"
       },
       "redis": {
         "host": "192.168.4.99",
-        "port": 6379,
-        "auth": "",
-        "db": 0
+        "port": 6379
       }
     }
   },

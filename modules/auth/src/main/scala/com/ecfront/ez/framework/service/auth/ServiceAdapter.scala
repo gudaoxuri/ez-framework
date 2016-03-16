@@ -10,16 +10,16 @@ import io.vertx.core.json.JsonObject
 object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
   var publicUriPrefix: String = "/public/"
-  var allowRegister: Boolean = true
-  var activeUrl: String = ""
-  var restPasswordUrl: String = ""
+  var allowRegister: Boolean = false
+  var loginUrl: String = ""
 
   override def init(parameter: JsonObject): Resp[String] = {
-    publicUriPrefix = parameter.getString("publicUriPrefix","/public/")
-    allowRegister = parameter.getBoolean("allowRegister",true)
-    activeUrl = parameter.getString("activeUrl")
-    restPasswordUrl = parameter.getString("restPasswordUrl")
-
+    publicUriPrefix = parameter.getString("publicUriPrefix", "/public/")
+    allowRegister = parameter.getBoolean("allowRegister", false)
+    loginUrl = parameter.getString("loginUrl", "#/auth/login")
+    if (!loginUrl.toLowerCase().startsWith("http")) {
+      loginUrl = com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.webUrl + loginUrl
+    }
     EZAsyncInterceptorProcessor.register(HttpInterceptor.category, AuthHttpInterceptor)
     AutoBuildingProcessor.autoBuilding[HTTP]("com.ecfront.ez.framework.service.auth", classOf[HTTP])
     Initiator.init()
@@ -36,6 +36,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     com.ecfront.ez.framework.service.redis.ServiceAdapter.serviceName,
     com.ecfront.ez.framework.service.email.ServiceAdapter.serviceName
   )
+
+  override var serviceName: String = "auth"
 
 }
 

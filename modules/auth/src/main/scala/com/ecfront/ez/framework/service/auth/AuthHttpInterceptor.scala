@@ -9,10 +9,13 @@ import io.vertx.core.json.JsonObject
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 
+/**
+  * Http 权限拦截器
+  */
 object AuthHttpInterceptor extends HttpInterceptor {
 
   override def before(obj: EZRPCContext, context: mutable.Map[String, Any], p: AsyncResp[EZRPCContext]): Unit = {
-    val authContext:EZAuthContext=obj
+    val authContext: EZAuthContext = obj
     authContext.token = if (authContext.parameters.contains(EZ_Token_Info.TOKEN_FLAG)) Some(authContext.parameters(EZ_Token_Info.TOKEN_FLAG)) else None
     if (authContext.templateUri.startsWith(ServiceAdapter.publicUriPrefix)) {
       // 可匿名访问

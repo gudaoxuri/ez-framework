@@ -14,11 +14,13 @@ import scala.concurrent.{Await, Promise}
 object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
   var resourcePath: String = ""
+  var webUrl: String = ""
   var publicUrl: String = ""
 
   override def init(parameter: JsonObject): Resp[String] = {
     resourcePath = parameter.getString("resourcePath", "/tmp/")
     publicUrl = parameter.getString("publicUrl", "http://" + parameter.getString("host") + ":" + parameter.getInteger("port") + "/")
+    webUrl = parameter.getString("webUrl", publicUrl)
     val servicePath = parameter.getString("servicePath")
     AutoBuildingProcessor.autoBuilding[HTTP](servicePath, classOf[HTTP])
     val opt = new HttpServerOptions()
@@ -53,6 +55,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   override def destroy(parameter: JsonObject): Resp[String] = {
     Resp.success("")
   }
+
+  override var serviceName: String = "rpc.http"
 
 }
 

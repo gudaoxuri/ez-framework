@@ -15,19 +15,12 @@
         </encoder>
     </appender>
 
-    <root level="TRACE">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="rollingFile"/>
     </root>
 
-    <logger name="io.netty" level="WARN"/>
-    <logger name="io.vertx" level="WARN"/>
-    <logger name="org.apache.zookeeper" level="WARN"/>
-    <logger name="kafka.utils" level="WARN"/>
-    <logger name="org.mongodb.driver" level="WARN"/>
-    <!--
-        <logger name="com.ecfront.common.Resp" level="OFF"/>
-    -->
-    <logger name="com.ecfront.ez.framework" level="WARN"/>
+    <logger name="com.ecfront" level="TRACE"/>
+    <logger name="com.asto" level="TRACE"/>
 
 </configuration>

@@ -17,6 +17,8 @@ object ServiceAdapter extends EZServiceAdapter[Test2Context] {
 
   override lazy val dependents: collection.mutable.Set[String] = collection.mutable.Set("test1","test3.sub1")
 
+  override var serviceName: String = "test2"
+
 }
 
 case class Test2Context(field1: String)

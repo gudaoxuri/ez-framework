@@ -1,4 +1,4 @@
-= 3.0.0
+= 3.0.0-SNAPSHOT
 
 . 重写核心架构
 . 规范代码组织
@@ -12,7 +12,7 @@
 . storage-jdbc [OK]
 . rpc-http [OK]
 . rpc-websocket [Coding...]
-. auth [Testing...]
+. auth [OK]
 . oauth2 [Coding...]
 . email [OK]
 . redis [OK]
@@ -21,4 +21,8 @@
 . master-slave [OK]
 . common-distributed-services [Plan]
 
-= 3.1.0
+= 3.0.0
+
+. https 支持
+. 微信公众号 支持
+. SimpleRPC 添加排序、过滤等功能
