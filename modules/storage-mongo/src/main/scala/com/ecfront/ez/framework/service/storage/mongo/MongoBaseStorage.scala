@@ -108,7 +108,7 @@ trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
     packageCondition(JsonHelper.toJsonString(BeanHelper.findValues(model)))
   }
 
-  protected def packageCondition(condition: String): JsonObject = {
+  private def packageCondition(condition: String): JsonObject = {
     if (condition == null || condition.trim == "") {
       new JsonObject("{}")
     } else {
