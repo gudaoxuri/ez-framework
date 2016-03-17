@@ -1,7 +1,5 @@
-.idea/
-target/
-
 *.class
 *.log
+
 .idea
 *.iml

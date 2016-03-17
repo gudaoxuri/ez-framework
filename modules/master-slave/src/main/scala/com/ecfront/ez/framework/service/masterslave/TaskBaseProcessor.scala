@@ -22,7 +22,12 @@ trait TaskBaseProcessor[E] extends Serializable with LazyLogging {
   def execute(
                taskInfo: Map[String, Any], taskVar: Map[String, Any],
                instanceParameters: Map[String, Any], again: Boolean): Resp[(Map[String, Any], Map[String, Any])] = {
-    val task = JsonHelper.toObject(taskInfo, modelClazz)
+    val task =
+      if (modelClazz != classOf[Void]) {
+        null.asInstanceOf[E]
+      } else {
+        JsonHelper.toObject(taskInfo, modelClazz)
+      }
     if (again) {
       tryPreProcess(task, taskVar, instanceParameters)
     }

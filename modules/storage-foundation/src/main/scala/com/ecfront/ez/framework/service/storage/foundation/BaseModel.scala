@@ -219,7 +219,11 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否允许更新
     */
-  protected def preUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, String, List[Any])] = Resp.success((newValues, condition, parameters))
+  protected def preUpdateByCond(
+                                 newValues: String, condition: String,
+                                 parameters: List[Any],
+                                 context: EZStorageContext): Resp[(String, String, List[Any])] =
+    Resp.success((newValues, condition, parameters))
 
   /**
     * 更新后处理
@@ -326,7 +330,10 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否允许删除
     */
-  protected def preDeleteByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
+  protected def preDeleteByCond(
+                                 condition: String, parameters: List[Any],
+                                 context: EZStorageContext): Resp[(String, List[Any])] =
+    Resp.success((condition, parameters))
 
   /**
     * 删除后处理
@@ -435,7 +442,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否允许获取这条记录
     */
-  protected def preGetByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
+  protected def preGetByCond(condition: String,
+                             parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] =
+    Resp.success((condition, parameters))
 
   /**
     * 获取一条记录后处理
@@ -545,7 +554,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否允许判断是否存在
     */
-  protected def preExistByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
+  protected def preExistByCond(condition: String, parameters: List[Any],
+                               context: EZStorageContext): Resp[(String, List[Any])] =
+    Resp.success((condition, parameters))
 
   /**
     * 判断是否存在后处理
@@ -556,7 +567,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context     上下文
     * @return 处理后的结果
     */
-  protected def postExistByCond(condition: String, parameters: List[Any], existResult: Boolean, context: EZStorageContext): Resp[Boolean] = Resp.success(existResult)
+  protected def postExistByCond(condition: String, parameters: List[Any],
+                                existResult: Boolean, context: EZStorageContext): Resp[Boolean] =
+    Resp.success(existResult)
 
   /**
     * 判断是否存在
@@ -657,7 +670,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否允许分页
     */
-  protected def prePage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
+  protected def prePage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int,
+                        context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
 
   /**
     * 分页后处理
@@ -670,7 +684,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 处理后的结果
     */
-  protected def postPage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, pageResult: Page[M], context: EZStorageContext): Resp[Page[M]] = Resp.success(pageResult)
+  protected def postPage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int,
+                         pageResult: Page[M], context: EZStorageContext): Resp[Page[M]] = Resp.success(pageResult)
 
   /**
     * 分页
@@ -682,7 +697,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 分页结果
     */
-  def page(condition: String, parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10, context: EZStorageContext = EZStorageContext()): Resp[Page[M]] = {
+  def page(condition: String, parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10,
+           context: EZStorageContext = EZStorageContext()): Resp[Page[M]] = {
     val preR = prePage(condition, parameters, pageNumber, pageSize, context)
     if (preR) {
       val doR = doPage(preR.body._1, preR.body._2, pageNumber, pageSize, context)

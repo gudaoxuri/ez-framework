@@ -2,7 +2,6 @@ package com.ecfront.ez.framework.service.storage.mongo
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.service.storage.foundation.{EZStorageContext, StatusModel, StatusStorage}
-import io.vertx.core.json.JsonObject
 
 /**
   * Mongo带状态的持久化实现
@@ -20,7 +19,7 @@ trait MongoStatusStorage[M <: StatusModel] extends MongoBaseStorage[M] with Stat
   }
 
   override protected def appendEnabled(condition: String): String = {
-    new JsonObject(condition).put(StatusModel.ENABLE_FLAG, true).encode()
+    packageCondition(condition).put(StatusModel.ENABLE_FLAG, true).encode()
   }
 
 }
