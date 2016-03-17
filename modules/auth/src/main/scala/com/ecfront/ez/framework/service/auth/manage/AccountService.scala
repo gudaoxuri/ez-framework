@@ -2,7 +2,7 @@ package com.ecfront.ez.framework.service.auth.manage
 
 import java.util.UUID
 
-import com.ecfront.common.Resp
+import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.core.helper.FileType
 import com.ecfront.ez.framework.service.auth._
@@ -196,7 +196,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
       RedisProcessor.set(s"ez-rest_password_pwd_$email", body("newPassword"), 60 * 60 * 24)
       val activeUrl = com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.publicUrl +
         s"public/active/password/$email/$encryption/"
-      EmailProcessor.send(email, s"${EZContext.app} Found password",
+      EmailProcessor.send(email, s"${EZContext.app} Activate new password",
         s"""
            | Please visit this link to activate your new password:
            | <a href="$activeUrl">
@@ -239,6 +239,21 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
     } else {
       Resp.notFound("Link illegal")
     }
+  }
+
+  /**
+    * 更新操作
+    *
+    * @param parameter 请求参数，必须包含`id`
+    * @param body      原始（字符串类型）请求体
+    * @param context   PRC上下文
+    * @return 更新结果
+    */
+  @PUT(":id/")
+  override def rpcUpdate(parameter: Map[String, String], body: String, context: EZAuthContext): Resp[EZ_Account] = {
+    val account = JsonHelper.toObject[EZ_Account](body)
+    account.password = EZ_Account.packageEncryptPwd(account.login_id, account.password)
+    EZ_Account.update(account, context)
   }
 
 }

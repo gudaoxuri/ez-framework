@@ -1,5 +1,6 @@
 package com.ecfront.ez.framework.service.auth.manage
 
+import com.ecfront.ez.framework.core.helper.FileType
 import com.ecfront.ez.framework.service.auth.{EZAuthContext, EZ_Organization}
 import com.ecfront.ez.framework.service.rpc.foundation.RPC
 import com.ecfront.ez.framework.service.rpc.http.HTTP
@@ -14,5 +15,8 @@ import com.ecfront.ez.framework.service.storage.foundation.BaseStorage
 object OrganizationService extends SimpleHttpService[EZ_Organization, EZAuthContext] {
 
   override protected val storageObj: BaseStorage[EZ_Organization] = EZ_Organization
+
+  // 只能上传图片类型
+  override protected def allowUploadTypes = List(FileType.TYPE_IMAGE)
 
 }
