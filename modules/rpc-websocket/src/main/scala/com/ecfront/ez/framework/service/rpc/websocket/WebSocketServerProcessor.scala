@@ -4,15 +4,15 @@ import java.net.URLDecoder
 
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.EZContext
-import com.ecfront.ez.framework.service.rpc.foundation.{EZRPCContext, Fun, Router}
+import com.ecfront.ez.framework.service.rpc.foundation.{EZRPCContext, Fun, Method, Router}
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import io.vertx.core.buffer.Buffer
 import io.vertx.core.http._
 import io.vertx.core.{AsyncResult, Future, Handler}
 
+/**
+  * WebSocket 服务操作
+  */
 class WebSocketServerProcessor extends Handler[ServerWebSocket] with LazyLogging {
-
-  protected val FLAG_METHOD: String = "__method__"
 
   override def handle(request: ServerWebSocket): Unit = {
     val ip =
@@ -27,7 +27,7 @@ class WebSocketServerProcessor extends Handler[ServerWebSocket] with LazyLogging
     } catch {
       case ex: Throwable =>
         logger.error("WS process error.", ex)
-        returnContent(s"Request process error：${ex.getMessage}", request)
+        request.writeFinalTextFrame("Request process error：${ex.getMessage}")
     }
   }
 
@@ -42,51 +42,37 @@ class WebSocketServerProcessor extends Handler[ServerWebSocket] with LazyLogging
       } else {
         Map[String, String]()
       }
-    val method = if (parameters.contains(FLAG_METHOD)) {
-      val _method = parameters(FLAG_METHOD).toUpperCase
-      parameters = parameters - FLAG_METHOD
-      _method
-    } else {
-      "GET"
-    }
-    val result = Router.getFunction("WebSocket", method, request.path(), parameters)
+    // 目前只限于 `REQUEST` 方法
+    val result = Router.getFunction("WebSocket", Method.REQUEST, request.path(), parameters)
     parameters = result._3
+    WebSocketMessagePushManager.createWS(Method.REQUEST, result._4, request)
     if (result._1) {
-      if (method == "POST" || method == "PUT") {
-        request.frameHandler(new Handler[WebSocketFrame] {
-          override def handle(event: WebSocketFrame): Unit = {
-            execute(method, result._4, parameters, event.textData(), result._2, ip, request)
-          }
-        })
-      } else {
-        execute(method, result._4, parameters, null, result._2, ip, request)
-      }
+      request.frameHandler(new Handler[WebSocketFrame] {
+        override def handle(event: WebSocketFrame): Unit = {
+          execute(Method.REQUEST, result._4, parameters, event.textData(), result._2, ip, request)
+        }
+      })
     } else {
-      returnContent(result._1, request)
+      request.writeFinalTextFrame(JsonHelper.toJsonString(result._1))
     }
   }
 
   private def execute(method: String, path: String, parameters: Map[String, String], body: Any, fun: Fun[_], ip: String, request: ServerWebSocket): Unit = {
     val context = new EZRPCContext()
     context.remoteIP = ip
-    WebSocketProcessor.createWS(method, path, request)
+    context.method = method
+    context.templateUri = path
+    context.realUri = request.path()
+    context.parameters = parameters.map { i => i._1 -> URLDecoder.decode(i._2, "UTF-8") }
     EZContext.vertx.executeBlocking(new Handler[Future[Resp[Any]]] {
       override def handle(e: Future[Resp[Any]]): Unit = {
         e.complete(fun.execute(parameters, if (body != null) JsonHelper.toObject(body, fun.requestClass) else null, context))
       }
     }, false, new Handler[AsyncResult[Resp[Any]]] {
       override def handle(e: AsyncResult[Resp[Any]]): Unit = {
-        returnContent(e.result(), request)
+        WebSocketMessagePushManager.ws(method, path, JsonHelper.toJsonString(e.result()))
       }
     })
-  }
-
-  private def returnContent(result: Any, request: ServerWebSocket): ServerWebSocket = {
-    val body = result match {
-      case r: String => r
-      case _ => JsonHelper.toJsonString(result)
-    }
-    request.write(Buffer.buffer(body))
   }
 
 }

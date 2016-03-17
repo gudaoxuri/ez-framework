@@ -45,6 +45,7 @@ private[rpc] class Router extends LazyLogging {
   funContainer += ("GET" -> collection.mutable.Map[String, Fun[_]]())
   funContainer += ("DELETE" -> collection.mutable.Map[String, Fun[_]]())
   funContainer += ("PUT" -> collection.mutable.Map[String, Fun[_]]())
+  funContainer += ("REQUEST" -> collection.mutable.Map[String, Fun[_]]())
 
   /**
     * 业务方法容器，正则
@@ -55,6 +56,7 @@ private[rpc] class Router extends LazyLogging {
   funContainerR += ("GET" -> ArrayBuffer[RouterRContent]())
   funContainerR += ("DELETE" -> ArrayBuffer[RouterRContent]())
   funContainerR += ("PUT" -> ArrayBuffer[RouterRContent]())
+  funContainerR += ("REQUEST" -> ArrayBuffer[RouterRContent]())
 
 }
 
@@ -83,7 +85,8 @@ object Router extends LazyLogging {
     * @return 结果 （是否找到，业务方法，解析后的参数，对应的模板URI）
     */
   private[rpc] def getFunction(
-                                channel: String, method: String, path: String, parameters: Map[String, String]): (Resp[_], Fun[_], Map[String, String], String) = {
+                                channel: String, method: String, path: String,
+                                parameters: Map[String, String]): (Resp[_], Fun[_], Map[String, String], String) = {
     val newParameters = collection.mutable.Map[String, String]()
     newParameters ++= parameters
     var urlTemplate = path

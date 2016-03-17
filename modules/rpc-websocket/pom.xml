@@ -33,12 +33,6 @@
             <artifactId>ezf-rpc-foundation</artifactId>
             <version>${ezf-version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.ecfront</groupId>
-            <artifactId>ezf-storage-mongo</artifactId>
-            <version>${ezf-version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
 </project>

@@ -1,39 +1,28 @@
 <html>
 <head><title>Web Socket Test</title></head>
 <script>
-    var socket_resourceSaved;
-    var socket_AddANewResource;
+    var socket_resource;
     if (window.WebSocket) {
-        socket_resourceSaved = new WebSocket("ws://localhost:8081/resource/");
-        socket_resourceSaved.onmessage = function (event) {
-            console.log("resource saved received : " + event.data);
+        socket_resource = new WebSocket("ws://localhost:8081/resource/");
+        socket_resource.onmessage = function (event) {
+            console.log("resource saved received : " + JSON.parse(event.data));
         };
-        socket_resourceSaved.onopen = function (event) {
+        socket_resource.onopen = function (event) {
             console.log("resource saved opened!");
         };
-        socket_resourceSaved.onclose = function (event) {
+        socket_resource.onclose = function (event) {
             console.log("resource saved closed.");
-        };
-        socket_AddANewResource = new WebSocket("ws://localhost:8081/resource/?__method__=POST");
-        socket_AddANewResource.onmessage = function (event) {
-            console.log("add a new resource received : " + event.data);
-        };
-        socket_AddANewResource.onopen = function (event) {
-            console.log("add a new resource opened!");
-        };
-        socket_AddANewResource.onclose = function (event) {
-            console.log("add a new resource closed.");
         };
     } else {
         alert("Your browser does not support Websockets. (Use Chrome)");
     }
     function send() {
-        socket_AddANewResource.send({
+        socket_resource.send(JSON.stringify({
             code: "1111",
             method: "POST",
             uri: "/sdfs/fsdf/",
             enable: true
-        });
+        }));
     }
 </script>
 <body>

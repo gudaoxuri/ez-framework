@@ -1,7 +1,6 @@
 package com.ecfront.ez.framework.service.rpc.websocket.test
 
 import com.ecfront.ez.framework.service.storage.foundation._
-import com.ecfront.ez.framework.service.storage.mongo.{MongoStatusStorage, MongoBaseStorage, MongoSecureStorage}
 
 import scala.beans.BeanProperty
 
@@ -22,9 +21,9 @@ case class EZ_Resource() extends BaseModel with SecureModel with StatusModel {
 
 }
 
-object EZ_Resource extends MongoBaseStorage[EZ_Resource] with MongoSecureStorage[EZ_Resource] with MongoStatusStorage[EZ_Resource]{
+object EZ_Resource {
 
-  def apply(code:String,method: String, uri: String): EZ_Resource = {
+  def apply(code: String, method: String, uri: String): EZ_Resource = {
     val res = EZ_Resource()
     res.code = code
     res.method = method

@@ -11,7 +11,7 @@
 . storage-mongo [OK]
 . storage-jdbc [OK]
 . rpc-http [OK]
-. rpc-websocket [Coding...]
+. rpc-websocket [OK]
 . auth [OK]
 . oauth2 [Coding...]
 . email [OK]
@@ -27,3 +27,6 @@
 . https 支持
 . 微信公众号 支持
 . SimpleRPC 添加排序、过滤等功能
+. 完善文档
+. 添加示例
+. 更多的边界测试

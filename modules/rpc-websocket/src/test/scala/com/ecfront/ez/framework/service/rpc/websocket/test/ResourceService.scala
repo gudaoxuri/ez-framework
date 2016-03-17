@@ -1,14 +1,18 @@
 package com.ecfront.ez.framework.service.rpc.websocket.test
 
-import com.ecfront.ez.framework.service.rpc.foundation.scaffold.SimpleRPCService
-import com.ecfront.ez.framework.service.rpc.foundation.{EZRPCContext, RPC}
+import com.ecfront.common.Resp
+import com.ecfront.ez.framework.service.rpc.foundation.{REQUEST, EZRPCContext, POST, RPC}
 import com.ecfront.ez.framework.service.rpc.websocket.WebSocket
-import com.ecfront.ez.framework.service.storage.foundation.BaseStorage
+import com.typesafe.scalalogging.slf4j.LazyLogging
 
 @RPC("/resource/")
 @WebSocket
-object ResourceService extends SimpleRPCService[EZ_Resource, EZRPCContext] {
+object ResourceService extends LazyLogging {
 
-  override protected val storageObj: BaseStorage[EZ_Resource] = EZ_Resource
+  @REQUEST("")
+  def save(parameter: Map[String, String], body: EZ_Resource, context: EZRPCContext): Resp[EZ_Resource] = {
+    println(body)
+    Resp.success(body)
+  }
 
 }

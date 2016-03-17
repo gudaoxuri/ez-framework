@@ -8,4 +8,5 @@ object Method extends Enumeration {
   val POST = Value("POST").toString
   val PUT = Value("PUT").toString
   val DELETE = Value("DELETE").toString
+  val REQUEST = Value("REQUEST").toString
 }
