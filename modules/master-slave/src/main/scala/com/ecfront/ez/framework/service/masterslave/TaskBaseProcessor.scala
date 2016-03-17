@@ -23,7 +23,7 @@ trait TaskBaseProcessor[E] extends Serializable with LazyLogging {
                taskInfo: Map[String, Any], taskVar: Map[String, Any],
                instanceParameters: Map[String, Any], again: Boolean): Resp[(Map[String, Any], Map[String, Any])] = {
     val task =
-      if (modelClazz != classOf[Void]) {
+      if (modelClazz == classOf[Void]) {
         null.asInstanceOf[E]
       } else {
         JsonHelper.toObject(taskInfo, modelClazz)
