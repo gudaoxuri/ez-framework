@@ -30,18 +30,7 @@ object EZManager extends LazyLogging {
     */
   private def startInParseConfig(): Resp[EZConfig] = {
     try {
-      var confPath = System.getProperty("conf")
-      if (confPath == null) {
-        val classPath = this.getClass.getResource("/")
-        if (classPath != null) {
-          confPath = classPath.getPath + "ez.json"
-        } else {
-          var currentPath = this.getClass.getProtectionDomain.getCodeSource.getLocation.toURI.getPath
-          currentPath = currentPath.substring(0, currentPath.lastIndexOf("/"))
-          confPath = currentPath + "/config/ez.json"
-        }
-      }
-      val jsonConfig = new JsonObject(Source.fromFile(confPath, "UTF-8").mkString)
+      val jsonConfig = new JsonObject(Source.fromFile(EZContext.confPath + "ez.json", "UTF-8").mkString)
       Resp.success(JsonHelper.toObject(jsonConfig.encode(), classOf[EZConfig]))
     } catch {
       case e: Throwable =>

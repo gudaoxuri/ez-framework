@@ -16,5 +16,22 @@ object EZContext {
   var vertx: Vertx = _
   // 配置文件中的APP级参数
   var args: JsonObject = _
+  // 配置文件路径
+  lazy val confPath: String = findConfPath()
+
+  private def findConfPath(): String = {
+    var confPath = System.getProperty("conf")
+    if (confPath == null) {
+      val classPath = this.getClass.getResource("/")
+      if (classPath != null) {
+        confPath = classPath.getPath
+      } else {
+        var currentPath = this.getClass.getProtectionDomain.getCodeSource.getLocation.toURI.getPath
+        currentPath = currentPath.substring(0, currentPath.lastIndexOf("/"))
+        confPath = currentPath + "/config/"
+      }
+    }
+    confPath
+  }
 
 }

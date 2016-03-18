@@ -18,6 +18,7 @@ import scala.concurrent.{Await, Future, Promise}
 object HttpClientProcessor extends LazyLogging {
 
   var httpClient: HttpClient = _
+  var httpClients: HttpClient = _
 
   /**
     * GET 请求
@@ -115,7 +116,13 @@ object HttpClientProcessor extends LazyLogging {
 
     private def request(method: HttpMethod, url: String, body: Any, contentType: String): Future[String] = {
       val p = Promise[String]()
-      val client = httpClient.requestAbs(method, url, new Handler[HttpClientResponse] {
+      val clientChannel =
+        if (url.toLowerCase().startsWith("https")) {
+          httpClients
+        } else {
+          httpClient
+        }
+      val client = clientChannel.requestAbs(method, url, new Handler[HttpClientResponse] {
         override def handle(response: HttpClientResponse): Unit = {
           response.exceptionHandler(new Handler[Throwable] {
             override def handle(event: Throwable): Unit = {

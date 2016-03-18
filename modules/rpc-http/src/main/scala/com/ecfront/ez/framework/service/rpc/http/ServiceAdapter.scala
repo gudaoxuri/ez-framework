@@ -3,7 +3,7 @@ package com.ecfront.ez.framework.service.rpc.http
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.{EZContext, EZServiceAdapter}
 import com.ecfront.ez.framework.service.rpc.foundation.AutoBuildingProcessor
-import io.vertx.core.http.{HttpServer, HttpServerOptions}
+import io.vertx.core.http.{HttpClientOptions, HttpServer, HttpServerOptions}
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.JksOptions
 import io.vertx.core.{AsyncResult, Handler}
@@ -25,8 +25,12 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     AutoBuildingProcessor.autoBuilding[HTTP](servicePath, classOf[HTTP])
     val opt = new HttpServerOptions()
     if (parameter.containsKey("ssl")) {
+      var keyPath = parameter.getJsonObject("ssl").getString("keyPath")
+      if (!keyPath.startsWith("/")) {
+        keyPath = EZContext.confPath + keyPath
+      }
       opt.setSsl(true).setKeyStoreOptions(
-        new JksOptions().setPath(parameter.getJsonObject("ssl").getString("keyPath"))
+        new JksOptions().setPath(keyPath)
           .setPassword(parameter.getJsonObject("ssl").getString("keyPassword"))
       )
     }
@@ -48,6 +52,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
         }
       })
     HttpClientProcessor.httpClient = EZContext.vertx.createHttpClient()
+    HttpClientProcessor.httpClients = EZContext.vertx.createHttpClient(new HttpClientOptions().setSsl(true).setVerifyHost(false).setTrustAll(true))
     val serviceR = Await.result(p.future, Duration.Inf)
     serviceR
   }

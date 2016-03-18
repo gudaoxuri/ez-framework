@@ -40,6 +40,23 @@ class HttpServerSpec extends MockStartupSpec {
 
   }
 
+  test("https test") {
+
+    EZ_Resource.deleteByCond("")
+    HttpClientProcessor.post("https://127.0.0.1:8080/resource/", EZ_Resource("2", "GET", "/2s"))
+    HttpClientProcessor.post("https://127.0.0.1:8080/resource/", EZ_Resource("3", "GET", "/3s"))
+    HttpClientProcessor.post("https://127.0.0.1:8080/resource/", EZ_Resource("4", "GET", "/4s"))
+    HttpClientProcessor.post("https://127.0.0.1:8080/resource/", EZ_Resource("5", "GET", "/5s"))
+
+    val pageResult = JsonHelper.toObject[Resp[Page[EZ_Resource]]](HttpClientProcessor.get(
+      "https://127.0.0.1:8080/resource/page/2/2/")).body
+    assert(pageResult.pageNumber == 2)
+    assert(pageResult.pageSize == 2)
+    assert(pageResult.pageTotal == 2)
+    assert(pageResult.recordTotal == 4)
+    assert(pageResult.objects.size == 2)
+  }
+
 }
 
 

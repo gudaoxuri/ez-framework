@@ -33,7 +33,7 @@
         "ssl": true,
         "authMethods": "LOGIN",
         "username": "hi-sb@ecfront.com",
-        "password": "HI123!qaz@"
+        "password": ""
       },
       "redis": {
         "host": "192.168.4.99",
