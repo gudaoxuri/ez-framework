@@ -75,15 +75,19 @@ object EZManager extends LazyLogging {
   /**
     * 执行服务排序
     *
-    * @param orderServices 排序后的服务列表
-    * @param services      未排序的服务列表
+    * @param orderServices   排序后的服务列表
+    * @param currentServices 当前过滤后的服务列表
+    * @param services        未排序的服务列表
     */
-  private def startInOrderServices(orderServices: ArrayBuffer[EZServiceAdapter[_]], services: List[EZServiceAdapter[_]]): Unit = {
-    services.foreach {
+  private def startInOrderServices(
+                                    orderServices: ArrayBuffer[EZServiceAdapter[_]],
+                                    currentServices: List[EZServiceAdapter[_]],
+                                    services: List[EZServiceAdapter[_]]): Unit = {
+    currentServices.foreach {
       service =>
         val unLoadDependents = service.dependents -- orderServices.map(_.serviceName).toSet
         if (unLoadDependents.nonEmpty) {
-          startInOrderServices(orderServices, services.filter(i => unLoadDependents.contains(i.serviceName)))
+          startInOrderServices(orderServices, services.filter(i => unLoadDependents.contains(i.serviceName)), services)
         }
         if (!orderServices.contains(service)) {
           orderServices += service
@@ -99,7 +103,7 @@ object EZManager extends LazyLogging {
     */
   private def startInOrderServices(services: List[EZServiceAdapter[_]]): Resp[List[EZServiceAdapter[_]]] = {
     val orderServices = ArrayBuffer[EZServiceAdapter[_]]()
-    startInOrderServices(orderServices, services)
+    startInOrderServices(orderServices, services, services)
     Resp.success(orderServices.toList)
   }
 
