@@ -117,12 +117,12 @@ object HttpClientProcessor extends LazyLogging {
     private def request(method: HttpMethod, url: String, body: Any, contentType: String): Future[String] = {
       val p = Promise[String]()
       val clientChannel =
-        if (url.toLowerCase().startsWith("https")) {
+        if (url.trim.toLowerCase().startsWith("https")) {
           httpClients
         } else {
           httpClient
         }
-      val client = clientChannel.requestAbs(method, url, new Handler[HttpClientResponse] {
+      val client = clientChannel.requestAbs(method, url.trim, new Handler[HttpClientResponse] {
         override def handle(response: HttpClientResponse): Unit = {
           response.exceptionHandler(new Handler[Throwable] {
             override def handle(event: Throwable): Unit = {

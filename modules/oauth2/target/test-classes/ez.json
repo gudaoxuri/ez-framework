@@ -4,28 +4,17 @@
     "module": "",
     "services": {
       "oauth2": {
-        "github": {
-          "clientID": "",
-          "clientSecret": ""
-        },
         "weixin_mp": {
-          "clientID": "wx7b758a31f520f4bb",
-          "clientSecret": "097c19f1cc0895a346b6f0de5e347165"
-        },
-        "weixin_open": {
-          "clientID": "",
-          "clientSecret": ""
+          "appId": "wx7b758a31f520f4bb",
+          "secret": "097c19f1cc0895a346b6f0de5e347165"
         }
       },
       "auth": {},
       "rpc.http": {
-        "publicUrl": "https://5604e291.all123.net:8080/",
+        "webUrl": "http://localhost:63342/shtzsr/ui/index.html",
+        "publicUrl": "http://5604e291.all123.net/",
         "host": "0.0.0.0",
-        "port": 8080,
-        "ssl": {
-          "keyPath": "keystore.jks",
-          "keyPassword": "123456"
-        }
+        "port": 80
       },
       "storage.mongo": {
         "hosts": [

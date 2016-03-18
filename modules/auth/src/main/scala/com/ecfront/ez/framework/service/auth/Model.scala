@@ -294,7 +294,7 @@ object EZ_Account extends MongoBaseStorage[EZ_Account] with MongoSecureStorage[E
     getByCond( s"""{"$$or":[{"login_id":"$loginIdOrEmail"},{"email":"$loginIdOrEmail"}]}""")
   }
 
-  def getByOAuth(authId: String, appName: String): Resp[EZ_Account] = {
+  def getByOAuth(appName: String,authId: String): Resp[EZ_Account] = {
     getByCond( s"""{"oauth.$appName":"$authId"}""")
   }
 

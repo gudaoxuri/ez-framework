@@ -14,30 +14,33 @@ import scala.collection.JavaConversions._
 @HTTP
 object OAuth2Service {
 
+  private val indexUrl = com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.webUrl
+
   @GET("code/:app/")
   def login(parameter: Map[String, String], context: EZAuthContext): Resp[RespRedirect] = {
     val appName = parameter("app")
     val processor = getAppProcessor(appName)
     if (processor != null) {
-      Resp.success(RespRedirect(processor.getCode))
+      Resp.success(RespRedirect(processor.fetchCodeUrl))
     } else {
       Resp.badRequest(s"App name [$appName] not found.")
     }
   }
 
   @GET("callback/:app/")
-  def callback(parameter: Map[String, String], context: EZAuthContext): Resp[Token_Info_VO] = {
+  def callback(parameter: Map[String, String], context: EZAuthContext): Resp[RespRedirect] = {
     val appName = parameter("app")
     val processor = getAppProcessor(appName)
     if (processor != null) {
-      val getTokenR = processor.getToken(parameter("code"), parameter("state"))
+      val getTokenR = processor.fetchAccessToken(parameter("code"), parameter("state"))
       if (getTokenR) {
-        val oauthAccountR = processor.getAccount(getTokenR.body)
+        val oauthAccountR = processor.fetchAccount(getTokenR.body)
         if (oauthAccountR) {
           val oauthAccount = oauthAccountR.body
           val accountR = EZ_Account.getByOAuth(appName, oauthAccount.oauth(appName))
           if (accountR.body != null) {
-            AuthService.addLoginInfo(accountR.body)
+            val loginInfo = AuthService.addLoginInfo(accountR.body)
+            Resp.success(RespRedirect(indexUrl + "?" + EZ_Token_Info.TOKEN_FLAG + "=" + loginInfo.body.token))
           } else {
             oauthAccount.login_id = oauthAccount.oauth(appName) + "@" + appName
             oauthAccount.email = oauthAccount.oauth(appName) + "@" + appName + EZ_Account.VIRTUAL_EMAIL
@@ -45,8 +48,8 @@ object OAuth2Service {
             oauthAccount.organization_code = ""
             oauthAccount.role_codes = List(EZ_Role.USER_ROLE_CODE)
             oauthAccount.enable = true
-            EZ_Account.save(oauthAccount)
-            AuthService.addLoginInfo(accountR.body)
+            val loginInfo = AuthService.addLoginInfo(EZ_Account.save(oauthAccount).body)
+            Resp.success(RespRedirect(indexUrl + "?" + EZ_Token_Info.TOKEN_FLAG + "=" + loginInfo.body.token))
           }
         } else {
           oauthAccountR
@@ -59,30 +62,6 @@ object OAuth2Service {
     }
   }
 
-  /*@POST("register/")
-  def register(parameter: Map[String, String], body: Account_VO, p: AsyncResp[Token_Info_VO], context: EZContext) = {
-    val account = EZ_Account()
-    account.login_id = body.login_id
-    account.name = body.name
-    account.email = body.email
-    account.password = body.new_password
-    account.image = body.image
-    account.enable = true
-    account.organization_code = ""
-    account.role_codes = List(BaseModel.SPLIT + EZ_Role.USER_ROLE_CODE)
-    account.ext_id = body.ext_id
-    account.ext_info = body.ext_info
-    EZ_Account.save(account, context).onSuccess {
-      case saveR =>
-        if (saveR) {
-          AuthService.addLoginInfo(account, p)
-        } else {
-          p.resp(saveR)
-        }
-    }
-  }*/
-
-
   def init(oauth2Config: JsonObject): Unit = {
     oauth2Config.iterator().foreach {
       item =>
@@ -94,10 +73,6 @@ object OAuth2Service {
     app match {
       case "weixin_mp" =>
         WeixinMPProcessor
-      case "weixin_open" =>
-        WeixinOpenProcessor
-      case "github" =>
-        GitHubProcessor
       case _ =>
         null
     }
