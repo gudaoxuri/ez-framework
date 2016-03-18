@@ -33,6 +33,11 @@
             <artifactId>ezf-kafka</artifactId>
             <version>${ezf-version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-redis</artifactId>
+            <version>${ezf-version}</version>
+        </dependency>
     </dependencies>
 
 </project>

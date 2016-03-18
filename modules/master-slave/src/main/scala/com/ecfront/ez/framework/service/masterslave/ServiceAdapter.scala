@@ -10,6 +10,9 @@ import scala.collection.mutable
 object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
   override def init(parameter: JsonObject): Resp[String] = {
+    HAManager.ha = parameter.getBoolean("ha", false)
+    HAManager.clusterId = parameter.getString("clusterId")
+    HAManager.worker = EZContext.module
     Assigner.init(EZContext.module, parameter.getString("clusterId"))
     if (parameter.containsKey("category")) {
       parameter.getJsonObject("category").foreach {
@@ -27,6 +30,19 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   override def destroy(parameter: JsonObject): Resp[String] = {
     Assigner.close()
     Resp.success("")
+  }
+
+  override def getDynamicDependents(parameter: JsonObject): Set[String] = {
+    if (parameter.containsKey("ha") && parameter.getBoolean("ha")) {
+      Set(
+        com.ecfront.ez.framework.service.kafka.ServiceAdapter.serviceName,
+        com.ecfront.ez.framework.service.redis.ServiceAdapter.serviceName
+      )
+    } else {
+      Set(
+        com.ecfront.ez.framework.service.kafka.ServiceAdapter.serviceName
+      )
+    }
   }
 
   override lazy val dependents: mutable.Set[String] = mutable.Set(

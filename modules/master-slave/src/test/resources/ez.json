@@ -5,6 +5,7 @@
     "services": {
       "masterslave": {
         "clusterId": "ez.test",
+        "ha":true,
         "category": {
           "m": {
             "pool": 5,
@@ -15,6 +16,10 @@
       "kafka": {
         "brokerList": "192.168.4.99:9092",
         "zkList": "192.168.4.99:2181"
+      },
+      "redis": {
+        "host": "192.168.4.99",
+        "port": 6379
       }
     }
   },

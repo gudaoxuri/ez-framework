@@ -38,6 +38,7 @@
         <module>modules/scheduler</module>
         <module>modules/kafka</module>
         <module>modules/master-slave</module>
+        <module>modules/weixin</module>
     </modules>
 
     <dependencies>

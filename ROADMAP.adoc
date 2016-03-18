@@ -13,7 +13,7 @@
 . rpc-http [OK]
 . rpc-websocket [OK]
 . auth [OK]
-. oauth2 [Coding...]
+. oauth2 [OK,Support WeiXin Only]
 . email [OK]
 . redis [OK]
 . scheduler [OK]

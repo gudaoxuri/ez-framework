@@ -88,11 +88,17 @@ object Assigner extends LazyLogging {
       Executor.registerProcessors(processors)
       startTaskProducer = KafkaProcessor.Producer(clusterId + "_start", module)
       finishTaskProducer = KafkaProcessor.Producer(clusterId + "_finish", module)
+      if (HAManager.ha) {
+        HAManager.loadCacheData()
+      }
       KafkaProcessor.Consumer(module, clusterId + "_prepare").receive(new ReceivedCallback {
         override def callback(message: String): Resp[Void] = {
           val dto = JsonHelper.toObject(message, classOf[TaskPrepareDTO])
           if (worker == dto.worker) {
             logger.trace(s"Received a message : $message")
+            if (HAManager.ha) {
+              HAManager.saveToCache(dto)
+            }
             ExecutorPool.addExecute(Executor(dto))
           }
           Resp.success(null)
@@ -119,6 +125,9 @@ object Assigner extends LazyLogging {
       * @param dto 完成任务信息
       */
     private[masterslave] def finishTask(dto: TaskFinishDTO): Unit = {
+      if (HAManager.ha) {
+        HAManager.removeInCache(dto.instanceId)
+      }
       if (finishTaskProducer != null) {
         finishTaskProducer.send(JsonHelper.toJsonString(dto))
       } else {

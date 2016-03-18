@@ -23,11 +23,11 @@ class MasterSlaveSpec extends MockStartupSpec {
         assert(finishDTO.instanceParameters == Map("inst1" -> "3", "newField" -> "haha..."))
         assert(finishDTO.isSuccess)
         println("finish -> " + finishDTO)
-        counter.countDown()
+       // counter.countDown()
     }, {
       startDTO =>
         println("start -> " + startDTO)
-        counter.countDown()
+      //  counter.countDown()
     })
 
     Assigner.Master.prepareTask(TaskPrepareDTO(
