@@ -30,12 +30,22 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     Resp.success("")
   }
 
-  override lazy val dependents: collection.mutable.Set[String] = collection.mutable.Set(
-    com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.serviceName,
-    com.ecfront.ez.framework.service.storage.mongo.ServiceAdapter.serviceName,
-    com.ecfront.ez.framework.service.redis.ServiceAdapter.serviceName,
-    com.ecfront.ez.framework.service.email.ServiceAdapter.serviceName
-  )
+  // 服务动态依赖处理方法，如果服务需要根据配置使用不同依赖请重写此方法
+  override def getDynamicDependents(parameter: JsonObject): Set[String] = {
+    if (parameter.containsKey("allowRegister") && parameter.getBoolean("allowRegister")) {
+      Set(
+        com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.serviceName,
+        com.ecfront.ez.framework.service.storage.mongo.ServiceAdapter.serviceName,
+        com.ecfront.ez.framework.service.email.ServiceAdapter.serviceName,
+        com.ecfront.ez.framework.service.redis.ServiceAdapter.serviceName
+      )
+    } else {
+      Set(
+        com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.serviceName,
+        com.ecfront.ez.framework.service.storage.mongo.ServiceAdapter.serviceName
+      )
+    }
+  }
 
   override var serviceName: String = "auth"
 

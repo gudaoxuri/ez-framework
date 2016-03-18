@@ -32,17 +32,17 @@
         </dependency>
         <dependency>
             <groupId>com.ecfront</groupId>
+            <artifactId>ezf-storage-mongo</artifactId>
+            <version>${ezf-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
             <artifactId>ezf-redis</artifactId>
             <version>${ezf-version}</version>
         </dependency>
         <dependency>
             <groupId>com.ecfront</groupId>
             <artifactId>ezf-email</artifactId>
-            <version>${ezf-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.ecfront</groupId>
-            <artifactId>ezf-storage-mongo</artifactId>
             <version>${ezf-version}</version>
         </dependency>
     </dependencies>

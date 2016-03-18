@@ -17,11 +17,15 @@
           "clientSecret": ""
         }
       },
-      "auth": {
-        "allowRegister": true,
-        "publicUriPrefix": "/public/",
-        "activeUrl": "",
-        "restPasswordUrl": ""
+      "auth": {},
+      "rpc.http": {
+        "publicUrl": "https://5604e291.all123.net:8080/",
+        "host": "0.0.0.0",
+        "port": 8080,
+        "ssl": {
+          "keyPath": "keystore.jks",
+          "keyPassword": "123456"
+        }
       },
       "storage.mongo": {
         "hosts": [
@@ -31,31 +35,6 @@
           }
         ],
         "db_name": "ez_test"
-      },
-      "rpc.http": {
-        "servicePath": "com.ecfront.ez.framework.service.rpc.http.test",
-        "publicUrl": "https://mock.ecfront.com:8080/",
-        "host": "0.0.0.0",
-        "port": 8080,
-        "resourcePath": "c:/tmp/",
-        "accessControlAllowOrigin": "*"
-      },
-      "email": {
-        "hostname": "smtp.exmail.qq.com",
-        "ownHostname": "smtp.exmail.qq.com",
-        "port": 465,
-        "starttls": "REQUIRED",
-        "login": "REQUIRED",
-        "ssl": true,
-        "authMethods": "LOGIN",
-        "username": "admin@ecfront.com",
-        "password": ""
-      },
-      "redis": {
-        "host": "192.168.4.99",
-        "port": 6379,
-        "auth": "",
-        "db": 0
       }
     }
   },

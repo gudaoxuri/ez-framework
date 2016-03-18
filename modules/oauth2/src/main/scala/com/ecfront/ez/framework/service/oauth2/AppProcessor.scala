@@ -26,7 +26,7 @@ trait AppProcessor extends LazyLogging {
 
   def getCode: String = {
     oauth2.authorizeURL(new JsonObject()
-      //fix weixin use appid instead of client_id
+      // fix weixin use appid instead of client_id
       .put("appid", config.getString("clientID"))
       .put("redirect_uri", com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.publicUrl + "public/oauth2/callback/" + appName + "/")
       .put("scope", scope)
@@ -37,9 +37,9 @@ trait AppProcessor extends LazyLogging {
     val p = Promise[Resp[AccessToken]]()
     //TODO csrf
     oauth2.getToken(new JsonObject()
-      //fix weixin use appid instead of client_id
+      // fix weixin use appid instead of client_id
       .put("appid", config.getString("clientID"))
-      //fix weixin use secret instead of clientSecret
+      // fix weixin use secret instead of clientSecret
       .put("secret", config.getString("clientSecret"))
       .put("code", code), new Handler[AsyncResult[AccessToken]] {
       override def handle(e: AsyncResult[AccessToken]): Unit = {

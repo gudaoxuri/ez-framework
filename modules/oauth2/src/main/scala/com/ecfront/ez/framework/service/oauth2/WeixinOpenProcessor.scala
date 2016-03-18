@@ -47,7 +47,7 @@ object WeixinOpenProcessor extends AppProcessor {
 
   override def scope: String = "snsapi_login"
 
-  override protected def appName: String = "weixin"
+  override protected def appName: String = "weixin_open"
 
   override def flowType: OAuth2FlowType = OAuth2FlowType.AUTH_CODE
 }

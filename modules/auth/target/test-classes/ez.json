@@ -19,7 +19,7 @@
       },
       "rpc.http": {
         "servicePath": "com.ecfront.ez.framework.service.rpc.http.test",
-        "webUrl": "http://127.0.0.1/",
+        "webUrl": "http://localhost:63342/shtzsr/ui/index.html",
         "publicUrl": "http://127.0.0.1:8080/",
         "host": "0.0.0.0",
         "port": 8080

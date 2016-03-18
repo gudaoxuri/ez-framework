@@ -49,7 +49,7 @@ object WeixinMPProcessor extends AppProcessor {
 
   override def scope: String = "snsapi_userinfo"
 
-  override protected def appName: String = "weixin"
+  override protected def appName: String = "weixin_mp"
 
   override def flowType: OAuth2FlowType = OAuth2FlowType.AUTH_CODE
 }

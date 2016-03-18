@@ -5,8 +5,8 @@
     "services": {
       "rpc.http": {
         "servicePath": "com.ecfront.ez.framework.service.rpc.http.test",
-        "webUrl": "https://mock.ecfront.com/",
-        "publicUrl": "https://mock.ecfront.com:8080/",
+        "webUrl": "http://localhost:63342/shtzsr/ui/index.html",
+        "publicUrl": "https://127.0.0.1:8080/",
         "host": "0.0.0.0",
         "port": 8080,
         "resourcePath": "c:/tmp/",

@@ -21,8 +21,10 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     resourcePath = parameter.getString("resourcePath", "/tmp/")
     publicUrl = parameter.getString("publicUrl", "http://" + parameter.getString("host") + ":" + parameter.getInteger("port") + "/")
     webUrl = parameter.getString("webUrl", publicUrl)
-    val servicePath = parameter.getString("servicePath")
-    AutoBuildingProcessor.autoBuilding[HTTP](servicePath, classOf[HTTP])
+    val servicePath = parameter.getString("servicePath", null)
+    if (servicePath != null) {
+      AutoBuildingProcessor.autoBuilding[HTTP](servicePath, classOf[HTTP])
+    }
     val opt = new HttpServerOptions()
     if (parameter.containsKey("ssl")) {
       var keyPath = parameter.getJsonObject("ssl").getString("keyPath")
