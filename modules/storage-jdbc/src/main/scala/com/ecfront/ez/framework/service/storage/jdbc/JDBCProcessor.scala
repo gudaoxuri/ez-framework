@@ -160,7 +160,7 @@ object JDBCProcessor extends LazyLogging {
               )
             } else {
               conn.updateWithParams(sql,
-                new JsonArray(parameters.toList),
+                new JsonArray(parameters),
                 new Handler[AsyncResult[UpdateResult]] {
                   override def handle(event: AsyncResult[UpdateResult]): Unit = {
                     if (event.succeeded()) {
@@ -261,7 +261,7 @@ object JDBCProcessor extends LazyLogging {
         case Success(conn) =>
           try {
             conn.queryWithParams(sql,
-              new JsonArray(parameters.toList),
+              new JsonArray(parameters),
               new Handler[AsyncResult[ResultSet]] {
                 override def handle(event: AsyncResult[ResultSet]): Unit = {
                   if (event.succeeded()) {
@@ -319,7 +319,7 @@ object JDBCProcessor extends LazyLogging {
         case Success(conn) =>
           try {
             conn.queryWithParams(sql,
-              new JsonArray(parameters.toList),
+              new JsonArray(parameters),
               new Handler[AsyncResult[ResultSet]] {
                 override def handle(event: AsyncResult[ResultSet]): Unit = {
                   if (event.succeeded()) {
@@ -372,7 +372,7 @@ object JDBCProcessor extends LazyLogging {
       db.onComplete {
         case Success(conn) =>
           try {
-            countInner(sql, parameters).onSuccess {
+            countInner(sql, parameters, conn).onSuccess {
               case countResp =>
                 if (countResp) {
                   val page = new Page[E]
@@ -382,7 +382,7 @@ object JDBCProcessor extends LazyLogging {
                   page.pageTotal = (page.recordTotal + pageSize - 1) / pageSize
                   val limitSql = s"$sql limit ${(pageNumber - 1) * pageSize} ,$pageSize"
                   conn.queryWithParams(limitSql,
-                    new JsonArray(parameters.toList),
+                    new JsonArray(parameters),
                     new Handler[AsyncResult[ResultSet]] {
                       override def handle(event: AsyncResult[ResultSet]): Unit = {
                         if (event.succeeded()) {
@@ -435,7 +435,7 @@ object JDBCProcessor extends LazyLogging {
         case Success(conn) =>
           try {
             conn.queryWithParams(sql,
-              new JsonArray(parameters.toList),
+              new JsonArray(parameters),
               new Handler[AsyncResult[ResultSet]] {
                 override def handle(event: AsyncResult[ResultSet]): Unit = {
                   if (event.succeeded()) {
@@ -462,29 +462,23 @@ object JDBCProcessor extends LazyLogging {
     }
 
     // 此方法仅为分页请求提供
-    private def countInner(sql: String, parameters: List[Any]): Future[Resp[Long]] = {
+    private def countInner(sql: String, parameters: List[Any], conn: SQLConnection): Future[Resp[Long]] = {
       val p = Promise[Resp[Long]]()
-      db.onComplete {
-        case Success(conn) =>
-          val countSql = s"SELECT COUNT(1) FROM ( $sql ) _${System.currentTimeMillis()}"
-          conn.queryWithParams(countSql,
-            new JsonArray(parameters.toList),
-            new Handler[AsyncResult[ResultSet]] {
-              override def handle(event: AsyncResult[ResultSet]): Unit = {
-                if (event.succeeded()) {
-                  val result = Resp.success[Long](event.result().getResults.get(0).getLong(0))
-                  conn.close()
-                  p.success(result)
-                } else {
-                  logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
-                  conn.close()
-                  p.success(Resp.serverError(event.cause().getMessage))
-                }
-              }
+      val countSql = s"SELECT COUNT(1) FROM ( $sql ) _${System.currentTimeMillis()}"
+      conn.queryWithParams(countSql,
+        new JsonArray(parameters),
+        new Handler[AsyncResult[ResultSet]] {
+          override def handle(event: AsyncResult[ResultSet]): Unit = {
+            if (event.succeeded()) {
+              val result = Resp.success[Long](event.result().getResults.get(0).getLong(0))
+              p.success(result)
+            } else {
+              logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
+              p.success(Resp.serverError(event.cause().getMessage))
             }
-          )
-        case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
-      }
+          }
+        }
+      )
       p.future
     }
 
@@ -502,7 +496,7 @@ object JDBCProcessor extends LazyLogging {
         case Success(conn) =>
           try {
             conn.queryWithParams(sql,
-              new JsonArray(parameters.toList),
+              new JsonArray(parameters),
               new Handler[AsyncResult[ResultSet]] {
                 override def handle(event: AsyncResult[ResultSet]): Unit = {
                   if (event.succeeded()) {
