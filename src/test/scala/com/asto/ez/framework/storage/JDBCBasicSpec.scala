@@ -8,7 +8,7 @@ abstract class JDBCBasicSpec extends BasicSpec {
 
   override def before2(): Any = {
     val jdbc = EZGlobal.ez_storage.getJsonObject("jdbc")
-    DBProcessor.dbClient = JDBCClient.createShared(EZGlobal.vertx, jdbc)
+    DBProcessor.init(jdbc)
   }
 
 }

@@ -25,7 +25,15 @@ import scala.util.{Failure, Success}
   */
 object DBProcessor extends LazyLogging {
 
-  var dbClient: JDBCClient = _
+
+  private var jdbc: JsonObject = null
+
+  def init(_jdbc: JsonObject) = {
+    jdbc = _jdbc
+    dbClient = JDBCClient.createShared(EZGlobal.vertx, jdbc)
+  }
+
+  private var dbClient: JDBCClient = _
 
   def update(sql: String, parameters: List[Any] = null, retryTimes: Int = 0): Future[Resp[Void]] = {
     val p = Promise[Resp[Void]]()
@@ -215,7 +223,7 @@ object DBProcessor extends LazyLogging {
       case Success(conn) =>
         try {
           conn.queryWithParams(sql,
-            new JsonArray(parameters.toList),
+            new JsonArray(parameters),
             new Handler[AsyncResult[ResultSet]] {
               override def handle(event: AsyncResult[ResultSet]): Unit = {
                 if (event.succeeded()) {
@@ -257,7 +265,7 @@ object DBProcessor extends LazyLogging {
     db.onComplete {
       case Success(conn) =>
         try {
-          countInner(sql, parameters).onSuccess {
+          countInner(sql, parameters, conn).onSuccess {
             case countResp =>
               if (countResp) {
                 val page = new Page[E]
@@ -313,7 +321,7 @@ object DBProcessor extends LazyLogging {
       case Success(conn) =>
         try {
           conn.queryWithParams(sql,
-            new JsonArray(parameters.toList),
+            new JsonArray(parameters),
             new Handler[AsyncResult[ResultSet]] {
               override def handle(event: AsyncResult[ResultSet]): Unit = {
                 if (event.succeeded()) {
@@ -340,29 +348,23 @@ object DBProcessor extends LazyLogging {
   }
 
   //此方法仅为分页请求提供
-  private def countInner(sql: String, parameters: List[Any]): Future[Resp[Long]] = {
+  private def countInner(sql: String, parameters: List[Any], conn: SQLConnection): Future[Resp[Long]] = {
     val p = Promise[Resp[Long]]()
-    db.onComplete {
-      case Success(conn) =>
-        val countSql = s"SELECT COUNT(1) FROM ( $sql ) _${System.currentTimeMillis()}"
-        conn.queryWithParams(countSql,
-          new JsonArray(parameters.toList),
-          new Handler[AsyncResult[ResultSet]] {
-            override def handle(event: AsyncResult[ResultSet]): Unit = {
-              if (event.succeeded()) {
-                val result = Resp.success[Long](event.result().getResults.get(0).getLong(0))
-                conn.close()
-                p.success(result)
-              } else {
-                logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
-                conn.close()
-                p.success(Resp.serverError(event.cause().getMessage))
-              }
-            }
+    val countSql = s"SELECT COUNT(1) FROM ( $sql ) _${System.currentTimeMillis()}"
+    conn.queryWithParams(countSql,
+      new JsonArray(parameters),
+      new Handler[AsyncResult[ResultSet]] {
+        override def handle(event: AsyncResult[ResultSet]): Unit = {
+          if (event.succeeded()) {
+            val result = Resp.success[Long](event.result().getResults.get(0).getLong(0))
+            p.success(result)
+          } else {
+            logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
+            p.success(Resp.serverError(event.cause().getMessage))
           }
-        )
-      case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
-    }
+        }
+      }
+    )
     p.future
   }
 
@@ -410,8 +412,19 @@ object DBProcessor extends LazyLogging {
         if (conn.succeeded()) {
           p.success(conn.result())
         } else {
-          logger.error("JDBC connecting fail .", conn.cause())
-          p.failure(conn.cause())
+          logger.warn("JDBC connecting fail . re-connecting it", conn.cause())
+          dbClient.close()
+          dbClient = JDBCClient.createShared(EZGlobal.vertx, jdbc)
+          dbClient.getConnection(new Handler[AsyncResult[SQLConnection]] {
+            override def handle(conn: AsyncResult[SQLConnection]): Unit = {
+              if (conn.succeeded()) {
+                p.success(conn.result())
+              } else {
+                logger.error("JDBC connecting fail .", conn.cause())
+                p.failure(conn.cause())
+              }
+            }
+          })
         }
       }
     })
