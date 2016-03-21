@@ -1,0 +1,40 @@
+{
+  "ez": {
+    "app": "",
+    "module": "",
+    "services": {
+      "weixin": {
+        "appId": "wx7b758a31f520f4bb",
+        "secret": "097c19f1cc0895a346b6f0de5e347165"
+      },
+      "oauth2": {
+        "weixin_mp": {
+          "appId": "wx7b758a31f520f4bb",
+          "secret": "097c19f1cc0895a346b6f0de5e347165"
+        }
+      },
+      "auth": {},
+      "rpc.http": {
+        "webUrl": "http://localhost:63342/shtzsr/ui/index.html",
+        "publicUrl": "http://5604e291.all123.net/",
+        "host": "0.0.0.0",
+        "port": 80
+      },
+      "storage.mongo": {
+        "hosts": [
+          {
+            "host": "192.168.4.99",
+            "port": 27017
+          }
+        ],
+        "db_name": "ez_test"
+      },
+      "redis": {
+        "host": "192.168.4.99",
+        "port": 6379
+      }
+    }
+  },
+  "args": {
+  }
+}
