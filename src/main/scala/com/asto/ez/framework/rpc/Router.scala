@@ -90,27 +90,34 @@ object Router extends LazyLogging {
     val newParameters = collection.mutable.Map[String, String]()
     newParameters ++= parameters
     var urlTemplate = path
-    var fun: Fun[_] = ROUTERS(channel).funContainer(method.toUpperCase).get(path).orNull
-    if (fun == null) {
-      //使用正则路由
-      ROUTERS(channel).funContainerR(method).foreach {
-        item =>
-          val matcher = item.pattern.matcher(path)
-          if (matcher.matches()) {
-            //匹配到正则路由
-            //获取原始（注册时的）Path
-            urlTemplate = item.originalPath
-            fun = item.fun
-            //从Path中抽取变量
-            item.param.foreach(name => newParameters += (name -> matcher.group(name)))
-          }
+    if(ROUTERS(channel).funContainer.contains(method.toUpperCase)){
+      var fun: Fun[_] = ROUTERS(channel).funContainer(method.toUpperCase).get(path).orNull
+      if (fun == null) {
+        //使用正则路由
+        ROUTERS(channel).funContainerR(method).foreach {
+          item =>
+            val matcher = item.pattern.matcher(path)
+            if (matcher.matches()) {
+              //匹配到正则路由
+              //获取原始（注册时的）Path
+              urlTemplate = item.originalPath
+              fun = item.fun
+              //从Path中抽取变量
+              item.param.foreach(name => newParameters += (name -> matcher.group(name)))
+            }
+        }
       }
-    }
-    if (fun != null) {
-      //匹配到路由
-      (Resp.success(null), fun, newParameters.toMap, urlTemplate)
-    } else {
-      //没有匹配到路由且没有any实现
+      if (fun != null) {
+        //匹配到路由
+        (Resp.success(null), fun, newParameters.toMap, urlTemplate)
+      } else {
+        //没有匹配到路由
+        // TODO add alert
+        (Resp.notImplemented("[ %s ] %s".format(method, path)), null, newParameters.toMap, null)
+      }
+    }else{
+      //没有匹配到路由
+      // TODO add alert
       (Resp.notImplemented("[ %s ] %s".format(method, path)), null, newParameters.toMap, null)
     }
   }
