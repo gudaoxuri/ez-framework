@@ -1,4 +1,4 @@
-package com.ecfront.ez.framework.service.oauth2
+package com.ecfront.ez.framework.service.weixin
 
 /**
   *  Access Token
