@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.service.oauth2
 
 import com.ecfront.common.{JsonHelper, Resp}
-import com.ecfront.ez.framework.service.auth.EZ_Account
+import com.ecfront.ez.framework.service.auth.model.EZ_Account
 import com.ecfront.ez.framework.service.rpc.http.HttpClientProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.json.JsonObject
