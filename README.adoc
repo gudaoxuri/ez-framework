@@ -1,5 +1,7 @@
 = Scala中功能全面、使用简单的服务框架
 
+image::https://img.shields.io/travis/gudaoxuri/ez-framework.svg[link="https://travis-ci.org/gudaoxuri/ez-framework"]
+
 == 特点
 
 . 模块化服务设计
