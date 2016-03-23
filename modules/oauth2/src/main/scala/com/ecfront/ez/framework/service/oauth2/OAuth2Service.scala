@@ -4,6 +4,7 @@ import java.util.UUID
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.service.auth._
+import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Role, EZ_Token_Info}
 import com.ecfront.ez.framework.service.rpc.foundation.{GET, RPC, RespRedirect}
 import com.ecfront.ez.framework.service.rpc.http.HTTP
 import io.vertx.core.json.JsonObject
