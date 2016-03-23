@@ -2,6 +2,7 @@ package com.ecfront.ez.framework.service.auth
 
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
 import com.ecfront.ez.framework.core.test.MockStartupSpec
+import com.ecfront.ez.framework.service.auth.model.EZ_Account
 import com.ecfront.ez.framework.service.rpc.http.HttpClientProcessor
 
 class UserSpec extends MockStartupSpec {
@@ -9,7 +10,7 @@ class UserSpec extends MockStartupSpec {
   // Step 1 Register
   test("User Register test") {
 
-    EZ_Account.deleteByCond(s"""{"email":"net@sunisle.org"}""")
+    EZ_Account.deleteByEmail("net@sunisle.org")
 
     val account = Account_VO()
     account.login_id = "u1"

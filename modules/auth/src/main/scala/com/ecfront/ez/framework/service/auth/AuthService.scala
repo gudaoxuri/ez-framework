@@ -3,9 +3,9 @@ package com.ecfront.ez.framework.service.auth
 import java.util.UUID
 
 import com.ecfront.common.Resp
+import com.ecfront.ez.framework.service.auth.model._
 import com.ecfront.ez.framework.service.rpc.foundation.{GET, POST, RPC}
 import com.ecfront.ez.framework.service.rpc.http.HTTP
-import com.ecfront.ez.framework.service.storage.mongo.SortEnum
 
 @RPC("/auth/")
 @HTTP
@@ -53,7 +53,7 @@ object AuthService {
       tokenInfo.last_login_time = System.currentTimeMillis()
       tokenInfo.roles = EZ_Role.findByCodes(account.role_codes).body
       tokenInfo.organization = EZ_Organization.getByCode(account.organization_code).body
-      EZ_Token_Info.deleteByCond(s"""{"login_id":"${tokenInfo.login_id}"}""")
+      EZ_Token_Info.deleteByLoginId(tokenInfo.login_id)
       val saveR = EZ_Token_Info.save(tokenInfo)
       if (saveR) {
         Resp.success(
@@ -137,7 +137,7 @@ object AuthService {
   }
 
   def doGetMenus(roleCodes: List[String]): Resp[List[EZ_Menu]] = {
-    val allMenuR = EZ_Menu.findWithOpt(s"""{"enable":true}""", Map("sort" -> SortEnum.DESC))
+    val allMenuR = EZ_Menu.findEnableWithSort()
     val roleCodeSet = roleCodes.toSet
     val filteredMenus = allMenuR.body.filter {
       menu =>

@@ -2,6 +2,7 @@ package com.ecfront.ez.framework.service.auth
 
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
 import com.ecfront.ez.framework.core.test.MockStartupSpec
+import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Organization, EZ_Resource, EZ_Role}
 import com.ecfront.ez.framework.service.rpc.foundation.Method
 import com.ecfront.ez.framework.service.rpc.http.HttpClientProcessor
 
@@ -9,10 +10,10 @@ class OrganizationSpec extends MockStartupSpec {
 
   test("Organization test") {
 
-    EZ_Organization.deleteByCond(s"""{"code":"org1"}""")
-    EZ_Resource.deleteByCond(s"""{"code":"GET@/org/1/foo/"}""")
-    EZ_Role.deleteByCond(s"""{"code":"org1@user1"}""")
-    EZ_Account.deleteByCond(s"""{"login_id":"u1"}""")
+    EZ_Organization.deleteByCode("org1")
+    EZ_Resource.deleteByCode("GET@/org/1/foo/")
+    EZ_Role.deleteByCode("org1@user1")
+    EZ_Account.deleteByLoginId("u1")
 
     EZ_Organization.save(EZ_Organization("org1", "组织1"))
     EZ_Resource.save(EZ_Resource(Method.GET, "/org/1/foo/", s"Fetch org1 Info"))

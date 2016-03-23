@@ -1,7 +1,8 @@
 package com.ecfront.ez.framework.service.auth.manage
 
 import com.ecfront.ez.framework.core.helper.FileType
-import com.ecfront.ez.framework.service.auth.{EZAuthContext, EZ_Organization}
+import com.ecfront.ez.framework.service.auth.EZAuthContext
+import com.ecfront.ez.framework.service.auth.model.EZ_Organization
 import com.ecfront.ez.framework.service.rpc.foundation.RPC
 import com.ecfront.ez.framework.service.rpc.http.HTTP
 import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHttpService

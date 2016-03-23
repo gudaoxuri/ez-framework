@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.service.auth
 
 import com.ecfront.common.BeanHelper
+import com.ecfront.ez.framework.service.auth.model.EZ_Token_Info
 import com.ecfront.ez.framework.service.rpc.foundation.EZRPCContext
 import com.ecfront.ez.framework.service.storage.foundation.EZStorageContext
 

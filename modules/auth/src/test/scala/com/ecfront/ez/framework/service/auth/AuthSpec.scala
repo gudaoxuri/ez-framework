@@ -2,6 +2,7 @@ package com.ecfront.ez.framework.service.auth
 
 import com.ecfront.common.EncryptHelper
 import com.ecfront.ez.framework.core.test.MockStartupSpec
+import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Resource, EZ_Role}
 import com.ecfront.ez.framework.service.rpc.foundation.Method
 import com.ecfront.ez.framework.service.storage.foundation.BaseModel
 
@@ -9,7 +10,7 @@ class AuthSpec extends MockStartupSpec {
 
   test("Auth Test") {
 
-    val resources = EZ_Resource.find("{}").body
+    val resources = EZ_Resource.find("").body
     assert(
       resources.size == 57
         && resources.head.method == Method.GET
@@ -18,7 +19,7 @@ class AuthSpec extends MockStartupSpec {
         && resources.head.enable
     )
 
-    val roles = EZ_Role.find("{}").body
+    val roles = EZ_Role.find("").body
     assert(
       roles.size == 2
         && roles.head.code == BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE

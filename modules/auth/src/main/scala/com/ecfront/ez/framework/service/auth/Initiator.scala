@@ -1,5 +1,6 @@
 package com.ecfront.ez.framework.service.auth
 
+import com.ecfront.ez.framework.service.auth.model._
 import com.ecfront.ez.framework.service.rpc.foundation.Method
 import com.ecfront.ez.framework.service.storage.foundation.BaseModel
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -14,7 +15,11 @@ object Initiator extends LazyLogging {
 
   def init(): Unit = {
 
-    val exist = EZ_Resource.existByCond(s"""{"code":"${Method.GET + BaseModel.SPLIT + "/auth/manage/organization/"}"}""")
+    val exist = if (ServiceAdapter.mongoStorage) {
+      EZ_Resource.existByCond(s"""{"code":"${Method.GET + BaseModel.SPLIT + "/auth/manage/organization/"}"}""")
+    } else {
+      EZ_Resource.existByCond(s"""code = ?""", List(Method.GET + BaseModel.SPLIT + "/auth/manage/organization/"))
+    }
     if (!exist.body) {
       val org = EZ_Organization("", "default")
       EZ_Organization.save(org)

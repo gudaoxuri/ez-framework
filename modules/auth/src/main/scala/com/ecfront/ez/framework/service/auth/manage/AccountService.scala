@@ -6,6 +6,7 @@ import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.core.helper.FileType
 import com.ecfront.ez.framework.service.auth._
+import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Role, EZ_Token_Info}
 import com.ecfront.ez.framework.service.email.EmailProcessor
 import com.ecfront.ez.framework.service.redis.RedisProcessor
 import com.ecfront.ez.framework.service.rpc.foundation._
@@ -80,7 +81,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
     val keyR = RedisProcessor.get(s"ez-active_account_$email")
     if (keyR && keyR.body == encryption) {
       RedisProcessor.del(s"ez-active_account_$email")
-      val accountR = EZ_Account.getByCond(s"""{"email":"$email"}""")
+      val accountR = EZ_Account.getByEmail(email)
       if (accountR && accountR.body != null) {
         accountR.body.enable = true
         EZ_Account.update(accountR.body, context)
@@ -189,7 +190,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
   @PUT("/public/findpassword/:email/")
   def findPassword(parameter: Map[String, String], body: Map[String, String], context: EZAuthContext): Resp[Void] = {
     val email = parameter("email")
-    val existR = EZ_Account.existByCond(s"""{"email":"$email"}""")
+    val existR = EZ_Account.existByEmail(email)
     if (existR && existR.body) {
       val encryption = UUID.randomUUID().toString + System.nanoTime()
       RedisProcessor.set(s"ez-rest_password_key_$email", encryption, 60 * 60 * 24)
@@ -225,7 +226,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
       if (newPwdR && newPwdR.body != null) {
         RedisProcessor.del(s"ez-rest_password_pwd_$email")
         val newPassword = newPwdR.body
-        val accountR = EZ_Account.getByCond(s"""{"email":"$email"}""")
+        val accountR = EZ_Account.getByEmail(email)
         if (accountR && accountR.body != null) {
           accountR.body.password = EZ_Account.packageEncryptPwd(accountR.body.login_id, newPassword)
           EZ_Account.update(accountR.body, context)

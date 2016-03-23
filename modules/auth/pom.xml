@@ -32,6 +32,11 @@
         </dependency>
         <dependency>
             <groupId>com.ecfront</groupId>
+            <artifactId>ezf-storage-jdbc</artifactId>
+            <version>${ezf-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
             <artifactId>ezf-storage-mongo</artifactId>
             <version>${ezf-version}</version>
         </dependency>

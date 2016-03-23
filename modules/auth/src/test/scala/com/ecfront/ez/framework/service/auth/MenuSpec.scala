@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.service.auth
 
 import com.ecfront.ez.framework.core.test.MockStartupSpec
+import com.ecfront.ez.framework.service.auth.model.EZ_Menu
 
 class MenuSpec extends MockStartupSpec {
 

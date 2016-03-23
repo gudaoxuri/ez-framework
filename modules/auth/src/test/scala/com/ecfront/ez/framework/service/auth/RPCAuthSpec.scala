@@ -2,6 +2,7 @@ package com.ecfront.ez.framework.service.auth
 
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
 import com.ecfront.ez.framework.core.test.MockStartupSpec
+import com.ecfront.ez.framework.service.auth.model.EZ_Account
 import com.ecfront.ez.framework.service.rpc.http.HttpClientProcessor
 
 class RPCAuthSpec extends MockStartupSpec {
