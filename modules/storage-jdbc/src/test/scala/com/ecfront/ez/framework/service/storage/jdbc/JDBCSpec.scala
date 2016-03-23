@@ -12,13 +12,17 @@ class JDBCSpec extends MockStartupSpec {
 
     // JDBCProcessor.find("select count(*) from testA join testB on testA.id = testB.id",List(),classOf[Long]),Duration.Inf)
 
-    val createFuture = JDBCProcessor.update(
+    JDBCProcessor.update(
       """
         |CREATE TABLE IF NOT EXISTS jdbc_test_entity
         |(
         | id INT NOT NULL AUTO_INCREMENT ,
         | name varchar(100) NOT NULL ,
         | age INT NOT NULL ,
+        | rel1 JSON ,
+        | rel2 JSON ,
+        | rel3 JSON ,
+        | rel4 JSON ,
         | create_user varchar(100) NOT NULL COMMENT '创建用户' ,
         | create_org varchar(100) NOT NULL COMMENT '创建组织' ,
         | create_time BIGINT NOT NULL COMMENT '创建时间(yyyyMMddHHmmssSSS)' ,
@@ -30,7 +34,6 @@ class JDBCSpec extends MockStartupSpec {
         |)ENGINE=innodb DEFAULT CHARSET=utf8
       """.stripMargin
     )
-    createFuture
 
     JDBC_Test_Entity.deleteByCond("1=1", List()).body
 
@@ -115,6 +118,57 @@ class JDBCSpec extends MockStartupSpec {
     assert(findResult.isEmpty)
   }
 
+  test("complex type test") {
+
+    var jdbc = JDBC_Test_Entity()
+    jdbc.id = "1"
+    jdbc.name = "n4"
+    jdbc.age = 1
+    jdbc.rel1 = List("1", "2")
+    jdbc.rel2 = Map("s" -> "sss")
+    val relModel = new Rel_Model()
+    relModel.f = "r"
+    jdbc.rel3 = List(relModel)
+    jdbc.rel4 = relModel
+
+    jdbc = JDBC_Test_Entity.save(jdbc).body
+    assert(jdbc.rel1 == List("1", "2"))
+    assert(jdbc.rel2 == Map("s" -> "sss"))
+    assert(jdbc.rel3.head.f == "r")
+    assert(jdbc.rel4.f ==  "r")
+    jdbc.rel1 = List("new")
+    jdbc.rel2 = Map("new" -> "new")
+    val newRelModel = new Rel_Model()
+    newRelModel.f = "new"
+    jdbc.rel3 = List(newRelModel)
+    jdbc.rel4 = newRelModel
+
+    jdbc = JDBC_Test_Entity.update(jdbc).body
+    assert(jdbc.rel1 == List("new"))
+    assert(jdbc.rel2 == Map("new" -> "new"))
+    assert(jdbc.rel3.head.f == "new")
+    assert(jdbc.rel4.f == "new")
+
+    jdbc = JDBC_Test_Entity.find("").body.head
+    assert(jdbc.rel1 == List("new"))
+    assert(jdbc.rel2 == Map("new" -> "new"))
+    assert(jdbc.rel3.head.f == "new")
+    assert(jdbc.rel4.f == "new")
+
+    jdbc = JDBC_Test_Entity.page("").body.objects.head
+    assert(jdbc.rel1 == List("new"))
+    assert(jdbc.rel2 == Map("new" -> "new"))
+    assert(jdbc.rel3.head.f == "new")
+    assert(jdbc.rel4.f == "new")
+
+    jdbc = JDBC_Test_Entity.getById("1").body
+    assert(jdbc.rel1 == List("new"))
+    assert(jdbc.rel2 == Map("new" -> "new"))
+    assert(jdbc.rel3.head.f == "new")
+    assert(jdbc.rel4.f == "new")
+
+  }
+
 }
 
 @Entity("")
@@ -125,6 +179,16 @@ case class JDBC_Test_Entity() extends SecureModel with StatusModel {
   @Label("姓名")
   @BeanProperty var name: String = _
   @BeanProperty var age: Int = _
+  @BeanProperty var rel1: List[String] = _
+  @BeanProperty var rel2: Map[String, Any] = _
+  @BeanProperty var rel3: List[Rel_Model] = _
+  @BeanProperty var rel4: Rel_Model = _
+
+}
+
+class Rel_Model extends Serializable {
+
+  @BeanProperty var f: String = _
 
 }
 

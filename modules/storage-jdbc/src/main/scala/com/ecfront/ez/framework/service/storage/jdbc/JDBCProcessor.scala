@@ -4,7 +4,7 @@ import java.lang
 import java.sql.SQLTransactionRollbackException
 import java.util.concurrent.atomic.AtomicLong
 
-import com.ecfront.common.{JsonHelper, Resp}
+import com.ecfront.common.{BeanHelper, JsonHelper, Resp}
 import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.service.storage.foundation.Page
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -124,11 +124,12 @@ object JDBCProcessor extends LazyLogging {
       */
     def update(sql: String, parameters: List[Any] = null, retryTimes: Int = 0): Future[Resp[Void]] = {
       val p = Promise[Resp[Void]]()
-      logger.trace(s"JDBC update : $sql [$parameters]")
+      val finalParameters = formatParameters(parameters)
+      logger.trace(s"JDBC update : $sql [$finalParameters]")
       db.onComplete {
         case Success(conn) =>
           try {
-            if (parameters == null) {
+            if (finalParameters == null) {
               conn.update(sql,
                 new Handler[AsyncResult[UpdateResult]] {
                   override def handle(event: AsyncResult[UpdateResult]): Unit = {
@@ -142,16 +143,16 @@ object JDBCProcessor extends LazyLogging {
                           if (retryTimes < 10) {
                             EZContext.vertx.setTimer(5000 * (retryTimes + 1), new Handler[lang.Long] {
                               override def handle(event: lang.Long): Unit = {
-                                logger.debug(s"JDBC update problem try times [${retryTimes + 1}] : $sql [$parameters]")
+                                logger.debug(s"JDBC update problem try times [${retryTimes + 1}] : $sql [$finalParameters]")
                                 update(sql, parameters, retryTimes + 1)
                               }
                             })
                           } else {
-                            logger.warn(s"JDBC update error and try times > 10 : $sql [$parameters]", event.cause())
+                            logger.warn(s"JDBC update error and try times > 10 : $sql [$finalParameters]", event.cause())
                             p.success(Resp.serverError(event.cause().getMessage))
                           }
                         case _ =>
-                          logger.warn(s"JDBC update error : $sql [$parameters]", event.cause())
+                          logger.warn(s"JDBC update error : $sql [$finalParameters]", event.cause())
                           p.success(Resp.serverError(event.cause().getMessage))
                       }
                     }
@@ -160,7 +161,7 @@ object JDBCProcessor extends LazyLogging {
               )
             } else {
               conn.updateWithParams(sql,
-                new JsonArray(parameters),
+                new JsonArray(finalParameters),
                 new Handler[AsyncResult[UpdateResult]] {
                   override def handle(event: AsyncResult[UpdateResult]): Unit = {
                     if (event.succeeded()) {
@@ -173,16 +174,16 @@ object JDBCProcessor extends LazyLogging {
                           if (retryTimes < 10) {
                             EZContext.vertx.setTimer(5000 * (retryTimes + 1), new Handler[lang.Long] {
                               override def handle(event: lang.Long): Unit = {
-                                logger.debug(s"JDBC update problem try times [${retryTimes + 1}] : $sql [$parameters]")
+                                logger.debug(s"JDBC update problem try times [${retryTimes + 1}] : $sql [$finalParameters]")
                                 update(sql, parameters, retryTimes + 1)
                               }
                             })
                           } else {
-                            logger.warn(s"JDBC update error and try times > 10 : $sql [$parameters]", event.cause())
+                            logger.warn(s"JDBC update error and try times > 10 : $sql [$finalParameters]", event.cause())
                             p.success(Resp.serverError(event.cause().getMessage))
                           }
                         case _ =>
-                          logger.warn(s"JDBC update error : $sql [$parameters]", event.cause())
+                          logger.warn(s"JDBC update error : $sql [$finalParameters]", event.cause())
                           p.success(Resp.serverError(event.cause().getMessage))
                       }
                     }
@@ -193,7 +194,7 @@ object JDBCProcessor extends LazyLogging {
           } catch {
             case ex: Throwable =>
               conn.close()
-              logger.error(s"JDBC execute error : $sql [$parameters]", ex)
+              logger.error(s"JDBC execute error : $sql [$finalParameters]", ex)
               p.success(Resp.serverError(ex.getMessage))
           }
         case Failure(ex) =>
@@ -218,12 +219,13 @@ object JDBCProcessor extends LazyLogging {
             val counter = new AtomicLong(parameterList.length)
             parameterList.foreach {
               parameters =>
+                val finalParameters = formatParameters(parameters)
                 conn.updateWithParams(sql,
-                  new JsonArray(parameters),
+                  new JsonArray(finalParameters),
                   new Handler[AsyncResult[UpdateResult]] {
                     override def handle(event: AsyncResult[UpdateResult]): Unit = {
                       if (!event.succeeded()) {
-                        logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
+                        logger.warn(s"JDBC execute error : $sql [$finalParameters]", event.cause())
                       }
                       if (counter.decrementAndGet() == 0) {
                         conn.close()
@@ -243,6 +245,22 @@ object JDBCProcessor extends LazyLogging {
           p.success(Resp.serverUnavailable(ex.getMessage))
       }
       p.future
+    }
+
+    private[jdbc] def formatParameters(parameters: List[Any]): List[Any] = {
+      if (parameters == null) {
+        null
+      } else {
+        parameters.map {
+          case p if
+          p.isInstanceOf[String] || p.isInstanceOf[Int] || p.isInstanceOf[Long] || p.isInstanceOf[Boolean] ||
+            p.isInstanceOf[Double] || p.isInstanceOf[Float] || p.isInstanceOf[BigDecimal] ||
+            p.isInstanceOf[Char] || p.isInstanceOf[Short] || p.isInstanceOf[Byte]
+          => p
+          case p =>
+            JsonHelper.toJsonString(p)
+        }
+      }
     }
 
     /**
@@ -272,7 +290,7 @@ object JDBCProcessor extends LazyLogging {
                     }
                     if (row != null) {
                       if (resultClass != classOf[JsonObject]) {
-                        val result = Resp.success(JsonHelper.toObject(row.encode(), resultClass))
+                        val result = Resp.success(convertObject(row, resultClass))
                         conn.close()
                         p.success(result)
                       } else {
@@ -326,8 +344,7 @@ object JDBCProcessor extends LazyLogging {
                     val rows = event.result().getRows.toList
                     if (resultClass != classOf[JsonObject]) {
                       val result = Resp.success(rows.map {
-                        row =>
-                          JsonHelper.toObject(row.encode(), resultClass)
+                        convertObject(_, resultClass)
                       })
                       conn.close()
                       p.success(result)
@@ -389,8 +406,7 @@ object JDBCProcessor extends LazyLogging {
                           val rows = event.result().getRows.toList
                           if (resultClass != classOf[JsonObject]) {
                             page.objects = rows.map {
-                              row =>
-                                JsonHelper.toObject(row.encode(), resultClass)
+                              convertObject(_, resultClass)
                             }
                           } else {
                             page.objects = rows.asInstanceOf[List[E]]
@@ -419,6 +435,34 @@ object JDBCProcessor extends LazyLogging {
         case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
       }
       p.future
+    }
+
+    /**
+      * 类Json信息，存储为 ： 类名 -> 要Json化的字段名列表
+      */
+    private val classJsonInfo = collection.mutable.Map[String, List[String]]()
+
+    private val baseTypes = Set("String", "Int", "Long", "Boolean", "Double", "Float", "BigDecimal", "Char", "Short", "Byte")
+
+    private[jdbc] def convertObject[E](row: JsonObject, resultClass: Class[E]): E = {
+      if (!classJsonInfo.contains(resultClass.getName)) {
+        classJsonInfo += resultClass.getName -> BeanHelper.findFields(resultClass).filterNot {
+          field =>
+            baseTypes.contains(field._2)
+        }.keys.toList
+      }
+      classJsonInfo(resultClass.getName).foreach {
+        field =>
+          if (row.containsKey(field) && row.getValue(field) != null) {
+            val str=row.getString(field)
+            if(str.startsWith("""[""")){
+              row.put(field, new JsonArray(str))
+            }else {
+              row.put(field, new JsonObject(str))
+            }
+          }
+      }
+      JsonHelper.toObject(row.encode(), resultClass)
     }
 
     /**

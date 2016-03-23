@@ -44,17 +44,17 @@ object SecureModel {
 
 trait SecureStorage[M <: SecureModel] extends BaseStorage[M] {
 
-  override protected def preSave(model: M, context: EZStorageContext): Resp[M] = {
+  override def preSave(model: M, context: EZStorageContext): Resp[M] = {
     wrapSecureSave(model, context)
     super.preSave(model, context)
   }
 
-  override protected def preUpdate(model: M, context: EZStorageContext): Resp[M] = {
+  override def preUpdate(model: M, context: EZStorageContext): Resp[M] = {
     wrapSecureUpdate(model, context)
     super.preUpdate(model, context)
   }
 
-  override protected def preSaveOrUpdate(model: M, context: EZStorageContext): Resp[M] = {
+  override def preSaveOrUpdate(model: M, context: EZStorageContext): Resp[M] = {
     wrapSecureSave(model, context)
     super.preSaveOrUpdate(model, context)
   }
@@ -105,6 +105,16 @@ trait SecureStorage[M <: SecureModel] extends BaseStorage[M] {
       model.update_org = context.optOrganization
     }
   }
+
+}
+
+trait SecureStorageAdapter[M <: SecureModel, O <: SecureStorage[M]] extends BaseStorageAdapter[M, O] with SecureStorage[M] {
+
+  override def preSave(model: M, context: EZStorageContext): Resp[M] = storageObj.preSave(model, context)
+
+  override def preUpdate(model: M, context: EZStorageContext): Resp[M] = storageObj.preUpdate(model, context)
+
+  override def preSaveOrUpdate(model: M, context: EZStorageContext): Resp[M] = storageObj.preSaveOrUpdate(model, context)
 
 }
 

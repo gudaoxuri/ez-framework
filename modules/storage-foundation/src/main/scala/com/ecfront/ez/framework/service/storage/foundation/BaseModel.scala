@@ -73,7 +73,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context 上下文
     * @return 是否允许保存
     */
-  protected def preSave(model: M, context: EZStorageContext): Resp[M] = Resp.success(model)
+  def preSave(model: M, context: EZStorageContext): Resp[M] = Resp.success(model)
 
   /**
     * 保存后处理
@@ -82,7 +82,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 处理后的实体对象
     */
-  protected def postSave(saveResult: M, context: EZStorageContext): Resp[M] = Resp.success(saveResult)
+  def postSave(saveResult: M, context: EZStorageContext): Resp[M] = Resp.success(saveResult)
 
   /**
     * 保存
@@ -112,7 +112,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context 上下文
     * @return 保存后的实体对象
     */
-  protected def doSave(model: M, context: EZStorageContext): Resp[M]
+  def doSave(model: M, context: EZStorageContext): Resp[M]
 
   /**
     * 更新前处理
@@ -121,7 +121,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context 上下文
     * @return 是否允许更新
     */
-  protected def preUpdate(model: M, context: EZStorageContext): Resp[M] = Resp.success(model)
+  def preUpdate(model: M, context: EZStorageContext): Resp[M] = Resp.success(model)
 
   /**
     * 更新后处理
@@ -130,7 +130,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context      上下文
     * @return 处理后的实体对象
     */
-  protected def postUpdate(updateResult: M, context: EZStorageContext): Resp[M] = Resp.success(updateResult)
+  def postUpdate(updateResult: M, context: EZStorageContext): Resp[M] = Resp.success(updateResult)
 
   /**
     * 更新
@@ -160,7 +160,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context 上下文
     * @return 更新后的实体对象
     */
-  protected def doUpdate(model: M, context: EZStorageContext): Resp[M]
+  def doUpdate(model: M, context: EZStorageContext): Resp[M]
 
   /**
     * 保存或更新前处理
@@ -169,7 +169,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context 上下文
     * @return 是否允许保存或更新
     */
-  protected def preSaveOrUpdate(model: M, context: EZStorageContext): Resp[M] = Resp.success(model)
+  def preSaveOrUpdate(model: M, context: EZStorageContext): Resp[M] = Resp.success(model)
 
   /**
     * 保存或更新后处理
@@ -178,7 +178,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context            上下文
     * @return 处理后的实体对象
     */
-  protected def postSaveOrUpdate(saveOrUpdateResult: M, context: EZStorageContext): Resp[M] = Resp.success(saveOrUpdateResult)
+  def postSaveOrUpdate(saveOrUpdateResult: M, context: EZStorageContext): Resp[M] = Resp.success(saveOrUpdateResult)
 
   /**
     * 保存或更新
@@ -208,7 +208,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context 上下文
     * @return 保存或更新后的实体对象
     */
-  protected def doSaveOrUpdate(model: M, context: EZStorageContext): Resp[M]
+  def doSaveOrUpdate(model: M, context: EZStorageContext): Resp[M]
 
   /**
     * 更新前处理
@@ -219,10 +219,10 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否允许更新
     */
-  protected def preUpdateByCond(
-                                 newValues: String, condition: String,
-                                 parameters: List[Any],
-                                 context: EZStorageContext): Resp[(String, String, List[Any])] =
+  def preUpdateByCond(
+                       newValues: String, condition: String,
+                       parameters: List[Any],
+                       context: EZStorageContext): Resp[(String, String, List[Any])] =
     Resp.success((newValues, condition, parameters))
 
   /**
@@ -234,7 +234,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否成功
     */
-  protected def postUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZStorageContext): Resp[Void] = Resp.success(null)
+  def postUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZStorageContext): Resp[Void] = Resp.success(null)
 
   /**
     * 更新
@@ -268,7 +268,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否成功
     */
-  protected def doUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZStorageContext): Resp[Void]
+  def doUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZStorageContext): Resp[Void]
 
   /**
     * 删除前处理
@@ -277,7 +277,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context 上下文
     * @return 是否允许删除
     */
-  protected def preDeleteById(id: Any, context: EZStorageContext): Resp[Any] = Resp.success(id)
+  def preDeleteById(id: Any, context: EZStorageContext): Resp[Any] = Resp.success(id)
 
   /**
     * 删除后处理
@@ -286,7 +286,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context 上下文
     * @return 是否成功
     */
-  protected def postDeleteById(id: Any, context: EZStorageContext): Resp[Void] = Resp.success(null)
+  def postDeleteById(id: Any, context: EZStorageContext): Resp[Void] = Resp.success(null)
 
   /**
     * 删除
@@ -320,7 +320,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context 上下文
     * @return 是否成功
     */
-  protected def doDeleteById(id: Any, context: EZStorageContext): Resp[Void]
+  def doDeleteById(id: Any, context: EZStorageContext): Resp[Void]
 
   /**
     * 删除前处理
@@ -330,9 +330,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否允许删除
     */
-  protected def preDeleteByCond(
-                                 condition: String, parameters: List[Any],
-                                 context: EZStorageContext): Resp[(String, List[Any])] =
+  def preDeleteByCond(
+                       condition: String, parameters: List[Any],
+                       context: EZStorageContext): Resp[(String, List[Any])] =
     Resp.success((condition, parameters))
 
   /**
@@ -343,7 +343,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否成功
     */
-  protected def postDeleteByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Void] = Resp.success(null)
+  def postDeleteByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Void] = Resp.success(null)
 
   /**
     * 删除
@@ -379,7 +379,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否成功
     */
-  protected def doDeleteByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Void]
+  def doDeleteByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Void]
 
   /**
     * 获取一条记录前处理
@@ -388,7 +388,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context 上下文
     * @return 是否允许获取这条记录
     */
-  protected def preGetById(id: Any, context: EZStorageContext): Resp[Any] = Resp.success(id)
+  def preGetById(id: Any, context: EZStorageContext): Resp[Any] = Resp.success(id)
 
   /**
     * 获取一条记录后处理
@@ -398,7 +398,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context   上下文
     * @return 处理后的记录
     */
-  protected def postGetById(id: Any, getResult: M, context: EZStorageContext): Resp[M] = Resp.success(getResult)
+  def postGetById(id: Any, getResult: M, context: EZStorageContext): Resp[M] = Resp.success(getResult)
 
   /**
     * 获取一条记录
@@ -432,7 +432,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context 上下文
     * @return 获取到的记录
     */
-  protected def doGetById(id: Any, context: EZStorageContext): Resp[M]
+  def doGetById(id: Any, context: EZStorageContext): Resp[M]
 
   /**
     * 获取一条记录前处理
@@ -442,8 +442,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否允许获取这条记录
     */
-  protected def preGetByCond(condition: String,
-                             parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] =
+  def preGetByCond(condition: String,
+                   parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] =
     Resp.success((condition, parameters))
 
   /**
@@ -455,7 +455,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 处理后的记录
     */
-  protected def postGetByCond(condition: String, parameters: List[Any], getResult: M, context: EZStorageContext): Resp[M] = Resp.success(getResult)
+  def postGetByCond(condition: String, parameters: List[Any], getResult: M, context: EZStorageContext): Resp[M] = Resp.success(getResult)
 
   /**
     * 获取一条记录
@@ -491,7 +491,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 获取到的记录
     */
-  protected def doGetByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[M]
+  def doGetByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[M]
 
   /**
     * 判断是否存在前处理
@@ -500,7 +500,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context 上下文
     * @return 是否允许判断是否存在
     */
-  protected def preExistById(id: Any, context: EZStorageContext): Resp[Any] = Resp.success(id)
+  def preExistById(id: Any, context: EZStorageContext): Resp[Any] = Resp.success(id)
 
   /**
     * 判断是否存在后处理
@@ -510,7 +510,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context     上下文
     * @return 处理后的结果
     */
-  protected def postExistById(id: Any, existResult: Boolean, context: EZStorageContext): Resp[Boolean] = Resp.success(existResult)
+  def postExistById(id: Any, existResult: Boolean, context: EZStorageContext): Resp[Boolean] = Resp.success(existResult)
 
   /**
     * 判断是否存在
@@ -544,7 +544,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context 上下文
     * @return 是否存在
     */
-  protected def doExistById(id: Any, context: EZStorageContext = null): Resp[Boolean]
+  def doExistById(id: Any, context: EZStorageContext = null): Resp[Boolean]
 
   /**
     * 判断是否存在前处理
@@ -554,8 +554,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否允许判断是否存在
     */
-  protected def preExistByCond(condition: String, parameters: List[Any],
-                               context: EZStorageContext): Resp[(String, List[Any])] =
+  def preExistByCond(condition: String, parameters: List[Any],
+                     context: EZStorageContext): Resp[(String, List[Any])] =
     Resp.success((condition, parameters))
 
   /**
@@ -567,8 +567,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context     上下文
     * @return 处理后的结果
     */
-  protected def postExistByCond(condition: String, parameters: List[Any],
-                                existResult: Boolean, context: EZStorageContext): Resp[Boolean] =
+  def postExistByCond(condition: String, parameters: List[Any],
+                      existResult: Boolean, context: EZStorageContext): Resp[Boolean] =
     Resp.success(existResult)
 
   /**
@@ -605,7 +605,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否存在
     */
-  protected def doExistByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Boolean]
+  def doExistByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Boolean]
 
   /**
     * 查找前处理
@@ -615,7 +615,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否允许查找
     */
-  protected def preFind(condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
+  def preFind(condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
 
   /**
     * 查找后处理
@@ -626,7 +626,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 处理后的结果
     */
-  protected def postFind(condition: String, parameters: List[Any], findResult: List[M], context: EZStorageContext): Resp[List[M]] = Resp.success(findResult)
+  def postFind(condition: String, parameters: List[Any], findResult: List[M], context: EZStorageContext): Resp[List[M]] = Resp.success(findResult)
 
   /**
     * 查找
@@ -658,7 +658,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 查找结果
     */
-  protected def doFind(condition: String, parameters: List[Any], context: EZStorageContext): Resp[List[M]]
+  def doFind(condition: String, parameters: List[Any], context: EZStorageContext): Resp[List[M]]
 
   /**
     * 分页前处理
@@ -670,8 +670,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否允许分页
     */
-  protected def prePage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int,
-                        context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
+  def prePage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int,
+              context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
 
   /**
     * 分页后处理
@@ -684,8 +684,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 处理后的结果
     */
-  protected def postPage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int,
-                         pageResult: Page[M], context: EZStorageContext): Resp[Page[M]] = Resp.success(pageResult)
+  def postPage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int,
+               pageResult: Page[M], context: EZStorageContext): Resp[Page[M]] = Resp.success(pageResult)
 
   /**
     * 分页
@@ -722,7 +722,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 分页结果
     */
-  protected def doPage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZStorageContext): Resp[Page[M]]
+  def doPage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZStorageContext): Resp[Page[M]]
 
   /**
     * 计数前处理
@@ -732,7 +732,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 是否允许计数
     */
-  protected def preCount(condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
+  def preCount(condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
 
   /**
     * 计数后处理
@@ -743,7 +743,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context     上下文
     * @return 处理后的结果
     */
-  protected def postCount(condition: String, parameters: List[Any], countResult: Long, context: EZStorageContext): Resp[Long] = Resp.success(countResult)
+  def postCount(condition: String, parameters: List[Any], countResult: Long, context: EZStorageContext): Resp[Long] = Resp.success(countResult)
 
   /**
     * 计数
@@ -775,8 +775,597 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context    上下文
     * @return 条数
     */
-  protected def doCount(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Long]
+  def doCount(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Long]
 
+}
+
+
+/**
+  * 基础持久化类的实现适配类
+  * @tparam M 实体类型
+  * @tparam O 实现类，如jdbc或mongo方式
+  */
+trait BaseStorageAdapter[M <: BaseModel, O <: BaseStorage[M]] extends BaseStorage[M] {
+
+  // 持久化对象
+  protected val storageObj: O
+
+  /**
+    * 保存前处理
+    *
+    * @param model   实体对象
+    * @param context 上下文
+    * @return 是否允许保存
+    */
+  override def preSave(model: M, context: EZStorageContext): Resp[M] = storageObj.preSave(model, context)
+
+  /**
+    * 保存后处理
+    *
+    * @param saveResult 保存后的实体对象
+    * @param context    上下文
+    * @return 处理后的实体对象
+    */
+  override def postSave(saveResult: M, context: EZStorageContext): Resp[M] = storageObj.postSave(saveResult, context)
+
+  /**
+    * 保存
+    *
+    * @param model   实体对象
+    * @param context 上下文
+    * @return 保存后的实体对象
+    */
+  override def save(model: M, context: EZStorageContext): Resp[M] = storageObj.save(model, context)
+
+  /**
+    * 更新前处理
+    *
+    * @param model   实体对象
+    * @param context 上下文
+    * @return 是否允许更新
+    */
+  override def preUpdate(model: M, context: EZStorageContext): Resp[M] = storageObj.preUpdate(model, context)
+
+  /**
+    * 更新后处理
+    *
+    * @param updateResult 更新后的实体对象
+    * @param context      上下文
+    * @return 处理后的实体对象
+    */
+  override def postUpdate(updateResult: M, context: EZStorageContext): Resp[M] = storageObj.postUpdate(updateResult, context)
+
+  /**
+    * 更新
+    *
+    * @param model   实体对象
+    * @param context 上下文
+    * @return 更新后的实体对象
+    */
+  override def update(model: M, context: EZStorageContext): Resp[M] = storageObj.update(model, context)
+
+  /**
+    * 保存或更新前处理
+    *
+    * @param model   实体对象
+    * @param context 上下文
+    * @return 是否允许保存或更新
+    */
+  override def preSaveOrUpdate(model: M, context: EZStorageContext): Resp[M] = storageObj.preSaveOrUpdate(model, context)
+
+  /**
+    * 保存或更新后处理
+    *
+    * @param saveOrUpdateResult 保存或更新后的实体对象
+    * @param context            上下文
+    * @return 处理后的实体对象
+    */
+  override def postSaveOrUpdate(saveOrUpdateResult: M, context: EZStorageContext): Resp[M] = storageObj.postSaveOrUpdate(saveOrUpdateResult, context)
+
+  /**
+    * 保存或更新
+    *
+    * @param model   实体对象
+    * @param context 上下文
+    * @return 保存或更新后的实体对象
+    */
+  override def saveOrUpdate(model: M, context: EZStorageContext): Resp[M] = storageObj.saveOrUpdate(model, context)
+
+  /**
+    * 更新前处理
+    *
+    * @param newValues  新值，SQL (相当于SET中的条件)或Json
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 是否允许更新
+    */
+  override def preUpdateByCond(
+                                newValues: String, condition: String,
+                                parameters: List[Any], context: EZStorageContext): Resp[(String, String, List[Any])] =
+    storageObj.preUpdateByCond(newValues, condition, parameters, context)
+
+  /**
+    * 更新后处理
+    *
+    * @param newValues  新值，SQL (相当于SET中的条件)或Json
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 是否成功
+    */
+  override def postUpdateByCond(newValues: String, condition:
+  String, parameters: List[Any], context: EZStorageContext): Resp[Void] =
+    storageObj.postUpdateByCond(newValues, condition, parameters, context)
+
+  /**
+    * 更新
+    *
+    * @param newValues  新值，SQL (相当于SET中的条件)或Json
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 是否成功
+    */
+  override def updateByCond(newValues: String, condition: String,
+                            parameters: List[Any], context: EZStorageContext): Resp[Void] =
+    storageObj.updateByCond(newValues, condition, parameters, context)
+
+  /**
+    * 删除前处理
+    *
+    * @param id      主键
+    * @param context 上下文
+    * @return 是否允许删除
+    */
+  override def preDeleteById(id: Any, context: EZStorageContext): Resp[Any] = storageObj.preDeleteById(id, context)
+
+  /**
+    * 删除后处理
+    *
+    * @param id      主键
+    * @param context 上下文
+    * @return 是否成功
+    */
+  override def postDeleteById(id: Any, context: EZStorageContext): Resp[Void] = storageObj.postDeleteById(id, context)
+
+  /**
+    * 删除
+    *
+    * @param id      主键
+    * @param context 上下文
+    * @return 是否成功
+    */
+  override def deleteById(id: Any, context: EZStorageContext): Resp[Void] = storageObj.deleteById(id, context)
+
+  /**
+    * 删除前处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 是否允许删除
+    */
+  override def preDeleteByCond(condition: String, parameters: List[Any],
+                               context: EZStorageContext): Resp[(String, List[Any])] =
+    storageObj.preDeleteByCond(condition, parameters, context)
+
+  /**
+    * 删除后处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 是否成功
+    */
+  override def postDeleteByCond(condition: String, parameters: List[Any],
+                                context: EZStorageContext): Resp[Void] =
+    storageObj.postDeleteByCond(condition, parameters, context)
+
+  /**
+    * 删除
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 是否成功
+    */
+  override def deleteByCond(condition: String, parameters: List[Any],
+                            context: EZStorageContext): Resp[Void] =
+    storageObj.deleteByCond(condition, parameters, context)
+
+  /**
+    * 获取一条记录前处理
+    *
+    * @param id      主键
+    * @param context 上下文
+    * @return 是否允许获取这条记录
+    */
+  override def preGetById(id: Any, context: EZStorageContext): Resp[Any] = storageObj.preGetById(id, context)
+
+  /**
+    * 获取一条记录后处理
+    *
+    * @param id        主键
+    * @param getResult 获取到的记录
+    * @param context   上下文
+    * @return 处理后的记录
+    */
+  override def postGetById(id: Any, getResult: M, context: EZStorageContext): Resp[M] = storageObj.postGetById(id, getResult, context)
+
+  /**
+    * 获取一条记录
+    *
+    * @param id      主键
+    * @param context 上下文
+    * @return 获取到的记录
+    */
+  override def getById(id: Any, context: EZStorageContext): Resp[M] = storageObj.getById(id, context)
+
+  /**
+    * 获取一条记录前处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 是否允许获取这条记录
+    */
+  override def preGetByCond(condition: String, parameters: List[Any],
+                            context: EZStorageContext): Resp[(String, List[Any])] =
+    storageObj.preGetByCond(condition, parameters, context)
+
+  /**
+    * 获取一条记录后处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param getResult  获取到的记录
+    * @param context    上下文
+    * @return 处理后的记录
+    */
+  override def postGetByCond(condition: String, parameters: List[Any],
+                             getResult: M, context: EZStorageContext): Resp[M] =
+    storageObj.postGetByCond(condition, parameters, getResult, context)
+
+  /**
+    * 获取一条记录
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 获取到的记录
+    */
+  override def getByCond(condition: String, parameters: List[Any],
+                         context: EZStorageContext): Resp[M] = storageObj.getByCond(condition, parameters, context)
+
+  /**
+    * 判断是否存在前处理
+    *
+    * @param id      主键
+    * @param context 上下文
+    * @return 是否允许判断是否存在
+    */
+  override def preExistById(id: Any, context: EZStorageContext): Resp[Any] = storageObj.preExistById(id, context)
+
+  /**
+    * 判断是否存在后处理
+    *
+    * @param id          主键
+    * @param existResult 是否存在
+    * @param context     上下文
+    * @return 处理后的结果
+    */
+  override def postExistById(id: Any, existResult: Boolean,
+                             context: EZStorageContext): Resp[Boolean] =
+    storageObj.postExistById(id, existResult, context)
+
+  /**
+    * 判断是否存在
+    *
+    * @param id      主键
+    * @param context 上下文
+    * @return 是否存在
+    */
+  override def existById(id: Any, context: EZStorageContext): Resp[Boolean] = storageObj.existById(id, context)
+
+  /**
+    * 判断是否存在前处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 是否允许判断是否存在
+    */
+  override def preExistByCond(condition: String, parameters: List[Any],
+                              context: EZStorageContext): Resp[(String, List[Any])] =
+    storageObj.preExistByCond(condition, parameters, context)
+
+  /**
+    * 判断是否存在后处理
+    *
+    * @param condition   条件，SQL (相当于Where中的条件)或Json
+    * @param parameters  参数 ，Mongo不需要
+    * @param existResult 是否存在
+    * @param context     上下文
+    * @return 处理后的结果
+    */
+  override def postExistByCond(condition: String, parameters: List[Any],
+                               existResult: Boolean, context: EZStorageContext): Resp[Boolean] =
+    storageObj.postExistByCond(condition, parameters, existResult, context)
+
+  /**
+    * 判断是否存在
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 是否存在
+    */
+  override def existByCond(condition: String, parameters: List[Any],
+                           context: EZStorageContext): Resp[Boolean] =
+    storageObj.existByCond(condition, parameters, context)
+
+  /**
+    * 查找前处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 是否允许查找
+    */
+  override def preFind(condition: String, parameters: List[Any],
+                       context: EZStorageContext): Resp[(String, List[Any])] =
+    storageObj.preFind(condition, parameters, context)
+
+  /**
+    * 查找后处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param findResult 是否存在
+    * @param context    上下文
+    * @return 处理后的结果
+    */
+  override def postFind(condition: String, parameters: List[Any],
+                        findResult: List[M], context: EZStorageContext): Resp[List[M]] =
+    storageObj.postFind(condition, parameters, findResult, context)
+
+  /**
+    * 查找
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 查找结果
+    */
+  override def find(condition: String, parameters: List[Any],
+                    context: EZStorageContext): Resp[List[M]] =
+    storageObj.find(condition, parameters, context)
+
+  /**
+    * 分页前处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param pageNumber 当前页，从1开始
+    * @param pageSize   每页条数
+    * @param context    上下文
+    * @return 是否允许分页
+    */
+  override def prePage(condition: String, parameters: List[Any],
+                       pageNumber: Long, pageSize: Int, context: EZStorageContext): Resp[(String, List[Any])] =
+    storageObj.prePage(condition, parameters, pageNumber, pageSize, context)
+
+  /**
+    * 分页后处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param pageNumber 当前页，从1开始
+    * @param pageSize   每页条数
+    * @param pageResult 是否存在
+    * @param context    上下文
+    * @return 处理后的结果
+    */
+  override def postPage(condition: String, parameters: List[Any],
+                        pageNumber: Long, pageSize: Int, pageResult: Page[M], context: EZStorageContext): Resp[Page[M]] =
+    storageObj.postPage(condition, parameters, pageNumber, pageSize, pageResult, context)
+
+  /**
+    * 分页
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param pageNumber 当前页，从1开始
+    * @param pageSize   每页条数
+    * @param context    上下文
+    * @return 分页结果
+    */
+  override def page(condition: String, parameters: List[Any],
+                    pageNumber: Long, pageSize: Int, context: EZStorageContext): Resp[Page[M]] =
+    storageObj.page(condition, parameters, pageNumber, pageSize, context)
+
+  /**
+    * 计数前处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 是否允许计数
+    */
+  override def preCount(condition: String, parameters: List[Any],
+                        context: EZStorageContext): Resp[(String, List[Any])] =
+    storageObj.preCount(condition, parameters, context)
+
+  /**
+    * 计数后处理
+    *
+    * @param condition   条件，SQL (相当于Where中的条件)或Json
+    * @param parameters  参数 ，Mongo不需要
+    * @param countResult 是否存在
+    * @param context     上下文
+    * @return 处理后的结果
+    */
+  override def postCount(condition: String, parameters: List[Any],
+                         countResult: Long, context: EZStorageContext): Resp[Long] =
+    storageObj.postCount(condition, parameters, countResult, context)
+
+  /**
+    * 计数
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 条数
+    */
+  override def count(condition: String, parameters: List[Any],
+                     context: EZStorageContext): Resp[Long] = storageObj.count(condition, parameters, context)
+
+  /**
+    * 保存实现方法
+    *
+    * @param model   实体对象
+    * @param context 上下文
+    * @return 保存后的实体对象
+    */
+  override def doSave(model: M, context: EZStorageContext): Resp[M] =
+    storageObj.doSave(model, context)
+
+  /**
+    * 更新实现方法
+    *
+    * @param newValues  新值，SQL (相当于SET中的条件)或Json
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 是否成功
+    */
+  override def doUpdateByCond(newValues: String, condition: String,
+                              parameters: List[Any], context: EZStorageContext): Resp[Void] =
+    storageObj.doUpdateByCond(newValues, condition, parameters, context)
+
+  /**
+    * 删除实现方法
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 是否成功
+    */
+  override def doDeleteByCond(condition: String, parameters: List[Any],
+                              context: EZStorageContext): Resp[Void] =
+    storageObj.doDeleteByCond(condition, parameters, context)
+
+  /**
+    * 计数实现方法
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 条数
+    */
+  override def doCount(condition: String, parameters: List[Any],
+                       context: EZStorageContext): Resp[Long] =
+    storageObj.doCount(condition, parameters, context)
+
+  /**
+    * 判断是否存在实现方法
+    *
+    * @param id      主键
+    * @param context 上下文
+    * @return 是否存在
+    */
+  override def doExistById(id: Any, context: EZStorageContext): Resp[Boolean] =
+    storageObj.doExistById(id, context)
+
+  /**
+    * 更新实现方法
+    *
+    * @param model   实体对象
+    * @param context 上下文
+    * @return 更新后的实体对象
+    */
+  override def doUpdate(model: M, context: EZStorageContext): Resp[M] =
+    storageObj.doUpdate(model, context)
+
+  /**
+    * 保存或更新实现方法
+    *
+    * @param model   实体对象
+    * @param context 上下文
+    * @return 保存或更新后的实体对象
+    */
+  override def doSaveOrUpdate(model: M, context: EZStorageContext): Resp[M] =
+    storageObj.doSaveOrUpdate(model, context)
+
+  /**
+    * 删除实现方法
+    *
+    * @param id      主键
+    * @param context 上下文
+    * @return 是否成功
+    */
+  override def doDeleteById(id: Any, context: EZStorageContext): Resp[Void] =
+    storageObj.doDeleteById(id, context)
+
+  /**
+    * 获取一条记录实现方法
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 获取到的记录
+    */
+  override def doGetByCond(condition: String, parameters: List[Any],
+                           context: EZStorageContext): Resp[M] =
+    storageObj.doGetByCond(condition, parameters, context)
+
+  /**
+    * 分页实现方法
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param pageNumber 当前页，从1开始
+    * @param pageSize   每页条数
+    * @param context    上下文
+    * @return 分页结果
+    */
+  override def doPage(condition: String, parameters: List[Any],
+                      pageNumber: Long, pageSize: Int, context: EZStorageContext): Resp[Page[M]] =
+    storageObj.doPage(condition, parameters, pageNumber, pageSize, context)
+
+  /**
+    * 查找实现方法
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 查找结果
+    */
+  override def doFind(condition: String, parameters: List[Any],
+                      context: EZStorageContext): Resp[List[M]] =
+    storageObj.doFind(condition, parameters, context)
+
+  /**
+    * 判断是否存在实现方法
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @param context    上下文
+    * @return 是否存在
+    */
+  override def doExistByCond(condition: String, parameters: List[Any],
+                             context: EZStorageContext): Resp[Boolean] =
+    storageObj.doExistByCond(condition, parameters, context)
+
+  /**
+    * 获取一条记录实现方法
+    *
+    * @param id      主键
+    * @param context 上下文
+    * @return 获取到的记录
+    */
+  override def doGetById(id: Any, context: EZStorageContext): Resp[M] = storageObj.doGetById(id, context)
 }
 
 

@@ -62,21 +62,21 @@ trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
   override def doUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZStorageContext): Resp[Void] = {
     JDBCProcessor.update(
-      s"UPDATE $tableName Set $newValues WHERE $condition",
+      s"UPDATE $tableName Set $newValues WHERE ${packageCondition(condition)}",
       parameters
     )
   }
 
   override def doDeleteByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Void] = {
     JDBCProcessor.update(
-      s"DELETE FROM $tableName WHERE $condition ",
+      s"DELETE FROM $tableName WHERE ${packageCondition(condition)} ",
       parameters
     )
   }
 
   override def doGetByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[M] = {
     JDBCProcessor.get(
-      s"SELECT * FROM $tableName WHERE $condition ",
+      s"SELECT * FROM $tableName WHERE ${packageCondition(condition)} ",
       parameters,
       _modelClazz
     )
@@ -91,14 +91,14 @@ trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
   override def doExistByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Boolean] = {
     JDBCProcessor.exist(
-      s"SELECT 1 FROM $tableName WHERE $condition ",
+      s"SELECT 1 FROM $tableName WHERE ${packageCondition(condition)} ",
       parameters
     )
   }
 
   override def doFind(condition: String, parameters: List[Any], context: EZStorageContext): Resp[List[M]] = {
     JDBCProcessor.find(
-      s"SELECT * FROM $tableName WHERE $condition ",
+      s"SELECT * FROM $tableName WHERE ${packageCondition(condition)} ",
       parameters,
       _modelClazz
     )
@@ -106,7 +106,7 @@ trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
   override def doPage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZStorageContext): Resp[Page[M]] = {
     JDBCProcessor.page(
-      s"SELECT * FROM $tableName WHERE $condition ",
+      s"SELECT * FROM $tableName WHERE ${packageCondition(condition)} ",
       parameters,
       pageNumber, pageSize,
       _modelClazz
@@ -115,9 +115,17 @@ trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
   override def doCount(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Long] = {
     JDBCProcessor.count(
-      s"SELECT count(1) FROM $tableName WHERE $condition ",
+      s"SELECT count(1) FROM $tableName WHERE ${packageCondition(condition)} ",
       parameters
     )
+  }
+
+  private def packageCondition(condition: String): String = {
+    if (condition == null || condition.trim == "") {
+      "1=1"
+    } else {
+      condition
+    }
   }
 
   protected def getMapValue(model: BaseModel): Map[String, Any] = {

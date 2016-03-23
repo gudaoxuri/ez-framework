@@ -18,7 +18,7 @@ trait JDBCStatusStorage[M <: StatusModel] extends JDBCBaseStorage[M] with Status
     doUpdateByCond(" enable = false ", " id = ?", List(id), context)
   }
 
-  override protected def appendEnabled(condition: String): String = {
+  override def appendEnabled(condition: String): String = {
     condition + " AND enable = true "
   }
 

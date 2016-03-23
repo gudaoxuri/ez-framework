@@ -19,7 +19,7 @@ trait MongoStatusStorage[M <: StatusModel] extends MongoBaseStorage[M] with Stat
     doUpdateByCond( s"""{"$$set":{"enable":false}}""", s"""{"_id":"$id"}""", List(id), context)
   }
 
-  override protected def appendEnabled(condition: String): String = {
+  override def appendEnabled(condition: String): String = {
     val cond = if (condition == null || condition.trim == "") {
       new JsonObject("{}")
     } else {

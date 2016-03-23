@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.service.storage.jdbc
 
-import com.ecfront.common.{JsonHelper, Resp}
+import com.ecfront.common.Resp
 import com.ecfront.ez.framework.service.storage.foundation.Id
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.json.JsonArray
@@ -82,7 +82,7 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
       JDBCProcessor.Async.db.onComplete {
         case Success(conn) =>
           conn.updateWithParams(sql,
-            new JsonArray(richValueInfos.values.toList),
+            new JsonArray(JDBCProcessor.Async.formatParameters(richValueInfos.values.toList)),
             new Handler[AsyncResult[UpdateResult]] {
               override def handle(event: AsyncResult[UpdateResult]): Unit = {
                 if (event.succeeded()) {
@@ -94,7 +94,7 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
                           override def handle(event3: AsyncResult[ResultSet]): Unit = {
                             if (event3.succeeded()) {
                               val result = event3.result().getRows.get(0)
-                              p.success(Resp.success(JsonHelper.toObject(result.encode(), clazz)))
+                              p.success(Resp.success(JDBCProcessor.Async.convertObject(result, clazz)))
                             } else {
                               logger.error(s"JDBC execute error ", event3.cause())
                               p.success(Resp.serverError(event3.cause().getMessage))
