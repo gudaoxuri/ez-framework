@@ -1,7 +1,6 @@
 package com.ecfront.ez.framework.service.scheduler
 
 import com.ecfront.common.JsonHelper
-import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, StatusStorage}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.quartz.impl.StdSchedulerFactory
 
@@ -12,9 +11,6 @@ object SchedulerProcessor extends LazyLogging {
 
   private val quartzScheduler = StdSchedulerFactory.getDefaultScheduler
 
-  private var schedulerStorage: StatusStorage[EZ_Scheduler] = _
-  private var logStorage: BaseStorage[EZ_Scheduler_Log] = _
-
   /**
     * 保存调度任务
     *
@@ -23,7 +19,7 @@ object SchedulerProcessor extends LazyLogging {
   def save(scheduler: EZ_Scheduler): Unit = {
     scheduler.enable = true
     scheduler.parameterstr = JsonHelper.toJsonString(scheduler.parameters)
-    val saveR = schedulerStorage.save(scheduler)
+    val saveR = EZ_Scheduler.save(scheduler)
     if (saveR) {
       JobHelper.add(scheduler.name, scheduler.cron, classOf[ScheduleJobProxy], packageScheduler(scheduler), quartzScheduler)
     }
@@ -37,7 +33,7 @@ object SchedulerProcessor extends LazyLogging {
   def update(scheduler: EZ_Scheduler): Unit = {
     scheduler.enable = true
     scheduler.parameterstr = JsonHelper.toJsonString(scheduler.parameters)
-    val updateR = schedulerStorage.update(scheduler)
+    val updateR = EZ_Scheduler.update(scheduler)
     if (updateR) {
       JobHelper.modify(scheduler.name, scheduler.cron, classOf[ScheduleJobProxy], packageScheduler(scheduler), quartzScheduler)
     }
@@ -59,8 +55,8 @@ object SchedulerProcessor extends LazyLogging {
     * @param id 调度任务ID
     */
   def delete(id: String): Unit = {
-    val getR = schedulerStorage.getById(id)
-    val deleteR = schedulerStorage.deleteById(id)
+    val getR = EZ_Scheduler.getById(id)
+    val deleteR = EZ_Scheduler.deleteById(id)
     if (deleteR) {
       JobHelper.remove(getR.body.name, quartzScheduler)
     }
@@ -72,29 +68,18 @@ object SchedulerProcessor extends LazyLogging {
     * @param log 调度日志
     */
   def saveLog(log: EZ_Scheduler_Log): Unit = {
-    logStorage.save(log, null)
+    EZ_Scheduler_Log.save(log, null)
   }
 
   /**
     * 初始化调度器
     *
-    * @param module   当前模块，只有等于当前模块的记录才会被调度
-    * @param useMongo 是否使用Mongo数据库
+    * @param module 当前模块，只有等于当前模块的记录才会被调度
     */
-  def init(module: String, useMongo: Boolean): Unit = {
+  def init(module: String): Unit = {
     logger.debug("Startup scheduling.")
-    val enabledCond =
-      if (useMongo) {
-        schedulerStorage = Mongo_EZ_Scheduler
-        logStorage = Mongo_EZ_Scheduler_Log
-        s"""{"module":"$module"}"""
-      } else {
-        schedulerStorage = JDBC_EZ_Scheduler
-        logStorage = JDBC_EZ_Scheduler_Log
-        "module =?"
-      }
     quartzScheduler.start()
-    val findR = schedulerStorage.findEnabled(enabledCond, List(module))
+    val findR = EZ_Scheduler.findByModule(module)
     if (findR) {
       findR.body.foreach {
         job =>

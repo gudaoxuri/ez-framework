@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.service.scheduler
 
-import com.ecfront.ez.framework.service.storage.foundation.{BaseModel, Entity, Label}
+import com.ecfront.ez.framework.service.storage.foundation._
 import com.ecfront.ez.framework.service.storage.jdbc.JDBCBaseStorage
 import com.ecfront.ez.framework.service.storage.mongo.MongoBaseStorage
 
@@ -22,9 +22,14 @@ case class EZ_Scheduler_Log() extends BaseModel {
 
 }
 
-object JDBC_EZ_Scheduler_Log extends JDBCBaseStorage[EZ_Scheduler_Log]
+object EZ_Scheduler_Log extends BaseStorageAdapter[EZ_Scheduler_Log, BaseStorage[EZ_Scheduler_Log]] {
+  override protected val storageObj: BaseStorage[EZ_Scheduler_Log] =
+    if (ServiceAdapter.mongoStorage) EZ_Scheduler_Log_Mongo else EZ_Scheduler_Log_JDBC
+}
 
-object Mongo_EZ_Scheduler_Log extends MongoBaseStorage[EZ_Scheduler_Log]
+object EZ_Scheduler_Log_JDBC extends JDBCBaseStorage[EZ_Scheduler_Log]
+
+object EZ_Scheduler_Log_Mongo extends MongoBaseStorage[EZ_Scheduler_Log]
 
 
 

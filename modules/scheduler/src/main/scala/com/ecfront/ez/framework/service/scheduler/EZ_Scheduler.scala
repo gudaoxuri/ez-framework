@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.service.scheduler
 
-import com.ecfront.common.Ignore
+import com.ecfront.common.{Ignore, Resp}
 import com.ecfront.ez.framework.service.storage.foundation._
 import com.ecfront.ez.framework.service.storage.jdbc.{JDBCSecureStorage, JDBCStatusStorage}
 import com.ecfront.ez.framework.service.storage.mongo.{MongoSecureStorage, MongoStatusStorage}
@@ -29,6 +29,37 @@ case class EZ_Scheduler() extends SecureModel with StatusModel {
 
 }
 
-object JDBC_EZ_Scheduler extends JDBCSecureStorage[EZ_Scheduler] with JDBCStatusStorage[EZ_Scheduler]
 
-object Mongo_EZ_Scheduler extends MongoSecureStorage[EZ_Scheduler] with MongoStatusStorage[EZ_Scheduler]
+object EZ_Scheduler extends SecureStorageAdapter[EZ_Scheduler, EZ_Scheduler_Base]
+  with StatusStorageAdapter[EZ_Scheduler, EZ_Scheduler_Base] with EZ_Scheduler_Base {
+
+  override protected val storageObj: EZ_Scheduler_Base =
+    if (ServiceAdapter.mongoStorage) EZ_Scheduler_Mongo else EZ_Scheduler_JDBC
+
+  override def findByModule(module: String): Resp[List[EZ_Scheduler]] = {
+    storageObj.findByModule(module)
+  }
+
+}
+
+trait EZ_Scheduler_Base extends SecureStorage[EZ_Scheduler] with StatusStorage[EZ_Scheduler] {
+
+  def findByModule(module: String): Resp[List[EZ_Scheduler]]
+
+}
+
+object EZ_Scheduler_Mongo extends MongoSecureStorage[EZ_Scheduler] with MongoStatusStorage[EZ_Scheduler] with EZ_Scheduler_Base {
+
+  override def findByModule(module: String): Resp[List[EZ_Scheduler]] = {
+    findEnabled(s"""{"module":"$module"}""")
+  }
+
+}
+
+object EZ_Scheduler_JDBC extends JDBCSecureStorage[EZ_Scheduler] with JDBCStatusStorage[EZ_Scheduler] with EZ_Scheduler_Base {
+
+  override def findByModule(module: String): Resp[List[EZ_Scheduler]] = {
+    findEnabled(s"""module = ?""", List(module))
+  }
+
+}

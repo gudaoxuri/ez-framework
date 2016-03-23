@@ -6,12 +6,11 @@ import io.vertx.core.json.JsonObject
 
 object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
+  var mongoStorage: Boolean = false
+
   override def init(parameter: JsonObject): Resp[String] = {
-    if (parameter.getString("storage") == "mongo") {
-      SchedulerProcessor.init(EZContext.module, useMongo = true)
-    } else {
-      SchedulerProcessor.init(EZContext.module, useMongo = false)
-    }
+    mongoStorage = parameter.getString("storage", "mongo") == "mongo"
+    SchedulerProcessor.init(EZContext.module)
     Resp.success("")
   }
 
