@@ -4,6 +4,7 @@ import com.ecfront.common.{JsonHelper, Resp, StandardCode}
 import com.ecfront.ez.framework.core.test.MockStartupSpec
 import com.ecfront.ez.framework.service.rpc.http.test.EZ_Resource
 import com.ecfront.ez.framework.service.storage.foundation.Page
+import org.jsoup.Jsoup
 
 class HttpServerSpec extends MockStartupSpec {
 
@@ -21,7 +22,6 @@ class HttpServerSpec extends MockStartupSpec {
     assert(JsonHelper.toObject[Resp[EZ_Resource]](
       HttpClientProcessor.post("http://127.0.0.1:8080/resource/", EZ_Resource("1", "GET", "/ss"))).code == StandardCode.BAD_REQUEST)
 
-
     assert(JsonHelper.toObject[Resp[List[EZ_Resource]]](HttpClientProcessor.get(
       "http://127.0.0.1:8080/resource/")).body.head.uri == "/ss")
 
@@ -38,6 +38,30 @@ class HttpServerSpec extends MockStartupSpec {
     assert(pageResult.recordTotal == 5)
     assert(pageResult.objects.size == 2)
 
+    var xmlStr = HttpClientProcessor.get(
+      "http://127.0.0.1:8080/resource/xml/str/", "text/xml; charset=utf-8")
+    assert(Jsoup.parse(xmlStr).select("city").size() > 0)
+    xmlStr = HttpClientProcessor.get(
+      "http://127.0.0.1:8080/resource/xml/", "text/xml; charset=utf-8")
+    assert(Jsoup.parse(xmlStr).select("city").size() > 0)
+    xmlStr = HttpClientProcessor.post(
+      "http://127.0.0.1:8080/resource/xml/", xmlStr, "text/xml; charset=utf-8")
+    assert(Jsoup.parse(xmlStr).select("city").size() > 0)
+    xmlStr = HttpClientProcessor.post(
+      "http://127.0.0.1:8080/resource/xml/", Jsoup.parse(xmlStr), "text/xml; charset=utf-8")
+    assert(Jsoup.parse(xmlStr).select("city").size() > 0)
+    xmlStr = HttpClientProcessor.post(
+      "http://127.0.0.1:8080/resource/xml/str/", xmlStr, "text/xml; charset=utf-8")
+    assert(Jsoup.parse(xmlStr).select("city").size() > 0)
+    xmlStr = HttpClientProcessor.post(
+      "http://127.0.0.1:8080/resource/xml/str/", Jsoup.parse(xmlStr), "text/xml; charset=utf-8")
+    assert(Jsoup.parse(xmlStr).select("city").size() > 0)
+    xmlStr = HttpClientProcessor.post(
+      "http://127.0.0.1:8080/resource/xml/str/error/", Jsoup.parse(xmlStr), "text/xml; charset=utf-8")
+    assert(Jsoup.parse(xmlStr).select("error").size() > 0)
+    xmlStr = HttpClientProcessor.get(
+      "http://flash.weather.com.cn:80/wmaps/xml/china.xml", "text/xml; charset=utf-8")
+    assert(Jsoup.parse(xmlStr).select("city").size() > 0)
   }
 
   test("https test") {
