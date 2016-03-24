@@ -47,8 +47,9 @@ EZManager.start()
  
 . 登录
 
- POST http://127.0.0.1:8080/public/auth/login/" body: {"id":"admin","password":"admin"}
- 返回登录信息
+POST http://127.0.0.1:8080/public/auth/login/" body: {"id":"admin","password":"admin"}
+
+返回登录信息
 
 === 依赖
 
@@ -278,7 +279,7 @@ body
   "method": String,  // Http方法，大写
   "uri": String,  // 资源uri
   "name": String, // 资源名称
-  "enable": Boolean // 是否启用
+  "enable": Boolean, // 是否启用
   "create_user": String, // 创建用户login_id
   "create_org": String, // 创建组织编码
   "create_time": Long, // 创建时间（yyyyMMddHHmmssSSS）
@@ -296,6 +297,7 @@ PUT /auth/manage/resource/<资源id>/?__ez_token__=<token>
 body
 [source,json]
 {
+  "id": String,  // 数据库id
   "method": String,  // Http方法，大写
   "uri": String,  // 资源URI
   "name": String // 资源名称
@@ -403,3 +405,682 @@ GET /auth/manage/resource/export/?__ez_token__=<token>
 *响应内容主体*
 
 资源中可导出字段的列表，格式为逗号分割符
+
+==== （管理接口）添加组织
+
+*请求*
+
+POST /auth/manage/organization/?__ez_token__=<token>
+
+body
+[source,json]
+{
+  "code": String,  // 编码编码
+  "name": String, // 组织名称
+  "image": String // 组织图标
+}
+
+*响应内容主体*
+
+[source,json]
+{
+  "id": String,  // 数据库id
+  "code": String,  // 编码编码
+  "name": String, // 组织名称
+  "image": String, // 组织图标
+  "enable": Boolean, // 是否启用
+  "create_user": String, // 创建用户login_id
+  "create_org": String, // 创建组织编码
+  "create_time": Long, // 创建时间（yyyyMMddHHmmssSSS）
+  "update_user": String, // 更新用户login_id
+  "update_org": String, // 更新组织编码
+  "update_time": Long // 更新时间（yyyyMMddHHmmssSSS）
+}
+
+==== （管理接口）更新组织
+
+*请求*
+
+PUT /auth/manage/organization/<组织id>/?__ez_token__=<token>
+
+body
+[source,json]
+{
+  "id": String,  // 数据库id
+  "code": String,  // 组织编码
+  "name": String, // 组织名称
+  "image": String // 组织图标
+}
+
+*响应内容主体*
+
+同`（管理接口）添加组织`的响应内容主体
+
+==== （管理接口）查找组织列表
+
+*请求*
+
+GET /auth/manage/organization/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+[source,json]
+[
+  {
+   同`（管理接口）添加组织`的响应内容主体
+  },
+  ...
+]
+
+==== （管理接口）查找启用组织列表
+
+*请求*
+
+GET /auth/manage/organization/enable/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+同`（管理接口）查找启用组织列表`的响应内容主体
+
+==== （管理接口）分页查找组织列表
+
+*请求*
+
+GET /auth/manage/organization/page/<当前页，从1开始>/<每页显示条数>/?__ez_token__=<token>?&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+[source,json]
+{
+  "pageNumber":Long, // 当前页，从1开始
+  "pageSize":Int, // 每页显示条数
+  "pageTotal":Long, // 总共页数
+  "recordTotal":Long, // 总共记录数
+  // 当前页的实体列表
+  "objects":[
+    {
+     同`（管理接口）添加组织`的响应内容主体
+    },
+    ...
+  ]
+}
+
+==== （管理接口）获取一个组织
+
+*请求*
+
+GET /auth/manage/organization/<组织id>/?__ez_token__=<token>
+
+*响应内容主体*
+
+同`（管理接口）添加组织`的响应内容主体
+
+==== （管理接口）删除一个组织
+
+*请求*
+
+DELETE /auth/manage/organization/<组织id>/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）启用一个组织
+
+*请求*
+
+GET /auth/manage/organization/<组织id>/enable/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）禁用一个组织
+
+*请求*
+
+DELETE /auth/manage/organization/<组织id>/disable/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）导出组织列表
+
+*请求*
+
+GET /auth/manage/organization/export/?__ez_token__=<token>
+
+*响应内容主体*
+
+组织中可导出字段的列表，格式为逗号分割符
+
+==== （管理接口）上传组织图标
+
+*请求*
+
+POST /auth/manage/organization/res/?__ez_token__=<token>
+
+body 上传的图标
+
+*响应内容主体*
+
+上传图标的uri
+
+==== （管理接口）获取组织图标
+
+*请求*
+
+GET <`（管理接口）上传组织图标`中返回的uri>?__ez_token__=<token>
+
+*响应内容主体*
+
+显示上传的图标
+
+==== （管理接口）添加角色
+
+*请求*
+
+POST /auth/manage/role/?__ez_token__=<token>
+
+body
+[source,json]
+{
+  "flag": String,  // 角色标识
+  "name": String, // 角色名称
+  "resource_codes": List[String], // 所属资源编码列表
+  "organization_code": String // 所属组织编码
+}
+
+*响应内容主体*
+
+[source,json]
+{
+  "id": String,  // 数据库id
+  "code": String,  // 编码编码
+  "flag": String,  // 角色标识
+  "name": String, // 角色名称
+  "resource_codes": List[String], // 所属资源编码列表
+  "organization_code": String, // 所属组织编码
+  "enable": Boolean, // 是否启用
+  "create_user": String, // 创建用户login_id
+  "create_org": String, // 创建角色编码
+  "create_time": Long, // 创建时间（yyyyMMddHHmmssSSS）
+  "update_user": String, // 更新用户login_id
+  "update_org": String, // 更新角色编码
+  "update_time": Long // 更新时间（yyyyMMddHHmmssSSS）
+}
+
+==== （管理接口）更新角色
+
+*请求*
+
+PUT /auth/manage/role/<角色id>/?__ez_token__=<token>
+
+body
+[source,json]
+{
+  "id": String,  // 数据库id
+  "flag": String,  // 角色标识
+  "name": String, // 角色名称
+  "resource_codes": List[String], // 所属资源编码列表
+  "organization_code": String // 所属组织编码
+}
+
+*响应内容主体*
+
+同`（管理接口）添加角色`的响应内容主体
+
+==== （管理接口）查找角色列表
+
+*请求*
+
+GET /auth/manage/role/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+[source,json]
+[
+  {
+   同`（管理接口）添加角色`的响应内容主体
+  },
+  ...
+]
+
+==== （管理接口）查找启用角色列表
+
+*请求*
+
+GET /auth/manage/role/enable/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+同`（管理接口）查找启用角色列表`的响应内容主体
+
+==== （管理接口）分页查找角色列表
+
+*请求*
+
+GET /auth/manage/role/page/<当前页，从1开始>/<每页显示条数>/?__ez_token__=<token>?&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+[source,json]
+{
+  "pageNumber":Long, // 当前页，从1开始
+  "pageSize":Int, // 每页显示条数
+  "pageTotal":Long, // 总共页数
+  "recordTotal":Long, // 总共记录数
+  // 当前页的实体列表
+  "objects":[
+    {
+     同`（管理接口）添加角色`的响应内容主体
+    },
+    ...
+  ]
+}
+
+==== （管理接口）获取一个角色
+
+*请求*
+
+GET /auth/manage/role/<角色id>/?__ez_token__=<token>
+
+*响应内容主体*
+
+同`（管理接口）添加角色`的响应内容主体
+
+==== （管理接口）删除一个角色
+
+*请求*
+
+DELETE /auth/manage/role/<角色id>/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）启用一个角色
+
+*请求*
+
+GET /auth/manage/role/<角色id>/enable/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）禁用一个角色
+
+*请求*
+
+DELETE /auth/manage/role/<角色id>/disable/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）导出角色列表
+
+*请求*
+
+GET /auth/manage/role/export/?__ez_token__=<token>
+
+*响应内容主体*
+
+角色中可导出字段的列表，格式为逗号分割符
+
+==== （管理接口）添加账户
+
+*请求*
+
+POST /auth/manage/account/?__ez_token__=<token>
+
+body
+[source,json]
+{
+  "login_id": String, // 登录id
+  "name": String, // 姓名
+  "email": String, // email
+  "image": String, // 头像URL
+  "password": String, // 密码
+  "role_codes": List[String], // 角色编码列表
+  "organization_code": String, // 所属组织编码
+  "ext_id": String, // 扩展Id
+  "ext_info": Map[String, String] // 扩展信息
+}
+
+*响应内容主体*
+
+[source,json]
+{
+  "id": String,  // 数据库id
+  "code": String,  // 账户编码
+  "login_id": String, // 登录id
+  "name": String, // 姓名
+  "email": String, // email
+  "image": String, // 头像URL
+  "password": String, // 密码
+  "role_codes": List[String], // 角色编码列表
+  "organization_code": String, // 所属组织编码
+  "oauth": Map[String, String], // oauth信息
+  "ext_id": String, // 扩展Id
+  "ext_info": Map[String, String] // 扩展信息
+  "enable": Boolean, // 是否启用
+  "create_user": String, // 创建用户login_id
+  "create_org": String, // 创建账户编码
+  "create_time": Long, // 创建时间（yyyyMMddHHmmssSSS）
+  "update_user": String, // 更新用户login_id
+  "update_org": String, // 更新账户编码
+  "update_time": Long // 更新时间（yyyyMMddHHmmssSSS）
+}
+
+==== （管理接口）更新账户
+
+*请求*
+
+PUT /auth/manage/account/<账户id>/?__ez_token__=<token>
+
+body
+[source,json]
+{
+  "id": String,  // 数据库id
+  "name": String, // 姓名
+  "email": String, // email
+  "image": String, // 头像URL
+  "password": String, // 密码
+  "role_codes": List[String], // 角色编码列表
+  "organization_code": String, // 所属组织编码
+  "ext_id": String, // 扩展Id
+  "ext_info": Map[String, String] // 扩展信息
+}
+
+*响应内容主体*
+
+同`（管理接口）添加账户`的响应内容主体
+
+==== （管理接口）查找账户列表
+
+*请求*
+
+GET /auth/manage/account/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+[source,json]
+[
+  {
+   同`（管理接口）添加账户`的响应内容主体
+  },
+  ...
+]
+
+==== （管理接口）查找启用账户列表
+
+*请求*
+
+GET /auth/manage/account/enable/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+同`（管理接口）查找启用账户列表`的响应内容主体
+
+==== （管理接口）分页查找账户列表
+
+*请求*
+
+GET /auth/manage/account/page/<当前页，从1开始>/<每页显示条数>/?__ez_token__=<token>?&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+[source,json]
+{
+  "pageNumber":Long, // 当前页，从1开始
+  "pageSize":Int, // 每页显示条数
+  "pageTotal":Long, // 总共页数
+  "recordTotal":Long, // 总共记录数
+  // 当前页的实体列表
+  "objects":[
+    {
+     同`（管理接口）添加账户`的响应内容主体
+    },
+    ...
+  ]
+}
+
+==== （管理接口）获取一个账户
+
+*请求*
+
+GET /auth/manage/account/<账户id>/?__ez_token__=<token>
+
+*响应内容主体*
+
+同`（管理接口）添加账户`的响应内容主体
+
+==== （管理接口）删除一个账户
+
+*请求*
+
+DELETE /auth/manage/account/<账户id>/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）启用一个账户
+
+*请求*
+
+GET /auth/manage/account/<账户id>/enable/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）禁用一个账户
+
+*请求*
+
+DELETE /auth/manage/account/<账户id>/disable/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）导出账户列表
+
+*请求*
+
+GET /auth/manage/account/export/?__ez_token__=<token>
+
+*响应内容主体*
+
+账户中可导出字段的列表，格式为逗号分割符
+
+==== （管理接口）上传账户头像
+
+*请求*
+
+POST /auth/manage/role/res/?__ez_token__=<token>
+
+body 上传的头像
+
+*响应内容主体*
+
+上传头像的uri
+
+==== （管理接口）获取账户头像
+
+*请求*
+
+GET <`（管理接口）上传账户头像`中返回的uri>?__ez_token__=<token>
+
+*响应内容主体*
+
+显示上传的头像
+
+==== （管理接口）添加菜单
+
+*请求*
+
+POST /auth/manage/menu/?__ez_token__=<token>
+
+body
+[source,json]
+{
+  "uri": String, // 菜单点击的URI
+  "name": String, // 菜单名称
+  "icon": String, // 菜单图标名称
+  "translate": String, // 菜单翻译（i18n用）
+  "role_codes": List[String], // 所属角色编码列表
+  "parent_code": String, // 父菜单编码，用于多级菜单
+  "sort": Int, // 排序，倒序
+  "organization_code": String // 所属组织编码
+}
+
+*响应内容主体*
+
+[source,json]
+{
+  "id": String,  // 数据库id
+  "code": String,  // 菜单编码
+  "uri": String, // 菜单点击的URI
+  "name": String, // 菜单名称
+  "icon": String, // 菜单图标名称
+  "translate": String, // 菜单翻译（i18n用）
+  "role_codes": List[String], // 所属角色编码列表
+  "parent_code": String, // 父菜单编码，用于多级菜单
+  "sort": Int, // 排序，倒序
+  "organization_code": String, // 所属组织编码
+  "enable": Boolean, // 是否启用
+  "create_user": String, // 创建用户login_id
+  "create_org": String, // 创建菜单编码
+  "create_time": Long, // 创建时间（yyyyMMddHHmmssSSS）
+  "update_user": String, // 更新用户login_id
+  "update_org": String, // 更新菜单编码
+  "update_time": Long // 更新时间（yyyyMMddHHmmssSSS）
+}
+
+==== （管理接口）更新菜单
+
+*请求*
+
+PUT /auth/manage/menu/<菜单id>/?__ez_token__=<token>
+
+body
+[source,json]
+{
+  "id": String,  // 数据库id
+  "uri": String, // 菜单点击的URI
+  "name": String, // 菜单名称
+  "icon": String, // 菜单图标名称
+  "translate": String, // 菜单翻译（i18n用）
+  "role_codes": List[String], // 所属角色编码列表
+  "parent_code": String, // 父菜单编码，用于多级菜单
+  "sort": Int, // 排序，倒序
+  "organization_code": String // 所属组织编码
+}
+
+*响应内容主体*
+
+同`（管理接口）添加菜单`的响应内容主体
+
+==== （管理接口）查找菜单列表
+
+*请求*
+
+GET /auth/manage/menu/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+[source,json]
+[
+  {
+   同`（管理接口）添加菜单`的响应内容主体
+  },
+  ...
+]
+
+==== （管理接口）查找启用菜单列表
+
+*请求*
+
+GET /auth/manage/menu/enable/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+同`（管理接口）查找启用菜单列表`的响应内容主体
+
+==== （管理接口）分页查找菜单列表
+
+*请求*
+
+GET /auth/manage/menu/page/<当前页，从1开始>/<每页显示条数>/?__ez_token__=<token>?&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+[source,json]
+{
+  "pageNumber":Long, // 当前页，从1开始
+  "pageSize":Int, // 每页显示条数
+  "pageTotal":Long, // 总共页数
+  "recordTotal":Long, // 总共记录数
+  // 当前页的实体列表
+  "objects":[
+    {
+     同`（管理接口）添加菜单`的响应内容主体
+    },
+    ...
+  ]
+}
+
+==== （管理接口）获取一个菜单
+
+*请求*
+
+GET /auth/manage/menu/<菜单id>/?__ez_token__=<token>
+
+*响应内容主体*
+
+同`（管理接口）添加菜单`的响应内容主体
+
+==== （管理接口）删除一个菜单
+
+*请求*
+
+DELETE /auth/manage/menu/<菜单id>/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）启用一个菜单
+
+*请求*
+
+GET /auth/manage/menu/<菜单id>/enable/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）禁用一个菜单
+
+*请求*
+
+DELETE /auth/manage/menu/<菜单id>/disable/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）导出菜单列表
+
+*请求*
+
+GET /auth/manage/menu/export/?__ez_token__=<token>
+
+*响应内容主体*
+
+菜单中可导出字段的列表，格式为逗号分割符
