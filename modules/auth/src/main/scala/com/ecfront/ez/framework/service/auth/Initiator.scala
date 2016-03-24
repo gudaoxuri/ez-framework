@@ -87,7 +87,7 @@ object Initiator extends LazyLogging {
       EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/bylogin/", s"Fetch Account By Login"))
       EZ_Resource.save(EZ_Resource(Method.PUT, "/auth/manage/account/bylogin/", s"Update Account By Login"))
 
-      EZ_Role.save(EZ_Role(EZ_Role.SYSTEM_ROLE_CODE, "System", List(
+      EZ_Role.save(EZ_Role(EZ_Role.SYSTEM_ROLE_FLAG, "System", List(
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/page/:pageNumber/:pageSize/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/:id/",
@@ -146,39 +146,39 @@ object Initiator extends LazyLogging {
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/bylogin/",
         s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/account/bylogin/"
       )))
-      EZ_Role.save(EZ_Role(EZ_Role.USER_ROLE_CODE, "User", List(
-        s"${Method.POST}${BaseModel.SPLIT}/auth/manage/account/res/",
-        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/res/:date/:fileName",
-        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/bylogin/",
-        s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/account/bylogin/"
+      EZ_Role.save(EZ_Role(EZ_Role.USER_ROLE_FLAG, "User", List(
+        s"{Method.POST}${BaseModel.SPLIT}/auth/manage/account/res/",
+        s"{Method.GET}${BaseModel.SPLIT}/auth/manage/account/res/:date/:fileName",
+        s"{Method.GET}${BaseModel.SPLIT}/auth/manage/account/bylogin/",
+        s"{Method.PUT}${BaseModel.SPLIT}/auth/manage/account/bylogin/"
       )))
 
       val account = EZ_Account(EZ_Account.SYSTEM_ACCOUNT_CODE, "i@sunisle.org", "Sys Admin", "admin", List(
-        BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE
+        BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_FLAG
       ))
       EZ_Account.save(account)
 
       EZ_Menu.save(EZ_Menu("ez.dashboard", "Dashboard", "",
-        List(BaseModel.SPLIT + EZ_Role.USER_ROLE_CODE, BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE),
+        List(BaseModel.SPLIT + EZ_Role.USER_ROLE_FLAG, BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_FLAG),
         "icon-home", "sidebar.nav.DASHBARD", 10000))
       EZ_Menu.save(EZ_Menu("#sysManage", "System Manage", "",
-        List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE),
+        List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_FLAG),
         "icon-settings", "sidebar.nav.sysManage._", -1))
-      EZ_Menu.save(EZ_Menu("ez.sysmanage-organization-list", "Organization", "#sysManage",
-        List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE),
+      EZ_Menu.save(EZ_Menu("ez.sysmanage-organization-list", "Organization", BaseModel.SPLIT + "#sysManage",
+        List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_FLAG),
         "icon-globe", "sidebar.nav.sysManage.Organization"))
       EZ_Menu.save(EZ_Menu("ez.sysmanage-resource-list",
-        "Resource", "#sysManage",
-        List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE),
+        "Resource", BaseModel.SPLIT + "#sysManage",
+        List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_FLAG),
         "icon-basket-loaded", "sidebar.nav.sysManage.RESOURCE"))
-      EZ_Menu.save(EZ_Menu("ez.sysmanage-role-list", "Role", "#sysManage",
-        List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE),
+      EZ_Menu.save(EZ_Menu("ez.sysmanage-role-list", "Role", BaseModel.SPLIT + "#sysManage",
+        List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_FLAG),
         "icon-shuffle", "sidebar.nav.sysManage.ROLE"))
-      EZ_Menu.save(EZ_Menu("ez.sysmanage-account-list", "Account", "#sysManage",
-        List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE),
+      EZ_Menu.save(EZ_Menu("ez.sysmanage-account-list", "Account", BaseModel.SPLIT + "#sysManage",
+        List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_FLAG),
         "icon-people", "sidebar.nav.sysManage.ACCOUNT"))
-      EZ_Menu.save(EZ_Menu("ez.sysmanage-menu-list", "Menu", "#sysManage",
-        List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE),
+      EZ_Menu.save(EZ_Menu("ez.sysmanage-menu-list", "Menu", BaseModel.SPLIT + "#sysManage",
+        List(BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_FLAG),
         "icon-grid", "sidebar.nav.sysManage.MENU"))
 
       logger.info("Initialized auth basic data.")

@@ -10,7 +10,7 @@ class UserSpec extends MockStartupSpec {
   // Step 1 Register
   test("User Register test") {
 
-    EZ_Account.deleteByEmail("net@sunisle.org")
+    EZ_Account.deleteByEmail("net@sunisle.org", "")
 
     val account = Account_VO()
     account.login_id = "u1"
@@ -33,7 +33,7 @@ class UserSpec extends MockStartupSpec {
       JsonHelper.toObject[Resp[String]](
         HttpClientProcessor.post(
           s"http://127.0.0.1:8080/public/register/",
-          account)).message.contains("unique"))
+          account)).message.contains("exist"))
 
     account.email = "net@sunisle.org"
     assert(
@@ -48,12 +48,12 @@ class UserSpec extends MockStartupSpec {
   test("User Active test") {
 
     // Replace Real url in your email
-    val emailReceivedUrl = "http://127.0.0.1:8080/public/active/account/net@sunisle.org/7a23106f-6288-45d5-9897-a9ddfafff08d243804632434419/"
+    val emailReceivedUrl = "http://127.0.0.1:8080/public/active/account/af4c3092-1d9c-4cb1-bd4f-0bdd938c9c6697612617911071/"
     assert(
       JsonHelper.toObject[Resp[String]](
         HttpClientProcessor.get(
           // Error url
-          s"http://0.0.0.0:8080/public/active/account/i@sunisle.org/74df7c7f-7d7d-47a0-bfc9-2b6df1c586cd12325753090669/ ")
+          s"http://0.0.0.0:8080/public/active/account/74df7c7f-7d7d-47a0-bfc9-2b6df1c586cd12325753090669/ ")
       ).code == StandardCode.NOT_FOUND)
 
     val result = HttpClientProcessor.get(
@@ -66,7 +66,7 @@ class UserSpec extends MockStartupSpec {
   // Step 3 Modify Account
   test("User Get Or Update test") {
 
-    val token = AuthService.doLogin("u1", "123").body.token
+    val token = AuthService.doLogin("u1", "123", "").body.token
     val accountVO = JsonHelper.toObject[Resp[Account_VO]](
       HttpClientProcessor.get(
         s"http://0.0.0.0:8080/auth/manage/account/bylogin/?__ez_token__=$token")).body
@@ -92,22 +92,21 @@ class UserSpec extends MockStartupSpec {
     JsonHelper.toObject[Resp[Void]](
       HttpClientProcessor.put(
         s"http://0.0.0.0:8080/public/findpassword/net@sunisle.org/", Map("newPassword" -> "abc"))).body
-
   }
 
   // Step 4 Active New Password
   test("User Active New Password test") {
 
     // Replace Real url in your email
-    val emailReceivedUrl = "http://127.0.0.1:8080/public/active/password/net@sunisle.org/1d7b6c29-b465-44a0-bc3f-aa3d0d82487a244006759536524/"
+    val emailReceivedUrl = "http://127.0.0.1:8080/public/active/password/844e5d62-e92e-4c42-affc-1eb4a29b94f597986475888800/"
 
     assert(JsonHelper.toObject[Resp[String]](
       HttpClientProcessor.get(
-        s"http://0.0.0.0:8080/public/active/password/i@sunisle.org/83a10fc0-9fbe-4da4-beb0-6e90b9adfc0814147819669595/")
+        s"http://0.0.0.0:8080/public/active/password/83a10fc0-9fbe-4da4-beb0-6e90b9adfc0814147819669595/")
     ).code == StandardCode.NOT_FOUND)
     val result = HttpClientProcessor.get(emailReceivedUrl)
     println(result)
-    assert(AuthService.doLogin("u1", "abc"))
+    assert(AuthService.doLogin("u1", "abc", ""))
 
   }
 

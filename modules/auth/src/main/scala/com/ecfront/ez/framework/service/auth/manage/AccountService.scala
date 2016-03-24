@@ -6,13 +6,12 @@ import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.core.helper.FileType
 import com.ecfront.ez.framework.service.auth._
-import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Role, EZ_Token_Info}
+import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Role}
 import com.ecfront.ez.framework.service.email.EmailProcessor
-import com.ecfront.ez.framework.service.redis.RedisProcessor
 import com.ecfront.ez.framework.service.rpc.foundation._
 import com.ecfront.ez.framework.service.rpc.http.HTTP
 import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHttpService
-import com.ecfront.ez.framework.service.storage.foundation.{BaseModel, BaseStorage}
+import com.ecfront.ez.framework.service.storage.foundation.BaseStorage
 
 /**
   * 账号管理
@@ -44,20 +43,25 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
       account.password = body.new_password
       account.image = body.image
       account.enable = false
-      account.organization_code = ""
-      account.role_codes = List(BaseModel.SPLIT + EZ_Role.USER_ROLE_CODE)
+      // 用户自助注册只能到默认组织下
+      account.organization_code = ServiceAdapter.defaultOrganizationCode
+      // 用户自助注册的角色默认是 user
+      account.role_codes = List(EZ_Role.assembleCode(ServiceAdapter.defaultRoleFlag, account.organization_code))
       val saveR = EZ_Account.save(account, context)
       if (saveR) {
-        val encryption = UUID.randomUUID().toString + System.nanoTime()
-        RedisProcessor.set(s"ez-active_account_${body.email}", encryption, 60 * 60 * 24)
-        val activeUrl = com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.publicUrl +
-          s"public/active/account/${body.email}/$encryption/"
-        EmailProcessor.send(body.email, s"${EZContext.app} activate your account",
-          s"""
-             | Please visit this link to activate your account:
-             | <a href="$activeUrl">
-             | $activeUrl</a>
-              """.stripMargin)
+        if (ServiceAdapter.selfActive) {
+          val encryption = UUID.randomUUID().toString + System.nanoTime()
+          CacheManager.addActiveAccount(encryption, saveR.body.code)
+          val activeUrl = com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.publicUrl +
+            s"public/active/account/$encryption/"
+          EmailProcessor.send(body.email, s"${EZContext.app} activate your account",
+            s"""Please visit this link to activate your account:
+                | <a href="$activeUrl">
+                | $activeUrl</a>""".stripMargin)
+        } else {
+          EmailProcessor.send(body.email, s"${EZContext.app} waiting audit",
+            s"""Waiting audit to activate your account.""".stripMargin)
+        }
         Resp.success(null)
       } else {
         saveR
@@ -74,14 +78,12 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
     * @param context   PRC上下文
     * @return 是否成功，成功后跳转到登录url，带 `action=active` 参数
     */
-  @GET("/public/active/account/:email/:encryption/")
+  @GET("/public/active/account/:encryption/")
   def activeNewAccount(parameter: Map[String, String], context: EZAuthContext): Resp[RespRedirect] = {
-    val email = parameter("email")
     val encryption = parameter("encryption")
-    val keyR = RedisProcessor.get(s"ez-active_account_$email")
-    if (keyR && keyR.body == encryption) {
-      RedisProcessor.del(s"ez-active_account_$email")
-      val accountR = EZ_Account.getByEmail(email)
+    val codeR = CacheManager.getAndRemoveActiveAccount(encryption)
+    if (codeR && codeR.body != null) {
+      val accountR = EZ_Account.getByCode(codeR.body)
       if (accountR && accountR.body != null) {
         accountR.body.enable = true
         EZ_Account.update(accountR.body, context)
@@ -104,7 +106,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
   @GET("bylogin/")
   def getAccountByLoginId(parameter: Map[String, String], context: EZAuthContext): Resp[Account_VO] = {
     if (context.token.isDefined && context.loginInfo.isDefined) {
-      val accountR = EZ_Account.getByLoginId(context.loginInfo.get.login_id)
+      val accountR = EZ_Account.getByLoginId(context.loginInfo.get.login_id, context.loginInfo.get.organization_code)
       if (accountR) {
         if (accountR.body != null && accountR.body.enable) {
           val account = accountR.body
@@ -124,7 +126,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
         accountR
       }
     } else {
-      Resp.badRequest("Login Info not found")
+      Resp.unAuthorized("")
     }
   }
 
@@ -140,7 +142,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
   def updateAccountByLoginId(parameter: Map[String, String], body: Account_VO, context: EZAuthContext): Resp[Void] = {
     if (context.token.isDefined && context.loginInfo.isDefined) {
       if (body.login_id == context.loginInfo.get.login_id) {
-        val accountR = EZ_Account.getByLoginId(context.loginInfo.get.login_id)
+        val accountR = EZ_Account.getByLoginId(context.loginInfo.get.login_id, context.loginInfo.get.organization_code)
         if (accountR) {
           if (accountR.body != null) {
             val account = accountR.body
@@ -154,11 +156,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
               account.image = body.image
               val updateR = EZ_Account.update(account, context)
               if (updateR) {
-                val tokenInfoR = EZ_Token_Info.getById(context.token.get, context)
-                val tokenInfo = tokenInfoR.body
-                tokenInfo.login_name = account.name
-                tokenInfo.image = account.image
-                EZ_Token_Info.update(tokenInfo, context)
+                CacheManager.updateTokenInfo(updateR.body)
               } else {
                 updateR
               }
@@ -175,7 +173,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
         Resp.unAuthorized("")
       }
     } else {
-      Resp.badRequest("Login Info not found")
+      Resp.unAuthorized("Login Info not found")
     }
   }
 
@@ -190,13 +188,14 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
   @PUT("/public/findpassword/:email/")
   def findPassword(parameter: Map[String, String], body: Map[String, String], context: EZAuthContext): Resp[Void] = {
     val email = parameter("email")
-    val existR = EZ_Account.existByEmail(email)
-    if (existR && existR.body) {
+    val newPassword = body("newPassword")
+    // 找回密码只针对默认组织
+    val accountR = EZ_Account.getByEmail(email, "")
+    if (accountR && accountR.body != null) {
       val encryption = UUID.randomUUID().toString + System.nanoTime()
-      RedisProcessor.set(s"ez-rest_password_key_$email", encryption, 60 * 60 * 24)
-      RedisProcessor.set(s"ez-rest_password_pwd_$email", body("newPassword"), 60 * 60 * 24)
+      CacheManager.addActiveNewPassword(encryption, accountR.body.code, newPassword)
       val activeUrl = com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.publicUrl +
-        s"public/active/password/$email/$encryption/"
+        s"public/active/password/$encryption/"
       EmailProcessor.send(email, s"${EZContext.app} Activate new password",
         s"""
            | Please visit this link to activate your new password:
@@ -215,25 +214,16 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
     * @param context   PRC上下文
     * @return 是否成功，成功后跳转到登录url，带 `action=findpassword` 参数
     */
-  @GET("/public/active/password/:email/:encryption/")
+  @GET("/public/active/password/:encryption/")
   def activeNewPassword(parameter: Map[String, String], context: EZAuthContext): Resp[RespRedirect] = {
-    val email = parameter("email")
     val encryption = parameter("encryption")
-    val keyR = RedisProcessor.get(s"ez-rest_password_key_$email")
-    if (keyR && keyR.body == encryption) {
-      RedisProcessor.del(s"ez-rest_password_key_$email")
-      val newPwdR = RedisProcessor.get(s"ez-rest_password_pwd_$email")
-      if (newPwdR && newPwdR.body != null) {
-        RedisProcessor.del(s"ez-rest_password_pwd_$email")
-        val newPassword = newPwdR.body
-        val accountR = EZ_Account.getByEmail(email)
-        if (accountR && accountR.body != null) {
-          accountR.body.password = EZ_Account.packageEncryptPwd(accountR.body.login_id, newPassword)
-          EZ_Account.update(accountR.body, context)
-          Resp.success(RespRedirect(ServiceAdapter.loginUrl + "?action=findpassword"))
-        } else {
-          Resp.notFound("Link illegal")
-        }
+    val newPasswordR = CacheManager.getAndRemoveNewPassword(encryption)
+    if (newPasswordR && newPasswordR.body != null) {
+      val accountR = EZ_Account.getByCode(newPasswordR.body._1)
+      if (accountR && accountR.body != null) {
+        accountR.body.password = EZ_Account.packageEncryptPwd(accountR.body.login_id, newPasswordR.body._2)
+        EZ_Account.update(accountR.body, context)
+        Resp.success(RespRedirect(ServiceAdapter.loginUrl + "?action=findpassword"))
       } else {
         Resp.notFound("Link illegal")
       }

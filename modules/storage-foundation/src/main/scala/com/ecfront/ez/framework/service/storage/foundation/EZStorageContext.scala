@@ -8,5 +8,5 @@ import scala.beans.BeanProperty
   * @param optOrganization 操作者组织
   */
 case class EZStorageContext(
-                             @BeanProperty val optAccount: String = "",
-                             @BeanProperty val optOrganization: String = "")
+                             @BeanProperty optAccount: String = "",
+                             @BeanProperty optOrganization: String = "")

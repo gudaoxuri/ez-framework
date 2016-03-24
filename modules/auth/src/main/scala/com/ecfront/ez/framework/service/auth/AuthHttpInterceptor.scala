@@ -1,12 +1,9 @@
 package com.ecfront.ez.framework.service.auth
 
 import com.ecfront.common.AsyncResp
-import com.ecfront.ez.framework.service.auth.model.{EZ_Token_Info, _}
+import com.ecfront.ez.framework.service.auth.model._
 import com.ecfront.ez.framework.service.rpc.foundation.EZRPCContext
 import com.ecfront.ez.framework.service.rpc.http.HttpInterceptor
-import com.ecfront.ez.framework.service.storage.jdbc.JDBCProcessor
-import com.ecfront.ez.framework.service.storage.mongo.MongoProcessor
-import io.vertx.core.json.JsonObject
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,8 +16,8 @@ object AuthHttpInterceptor extends HttpInterceptor {
   override def before(obj: EZRPCContext, context: mutable.Map[String, Any], p: AsyncResp[EZRPCContext]): Unit = {
     val authContext: EZAuthContext = obj
     authContext.token =
-      if (authContext.parameters.contains(EZ_Token_Info.TOKEN_FLAG)) {
-        Some(authContext.parameters(EZ_Token_Info.TOKEN_FLAG))
+      if (authContext.parameters.contains(AuthService.VIEW_TOKEN_FLAG)) {
+        Some(authContext.parameters(AuthService.VIEW_TOKEN_FLAG))
       } else {
         None
       }
@@ -29,43 +26,37 @@ object AuthHttpInterceptor extends HttpInterceptor {
       p.success(authContext)
     } else {
       if (authContext.token.isEmpty) {
-        p.unAuthorized(s"【token】not exist，Request parameter must include【${EZ_Token_Info.TOKEN_FLAG}】")
+        // token不存在
+        p.unAuthorized(s"【token】not exist，Request parameter must include【${AuthService.VIEW_TOKEN_FLAG}】")
       } else {
-        val tokenF =
-          if (ServiceAdapter.mongoStorage) {
-          MongoProcessor.Async.getById(EZ_Token_Info_Mongo.tableName, authContext.token.get, classOf[EZ_Token_Info])
-        } else {
-          JDBCProcessor.Async.get(
-            s"SELECT * FROM ${EZ_Token_Info_JDBC.tableName} WHERE id = ?",
-            List(authContext.token.get), classOf[EZ_Token_Info])
-        }
-        tokenF.onSuccess {
+        // 根据token获取EZ_Token_Info
+        CacheManager.getTokenInfoAsync(authContext.token.get).onSuccess {
           case tokenR =>
             if (tokenR && tokenR.body != null) {
-              authContext.loginInfo = Some(tokenR.body)
+              val tokenInfo = tokenR.body
+              authContext.loginInfo = Some(tokenInfo)
+              // 要访问的资源编码
               val resourceCode = EZ_Resource.assembleCode(authContext.method, authContext.templateUri)
-              if (!tokenR.body.roles.exists(_.resource_codes.contains(resourceCode))) {
-                val resF = if (ServiceAdapter.mongoStorage) {
-                  MongoProcessor.Async.exist(EZ_Resource_Mongo.tableName, new JsonObject(s"""{"code":"$resourceCode"}"""))
-                } else {
-                  JDBCProcessor.Async.exist(
-                    s"SELECT * FROM ${EZ_Resource_Mongo.tableName} WHERE code = ?",
-                    List(resourceCode))
-                }
-                resF.onSuccess {
-                  case resR =>
-                    if (resR && !resR.body) {
-                      // 所有登录用户都可以访问
-                      p.success(authContext)
-                    } else {
-                      p.unAuthorized(s"Account【${tokenR.body.login_name}】no access to ${authContext.realUri}】")
+              CacheManager.existResource(resourceCode).onSuccess {
+                case existResR =>
+                  if (existResR.body) {
+                    // 此资源需要认证
+                    CacheManager.existResourceByRoles(tokenInfo.role_codes, resourceCode).onSuccess {
+                      case existMatchResR =>
+                        if (existMatchResR.body) {
+                          // 登录用户所属角色列表中存在此资源
+                          p.success(authContext)
+                        } else {
+                          p.unAuthorized(s"Account【${tokenInfo.name}】in 【${tokenInfo.organization_code}】 no access to ${authContext.realUri}】")
+                        }
                     }
-                }
-              } else {
-                p.success(authContext)
+                  } else {
+                    // 所有登录用户都可以访问
+                    p.success(authContext)
+                  }
               }
             } else {
-              p.unAuthorized("【token】not exist")
+              p.resp(tokenR)
             }
         }
       }

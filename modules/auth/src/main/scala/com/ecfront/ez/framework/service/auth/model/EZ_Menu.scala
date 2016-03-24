@@ -15,6 +15,8 @@ import scala.beans.BeanProperty
 case class EZ_Menu() extends SecureModel with StatusModel {
 
   @Unique
+  @Label("Code") // organization_code@uri
+  @BeanProperty var code: String = _
   @Require
   @Label("URI")
   @BeanProperty var uri: String = _
@@ -24,8 +26,9 @@ case class EZ_Menu() extends SecureModel with StatusModel {
   @BeanProperty var icon: String = ""
   @BeanProperty var translate: String = ""
   @BeanProperty var role_codes: List[String] = List[String]()
-  @BeanProperty var parent_uri: String = null
+  @BeanProperty var parent_code: String = null
   @BeanProperty var sort: Int = 0
+  @BeanProperty var organization_code: String = _
 
 }
 
@@ -35,15 +38,16 @@ object EZ_Menu extends SecureStorageAdapter[EZ_Menu, EZ_Menu_Base]
   override protected val storageObj: EZ_Menu_Base =
     if (ServiceAdapter.mongoStorage) EZ_Menu_Mongo else EZ_Menu_JDBC
 
-  def apply(uri: String, name: String, parent_uri: String, roleCodes: List[String], icon: String = "", translate: String = "", sort: Int = 0): EZ_Menu = {
+  def apply(uri: String, name: String, parent_code: String, roleCodes: List[String], icon: String = "", translate: String = "", sort: Int = 0): EZ_Menu = {
     val menu = EZ_Menu()
     menu.uri = uri
     menu.name = name
-    menu.parent_uri = parent_uri
+    menu.parent_code = parent_code
     menu.icon = icon
     menu.translate = translate
     menu.role_codes = roleCodes
     menu.sort = sort
+    menu.organization_code = ""
     menu.enable = true
     menu
   }
@@ -52,13 +56,44 @@ object EZ_Menu extends SecureStorageAdapter[EZ_Menu, EZ_Menu_Base]
 
   override def findEnableWithSort(): Resp[List[EZ_Menu]] = storageObj.findEnableWithSort()
 
+  override def findByOrganizationCodeWithSort(organizationCode: String): Resp[List[EZ_Menu]] =
+    storageObj.findByOrganizationCodeWithSort(organizationCode)
+
+  override def findEnableByOrganizationCodeWithSort(organizationCode: String): Resp[List[EZ_Menu]] =
+    storageObj.findEnableByOrganizationCodeWithSort(organizationCode)
+
 }
 
 trait EZ_Menu_Base extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] {
 
+  override def preSave(model: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
+    preSaveOrUpdate(model, context)
+  }
+
+  override def preUpdate(model: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
+    preSaveOrUpdate(model, context)
+  }
+
+  override def preSaveOrUpdate(model: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
+    if (model.uri.contains(BaseModel.SPLIT)) {
+      Resp.badRequest(s"【uri】can't contains ${BaseModel.SPLIT}")
+    } else {
+      model.code = assembleCode(model.uri, model.organization_code)
+      super.preSaveOrUpdate(model, context)
+    }
+  }
+
+  def assembleCode(uri: String, organizationCode: String): String = {
+    organizationCode + BaseModel.SPLIT + uri
+  }
+
   def findWithSort(): Resp[List[EZ_Menu]]
 
   def findEnableWithSort(): Resp[List[EZ_Menu]]
+
+  def findByOrganizationCodeWithSort(organizationCode: String): Resp[List[EZ_Menu]]
+
+  def findEnableByOrganizationCodeWithSort(organizationCode: String): Resp[List[EZ_Menu]]
 
 }
 
@@ -72,6 +107,14 @@ object EZ_Menu_Mongo extends MongoSecureStorage[EZ_Menu] with MongoStatusStorage
     findWithOpt(s"""{"enable":true}""", Map("sort" -> SortEnum.DESC))
   }
 
+  override def findByOrganizationCodeWithSort(organizationCode: String): Resp[List[EZ_Menu]] = {
+    findWithOpt(s"""{"organization_code":"$organizationCode"}""", Map("sort" -> SortEnum.DESC))
+  }
+
+  override def findEnableByOrganizationCodeWithSort(organizationCode: String): Resp[List[EZ_Menu]] = {
+    findWithOpt(s"""{"enable":true,"organization_code":"$organizationCode"}""", Map("sort" -> SortEnum.DESC))
+  }
+
 }
 
 object EZ_Menu_JDBC extends JDBCSecureStorage[EZ_Menu] with JDBCStatusStorage[EZ_Menu] with EZ_Menu_Base {
@@ -82,6 +125,14 @@ object EZ_Menu_JDBC extends JDBCSecureStorage[EZ_Menu] with JDBCStatusStorage[EZ
 
   override def findEnableWithSort(): Resp[List[EZ_Menu]] = {
     find(s"enable = ? ORDER BY sort DESC", List(true))
+  }
+
+  override def findByOrganizationCodeWithSort(organizationCode: String): Resp[List[EZ_Menu]] = {
+    find(s"organization_code = ? ORDER BY sort DESC", List(organizationCode))
+  }
+
+  override def findEnableByOrganizationCodeWithSort(organizationCode: String): Resp[List[EZ_Menu]] = {
+    find(s"enable = ? AND organization_code = ? ORDER BY sort DESC", List(true, organizationCode))
   }
 
 }

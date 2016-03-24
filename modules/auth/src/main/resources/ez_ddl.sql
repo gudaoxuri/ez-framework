@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS ez_organization
 (
     id INT NOT NULL AUTO_INCREMENT COMMENT '记录主键' ,
-    code varchar(200) NOT NULL COMMENT 'Code' ,
-    name varchar(200) NOT NULL COMMENT 'Name' ,
-    image varchar(200) COMMENT 'Image' ,
+    code varchar(200) NOT NULL COMMENT '组织编码' ,
+    name varchar(200) NOT NULL COMMENT '组织名称' ,
+    image varchar(200) COMMENT '组织图标' ,
     enable BOOLEAN NOT NULL COMMENT '是否启用' ,
     create_user varchar(100) NOT NULL COMMENT '创建用户' ,
     create_org varchar(100) NOT NULL COMMENT '创建组织' ,
@@ -18,21 +18,23 @@ CREATE TABLE IF NOT EXISTS ez_organization
     INDEX idx_update_user(update_user) ,
     INDEX idx_update_org(update_org) ,
     INDEX idx_update_time(update_time)
-)ENGINE=innodb DEFAULT CHARSET=utf8;
+)ENGINE=innodb DEFAULT CHARSET=utf8
+COMMENT '组织表，用于租户管理';
 
 CREATE TABLE IF NOT EXISTS ez_account
 (
     id INT NOT NULL AUTO_INCREMENT COMMENT '记录主键' ,
-    login_id varchar(200) NOT NULL COMMENT 'Login Id' ,
-    name varchar(200) NOT NULL COMMENT 'Name' ,
-    image varchar(200) COMMENT 'Image' ,
-    password varchar(200) NOT NULL COMMENT 'Password' ,
+    code varchar(200) NOT NULL COMMENT '用户编码，自动生成：所属组织编码@登录Id' ,
+    login_id varchar(200) NOT NULL COMMENT '登录Id，不能包含@' ,
+    name varchar(200) NOT NULL COMMENT '用户名' ,
+    image varchar(200) COMMENT '头像' ,
+    password varchar(200) NOT NULL COMMENT '密码' ,
     email varchar(200) NOT NULL COMMENT 'Email' ,
-    ext_id varchar(200) COMMENT 'Ext Id' ,
-    ext_info JSON COMMENT 'Ext Info' ,
-    oauth JSON COMMENT 'OAuth Info' ,
-    organization_code varchar(200) COMMENT '' ,
-    role_codes JSON COMMENT '' ,
+    ext_id varchar(200) COMMENT '扩展Id，用于关联其它对象以扩展属性，扩展Id多为业务系统用户信息表的主键' ,
+    ext_info JSON COMMENT '扩展信息，json格式' ,
+    oauth JSON COMMENT 'OAuth认证信息，json格式，key=oauth服务标记，value=openid' ,
+    organization_code varchar(200) COMMENT '所属组织编码' ,
+    role_codes JSON COMMENT '所属角色编码列表，json格式' ,
     enable BOOLEAN NOT NULL COMMENT '是否启用' ,
     create_user varchar(100) NOT NULL COMMENT '创建用户' ,
     create_org varchar(100) NOT NULL COMMENT '创建组织' ,
@@ -45,20 +47,22 @@ CREATE TABLE IF NOT EXISTS ez_account
     INDEX idx_name(name) ,
     INDEX idx_email(email) ,
     INDEX idx_ext_id(ext_id) ,
+    INDEX idx_org_id(organization_code) ,
     INDEX idx_enable(enable) ,
     INDEX idx_update_user(update_user) ,
     INDEX idx_update_org(update_org) ,
     INDEX idx_update_time(update_time)
-)ENGINE=innodb DEFAULT CHARSET=utf8;
+)ENGINE=innodb DEFAULT CHARSET=utf8
+COMMENT '用户表';
 
 CREATE TABLE IF NOT EXISTS ez_role
 (
     id INT NOT NULL AUTO_INCREMENT COMMENT '记录主键' ,
-    code varchar(200) NOT NULL COMMENT 'Code' ,
-    name varchar(200) NOT NULL COMMENT 'Name' ,
-    flag varchar(200) NOT NULL COMMENT 'Flag' ,
-    resource_codes JSON COMMENT '' ,
-    organization_code varchar(200) COMMENT '' ,
+    code varchar(200) NOT NULL COMMENT '角色编码，自动生成：所属组织编码@角色标记' ,
+    name varchar(200) NOT NULL COMMENT '角色名称' ,
+    flag varchar(200) NOT NULL COMMENT '角色标记' ,
+    resource_codes JSON COMMENT '可访问资源编码列表，json格式' ,
+    organization_code varchar(200) COMMENT '所属组织编码' ,
     enable BOOLEAN NOT NULL COMMENT '是否启用' ,
     create_user varchar(100) NOT NULL COMMENT '创建用户' ,
     create_org varchar(100) NOT NULL COMMENT '创建组织' ,
@@ -70,19 +74,21 @@ CREATE TABLE IF NOT EXISTS ez_role
     INDEX idx_code(code) ,
     INDEX idx_flag(flag) ,
     INDEX idx_name(name) ,
+    INDEX idx_org_id(organization_code) ,
     INDEX idx_enable(enable) ,
     INDEX idx_update_user(update_user) ,
     INDEX idx_update_org(update_org) ,
     INDEX idx_update_time(update_time)
-)ENGINE=innodb DEFAULT CHARSET=utf8;
+)ENGINE=innodb DEFAULT CHARSET=utf8
+COMMENT '角色表';
 
 CREATE TABLE IF NOT EXISTS ez_resource
 (
     id INT NOT NULL AUTO_INCREMENT COMMENT '记录主键' ,
-    code varchar(1000) NOT NULL COMMENT 'Code（Method+URI）' ,
-    method varchar(200) NOT NULL COMMENT 'Method' ,
-    uri varchar(1000) NOT NULL COMMENT 'URI' ,
-    name varchar(200) NOT NULL COMMENT 'Name' ,
+    code varchar(1000) NOT NULL COMMENT '资源编码，自动生成：访问方法@资源名称' ,
+    method varchar(200) NOT NULL COMMENT '访问方法' ,
+    uri varchar(1000) NOT NULL COMMENT '资源URL' ,
+    name varchar(200) NOT NULL COMMENT '资源名称' ,
     enable BOOLEAN NOT NULL COMMENT '是否启用' ,
     create_user varchar(100) NOT NULL COMMENT '创建用户' ,
     create_org varchar(100) NOT NULL COMMENT '创建组织' ,
@@ -97,18 +103,21 @@ CREATE TABLE IF NOT EXISTS ez_resource
     INDEX idx_update_user(update_user) ,
     INDEX idx_update_org(update_org) ,
     INDEX idx_update_time(update_time)
-)ENGINE=innodb DEFAULT CHARSET=utf8;
+)ENGINE=innodb DEFAULT CHARSET=utf8
+COMMENT '资源表';
 
 CREATE TABLE IF NOT EXISTS ez_menu
 (
     id INT NOT NULL AUTO_INCREMENT COMMENT '记录主键' ,
-    uri varchar(1000) NOT NULL COMMENT 'URI' ,
-    name varchar(200) NOT NULL COMMENT 'Name' ,
-    icon varchar(200) COMMENT '' ,
-    translate varchar(200) COMMENT '' ,
-    role_codes JSON COMMENT '' ,
-    parent_uri varchar(1000) COMMENT '' ,
-    sort INT COMMENT '' ,
+    code varchar(1000) NOT NULL COMMENT '菜单编码，自动生成：所属组织编码@菜单链接' ,
+    uri varchar(1000) NOT NULL COMMENT '菜单链接' ,
+    name varchar(200) NOT NULL COMMENT '菜单名称' ,
+    icon varchar(200) COMMENT '菜单图标' ,
+    translate varchar(200) COMMENT '菜单名称翻译标识（i18n用）' ,
+    role_codes JSON COMMENT '菜单所属角色编码列表，json格式' ,
+    parent_code varchar(1000) COMMENT '父菜单编码，用于组装多级菜单' ,
+    sort INT COMMENT '显示排序，倒序排列' ,
+    organization_code varchar(200) COMMENT '所属组织编码' ,
     enable BOOLEAN NOT NULL COMMENT '是否启用' ,
     create_user varchar(100) NOT NULL COMMENT '创建用户' ,
     create_org varchar(100) NOT NULL COMMENT '创建组织' ,
@@ -118,25 +127,11 @@ CREATE TABLE IF NOT EXISTS ez_menu
     update_time BIGINT NOT NULL COMMENT '更新时间(yyyyMMddHHmmssSSS)' ,
     PRIMARY KEY(id) ,
     INDEX idx_name(name) ,
+    INDEX idx_org_id(organization_code) ,
     INDEX idx_enable(enable) ,
     INDEX idx_update_user(update_user) ,
     INDEX idx_update_org(update_org) ,
     INDEX idx_update_time(update_time)
-)ENGINE=innodb DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS ez_token_info
-(
-    id varchar(200)  NOT NULL COMMENT '记录主键' ,
-    login_id varchar(200) COMMENT '' ,
-    login_name varchar(200) COMMENT '' ,
-    image varchar(200) COMMENT '' ,
-    organization JSON COMMENT '' ,
-    roles JSON COMMENT '' ,
-    ext_id varchar(200) COMMENT '' ,
-    ext_info JSON COMMENT '' ,
-    last_login_time BIGINT COMMENT '' ,
-    PRIMARY KEY(id) ,
-    INDEX idx_login_id(login_id)
-)ENGINE=innodb DEFAULT CHARSET=utf8;
-
+)ENGINE=innodb DEFAULT CHARSET=utf8
+COMMENT '菜单表';
 

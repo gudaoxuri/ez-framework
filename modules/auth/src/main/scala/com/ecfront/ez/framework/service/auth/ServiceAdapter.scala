@@ -3,25 +3,36 @@ package com.ecfront.ez.framework.service.auth
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZServiceAdapter
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
+import com.ecfront.ez.framework.service.auth.model.EZ_Role
 import com.ecfront.ez.framework.service.rpc.foundation.AutoBuildingProcessor
 import com.ecfront.ez.framework.service.rpc.http.{HTTP, HttpInterceptor}
 import io.vertx.core.json.JsonObject
 
 object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
-  var publicUriPrefix: String = "/public/"
-  var allowRegister: Boolean = false
-  var loginUrl: String = ""
-  var mongoStorage: Boolean = false
+  var publicUriPrefix: String = _
+  var allowRegister: Boolean = _
+  var selfActive: Boolean = _
+  var defaultRoleFlag: String = _
+  var defaultOrganizationCode: String = _
+  var loginUrl: String = _
+  var mongoStorage: Boolean = _
+  var loginKeepSeconds: Long = _
+  var activeKeepSeconds: Long = _
 
   override def init(parameter: JsonObject): Resp[String] = {
+    mongoStorage = parameter.getString("storage", "mongo") == "mongo"
     publicUriPrefix = parameter.getString("publicUriPrefix", "/public/")
     allowRegister = parameter.getBoolean("allowRegister", false)
+    selfActive = parameter.getBoolean("selfActive", true)
+    defaultRoleFlag = parameter.getString("defaultRoleFlag", EZ_Role.USER_ROLE_FLAG)
+    defaultOrganizationCode = parameter.getString("defaultOrganizationCode", "")
     loginUrl = parameter.getString("loginUrl", "#/auth/login")
+    loginKeepSeconds = parameter.getLong("loginKeepSeconds", 0L)
+    activeKeepSeconds = parameter.getLong("activeKeepSeconds", 24L * 60 * 60)
     if (!loginUrl.toLowerCase().startsWith("http")) {
       loginUrl = com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.webUrl + loginUrl
     }
-    mongoStorage = parameter.getString("storage", "mongo") == "mongo"
     EZAsyncInterceptorProcessor.register(HttpInterceptor.category, AuthHttpInterceptor)
     AutoBuildingProcessor.autoBuilding[HTTP]("com.ecfront.ez.framework.service.auth", classOf[HTTP])
     Initiator.init()
@@ -47,7 +58,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
       ) ++ s
     } else {
       Set(
-        com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.serviceName
+        com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.serviceName,
+        com.ecfront.ez.framework.service.redis.ServiceAdapter.serviceName
       ) ++ s
     }
   }

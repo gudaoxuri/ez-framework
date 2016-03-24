@@ -22,8 +22,8 @@ class AuthSpec extends MockStartupSpec {
     val roles = EZ_Role.find("").body
     assert(
       roles.size == 2
-        && roles.head.code == BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE
-        && roles.head.flag == EZ_Role.SYSTEM_ROLE_CODE
+        && roles.head.code == BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_FLAG
+        && roles.head.flag == EZ_Role.SYSTEM_ROLE_FLAG
         && roles.head.name == "System"
         && roles.head.resource_codes.size == 57
         && roles.head.resource_codes.head == s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/"
@@ -40,39 +40,34 @@ class AuthSpec extends MockStartupSpec {
     )
 
     // login
-    assert(!AuthService.doLogin(EZ_Account.SYSTEM_ACCOUNT_CODE, "errorpwd"))
-    val loginResp = AuthService.doLogin(EZ_Account.SYSTEM_ACCOUNT_CODE, "admin")
+    assert(!AuthService.doLogin(EZ_Account.SYSTEM_ACCOUNT_CODE, "errorpwd", ""))
+    val loginResp = AuthService.doLogin(EZ_Account.SYSTEM_ACCOUNT_CODE, "admin", "")
     assert(loginResp
       && loginResp.body.token != ""
       && loginResp.body.login_id == EZ_Account.SYSTEM_ACCOUNT_CODE
-      && loginResp.body.login_name == "Sys Admin"
+      && loginResp.body.name == "Sys Admin"
       && loginResp.body.organization_code == ""
-      && loginResp.body.organization_name == "default"
-      && loginResp.body.role_info == Map(
-      BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE -> "System"
+      && loginResp.body.role_codes == List(
+      BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_FLAG
     )
       && loginResp.body.ext_id == ""
-      && loginResp.body.last_login_time != 0
     )
     val token = loginResp.body.token
     // get login info
-    val loginInfoResp = AuthService.doGetLoginInfo(token)
+    val loginInfoResp = CacheManager.getTokenInfo(token)
     assert(loginInfoResp
       && loginInfoResp.body.token != ""
       && loginInfoResp.body.login_id == EZ_Account.SYSTEM_ACCOUNT_CODE
-      && loginInfoResp.body.login_name == "Sys Admin"
       && loginInfoResp.body.organization_code == ""
-      && loginInfoResp.body.organization_name == "default"
-      && loginInfoResp.body.role_info == Map(
-      BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_CODE -> "System"
+      && loginInfoResp.body.role_codes == List(
+      BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_FLAG
     )
       && loginInfoResp.body.ext_id == ""
-      && loginInfoResp.body.last_login_time != 0
     )
     // logout
     assert(AuthService.doLogout(token))
     // get login info
-    assert(!AuthService.doGetLoginInfo(token))
+    assert(!CacheManager.getTokenInfo(token))
 
   }
 

@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.service.auth._
-import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Role, EZ_Token_Info}
+import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Role}
 import com.ecfront.ez.framework.service.rpc.foundation.{GET, RPC, RespRedirect}
 import com.ecfront.ez.framework.service.rpc.http.HTTP
 import io.vertx.core.json.JsonObject
@@ -38,19 +38,24 @@ object OAuth2Service {
         val oauthAccountR = processor.fetchAccount(getTokenR.body)
         if (oauthAccountR) {
           val oauthAccount = oauthAccountR.body
-          val accountR = EZ_Account.getByOAuth(appName, oauthAccount.oauth(appName))
+          // TODO 支持其他组织
+          val accountR = EZ_Account.getByOAuth(appName, oauthAccount.oauth(appName), "")
           if (accountR.body != null) {
-            val loginInfo = AuthService.addLoginInfo(accountR.body)
-            Resp.success(RespRedirect(indexUrl + "?" + EZ_Token_Info.TOKEN_FLAG + "=" + loginInfo.body.token))
+            if (accountR.body.enable) {
+              val loginInfo = CacheManager.addTokenInfo(accountR.body)
+              Resp.success(RespRedirect(indexUrl + "?" + AuthService.VIEW_TOKEN_FLAG + "=" + loginInfo.body.token))
+            } else {
+              Resp.badRequest(s"Account 【${accountR.body.name}】disabled")
+            }
           } else {
             oauthAccount.login_id = oauthAccount.oauth(appName) + "@" + appName
             oauthAccount.email = oauthAccount.oauth(appName) + "@" + appName + EZ_Account.VIRTUAL_EMAIL
             oauthAccount.password = UUID.randomUUID().toString
             oauthAccount.organization_code = ""
-            oauthAccount.role_codes = List(EZ_Role.USER_ROLE_CODE)
+            oauthAccount.role_codes = List(EZ_Role.USER_ROLE_FLAG)
             oauthAccount.enable = true
-            val loginInfo = AuthService.addLoginInfo(EZ_Account.save(oauthAccount).body)
-            Resp.success(RespRedirect(indexUrl + "?" + EZ_Token_Info.TOKEN_FLAG + "=" + loginInfo.body.token))
+            val loginInfo = CacheManager.addTokenInfo(EZ_Account.save(oauthAccount).body)
+            Resp.success(RespRedirect(indexUrl + "?" + AuthService.VIEW_TOKEN_FLAG + "=" + loginInfo.body.token))
           }
         } else {
           oauthAccountR

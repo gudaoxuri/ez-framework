@@ -5,14 +5,19 @@
     "services": {
       "auth": {
         "allowRegister": true,
+        "selfActive": true,
+        "defaultRoleFlag": "user",
+        "defaultOrganizationCode": "",
         "publicUriPrefix": "/public/",
         "loginUrl": "#/auth/login",
-        "storage":"jdbc" // mongo or jdbc
+        "loginKeepSeconds": 0 , // 登录保持时间
+        "activeKeepSeconds": 86400 , // 注册激活和找回密码有效时间
+        "storage":"mongo" // mongo or jdbc
       },
       "storage.mongo": {
         "hosts": [
           {
-            "host": "192.168.99.100",
+            "host": "192.168.4.99",
             "port": 27017
           }
         ],
@@ -20,7 +25,7 @@
       },
       "storage.jdbc": {
         "driver_class": "com.mysql.jdbc.Driver",
-        "url": "jdbc:mysql://192.168.99.100:3306/ez_test?characterEncoding=UTF-8&autoReconnect=true",
+        "url": "jdbc:mysql://192.168.4.99:3306/ez_test?characterEncoding=UTF-8&autoReconnect=true",
         "user": "root",
         "password": "123456",
         "max_pool_size": 1,
@@ -43,11 +48,11 @@
         "login": "REQUIRED",
         "ssl": true,
         "authMethods": "LOGIN",
-        "username": "hi-sb@ecfront.com",
-        "password": ""
+        "username": "test@ecfront.com",
+        "password": "t~!Q`1q"
       },
       "redis": {
-        "host": "192.168.99.100",
+        "host": "192.168.4.99",
         "port": 6379
       }
     }
