@@ -92,7 +92,7 @@ POST http://127.0.0.1:8080/public/auth/login/" body: {"id":"admin","password":"a
 POST /public/auth/login/
 
 body:
-[source,json]
+[source,text]
 {
   "id":String, // 登录Id或email
   "password":String // 密码
@@ -100,7 +100,7 @@ body:
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 {
   "token": String, // token，前端需要保存此值，用于后续获取登录信息
   "login_id": String, // 登录id
@@ -141,7 +141,7 @@ GET /public/menu/?__ez_token__=<token>  `__ez_token__`可选，不加时显示�
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 [
   {
     "code": String, // 菜单编码
@@ -165,7 +165,7 @@ POST /public/register/
 
 body
 
-[source,json]
+[source,text]
 {
   "login_id": String,  // 登录id
   "name": String, // 姓名
@@ -195,7 +195,7 @@ GET /public/active/account/<加密字符串>/ 来自邮件中的链接
 PUT /public/findpassword/<email>/
 
 body
-[source,json]
+[source,text]
 {
   "newPassword": String  // 新的密码
 }
@@ -224,7 +224,7 @@ GET /auth/manage/account/bylogin/?__ez_token__=<token>
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 {
   "id": String,  // 数据库id
   "login_id": String,  // 登录id
@@ -242,7 +242,7 @@ GET /auth/manage/account/bylogin/?__ez_token__=<token>
 PUT /auth/manage/account/bylogin/?__ez_token__=<token>
 
 body
-[source,json]
+[source,text]
 {
   "login_id": String,  // 登录id
   "name": String, // 姓名
@@ -263,7 +263,7 @@ null
 POST /auth/manage/resource/?__ez_token__=<token>
 
 body
-[source,json]
+[source,text]
 {
   "method": String,  // Http方法，大写
   "uri": String,  // 资源URI
@@ -272,7 +272,7 @@ body
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 {
   "id": String,  // 数据库id
   "code": String,  // 资源编码
@@ -295,7 +295,7 @@ body
 PUT /auth/manage/resource/<资源id>/?__ez_token__=<token>
 
 body
-[source,json]
+[source,text]
 {
   "id": String,  // 数据库id
   "method": String,  // Http方法，大写
@@ -315,7 +315,7 @@ GET /auth/manage/resource/?__ez_token__=<token>&condition=<查找条件，sql或
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 [
   {
    同`（管理接口）添加资源`的响应内容主体
@@ -341,7 +341,7 @@ GET /auth/manage/resource/page/<当前页，从1开始>/<每页显示条数>/?__
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 {
   "pageNumber":Long, // 当前页，从1开始
   "pageSize":Int, // 每页显示条数
@@ -413,7 +413,7 @@ GET /auth/manage/resource/export/?__ez_token__=<token>
 POST /auth/manage/organization/?__ez_token__=<token>
 
 body
-[source,json]
+[source,text]
 {
   "code": String,  // 编码编码
   "name": String, // 组织名称
@@ -422,7 +422,7 @@ body
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 {
   "id": String,  // 数据库id
   "code": String,  // 编码编码
@@ -444,7 +444,7 @@ body
 PUT /auth/manage/organization/<组织id>/?__ez_token__=<token>
 
 body
-[source,json]
+[source,text]
 {
   "id": String,  // 数据库id
   "code": String,  // 组织编码
@@ -464,7 +464,7 @@ GET /auth/manage/organization/?__ez_token__=<token>&condition=<查找条件，sq
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 [
   {
    同`（管理接口）添加组织`的响应内容主体
@@ -490,7 +490,7 @@ GET /auth/manage/organization/page/<当前页，从1开始>/<每页显示条数>
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 {
   "pageNumber":Long, // 当前页，从1开始
   "pageSize":Int, // 每页显示条数
@@ -584,7 +584,7 @@ GET <`（管理接口）上传组织图标`中返回的uri>?__ez_token__=<token>
 POST /auth/manage/role/?__ez_token__=<token>
 
 body
-[source,json]
+[source,text]
 {
   "flag": String,  // 角色标识
   "name": String, // 角色名称
@@ -594,7 +594,7 @@ body
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 {
   "id": String,  // 数据库id
   "code": String,  // 编码编码
@@ -618,7 +618,7 @@ body
 PUT /auth/manage/role/<角色id>/?__ez_token__=<token>
 
 body
-[source,json]
+[source,text]
 {
   "id": String,  // 数据库id
   "flag": String,  // 角色标识
@@ -639,7 +639,7 @@ GET /auth/manage/role/?__ez_token__=<token>&condition=<查找条件，sql或mong
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 [
   {
    同`（管理接口）添加角色`的响应内容主体
@@ -665,7 +665,7 @@ GET /auth/manage/role/page/<当前页，从1开始>/<每页显示条数>/?__ez_t
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 {
   "pageNumber":Long, // 当前页，从1开始
   "pageSize":Int, // 每页显示条数
@@ -737,7 +737,7 @@ GET /auth/manage/role/export/?__ez_token__=<token>
 POST /auth/manage/account/?__ez_token__=<token>
 
 body
-[source,json]
+[source,text]
 {
   "login_id": String, // 登录id
   "name": String, // 姓名
@@ -752,7 +752,7 @@ body
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 {
   "id": String,  // 数据库id
   "code": String,  // 账户编码
@@ -782,7 +782,7 @@ body
 PUT /auth/manage/account/<账户id>/?__ez_token__=<token>
 
 body
-[source,json]
+[source,text]
 {
   "id": String,  // 数据库id
   "name": String, // 姓名
@@ -807,7 +807,7 @@ GET /auth/manage/account/?__ez_token__=<token>&condition=<查找条件，sql或m
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 [
   {
    同`（管理接口）添加账户`的响应内容主体
@@ -833,7 +833,7 @@ GET /auth/manage/account/page/<当前页，从1开始>/<每页显示条数>/?__e
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 {
   "pageNumber":Long, // 当前页，从1开始
   "pageSize":Int, // 每页显示条数
@@ -927,7 +927,7 @@ GET <`（管理接口）上传账户头像`中返回的uri>?__ez_token__=<token>
 POST /auth/manage/menu/?__ez_token__=<token>
 
 body
-[source,json]
+[source,text]
 {
   "uri": String, // 菜单点击的URI
   "name": String, // 菜单名称
@@ -941,7 +941,7 @@ body
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 {
   "id": String,  // 数据库id
   "code": String,  // 菜单编码
@@ -969,7 +969,7 @@ body
 PUT /auth/manage/menu/<菜单id>/?__ez_token__=<token>
 
 body
-[source,json]
+[source,text]
 {
   "id": String,  // 数据库id
   "uri": String, // 菜单点击的URI
@@ -994,7 +994,7 @@ GET /auth/manage/menu/?__ez_token__=<token>&condition=<查找条件，sql或mong
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 [
   {
    同`（管理接口）添加菜单`的响应内容主体
@@ -1020,7 +1020,7 @@ GET /auth/manage/menu/page/<当前页，从1开始>/<每页显示条数>/?__ez_t
 
 *响应内容主体*
 
-[source,json]
+[source,text]
 {
   "pageNumber":Long, // 当前页，从1开始
   "pageSize":Int, // 每页显示条数
