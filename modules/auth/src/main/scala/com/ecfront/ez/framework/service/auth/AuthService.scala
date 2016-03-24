@@ -66,11 +66,15 @@ object AuthService {
 
   @GET("/public/menu/")
   def getMenus(parameter: Map[String, String], context: EZAuthContext): Resp[List[EZ_Menu]] = {
-    val tokenInfoR = CacheManager.getTokenInfo(parameter(VIEW_TOKEN_FLAG))
-    if (tokenInfoR) {
-      doGetMenus(tokenInfoR.body.role_codes, tokenInfoR.body.organization_code)
+    if (parameter.contains(VIEW_TOKEN_FLAG)) {
+      val tokenInfoR = CacheManager.getTokenInfo(parameter(VIEW_TOKEN_FLAG))
+      if (tokenInfoR) {
+        doGetMenus(tokenInfoR.body.role_codes, tokenInfoR.body.organization_code)
+      } else {
+        Resp.success(List())
+      }
     } else {
-      Resp.success(List())
+      doGetMenus(List(), "")
     }
   }
 

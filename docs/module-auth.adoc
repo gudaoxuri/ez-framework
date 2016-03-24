@@ -1,0 +1,405 @@
+== 认证服务
+
+=== 功能
+
+. 支持RBAC的认证服务
+. 支持菜单级和资源级（action）的授权
+. 支持JDBC或Mongo的持久化
+. 支持自助注册及密码找回
+
+=== 5分钟上手
+
+. 添加依赖
+
+[source,xml]
+<dependency>
+  <groupId>com.ecfront</groupId>
+  <artifactId>ezf-auth</artifactId>
+  <version>3.0.0-SNAPSHOT</version>
+<dependency>
+
+. 添加配置
+
+[source,json]
+"auth": {},
+"storage.mongo": {
+  "hosts": [
+    {
+      "host": "<服务IP>",
+      "port": 27017
+    }
+  ],
+  "db_name": "test"
+},
+"rpc.http": {
+  "host": "0.0.0.0",
+  "port": 8080
+},
+"redis": {
+  "host": "<服务IP>",
+  "port": 6379
+}
+ 
+. 启动服务
+
+[source,scala]
+EZManager.start()
+ 
+. 登录
+
+ POST http://127.0.0.1:8080/public/auth/login/" body: {"id":"admin","password":"admin"}
+ 返回登录信息
+
+=== 依赖
+
+服务依赖：rpc.http、redis、storage.mongo或storage.jdbc、mail（可选）
+
+环境依赖：redis、mongo或mysql
+
+=== 配置
+
+[source,json]
+----
+"auth": {
+  "allowRegister": false, <1>
+  "selfActive": true, <2>
+  "defaultRoleFlag": "user", <3>
+  "defaultOrganizationCode": "", <4>
+  "publicUriPrefix": "/public/", <5>
+  "loginUrl": "#/auth/login", <6>
+  "loginKeepSeconds": 0 , <7>
+  "activeKeepSeconds": 86400 , <8>
+  "storage":"mongo" <9>
+}
+----
+<1> 是否允许注册，注册后账户处于禁用状态，需要激活
+<2> 是否允许自助激活，true：会发送激活邮件自助激活，false：需要管理员手工激活
+<3> 默认角色标识，注册时账户默认的角色
+<4> 默认组织编码，注册时账户默认的组织
+<5> 公开URI的前缀，以此前缀开头的URI不需要认证
+<6> 登录URL，注册或找回密码激活成功后会跳转到登录URL，如果此配置值不带http前缀则使用`rpc-http`中`webUrl`做为基础路径
+<7> 登录保持时间，单位秒，指定登录会话多少秒后过期，0表示不过期
+<8> 注册或找回密码激活有效期，单位秒
+<9> 持久化实现，支持`mongo`或`jdbc`
+
+=== 使用
+
+==== 登录
+
+*请求*
+
+POST /public/auth/login/
+
+body:
+[source,json]
+{
+  "id":String, // 登录Id或email
+  "password":String // 密码
+}
+
+*响应内容主体*
+
+[source,json]
+{
+  "token": String, // token，前端需要保存此值，用于后续获取登录信息
+  "login_id": String, // 登录id
+  "name": String, // 姓名
+  "email": String, // email
+  "image": String, // 头像URL
+  "organization_code": String, // 组织编码
+  "role_codes": List[String], // 角色编码列表
+  "ext_id": String, // 扩展Id
+  "ext_info": Map[String, String] // 扩展信息
+}
+
+==== 注销
+
+*请求*
+
+GET /auth/logout/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== 获取登录信息
+
+*请求*
+
+GET /auth/logininfo/?__ez_token__=<token>
+
+*响应内容主体*
+
+同`登录`的响应内容主体
+
+==== 获取菜单（带权限过滤）
+
+*请求*
+
+GET /public/menu/?__ez_token__=<token>  `__ez_token__`可选，不加时显示公共（不需要认证）的菜单
+
+*响应内容主体*
+
+[source,json]
+[
+  {
+    "code": String, // 菜单编码
+    "uri": String, // 菜单点击的URI
+    "name": String, // 菜单名称
+    "icon": String, // 菜单图标名称
+    "translate": String, // 菜单翻译（i18n用）
+    "role_codes": List[String], // 所属角色编码列表
+    "parent_code": String, // 父菜单编码，用于多级菜单
+    "sort": Int, // 排序，倒序
+    "organization_code": String // 所属组织编码
+  },
+  ...
+]
+
+==== 注册
+
+*请求*
+
+POST /public/register/
+
+body
+
+[source,json]
+{
+  "login_id": String,  // 登录id
+  "name": String, // 姓名
+  "image": String, // 头像
+  "email": String, // Email
+  "new_password": String // 密码
+}
+
+*响应内容主体*
+
+null，允许自助激活时会发送激活邮件
+
+==== 激活账号
+
+*请求*
+
+GET /public/active/account/<加密字符串>/ 来自邮件中的链接
+
+*响应内容主体*
+
+跳转到登录URL 或 返回错误信息
+
+==== 找回（重置）密码
+
+*请求*
+
+PUT /public/findpassword/<email>/
+
+body
+[source,json]
+{
+  "newPassword": String  // 新的密码
+}
+
+*响应内容主体*
+
+null，发送激活邮件
+
+==== 激活新密码
+
+*请求*
+
+GET /public/active/password/<加密字符串>/ 来自邮件中的链接
+
+*响应内容主体*
+
+跳转到登录URL 或 返回错误信息
+
+==== 获取登录账号信息
+
+* 此操作直接从数据中获取数据，上文`获取账号信息`从缓存中获取
+
+*请求*
+
+GET /auth/manage/account/bylogin/?__ez_token__=<token>
+
+*响应内容主体*
+
+[source,json]
+{
+  "id": String,  // 数据库id
+  "login_id": String,  // 登录id
+  "name": String, // 姓名
+  "image": String, // 头像
+  "email": String, // Email
+  "ext_id": String, // 扩展id
+  "ext_info": Map[String, String] // 扩展信息
+}
+
+==== 更新登录账号信息
+
+*请求*
+
+PUT /auth/manage/account/bylogin/?__ez_token__=<token>
+
+body
+[source,json]
+{
+  "login_id": String,  // 登录id
+  "name": String, // 姓名
+  "image": String, // 头像
+  "email": String, // Email
+  "current_password": String, // 当前密码
+  "new_password": String // 新密码，如果要修改密码此字段必填
+}
+
+*响应内容主体*
+
+null
+
+==== （管理接口）添加资源
+
+*请求*
+
+POST /auth/manage/resource/?__ez_token__=<token>
+
+body
+[source,json]
+{
+  "method": String,  // Http方法，大写
+  "uri": String,  // 资源URI
+  "name": String // 资源名称
+}
+
+*响应内容主体*
+
+[source,json]
+{
+  "id": String,  // 数据库id
+  "code": String,  // 资源编码
+  "method": String,  // Http方法，大写
+  "uri": String,  // 资源uri
+  "name": String, // 资源名称
+  "enable": Boolean // 是否启用
+  "create_user": String, // 创建用户login_id
+  "create_org": String, // 创建组织编码
+  "create_time": Long, // 创建时间（yyyyMMddHHmmssSSS）
+  "update_user": String, // 更新用户login_id
+  "update_org": String, // 更新组织编码
+  "update_time": Long // 更新时间（yyyyMMddHHmmssSSS）
+}
+
+==== （管理接口）更新资源
+
+*请求*
+
+PUT /auth/manage/resource/<资源id>/?__ez_token__=<token>
+
+body
+[source,json]
+{
+  "method": String,  // Http方法，大写
+  "uri": String,  // 资源URI
+  "name": String // 资源名称
+}
+
+*响应内容主体*
+
+同`（管理接口）添加资源`的响应内容主体
+
+==== （管理接口）查找资源列表
+
+*请求*
+
+GET /auth/manage/resource/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+[source,json]
+[
+  {
+   同`（管理接口）添加资源`的响应内容主体
+  },
+  ...
+]
+
+==== （管理接口）查找启用资源列表
+
+*请求*
+
+GET /auth/manage/resource/enable/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+同`（管理接口）查找启用资源列表`的响应内容主体
+
+==== （管理接口）分页查找资源列表
+
+*请求*
+
+GET /auth/manage/resource/page/<当前页，从1开始>/<每页显示条数>/?__ez_token__=<token>?&condition=<查找条件，sql或mongo json>  condition可选
+
+*响应内容主体*
+
+[source,json]
+{
+  "pageNumber":Long, // 当前页，从1开始
+  "pageSize":Int, // 每页显示条数
+  "pageTotal":Long, // 总共页数
+  "recordTotal":Long, // 总共记录数
+  // 当前页的实体列表
+  "objects":[
+    {
+     同`（管理接口）添加资源`的响应内容主体
+    },
+    ...
+  ]
+}
+
+==== （管理接口）获取一个资源
+
+*请求*
+
+GET /auth/manage/resource/<资源id>/?__ez_token__=<token>
+
+*响应内容主体*
+
+同`（管理接口）添加资源`的响应内容主体
+
+==== （管理接口）删除一个资源
+
+*请求*
+
+DELETE /auth/manage/resource/<资源id>/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）启用一个资源
+
+*请求*
+
+GET /auth/manage/resource/<资源id>/enable/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）禁用一个资源
+
+*请求*
+
+DELETE /auth/manage/resource/<资源id>/disable/?__ez_token__=<token>
+
+*响应内容主体*
+
+null
+
+==== （管理接口）导出资源列表
+
+*请求*
+
+GET /auth/manage/resource/export/?__ez_token__=<token>
+
+*响应内容主体*
+
+资源中可导出字段的列表，格式为逗号分割符
