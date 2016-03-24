@@ -11,6 +11,8 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpServerFileUpload, HttpServerRequest, HttpServerResponse}
 import io.vertx.core.{AsyncResult, Future, Handler}
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -49,13 +51,13 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
       if (request.headers().contains("Accept") && request.headers().get("Accept") != "*.*") {
         request.headers().get("Accept").split(",")(0).toLowerCase
       } else {
-        "application/json; charset=UTF-8"
+        "application/json"
       }
     val contentType =
       if (request.headers().contains("Content-Type")) {
         request.headers().get("Content-Type").toLowerCase
       } else {
-        "application/json; charset=UTF-8"
+        "application/json; charset=utf-8"
       }
     val result = Router.getFunction("HTTP", request.method().name(), request.path(),
       request.params().map(entry => entry.getKey -> entry.getValue).toMap)
@@ -101,7 +103,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
           })
           upload.endHandler(new Handler[Void] {
             override def handle(e: Void): Unit = {
-              context.contentType = "application/json; charset=UTF-8"
+              context.contentType = "application/json; charset=utf-8"
               execute(request, newName, fun, context, request.response())
             }
           })
@@ -130,7 +132,18 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
             val b = if (body != null) {
               newContext.contentType match {
                 case t if t.contains("json") => JsonHelper.toObject(body, fun.requestClass)
-                case _ => logger.error("Not support content type:" + newContext.contentType)
+                case t if t.contains("xml") =>
+                  if (fun.requestClass == classOf[Document]) {
+                    Jsoup.parse(body.asInstanceOf[String])
+                  } else if (fun.requestClass == classOf[String]) {
+                    body.asInstanceOf[String]
+                  } else {
+                    logger.error(s"Not support return type [${fun.requestClass.getName}] by xml")
+                    null
+                  }
+                case _ =>
+                  logger.error("Not support content type:" + newContext.contentType)
+                  null
               }
             } else {
               null
@@ -157,22 +170,56 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
 
   private def returnContent(result: Any, response: HttpServerResponse, accept: String, contentType: String): Unit = {
     result match {
-      case value: Resp[_] if value && value.body.isInstanceOf[File] =>
-        val file = value.body.asInstanceOf[File]
+      case r: Resp[_] if r && r.body.isInstanceOf[File] =>
+        // 资源下载
+        val file = r.body.asInstanceOf[File]
         response.setStatusCode(200)
           .putHeader("Content-disposition", "attachment; filename=" + file.getName)
         response.sendFile(file.getPath)
-      case value: Resp[_] if value && value.body.isInstanceOf[RespRedirect] =>
-        response.putHeader("Location", value.body.asInstanceOf[RespRedirect].url)
+      case r: Resp[_] if r && r.body.isInstanceOf[RespRedirect] =>
+        // 重定向
+        response.putHeader("Location", r.body.asInstanceOf[RespRedirect].url)
           .setStatusCode(302)
           .end()
       case _ =>
-        // 支持CORS
-        val res = result match {
-          case r: String => r
-          case _ => JsonHelper.toJsonString(result)
+        val res = contentType match {
+          case t if t.contains("json") =>
+            // Json
+            JsonHelper.toJsonString(result)
+          case t if t.contains("xml") =>
+            // Xml
+            result match {
+              case r: Resp[_] =>
+                if (r) {
+                  if (r.body == null) {
+                    ""
+                  } else {
+                    r.body match {
+                      case b: Document => b.outerHtml()
+                      case b: String => b
+                      case _ =>
+                        logger.error(s"Not support return type [${r.body.getClass.getName}] by xml")
+                        s"""<?xml version="1.0" encoding="UTF-8"?>
+                           |<error>
+                           | <code>-1</code>
+                           | <message>Not support return type [${r.body.getClass.getName}] by xml</message>
+                           |</error>
+                 """.stripMargin
+                    }
+                  }
+                } else {
+                  s"""<?xml version="1.0" encoding="UTF-8"?>
+                     |<error>
+                     | <code>${r.code}</code>
+                     | <message>${r.message}</message>
+                     |</error>
+                 """.stripMargin
+                }
+            }
+          case _ => result.toString
         }
         logger.trace("Response: \r\n" + res)
+        // 支持CORS
         response.setStatusCode(200).putHeader("Content-Type", accept)
           .putHeader("Cache-Control", "no-cache")
           .putHeader("Access-Control-Allow-Origin", accessControlAllowOrigin)

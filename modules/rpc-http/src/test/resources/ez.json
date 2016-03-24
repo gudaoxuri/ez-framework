@@ -10,11 +10,11 @@
         "host": "0.0.0.0",
         "port": 8080,
         "resourcePath": "c:/tmp/",
-        "accessControlAllowOrigin": "*",
+        "accessControlAllowOrigin": "*"/*,
         "ssl": {
           "keyPath": "keystore.jks",
           "keyPassword": "123456"
-        }
+        }*/
       },
       "storage.mongo": {
         "hosts": [
