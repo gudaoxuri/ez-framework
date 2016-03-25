@@ -10,10 +10,12 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
   var appId:String=_
   var secret:String=_
+  var messageToken:String=_
 
   override def init(parameter: JsonObject): Resp[String] = {
     appId=parameter.getString("appId")
     secret=parameter.getString("secret")
+    messageToken=parameter.getString("messageToken")
     AutoBuildingProcessor.autoBuilding[HTTP]("com.ecfront.ez.framework.service.weixin.api", classOf[HTTP])
     Resp.success("")
   }

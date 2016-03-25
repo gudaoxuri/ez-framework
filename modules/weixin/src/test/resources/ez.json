@@ -6,8 +6,7 @@
       "weixin": {
         "appId": "wx7b758a31f520f4bb",
         "secret": "097c19f1cc0895a346b6f0de5e347165",
-        "messageUrl": "097c19f1cc0895a346b6f0de5e347165",
-        "messageToken": "097c19f1cc0895a346b6f0de5e347165"
+        "messageToken": "123456"
       },
       "oauth2": {
         "weixin_mp": {
@@ -18,7 +17,7 @@
       "auth": {},
       "rpc.http": {
         "webUrl": "http://localhost:63342/shtzsr/ui/index.html",
-        "publicUrl": "http://5604e291.all123.net/",
+        "publicUrl": "http://gudaoxuri.ngrok.natapp.cn/",
         "host": "0.0.0.0",
         "port": 80
       },

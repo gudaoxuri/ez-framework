@@ -1,4 +1,4 @@
-package com.ecfront.ez.framework.service.weixin
+package com.ecfront.ez.framework.service.weixin.api
 
 import com.ecfront.common.JsonHelper
 import com.ecfront.ez.framework.service.rpc.http.HttpClientProcessor
@@ -36,6 +36,5 @@ trait BaseProcessor extends LazyLogging {
       result
     }
   }
-
 
 }
