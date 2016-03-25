@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.service.weixin
 
-import com.ecfront.common.JsonHelper
+import com.ecfront.common.{EncryptHelper, JsonHelper}
 import com.ecfront.ez.framework.service.rpc.http.HttpClientProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
@@ -35,6 +35,11 @@ trait BaseProcessor extends LazyLogging {
     } else {
       result
     }
+  }
+
+  def validity(signature: String, timestamp: String, nonce: String): Boolean = {
+    val token = ServiceAdapter.messageToken
+    EncryptHelper.encrypt(Set(token, timestamp, nonce).mkString(""), "SHA1") == signature
   }
 
 

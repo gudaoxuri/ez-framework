@@ -6,7 +6,7 @@ import java.net.URLDecoder
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
-import com.ecfront.ez.framework.service.rpc.foundation.{EZRPCContext, Fun, RespRedirect, Router}
+import com.ecfront.ez.framework.service.rpc.foundation._
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpServerFileUpload, HttpServerRequest, HttpServerResponse}
@@ -24,6 +24,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * @param accessControlAllowOrigin 允许跨域的域名
   */
 class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String = "*") extends Handler[HttpServerRequest] with LazyLogging {
+
+
+  private val HTTP_STATUS_200: Int = 200
+  private val HTTP_STATUS_302: Int = 302
 
   override def handle(request: HttpServerRequest): Unit = {
     if (request.method().name() == "OPTIONS") {
@@ -173,60 +177,64 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
       case r: Resp[_] if r && r.body.isInstanceOf[File] =>
         // 资源下载
         val file = r.body.asInstanceOf[File]
-        response.setStatusCode(200)
+        response.setStatusCode(HTTP_STATUS_200)
           .putHeader("Content-disposition", "attachment; filename=" + file.getName)
         response.sendFile(file.getPath)
       case r: Resp[_] if r && r.body.isInstanceOf[RespRedirect] =>
         // 重定向
         response.putHeader("Location", r.body.asInstanceOf[RespRedirect].url)
-          .setStatusCode(302)
+          .setStatusCode(HTTP_STATUS_302)
           .end()
-      case _ =>
+      case r: Resp[_] if r && r.body.isInstanceOf[Raw] =>
+        returnContent(response, accept, r.body.asInstanceOf[Raw].raw.toString)
+      case r: Resp[_] =>
         val res = contentType match {
           case t if t.contains("json") =>
             // Json
-            JsonHelper.toJsonString(result)
+            JsonHelper.toJsonString(r)
           case t if t.contains("xml") =>
             // Xml
-            result match {
-              case r: Resp[_] =>
-                if (r) {
-                  if (r.body == null) {
-                    ""
-                  } else {
-                    r.body match {
-                      case b: Document => b.outerHtml()
-                      case b: String => b
-                      case _ =>
-                        logger.error(s"Not support return type [${r.body.getClass.getName}] by xml")
-                        s"""<?xml version="1.0" encoding="UTF-8"?>
-                           |<error>
-                           | <code>-1</code>
-                           | <message>Not support return type [${r.body.getClass.getName}] by xml</message>
-                           |</error>
-                 """.stripMargin
-                    }
-                  }
-                } else {
-                  s"""<?xml version="1.0" encoding="UTF-8"?>
-                     |<error>
-                     | <code>${r.code}</code>
-                     | <message>${r.message}</message>
-                     |</error>
+            if (r) {
+              if (r.body == null) {
+                ""
+              } else {
+                r.body match {
+                  case b: Document => b.outerHtml()
+                  case b: String => b
+                  case _ =>
+                    logger.error(s"Not support return type [${r.body.getClass.getName}] by xml")
+                    s"""<?xml version="1.0" encoding="UTF-8"?>
+                        |<error>
+                        | <code>-1</code>
+                        | <message>Not support return type [${r.body.getClass.getName}] by xml</message>
+                        |</error>
                  """.stripMargin
                 }
+              }
+            } else {
+              s"""<?xml version="1.0" encoding="UTF-8"?>
+                  |<error>
+                  | <code>${r.code}</code>
+                  | <message>${r.message}</message>
+                  |</error>
+                 """.stripMargin
             }
-          case _ => result.toString
+          case _ => r.toString
         }
-        logger.trace("Response: \r\n" + res)
-        // 支持CORS
-        response.setStatusCode(200).putHeader("Content-Type", accept)
-          .putHeader("Cache-Control", "no-cache")
-          .putHeader("Access-Control-Allow-Origin", accessControlAllowOrigin)
-          .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-          .putHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, X-authentication, X-client")
-          .end(res)
+        returnContent(response, accept, res)
+      case _ => logger.error(s"The response type [${result.getClass.getName}] not support")
     }
+  }
+
+  private def returnContent(response: HttpServerResponse, accept: String, res: String): Unit = {
+    logger.trace("Response: \r\n" + res)
+    // 支持CORS
+    response.setStatusCode(HTTP_STATUS_200).putHeader("Content-Type", accept)
+      .putHeader("Cache-Control", "no-cache")
+      .putHeader("Access-Control-Allow-Origin", accessControlAllowOrigin)
+      .putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+      .putHeader("Access-Control-Allow-Headers", "Content-Type, X-Requested-With, X-authentication, X-client")
+      .end(res)
   }
 
 }

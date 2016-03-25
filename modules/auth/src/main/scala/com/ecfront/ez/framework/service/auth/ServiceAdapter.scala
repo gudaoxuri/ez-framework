@@ -21,7 +21,6 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   var activeKeepSeconds: Long = _
 
   override def init(parameter: JsonObject): Resp[String] = {
-    mongoStorage = parameter.getString("storage", "mongo") == "mongo"
     publicUriPrefix = parameter.getString("publicUriPrefix", "/public/")
     allowRegister = parameter.getBoolean("allowRegister", false)
     selfActive = parameter.getBoolean("selfActive", true)
@@ -45,7 +44,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
   // 服务动态依赖处理方法，如果服务需要根据配置使用不同依赖请重写此方法
   override def getDynamicDependents(parameter: JsonObject): Set[String] = {
-    val s = if (parameter.getString("storage") == "mongo") {
+    mongoStorage = parameter.getString("storage", "mongo") == "mongo"
+    val s = if (mongoStorage) {
       Set(com.ecfront.ez.framework.service.storage.mongo.ServiceAdapter.serviceName)
     } else {
       Set(com.ecfront.ez.framework.service.storage.jdbc.ServiceAdapter.serviceName)
