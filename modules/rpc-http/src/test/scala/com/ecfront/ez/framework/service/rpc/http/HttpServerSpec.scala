@@ -1,5 +1,7 @@
 package com.ecfront.ez.framework.service.rpc.http
 
+import java.util.concurrent.CountDownLatch
+
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
 import com.ecfront.ez.framework.core.test.MockStartupSpec
 import com.ecfront.ez.framework.service.rpc.http.test.EZ_Resource
@@ -79,6 +81,10 @@ class HttpServerSpec extends MockStartupSpec {
     assert(pageResult.pageTotal == 2)
     assert(pageResult.recordTotal == 4)
     assert(pageResult.objects.size == 2)
+  }
+
+  test("Http1 test") {
+    new CountDownLatch(1).await()
   }
 
 }

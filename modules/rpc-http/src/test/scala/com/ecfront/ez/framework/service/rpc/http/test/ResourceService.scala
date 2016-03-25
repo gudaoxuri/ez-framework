@@ -14,6 +14,12 @@ object ResourceService extends SimpleHttpService[EZ_Resource, EZRPCContext] {
 
   override protected val storageObj: BaseStorage[EZ_Resource] = EZ_Resource
 
+  @POST("test/:s-s/:Sd/")
+  def test(parameter: Map[String, String], body:List[EZ_Resource],context: EZRPCContext): Resp[String] = {
+    // 泛型，error
+    Resp.success("")
+  }
+
   @GET("xml/")
   def testgetXml(parameter: Map[String, String], context: EZRPCContext): Resp[Document] = {
     Resp.success(Jsoup.parse(

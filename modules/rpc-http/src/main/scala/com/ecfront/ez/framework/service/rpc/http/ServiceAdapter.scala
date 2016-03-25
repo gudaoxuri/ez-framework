@@ -13,20 +13,27 @@ import scala.concurrent.{Await, Promise}
 
 object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
-  var resourcePath: String = ""
-  var webUrl: String = ""
-  var publicUrl: String = ""
+  private val DEFAULT_HTTP_PORT: Integer = 80
+  private val DEFAULT_HTTPS_PORT: Integer = 443
+
+  var resourcePath: String = _
+  var webUrl: String = _
+  var publicUrl: String = _
 
   override def init(parameter: JsonObject): Resp[String] = {
+    val useSSL = parameter.containsKey("ssl")
+    val port = parameter.getInteger("port", if (useSSL) DEFAULT_HTTPS_PORT else DEFAULT_HTTP_PORT)
+    val host = parameter.getString("host", "127.0.0.1")
     resourcePath = parameter.getString("resourcePath", "/tmp/")
-    publicUrl = parameter.getString("publicUrl", "http://" + parameter.getString("host") + ":" + parameter.getInteger("port") + "/")
+    publicUrl = parameter.getString("publicUrl", s"http${if (useSSL) "s" else ""}://" + host + ":" + port + "/")
     webUrl = parameter.getString("webUrl", publicUrl)
+
     val servicePath = parameter.getString("servicePath", null)
     if (servicePath != null) {
       AutoBuildingProcessor.autoBuilding[HTTP](servicePath, classOf[HTTP])
     }
     val opt = new HttpServerOptions()
-    if (parameter.containsKey("ssl")) {
+    if (useSSL) {
       var keyPath = parameter.getJsonObject("ssl").getString("keyPath")
       if (!keyPath.startsWith("/")) {
         keyPath = EZContext.confPath + keyPath
@@ -41,15 +48,15 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
       .createHttpServer(opt.setCompressionSupported(true)
         .setTcpKeepAlive(true))
       .requestHandler(new HttpServerProcessor(resourcePath, parameter.getString("accessControlAllowOrigin", "*")))
-      .listen(parameter.getInteger("port"), parameter.getString("host"), new Handler[AsyncResult[HttpServer]] {
+      .listen(port, host, new Handler[AsyncResult[HttpServer]] {
         override def handle(event: AsyncResult[HttpServer]): Unit = {
           if (event.succeeded()) {
             p.success(Resp.success(
-              s"""HTTP${if (parameter.containsKey("ssl")) "s" else ""} start successful.
-                  | http${if (parameter.containsKey("ssl")) "s" else ""}://${parameter.getString("host")}:${parameter.getInteger("port")}/""".stripMargin))
+              s"""HTTP${if (useSSL) "s" else ""} start successful.
+                  | http${if (useSSL) "s" else ""}://$host:$port/""".stripMargin))
           } else {
-            logger.error(s"HTTP${if (parameter.containsKey("ssl")) "s" else ""} start fail .", event.cause())
-            p.success(Resp.serverError(s"HTTP${if (parameter.containsKey("ssl")) "s" else ""} start fail : ${event.cause().getMessage}"))
+            logger.error(s"HTTP${if (useSSL) "s" else ""} start fail .", event.cause())
+            p.success(Resp.serverError(s"HTTP${if (useSSL) "s" else ""} start fail : ${event.cause().getMessage}"))
           }
         }
       })
