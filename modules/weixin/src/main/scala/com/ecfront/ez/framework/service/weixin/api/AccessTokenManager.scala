@@ -1,6 +1,7 @@
-package com.ecfront.ez.framework.service.weixin
+package com.ecfront.ez.framework.service.weixin.api
 
 import com.ecfront.ez.framework.service.redis.RedisProcessor
+import com.ecfront.ez.framework.service.weixin.ServiceAdapter
 
 object AccessTokenManager extends BaseProcessor {
 

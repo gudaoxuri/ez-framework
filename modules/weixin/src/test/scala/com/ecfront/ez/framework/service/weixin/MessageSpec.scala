@@ -7,6 +7,7 @@ import com.ecfront.ez.framework.core.test.MockStartupSpec
 class MessageSpec extends MockStartupSpec {
 
   test("message test") {
+    Weixin.init(MockMessageService)
     new CountDownLatch(1).await()
   }
 

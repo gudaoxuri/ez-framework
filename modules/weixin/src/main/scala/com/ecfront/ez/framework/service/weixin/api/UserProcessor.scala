@@ -1,26 +1,15 @@
 package com.ecfront.ez.framework.service.weixin.api
 
-import com.ecfront.common.{JsonHelper, Resp}
-import com.ecfront.ez.framework.service.auth.EZAuthContext
-import com.ecfront.ez.framework.service.rpc.foundation.{GET, POST, RPC}
-import com.ecfront.ez.framework.service.rpc.http.HTTP
-import com.ecfront.ez.framework.service.weixin.BaseProcessor
+import com.ecfront.common.JsonHelper
 import com.ecfront.ez.framework.service.weixin.vo.UserVO
 
 import scala.collection.mutable.ArrayBuffer
 
-@RPC("/weixin/user/")
-@HTTP
 object UserProcessor extends BaseProcessor {
 
   private val MAX_FETCHED_USER_INFO_EACH_TIME: Int = 100
 
-  @GET("ids/")
-  def rpcFindAllIds(parameter: Map[String, String], context: EZAuthContext): Resp[List[String]] = {
-    Resp.success(findAllIds())
-  }
-
-  def findAllIds(): List[String] = {
+  private[weixin] def findAllIds(): List[String] = {
     val allUserIds = ArrayBuffer[String]()
     val result = getDataByTokenUrl("user/get")
     val total = result("total").asInstanceOf[Int]
@@ -44,22 +33,12 @@ object UserProcessor extends BaseProcessor {
     }
   }
 
-  @GET(":openId/")
-  def rpcGetUserInfo(parameter: Map[String, String], context: EZAuthContext): Resp[UserVO] = {
-    Resp.success(getUserInfo(parameter("openId")))
-  }
-
-  def getUserInfo(openId: String): UserVO = {
+  private[weixin] def getUserInfo(openId: String): UserVO = {
     val result = getDataByTokenUrl(s"user/info?openid=$openId&lang=zh_CN")
     JsonHelper.toObject[UserVO](result)
   }
 
-  @POST("info/")
-  def rpcFindUserInfo(parameter: Map[String, String], body: String, context: EZAuthContext): Resp[List[UserVO]] = {
-    Resp.success(findUserInfo(body.split(",").toList))
-  }
-
-  def findUserInfo(openIds: List[String]): List[UserVO] = {
+  private[weixin] def findUserInfo(openIds: List[String]): List[UserVO] = {
     val request = openIds.map {
       id =>
         Map("openid" -> id)
