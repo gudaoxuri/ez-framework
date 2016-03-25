@@ -11,45 +11,41 @@
 
 . 添加依赖
 
-[source,xml]
-<dependency>
-  <groupId>com.ecfront</groupId>
-  <artifactId>ezf-auth</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
-<dependency>
+ <dependency>
+   <groupId>com.ecfront</groupId>
+   <artifactId>ezf-auth</artifactId>
+   <version>3.0.0-SNAPSHOT</version>
+ <dependency>
 
 . 添加配置
 
-[source,json]
-"auth": {},
-"storage.mongo": {
-  "hosts": [
-    {
-      "host": "<服务IP>",
-      "port": 27017
-    }
-  ],
-  "db_name": "test"
-},
-"rpc.http": {
-  "host": "0.0.0.0",
-  "port": 8080
-},
-"redis": {
-  "host": "<服务IP>",
-  "port": 6379
-}
+ "auth": {},
+ "storage.mongo": {
+   "hosts": [
+     {
+       "host": "<服务IP>",
+       "port": 27017
+     }
+   ],
+   "db_name": "test"
+ },
+ "rpc.http": {
+   "host": "0.0.0.0",
+   "port": 8080
+ },
+ "redis": {
+   "host": "<服务IP>",
+   "port": 6379
+ }
  
 . 启动服务
 
-[source,scala]
-EZManager.start()
+ EZManager.start()
  
 . 登录
 
-POST http://127.0.0.1:8080/public/auth/login/" body: {"id":"admin","password":"admin"}
-
-返回登录信息
+ POST http://127.0.0.1:8080/public/auth/login/" body: {"id":"admin","password":"admin"}
+ 返回登录信息
 
 === 依赖
 
@@ -85,11 +81,41 @@ POST http://127.0.0.1:8080/public/auth/login/" body: {"id":"admin","password":"a
 
 === 使用
 
+==== 说明
+
+. 无特殊说明的情况下所有返回值均为Json，由以下格式构成：
+
+----
+{
+  "code":"<状态码，200表示成功，其它表示失败>",
+  "message":"<消息，多在出现失败时显示失败原因>",
+  "body":"<返回主体内容，不同接口内容不同>"
+}
+----
+
+. 如果是分页查询，则返回格式构成如下：
+
+----
+ {
+   "code":"<状态码，200表示成功，其它表示失败>",
+   "message":"<消息，多在出现失败时显示失败原因>",
+   "body": {
+       "pageNumber": <当前页，从1开始>,
+       "pageSize": <每页条数>,
+       "pageTotal": <总页数>,
+       "recordTotal": <总记录数>,
+       "objects": [ 返回主体内容，不同接口内容不同 ]
+   }
+ }
+----
+
 ==== 登录
 
 *请求*
 
+----
 POST /public/auth/login/
+----
 
 body:
 [source,text]
@@ -117,7 +143,9 @@ body:
 
 *请求*
 
+----
 GET /auth/logout/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -127,7 +155,9 @@ null
 
 *请求*
 
+----
 GET /auth/logininfo/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -137,7 +167,9 @@ GET /auth/logininfo/?__ez_token__=<token>
 
 *请求*
 
+----
 GET /public/menu/?__ez_token__=<token>  `__ez_token__`可选，不加时显示公共（不需要认证）的菜单
+----
 
 *响应内容主体*
 
@@ -161,7 +193,9 @@ GET /public/menu/?__ez_token__=<token>  `__ez_token__`可选，不加时显示�
 
 *请求*
 
+----
 POST /public/register/
+----
 
 body
 
@@ -182,7 +216,9 @@ null，允许自助激活时会发送激活邮件
 
 *请求*
 
+----
 GET /public/active/account/<加密字符串>/ 来自邮件中的链接
+----
 
 *响应内容主体*
 
@@ -192,7 +228,9 @@ GET /public/active/account/<加密字符串>/ 来自邮件中的链接
 
 *请求*
 
+----
 PUT /public/findpassword/<email>/
+----
 
 body
 [source,text]
@@ -208,7 +246,9 @@ null，发送激活邮件
 
 *请求*
 
+----
 GET /public/active/password/<加密字符串>/ 来自邮件中的链接
+----
 
 *响应内容主体*
 
@@ -220,7 +260,9 @@ GET /public/active/password/<加密字符串>/ 来自邮件中的链接
 
 *请求*
 
+----
 GET /auth/manage/account/bylogin/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -239,7 +281,9 @@ GET /auth/manage/account/bylogin/?__ez_token__=<token>
 
 *请求*
 
+----
 PUT /auth/manage/account/bylogin/?__ez_token__=<token>
+----
 
 body
 [source,text]
@@ -260,7 +304,9 @@ null
 
 *请求*
 
+----
 POST /auth/manage/resource/?__ez_token__=<token>
+----
 
 body
 [source,text]
@@ -292,7 +338,9 @@ body
 
 *请求*
 
+----
 PUT /auth/manage/resource/<资源id>/?__ez_token__=<token>
+----
 
 body
 [source,text]
@@ -311,7 +359,9 @@ body
 
 *请求*
 
+----
 GET /auth/manage/resource/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -327,7 +377,9 @@ GET /auth/manage/resource/?__ez_token__=<token>&condition=<查找条件，sql或
 
 *请求*
 
+----
 GET /auth/manage/resource/enable/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -337,7 +389,9 @@ GET /auth/manage/resource/enable/?__ez_token__=<token>&condition=<查找条件�
 
 *请求*
 
+----
 GET /auth/manage/resource/page/<当前页，从1开始>/<每页显示条数>/?__ez_token__=<token>?&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -360,7 +414,9 @@ GET /auth/manage/resource/page/<当前页，从1开始>/<每页显示条数>/?__
 
 *请求*
 
+----
 GET /auth/manage/resource/<资源id>/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -370,7 +426,9 @@ GET /auth/manage/resource/<资源id>/?__ez_token__=<token>
 
 *请求*
 
+----
 DELETE /auth/manage/resource/<资源id>/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -380,7 +438,9 @@ null
 
 *请求*
 
+----
 GET /auth/manage/resource/<资源id>/enable/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -390,7 +450,9 @@ null
 
 *请求*
 
+----
 DELETE /auth/manage/resource/<资源id>/disable/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -400,7 +462,9 @@ null
 
 *请求*
 
+----
 GET /auth/manage/resource/export/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -410,7 +474,9 @@ GET /auth/manage/resource/export/?__ez_token__=<token>
 
 *请求*
 
+----
 POST /auth/manage/organization/?__ez_token__=<token>
+----
 
 body
 [source,text]
@@ -441,7 +507,9 @@ body
 
 *请求*
 
+----
 PUT /auth/manage/organization/<组织id>/?__ez_token__=<token>
+----
 
 body
 [source,text]
@@ -460,7 +528,9 @@ body
 
 *请求*
 
+----
 GET /auth/manage/organization/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -476,7 +546,9 @@ GET /auth/manage/organization/?__ez_token__=<token>&condition=<查找条件，sq
 
 *请求*
 
+----
 GET /auth/manage/organization/enable/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -486,7 +558,9 @@ GET /auth/manage/organization/enable/?__ez_token__=<token>&condition=<查找条�
 
 *请求*
 
+----
 GET /auth/manage/organization/page/<当前页，从1开始>/<每页显示条数>/?__ez_token__=<token>?&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -509,7 +583,9 @@ GET /auth/manage/organization/page/<当前页，从1开始>/<每页显示条数>
 
 *请求*
 
+----
 GET /auth/manage/organization/<组织id>/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -519,7 +595,9 @@ GET /auth/manage/organization/<组织id>/?__ez_token__=<token>
 
 *请求*
 
+----
 DELETE /auth/manage/organization/<组织id>/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -529,7 +607,9 @@ null
 
 *请求*
 
+----
 GET /auth/manage/organization/<组织id>/enable/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -539,7 +619,9 @@ null
 
 *请求*
 
+----
 DELETE /auth/manage/organization/<组织id>/disable/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -549,7 +631,9 @@ null
 
 *请求*
 
+----
 GET /auth/manage/organization/export/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -559,7 +643,9 @@ GET /auth/manage/organization/export/?__ez_token__=<token>
 
 *请求*
 
+----
 POST /auth/manage/organization/res/?__ez_token__=<token>
+----
 
 body 上传的图标
 
@@ -571,7 +657,9 @@ body 上传的图标
 
 *请求*
 
+----
 GET <`（管理接口）上传组织图标`中返回的uri>?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -581,7 +669,9 @@ GET <`（管理接口）上传组织图标`中返回的uri>?__ez_token__=<token>
 
 *请求*
 
+----
 POST /auth/manage/role/?__ez_token__=<token>
+----
 
 body
 [source,text]
@@ -615,7 +705,9 @@ body
 
 *请求*
 
+----
 PUT /auth/manage/role/<角色id>/?__ez_token__=<token>
+----
 
 body
 [source,text]
@@ -635,7 +727,9 @@ body
 
 *请求*
 
+----
 GET /auth/manage/role/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -651,7 +745,9 @@ GET /auth/manage/role/?__ez_token__=<token>&condition=<查找条件，sql或mong
 
 *请求*
 
+----
 GET /auth/manage/role/enable/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -661,7 +757,9 @@ GET /auth/manage/role/enable/?__ez_token__=<token>&condition=<查找条件，sql
 
 *请求*
 
+----
 GET /auth/manage/role/page/<当前页，从1开始>/<每页显示条数>/?__ez_token__=<token>?&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -684,7 +782,9 @@ GET /auth/manage/role/page/<当前页，从1开始>/<每页显示条数>/?__ez_t
 
 *请求*
 
+----
 GET /auth/manage/role/<角色id>/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -694,7 +794,9 @@ GET /auth/manage/role/<角色id>/?__ez_token__=<token>
 
 *请求*
 
+----
 DELETE /auth/manage/role/<角色id>/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -704,7 +806,9 @@ null
 
 *请求*
 
+----
 GET /auth/manage/role/<角色id>/enable/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -714,7 +818,9 @@ null
 
 *请求*
 
+----
 DELETE /auth/manage/role/<角色id>/disable/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -724,7 +830,9 @@ null
 
 *请求*
 
+----
 GET /auth/manage/role/export/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -734,7 +842,9 @@ GET /auth/manage/role/export/?__ez_token__=<token>
 
 *请求*
 
+----
 POST /auth/manage/account/?__ez_token__=<token>
+----
 
 body
 [source,text]
@@ -779,7 +889,9 @@ body
 
 *请求*
 
+----
 PUT /auth/manage/account/<账户id>/?__ez_token__=<token>
+----
 
 body
 [source,text]
@@ -803,7 +915,9 @@ body
 
 *请求*
 
+----
 GET /auth/manage/account/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -819,7 +933,9 @@ GET /auth/manage/account/?__ez_token__=<token>&condition=<查找条件，sql或m
 
 *请求*
 
+----
 GET /auth/manage/account/enable/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -829,7 +945,9 @@ GET /auth/manage/account/enable/?__ez_token__=<token>&condition=<查找条件，
 
 *请求*
 
+----
 GET /auth/manage/account/page/<当前页，从1开始>/<每页显示条数>/?__ez_token__=<token>?&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -852,7 +970,9 @@ GET /auth/manage/account/page/<当前页，从1开始>/<每页显示条数>/?__e
 
 *请求*
 
+----
 GET /auth/manage/account/<账户id>/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -862,7 +982,9 @@ GET /auth/manage/account/<账户id>/?__ez_token__=<token>
 
 *请求*
 
+----
 DELETE /auth/manage/account/<账户id>/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -872,7 +994,9 @@ null
 
 *请求*
 
+----
 GET /auth/manage/account/<账户id>/enable/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -882,7 +1006,9 @@ null
 
 *请求*
 
+----
 DELETE /auth/manage/account/<账户id>/disable/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -892,7 +1018,9 @@ null
 
 *请求*
 
+----
 GET /auth/manage/account/export/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -902,7 +1030,9 @@ GET /auth/manage/account/export/?__ez_token__=<token>
 
 *请求*
 
+----
 POST /auth/manage/role/res/?__ez_token__=<token>
+----
 
 body 上传的头像
 
@@ -914,7 +1044,9 @@ body 上传的头像
 
 *请求*
 
+----
 GET <`（管理接口）上传账户头像`中返回的uri>?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -924,7 +1056,9 @@ GET <`（管理接口）上传账户头像`中返回的uri>?__ez_token__=<token>
 
 *请求*
 
+----
 POST /auth/manage/menu/?__ez_token__=<token>
+----
 
 body
 [source,text]
@@ -966,7 +1100,9 @@ body
 
 *请求*
 
+----
 PUT /auth/manage/menu/<菜单id>/?__ez_token__=<token>
+----
 
 body
 [source,text]
@@ -990,7 +1126,9 @@ body
 
 *请求*
 
+----
 GET /auth/manage/menu/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -1006,7 +1144,9 @@ GET /auth/manage/menu/?__ez_token__=<token>&condition=<查找条件，sql或mong
 
 *请求*
 
+----
 GET /auth/manage/menu/enable/?__ez_token__=<token>&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -1016,7 +1156,9 @@ GET /auth/manage/menu/enable/?__ez_token__=<token>&condition=<查找条件，sql
 
 *请求*
 
+----
 GET /auth/manage/menu/page/<当前页，从1开始>/<每页显示条数>/?__ez_token__=<token>?&condition=<查找条件，sql或mongo json>  condition可选
+----
 
 *响应内容主体*
 
@@ -1039,7 +1181,9 @@ GET /auth/manage/menu/page/<当前页，从1开始>/<每页显示条数>/?__ez_t
 
 *请求*
 
+----
 GET /auth/manage/menu/<菜单id>/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -1049,7 +1193,9 @@ GET /auth/manage/menu/<菜单id>/?__ez_token__=<token>
 
 *请求*
 
+----
 DELETE /auth/manage/menu/<菜单id>/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -1059,7 +1205,9 @@ null
 
 *请求*
 
+----
 GET /auth/manage/menu/<菜单id>/enable/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -1069,7 +1217,9 @@ null
 
 *请求*
 
+----
 DELETE /auth/manage/menu/<菜单id>/disable/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
@@ -1079,7 +1229,9 @@ null
 
 *请求*
 
+----
 GET /auth/manage/menu/export/?__ez_token__=<token>
+----
 
 *响应内容主体*
 
