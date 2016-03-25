@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.service.weixin.vo
 
-class UserVO {
+class UserVO extends Serializable {
   // 用户的标识，对当前公众号唯一
   var openid: String = _
   // 用户的昵称
