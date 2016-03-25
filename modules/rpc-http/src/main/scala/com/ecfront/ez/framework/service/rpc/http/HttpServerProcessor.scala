@@ -13,6 +13,7 @@ import io.vertx.core.http.{HttpServerFileUpload, HttpServerRequest, HttpServerRe
 import io.vertx.core.{AsyncResult, Future, Handler}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.jsoup.parser.Parser
 
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -138,7 +139,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
                 case t if t.contains("json") => JsonHelper.toObject(body, fun.requestClass)
                 case t if t.contains("xml") =>
                   if (fun.requestClass == classOf[Document]) {
-                    Jsoup.parse(body.asInstanceOf[String])
+                    Jsoup.parse(body.asInstanceOf[String], "", Parser.xmlParser())
                   } else if (fun.requestClass == classOf[String]) {
                     body.asInstanceOf[String]
                   } else {
