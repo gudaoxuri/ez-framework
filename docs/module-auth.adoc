@@ -66,7 +66,8 @@
   "loginUrl": "#/auth/login", <6>
   "loginKeepSeconds": 0 , <7>
   "activeKeepSeconds": 86400 , <8>
-  "storage":"mongo" <9>
+  "extAccountStorage": "" , <9>
+  "storage":"mongo" <10>
 }
 ----
 <1> 是否允许注册，注册后账户处于禁用状态，需要激活
@@ -77,7 +78,8 @@
 <6> 登录URL，注册或找回密码激活成功后会跳转到登录URL，如果此配置值不带http前缀则使用`rpc-http`中`webUrl`做为基础路径
 <7> 登录保持时间，单位秒，指定登录会话多少秒后过期，0表示不过期
 <8> 注册或找回密码激活有效期，单位秒
-<9> 持久化实现，支持`mongo`或`jdbc`
+<9> 扩展账号持久化类路径，可选，默认对于扩展的账号信息存储在`ez_account`表中的`ext_info`字段中，如果需要将扩展信息存储在独立表中时可以定义一个继承自`BaseModel`的实体及对应的持久化实现，然后指定其类路径
+<10> 持久化实现，支持`mongo`或`jdbc`
 
 NOTE: 使用`jdbc`持久化时请先执行`ez_ddl.sql`以创建基础表
 
@@ -150,7 +152,7 @@ body:
   "organization_code": String, // 组织编码
   "role_codes": List[String], // 角色编码列表
   "ext_id": String, // 扩展Id
-  "ext_info": Map[String, String] // 扩展信息
+  "ext_info": Map[String, Any] // 扩展信息
 }
 
 ==== 注销
@@ -288,7 +290,7 @@ GET /auth/manage/account/bylogin/?__ez_token__=<token>
   "image": String, // 头像
   "email": String, // Email
   "ext_id": String, // 扩展id
-  "ext_info": Map[String, String] // 扩展信息
+  "ext_info": Map[String, Any] // 扩展信息
 }
 
 ==== 更新登录账号信息
@@ -871,7 +873,7 @@ body
   "role_codes": List[String], // 角色编码列表
   "organization_code": String, // 所属组织编码
   "ext_id": String, // 扩展Id
-  "ext_info": Map[String, String] // 扩展信息
+  "ext_info": Map[String, Any] // 扩展信息
 }
 
 *响应内容主体*
@@ -889,7 +891,7 @@ body
   "organization_code": String, // 所属组织编码
   "oauth": Map[String, String], // oauth信息
   "ext_id": String, // 扩展Id
-  "ext_info": Map[String, String] // 扩展信息
+  "ext_info": Map[String, Any] // 扩展信息
   "enable": Boolean, // 是否启用
   "create_user": String, // 创建用户login_id
   "create_org": String, // 创建账户编码
@@ -918,7 +920,7 @@ body
   "role_codes": List[String], // 角色编码列表
   "organization_code": String, // 所属组织编码
   "ext_id": String, // 扩展Id
-  "ext_info": Map[String, String] // 扩展信息
+  "ext_info": Map[String, Any] // 扩展信息
 }
 
 *响应内容主体*

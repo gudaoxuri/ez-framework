@@ -3,7 +3,7 @@ package com.ecfront.ez.framework.service.auth
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZServiceAdapter
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
-import com.ecfront.ez.framework.service.auth.model.EZ_Role
+import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Role}
 import com.ecfront.ez.framework.service.rpc.foundation.AutoBuildingProcessor
 import com.ecfront.ez.framework.service.rpc.http.{HTTP, HttpInterceptor}
 import io.vertx.core.json.JsonObject
@@ -29,6 +29,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     loginUrl = parameter.getString("loginUrl", "#/auth/login")
     loginKeepSeconds = parameter.getLong("loginKeepSeconds", 0L)
     activeKeepSeconds = parameter.getLong("activeKeepSeconds", 24L * 60 * 60)
+    EZ_Account.init(parameter.getString("extAccountStorage", null))
     if (!loginUrl.toLowerCase().startsWith("http")) {
       loginUrl = com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.webUrl + loginUrl
     }

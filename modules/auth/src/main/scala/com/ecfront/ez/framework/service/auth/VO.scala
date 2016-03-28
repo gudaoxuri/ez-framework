@@ -22,11 +22,10 @@ case class Token_Info_VO(
                           organization_code: String,
                           role_codes: List[String],
                           ext_id: String,
-                          ext_info: Map[String, String])
+                          ext_info: Map[String, Any])
 
 /**
   * 账号 VO
-  *
   *
   * 用于显示或添加、更新账号信息
   */
@@ -50,5 +49,5 @@ case class Account_VO() {
   // 扩展ID，不能更改
   var ext_id: String = _
   // 扩展信息
-  var ext_info: Map[String, String] = _
+  var ext_info: Map[String, Any] = _
 }

@@ -61,7 +61,11 @@ object AuthService {
 
   @GET("logininfo/")
   def getLoginInfo(parameter: Map[String, String], context: EZAuthContext): Resp[Token_Info_VO] = {
-    CacheManager.getTokenInfo(parameter(VIEW_TOKEN_FLAG))
+    goGetLoginInfo(parameter(VIEW_TOKEN_FLAG))
+  }
+
+  def goGetLoginInfo(token: String): Resp[Token_Info_VO] ={
+    CacheManager.getTokenInfo(token)
   }
 
   @GET("/public/menu/")

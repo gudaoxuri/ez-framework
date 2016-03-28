@@ -2,10 +2,11 @@ package com.ecfront.ez.framework.service.storage.foundation
 
 import java.lang.reflect.ParameterizedType
 
-import com.ecfront.common.{BeanHelper, Resp}
+import com.ecfront.common.{BeanHelper, JsonHelper, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.beans.BeanProperty
+import scala.reflect.runtime._
 
 /**
   * 实体基类，所有实体都应继承此类
@@ -30,6 +31,8 @@ object BaseModel {
   * @tparam M 实体类型
   */
 trait BaseStorage[M <: BaseModel] extends LazyLogging {
+
+  protected val _runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
 
   protected val _modelClazz = this.getClass.getGenericInterfaces()(0)
     .asInstanceOf[ParameterizedType].getActualTypeArguments()(0).asInstanceOf[Class[M]]
@@ -64,6 +67,10 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     } else {
       Resp.success(null)
     }
+  }
+
+  def convertToEntity(obj:Any): M ={
+    JsonHelper.toObject(obj,_modelClazz)
   }
 
   /**
@@ -782,6 +789,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
 
 /**
   * 基础持久化类的实现适配类
+  *
   * @tparam M 实体类型
   * @tparam O 实现类，如jdbc或mongo方式
   */

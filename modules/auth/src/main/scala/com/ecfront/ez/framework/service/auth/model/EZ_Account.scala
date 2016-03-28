@@ -1,8 +1,8 @@
 package com.ecfront.ez.framework.service.auth.model
 
-import com.ecfront.common.{EncryptHelper, FormatHelper, Resp}
+import com.ecfront.common.{EncryptHelper, FormatHelper, JsonHelper, Resp}
 import com.ecfront.ez.framework.service.auth.ServiceAdapter
-import com.ecfront.ez.framework.service.storage.foundation._
+import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, _}
 import com.ecfront.ez.framework.service.storage.jdbc.{JDBCSecureStorage, JDBCStatusStorage}
 import com.ecfront.ez.framework.service.storage.mongo.{MongoSecureStorage, MongoStatusStorage}
 
@@ -35,7 +35,7 @@ case class EZ_Account() extends SecureModel with StatusModel {
   @Label("Ext Id") // 用于关联其它对象以扩展属性，扩展Id多为业务系统用户信息表的主键
   @BeanProperty var ext_id: String = _
   @Label("Ext Info")
-  @BeanProperty var ext_info: Map[String, String] = _
+  @BeanProperty var ext_info: Map[String, Any] = _
   @Label("OAuth Info") // key=oauth服务标记，value=openid
   @BeanProperty var oauth: Map[String, String] = _
   @BeanProperty var organization_code: String = _
@@ -49,6 +49,16 @@ object EZ_Account extends SecureStorageAdapter[EZ_Account, EZ_Account_Base]
   val SYSTEM_ACCOUNT_CODE = "sysadmin"
 
   val VIRTUAL_EMAIL = "@virtual.is"
+
+  var extAccountStorage: BaseStorage[BaseModel] = _
+
+  def init(_extAccountStorage: String): Unit = {
+    if (_extAccountStorage == null || _extAccountStorage.trim.isEmpty) {
+      extAccountStorage = null
+    } else {
+      extAccountStorage = _runtimeMirror.reflectModule(_runtimeMirror.staticModule(_extAccountStorage)).instance.asInstanceOf[BaseStorage[BaseModel]]
+    }
+  }
 
   override protected val storageObj: EZ_Account_Base =
     if (ServiceAdapter.mongoStorage) EZ_Account_Mongo else EZ_Account_JDBC
@@ -124,21 +134,20 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
           if (model.ext_info == null) {
             model.ext_info = Map()
           }
+          model.code = assembleCode(model.login_id, model.organization_code)
           if (model.id == null || model.id.trim == "") {
             if (existByEmail(model.email, model.organization_code).body) {
               Resp.badRequest("【email】exist")
             } else {
               model.password = packageEncryptPwd(model.login_id, model.password)
-              model.code = assembleCode(model.login_id, model.organization_code)
-              super.preSaveOrUpdate(model, context)
+              super.preSave(model, context)
             }
           } else {
-            model.code = assembleCode(model.login_id, model.organization_code)
             val existEmail = getByEmail(model.email, model.organization_code).body
             if (existEmail != null && existEmail.code != model.code) {
               Resp.badRequest("【email】exist")
             } else {
-              super.preSaveOrUpdate(model, context)
+              super.preUpdate(model, context)
             }
           }
         } else {
@@ -147,6 +156,145 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
       }
     }
   }
+
+  override def postGetEnabledByCond(condition: String, parameters: List[Any], getResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    if (getResult != null && getResult.ext_id != null && getResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
+      getResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(getResult.ext_id.trim).body)
+    }
+    super.postGetEnabledByCond(condition, parameters, getResult, context)
+  }
+
+  override def postFindEnabled(condition: String, parameters: List[Any], findResult: List[EZ_Account], context: EZStorageContext): Resp[List[EZ_Account]] = {
+    if (findResult.nonEmpty && EZ_Account.extAccountStorage != null) {
+      findResult.foreach {
+        result =>
+          if (result != null && result.ext_id != null && result.ext_id.trim.nonEmpty) {
+            result.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(result.ext_id.trim).body)
+          }
+      }
+    }
+    super.postFindEnabled(condition, parameters, findResult, context)
+  }
+
+  override def postPageEnabled(condition: String, parameters: List[Any],
+                               pageNumber: Long, pageSize: Int, pageResult: Page[EZ_Account], context: EZStorageContext): Resp[Page[EZ_Account]] = {
+    if (pageResult.objects.nonEmpty && EZ_Account.extAccountStorage != null) {
+      pageResult.objects.foreach {
+        result =>
+          if (result != null && result.ext_id != null && result.ext_id.trim.nonEmpty) {
+            result.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(result.ext_id.trim).body)
+          }
+      }
+    }
+    super.postPageEnabled(condition, parameters, pageNumber, pageSize, pageResult, context)
+  }
+
+  override def postSave(saveResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    if (saveResult != null && EZ_Account.extAccountStorage != null) {
+      val extObj = EZ_Account.extAccountStorage.save(EZ_Account.extAccountStorage.convertToEntity(saveResult.ext_info), context).body
+      saveResult.ext_id = extObj.id
+      saveResult.ext_info = JsonHelper.toObject[Map[String, Any]](extObj)
+      doUpdate(saveResult, context)
+    }
+    super.postSave(saveResult, context)
+  }
+
+  override def postUpdate(updateResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    if (updateResult != null && EZ_Account.extAccountStorage != null) {
+      val extObj = EZ_Account.extAccountStorage.update(
+        EZ_Account.extAccountStorage.convertToEntity(updateResult.ext_info + (BaseModel.Id_FLAG -> updateResult.ext_id)), context).body
+      updateResult.ext_id = extObj.id
+      updateResult.ext_info = JsonHelper.toObject[Map[String, Any]](extObj)
+      doUpdate(updateResult, context)
+    }
+    super.postUpdate(updateResult, context)
+  }
+
+  override def postSaveOrUpdate(saveOrUpdateResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    if (saveOrUpdateResult != null && EZ_Account.extAccountStorage != null) {
+      val extObj =
+        if (saveOrUpdateResult.ext_id != null && saveOrUpdateResult.ext_id.nonEmpty){
+          EZ_Account.extAccountStorage.save(
+            EZ_Account.extAccountStorage.convertToEntity(saveOrUpdateResult.ext_info), context).body
+        } else {
+          EZ_Account.extAccountStorage.update(
+            EZ_Account.extAccountStorage.convertToEntity(
+              saveOrUpdateResult.ext_info + (BaseModel.Id_FLAG -> saveOrUpdateResult.ext_id)), context).body
+        }
+      saveOrUpdateResult.ext_id = extObj.id
+      saveOrUpdateResult.ext_info = JsonHelper.toObject[Map[String, Any]](extObj)
+      doUpdate(saveOrUpdateResult, context)
+    }
+    super.postSaveOrUpdate(saveOrUpdateResult, context)
+  }
+
+  override def preDeleteById(id: Any, context: EZStorageContext): Resp[Any] = {
+    if (EZ_Account.extAccountStorage != null) {
+      val objR = doGetById(id, context)
+      if (objR && objR.body != null && objR.body.ext_id != null && objR.body.ext_id.trim.nonEmpty) {
+        EZ_Account.extAccountStorage.deleteById(objR.body.ext_id.trim)
+      }
+    }
+    super.preDeleteById(id, context)
+  }
+
+  override def preDeleteByCond(condition: String, parameters: List[Any],
+                               context: EZStorageContext): Resp[(String, List[Any])] = {
+    if (EZ_Account.extAccountStorage != null) {
+      val objR = doFind(condition, parameters, context)
+      if (objR && objR.body != null && objR.body.nonEmpty) {
+        objR.body.foreach {
+          obj =>
+            if (obj.ext_id != null && obj.ext_id.trim.nonEmpty) {
+              EZ_Account.extAccountStorage.deleteById(obj.ext_id.trim)
+            }
+        }
+      }
+    }
+    super.preDeleteByCond(condition, parameters, context)
+  }
+
+  override def postGetById(id: Any, getResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    if (getResult != null && getResult.ext_id != null && getResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
+      getResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(getResult.ext_id.trim).body)
+    }
+    super.postGetById(id, getResult, context)
+  }
+
+  override def postGetByCond(condition: String, parameters: List[Any], getResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    if (getResult != null && getResult.ext_id != null && getResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
+      getResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(getResult.ext_id.trim).body)
+    }
+    super.postGetByCond(condition, parameters, getResult, context)
+  }
+
+  override def postFind(condition: String, parameters: List[Any], findResult: List[EZ_Account], context: EZStorageContext): Resp[List[EZ_Account]] = {
+    if (findResult.nonEmpty && EZ_Account.extAccountStorage != null) {
+      findResult.foreach {
+        result =>
+          if (result != null && result.ext_id != null && result.ext_id.trim.nonEmpty) {
+            result.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(result.ext_id.trim).body)
+          }
+      }
+    }
+    super.postFind(condition, parameters, findResult, context)
+  }
+
+  override def postPage(condition: String, parameters: List[Any],
+                        pageNumber: Long, pageSize: Int, pageResult: Page[EZ_Account], context: EZStorageContext): Resp[Page[EZ_Account]] = {
+    if (pageResult.objects.nonEmpty && EZ_Account.extAccountStorage != null) {
+      pageResult.objects.foreach {
+        result =>
+          if (result != null && result.ext_id != null && result.ext_id.trim.nonEmpty) {
+            result.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(result.ext_id.trim).body)
+          }
+      }
+    }
+    super.postPage(condition, parameters, pageNumber, pageSize, pageResult, context)
+  }
+
+  override def preUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, String, List[Any])] =
+    Resp.notImplemented("")
 
   def assembleCode(loginId: String, organization_code: String): String = {
     organization_code + BaseModel.SPLIT + loginId

@@ -12,26 +12,19 @@
         "loginUrl": "#/auth/login",
         "loginKeepSeconds": 0 , // 登录保持时间
         "activeKeepSeconds": 86400 , // 注册激活和找回密码有效时间
+        "extAccountStorage": "" ,
         "storage":"mongo" // mongo or jdbc
       },
       "storage.mongo": {
-        "hosts": [
-          {
-            "host": "192.168.4.99",
-            "port": 27017
-          }
-        ],
+        "host": "192.168.4.99",
+        "port": 27017,
         "db_name": "ez_test"
       },
       "storage.jdbc": {
         "driver_class": "com.mysql.jdbc.Driver",
         "url": "jdbc:mysql://192.168.4.99:3306/ez_test?characterEncoding=UTF-8&autoReconnect=true",
         "user": "root",
-        "password": "123456",
-        "max_pool_size": 1,
-        "max_idle_time": 1800,
-        "idle_test_period": 120,
-        "validate": true
+        "password": "123456"
       },
       "rpc.http": {
         "servicePath": "com.ecfront.ez.framework.service.rpc.http.test",
