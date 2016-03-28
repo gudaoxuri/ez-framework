@@ -140,6 +140,11 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
               Resp.badRequest("【email】exist")
             } else {
               model.password = packageEncryptPwd(model.login_id, model.password)
+              if (EZ_Account.extAccountStorage != null) {
+                val extObj = EZ_Account.extAccountStorage.save(EZ_Account.extAccountStorage.convertToEntity(model.ext_info), context).body
+                model.ext_id = extObj.id
+                model.ext_info = Map()
+              }
               super.preSave(model, context)
             }
           } else {
@@ -147,6 +152,11 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
             if (existEmail != null && existEmail.code != model.code) {
               Resp.badRequest("【email】exist")
             } else {
+              if (model.ext_id.nonEmpty && EZ_Account.extAccountStorage != null) {
+                EZ_Account.extAccountStorage.update(
+                  EZ_Account.extAccountStorage.convertToEntity(model.ext_info + (BaseModel.Id_FLAG -> model.ext_id)), context).body
+                model.ext_info = Map()
+              }
               super.preUpdate(model, context)
             }
           }
@@ -190,40 +200,22 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
   }
 
   override def postSave(saveResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (saveResult != null && EZ_Account.extAccountStorage != null) {
-      val extObj = EZ_Account.extAccountStorage.save(EZ_Account.extAccountStorage.convertToEntity(saveResult.ext_info), context).body
-      saveResult.ext_id = extObj.id
-      saveResult.ext_info = JsonHelper.toObject[Map[String, Any]](extObj)
-      doUpdate(saveResult, context)
+    if (saveResult != null && saveResult.ext_id != null && saveResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
+      saveResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(saveResult.ext_id.trim).body)
     }
     super.postSave(saveResult, context)
   }
 
   override def postUpdate(updateResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (updateResult != null && EZ_Account.extAccountStorage != null) {
-      val extObj = EZ_Account.extAccountStorage.update(
-        EZ_Account.extAccountStorage.convertToEntity(updateResult.ext_info + (BaseModel.Id_FLAG -> updateResult.ext_id)), context).body
-      updateResult.ext_id = extObj.id
-      updateResult.ext_info = JsonHelper.toObject[Map[String, Any]](extObj)
-      doUpdate(updateResult, context)
+    if (updateResult != null && updateResult.ext_id != null && updateResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
+      updateResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(updateResult.ext_id.trim).body)
     }
     super.postUpdate(updateResult, context)
   }
 
   override def postSaveOrUpdate(saveOrUpdateResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (saveOrUpdateResult != null && EZ_Account.extAccountStorage != null) {
-      val extObj =
-        if (saveOrUpdateResult.ext_id != null && saveOrUpdateResult.ext_id.nonEmpty){
-          EZ_Account.extAccountStorage.save(
-            EZ_Account.extAccountStorage.convertToEntity(saveOrUpdateResult.ext_info), context).body
-        } else {
-          EZ_Account.extAccountStorage.update(
-            EZ_Account.extAccountStorage.convertToEntity(
-              saveOrUpdateResult.ext_info + (BaseModel.Id_FLAG -> saveOrUpdateResult.ext_id)), context).body
-        }
-      saveOrUpdateResult.ext_id = extObj.id
-      saveOrUpdateResult.ext_info = JsonHelper.toObject[Map[String, Any]](extObj)
-      doUpdate(saveOrUpdateResult, context)
+    if (saveOrUpdateResult != null && saveOrUpdateResult.ext_id != null && saveOrUpdateResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
+      saveOrUpdateResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(saveOrUpdateResult.ext_id.trim).body)
     }
     super.postSaveOrUpdate(saveOrUpdateResult, context)
   }

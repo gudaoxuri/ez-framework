@@ -53,16 +53,16 @@ class ExtAccountSpec extends MockStartupSpec {
     account = EZ_Account("t2", "t2@sunisle.org", "t2", "123", List(
       BaseModel.SPLIT + EZ_Role.USER_ROLE_FLAG
     ))
-    account.ext_info = Map("ext1" -> "1")
+    account.ext_info = Map("ext1" -> "1测试")
     account = EZ_Account.save(account).body
-    assert(account.ext_info("ext1")=="1")
-    account.ext_info = Map("ext1" -> "new")
+    assert(account.ext_info("ext1")=="1测试")
+    account.ext_info = Map("ext1" -> "new测试")
     account = EZ_Account.update(account).body
-    assert(account.ext_info("ext1")=="new")
+    assert(account.ext_info("ext1")=="new测试")
     account = EZ_Account.getById(account.id).body
-    assert(account.ext_info("ext1")=="new")
+    assert(account.ext_info("ext1")=="new测试")
     account = EZ_Account.find("").body.find(_.name == "t2").get
-    assert(account.ext_info("ext1")=="new")
+    assert(account.ext_info("ext1")=="new测试")
     EZ_Account.deleteById(account.id)
 
   }
