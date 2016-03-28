@@ -92,10 +92,11 @@ trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
   /**
     * 附加条件查找
+    *
     * @param condition 过滤条件
-    * @param sort 排序
-    * @param limit 获取记录数，默认为0，表示获取所有
-    * @param context 上下文
+    * @param sort      排序
+    * @param limit     获取记录数，默认为0，表示获取所有
+    * @param context   上下文
     * @return 查找结果
     */
   def findWithOpt(condition: String = "{}", sort: Map[String, SortEnum], limit: Int = 0, context: EZStorageContext = EZStorageContext()): Resp[List[M]] = {
@@ -104,11 +105,12 @@ trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
   /**
     * 附加条件分页
+    *
     * @param condition  过滤条件
     * @param pageNumber 当前页，从1开始
     * @param pageSize   每页条数
-    * @param sort 排序
-    * @param context 上下文
+    * @param sort       排序
+    * @param context    上下文
     * @return 分页结果
     */
   def pageWithOpt(
@@ -122,20 +124,21 @@ trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
     *
     * 例如：
     * [{ "$$match": {<过滤条件>} },
-    *  {
-    *    // Group
-    *    "$$group": {
-    *       "_id": {
-    *           "platform":"$$platform",
-    *           "component":"$$component",
-    *           "module":"$$module",
-    *           "stage":"$$stage"
-    *       },
-    *       "count": { "$$sum": 1 }
-    *  }
+    * {
+    * // Group
+    * "$$group": {
+    * "_id": {
+    * "platform":"$$platform",
+    * "component":"$$component",
+    * "module":"$$module",
+    * "stage":"$$stage"
+    * },
+    * "count": { "$$sum": 1 }
+    * }
     * }]
+    *
     * @param condition 计算条件
-    * @param context 上下文
+    * @param context   上下文
     * @return 计算结果
     */
   def aggregate(condition: JsonArray, context: EZStorageContext = null): Resp[JsonArray] = {
@@ -143,7 +146,7 @@ trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
   }
 
   protected def convertToJsonObject(entityInfo: MongoEntityInfo, model: M): JsonObject = {
-    packageCondition(JsonHelper.toJsonString(BeanHelper.findValues(model)))
+    packageCondition(JsonHelper.toJsonString(BeanHelper.findValues(model).filter(_._2 != null)))
   }
 
   private def packageCondition(condition: String): JsonObject = {

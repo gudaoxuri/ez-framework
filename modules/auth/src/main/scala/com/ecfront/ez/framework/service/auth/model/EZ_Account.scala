@@ -135,6 +135,7 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
             model.ext_info = Map()
           }
           model.code = assembleCode(model.login_id, model.organization_code)
+          // TODO
           if (model.password != null && model.password.trim.length != 64) {
             model.password = packageEncryptPwd(model.login_id, model.password)
           }
