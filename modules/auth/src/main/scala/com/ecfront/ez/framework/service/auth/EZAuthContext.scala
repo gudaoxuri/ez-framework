@@ -15,6 +15,15 @@ class EZAuthContext extends EZRPCContext {
   @BeanProperty var token: Option[String] = None
   // 登录信息
   @BeanProperty var loginInfo: Option[Token_Info_VO] = None
+
+  override def toStorageContext: EZStorageContext = {
+    if (loginInfo.isDefined) {
+      EZStorageContext(loginInfo.get.login_id, loginInfo.get.organization_code)
+    } else {
+      EZStorageContext()
+    }
+  }
+
 }
 
 object EZAuthContext {

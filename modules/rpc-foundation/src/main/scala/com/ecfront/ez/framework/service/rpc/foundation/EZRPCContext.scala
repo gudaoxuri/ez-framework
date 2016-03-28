@@ -25,6 +25,14 @@ class EZRPCContext {
   // 请求的ContentType
   @BeanProperty var contentType: String = _
 
+  /**
+    * 在某些情况下（如Simple Service中）必须使用显示方法来转换
+    * @return
+    */
+  def toStorageContext: EZStorageContext = {
+    EZStorageContext()
+  }
+
 }
 
 object EZRPCContext {

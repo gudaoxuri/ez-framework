@@ -125,7 +125,7 @@ trait SimpleHttpService[M <: BaseModel, C <: EZRPCContext] extends SimpleRPCServ
     logger.trace(s" RPC simple export : $parameter")
     if (allowExport) {
       val condition = if (parameter.contains("condition")) parameter("condition") else ""
-      val res = storageObj.find(condition, List(), context)
+      val res = storageObj.find(condition, List(), context.toStorageContext)
       var file: File = null
       var bw: BufferedWriter = null
       try {

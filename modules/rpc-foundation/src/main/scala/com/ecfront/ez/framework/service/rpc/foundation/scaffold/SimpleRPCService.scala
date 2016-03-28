@@ -36,7 +36,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
   def rpcSave(parameter: Map[String, String], body: String, context: C): Resp[M] = {
     logger.trace(s" RPC simple save : $body")
     val model = JsonHelper.toObject(body, modelClazz)
-    storageObj.save(model, context)
+    storageObj.save(model, context.toStorageContext)
   }
 
   /**
@@ -54,7 +54,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
     } else {
       logger.trace(s" RPC simple update : $body")
       val model = JsonHelper.toObject(body, modelClazz)
-      storageObj.update(model, context)
+      storageObj.update(model, context.toStorageContext)
     }
   }
 
@@ -70,7 +70,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
     logger.trace(s" RPC simple find enable : $parameter")
     if (classOf[StatusModel].isAssignableFrom(modelClazz)) {
       val condition = if (parameter.contains("condition")) parameter("condition") else ""
-      storageObj.asInstanceOf[StatusStorage[_]].findEnabled(condition, List(), context)
+      storageObj.asInstanceOf[StatusStorage[_]].findEnabled(condition, List(), context.toStorageContext)
     } else {
       Resp.notImplemented("")
     }
@@ -87,7 +87,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
   def rpcFind(parameter: Map[String, String], context: C): Resp[List[M]] = {
     logger.trace(s" RPC simple find : $parameter")
     val condition = if (parameter.contains("condition")) parameter("condition") else ""
-    storageObj.find(condition, List(), context)
+    storageObj.find(condition, List(), context.toStorageContext)
   }
 
   /**
@@ -106,7 +106,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
     val condition = if (parameter.contains("condition")) parameter("condition") else ""
     val pageNumber = if (parameter.contains("pageNumber")) parameter("pageNumber").toLong else 1L
     val pageSize = if (parameter.contains("pageSize")) parameter("pageSize").toInt else DEFAULT_PAGE_SIZE
-    storageObj.page(condition, List(), pageNumber, pageSize, context)
+    storageObj.page(condition, List(), pageNumber, pageSize, context.toStorageContext)
   }
 
   /**
@@ -123,7 +123,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
     } else {
       val id = parameter("id")
       logger.trace(s" RPC simple get : $id")
-      storageObj.getById(id, context)
+      storageObj.getById(id, context.toStorageContext)
     }
   }
 
@@ -141,7 +141,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
     } else {
       val id = parameter("id")
       logger.trace(s" RPC simple delete : $id")
-      storageObj.deleteById(id, context)
+      storageObj.deleteById(id, context.toStorageContext)
     }
   }
 
@@ -160,7 +160,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
       if (classOf[StatusModel].isAssignableFrom(modelClazz)) {
         val id = parameter("id")
         logger.trace(s" RPC simple enable : $id")
-        storageObj.asInstanceOf[StatusStorage[_]].enableById(id, context)
+        storageObj.asInstanceOf[StatusStorage[_]].enableById(id, context.toStorageContext)
       } else {
         Resp.notImplemented("")
       }
@@ -182,7 +182,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
       if (classOf[StatusModel].isAssignableFrom(modelClazz)) {
         val id = parameter("id")
         logger.trace(s" RPC simple enable : $id")
-        storageObj.asInstanceOf[StatusStorage[_]].disableById(id, context)
+        storageObj.asInstanceOf[StatusStorage[_]].disableById(id, context.toStorageContext)
       } else {
         Resp.notImplemented("")
       }
