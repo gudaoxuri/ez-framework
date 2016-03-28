@@ -4,12 +4,8 @@
     "module": "",
     "services": {
       "storage.mongo": {
-        "hosts": [
-          {
-            "host": "192.168.4.99",
-            "port": 27017
-          }
-        ],
+        "host": "192.168.4.99",
+        "port": 27017,
         "db_name": "ez_test",
         "maxPoolSize": 100,
         "minPoolSize": 0,

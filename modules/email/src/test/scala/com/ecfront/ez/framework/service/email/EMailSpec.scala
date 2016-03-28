@@ -12,7 +12,7 @@ class EmailSpec extends MockStartupSpec {
       this.getClass.getResource("/").getPath + "ez.json")
 
     val sendResp = EmailProcessor.send(
-      "hi-sb@ecfront.com",
+      "test@ecfront.com",
       List("i@sunisle.org", "364341806@qq.com"),
       null, null,
       "test 1",

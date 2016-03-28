@@ -90,18 +90,56 @@ trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
     MongoProcessor.page(tableName, packageCondition(condition), pageNumber, pageSize, null, _modelClazz)
   }
 
+  /**
+    * 附加条件查找
+    * @param condition 过滤条件
+    * @param sort 排序
+    * @param limit 获取记录数，默认为0，表示获取所有
+    * @param context 上下文
+    * @return 查找结果
+    */
   def findWithOpt(condition: String = "{}", sort: Map[String, SortEnum], limit: Int = 0, context: EZStorageContext = EZStorageContext()): Resp[List[M]] = {
     MongoProcessor.find(tableName, packageCondition(condition), convertSort(sort), limit, _modelClazz)
   }
 
+  /**
+    * 附加条件分页
+    * @param condition  过滤条件
+    * @param pageNumber 当前页，从1开始
+    * @param pageSize   每页条数
+    * @param sort 排序
+    * @param context 上下文
+    * @return 分页结果
+    */
   def pageWithOpt(
                    condition: String = "{}", pageNumber: Long = 1, pageSize: Int = 10,
                    sort: Map[String, SortEnum] = Map(), context: EZStorageContext = null): Resp[Page[M]] = {
     MongoProcessor.page(tableName, packageCondition(condition), pageNumber, pageSize, convertSort(sort), _modelClazz)
   }
 
-  def aggregate(query: JsonArray, context: EZStorageContext = null): Resp[JsonArray] = {
-    MongoProcessor.aggregate(tableName, query)
+  /**
+    * 聚合计算
+    *
+    * 例如：
+    * [{ "$$match": {<过滤条件>} },
+    *  {
+    *    // Group
+    *    "$$group": {
+    *       "_id": {
+    *           "platform":"$$platform",
+    *           "component":"$$component",
+    *           "module":"$$module",
+    *           "stage":"$$stage"
+    *       },
+    *       "count": { "$$sum": 1 }
+    *  }
+    * }]
+    * @param condition 计算条件
+    * @param context 上下文
+    * @return 计算结果
+    */
+  def aggregate(condition: JsonArray, context: EZStorageContext = null): Resp[JsonArray] = {
+    MongoProcessor.aggregate(tableName, condition)
   }
 
   protected def convertToJsonObject(entityInfo: MongoEntityInfo, model: M): JsonObject = {

@@ -79,6 +79,8 @@
 <8> 注册或找回密码激活有效期，单位秒
 <9> 持久化实现，支持`mongo`或`jdbc`
 
+NOTE: 使用`jdbc`持久化时请先执行`ez_ddl.sql`以创建基础表
+
 === 认证服务接入
 
 在原有HTTP服务方法中修改 `EZRPCContext` 为 `EZAuthContext` 即可，如
