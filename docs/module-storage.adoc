@@ -196,115 +196,160 @@ IMPORTANT: 如果持久化字段是复杂类型，MySQL的版本必须是5.7及�
 ==== 常用方法
 
 [source,scala]
-继承自（Mongo或JDBC）BaseStorage[E]的方法
+.继承自（Mongo或JDBC）BaseStorage[E]的方法
 ----
-  /**
-    * 保存
-    *
-    * @param model   实体对象
-    * @param context 上下文
-    * @return 保存后的实体对象
-    */
-  def save(model: M, context: EZStorageContext = EZStorageContext()): Resp[M]
+/**
+  * 保存
+  *
+  * @param model   实体对象
+  * @param context 上下文
+  * @return 保存后的实体对象
+  */
+def save(model: M, context: EZStorageContext = EZStorageContext()): Resp[M]
+/**
+  * 更新
+  *
+  * @param model   实体对象
+  * @param context 上下文
+  * @return 更新后的实体对象
+  */
+def update(model: M, context: EZStorageContext = EZStorageContext()): Resp[M]
+/**
+  * 保存或更新
+  *
+  * @param model   实体对象
+  * @param context 上下文
+  * @return 保存或更新后的实体对象
+  */
+def saveOrUpdate(model: M, context: EZStorageContext = EZStorageContext()): Resp[M]
 
-  /**
-    * 更新
-    *
-    * @param model   实体对象
-    * @param context 上下文
-    * @return 更新后的实体对象
-    */
-  def update(model: M, context: EZStorageContext = EZStorageContext()): Resp[M]
+/**
+  * 更新
+  *
+  * @param newValues  新值，SQL (相当于SET中的条件)或Json
+  * @param condition  条件，SQL (相当于Where中的条件)或Json
+  * @param parameters 参数 ，Mongo不需要
+  * @param context    上下文
+  * @return 是否成功
+  */
+def updateByCond(newValues: String, condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Void]
 
-  /**
-    * 保存或更新
-    *
-    * @param model   实体对象
-    * @param context 上下文
-    * @return 保存或更新后的实体对象
-    */
-  def saveOrUpdate(model: M, context: EZStorageContext = EZStorageContext()): Resp[M]
+/**
+  * 删除
+  *
+  * @param id      主键
+  * @param context 上下文
+  * @return 是否成功
+  */
+def deleteById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[Void]
 
-  /**
-    * 更新
-    *
-    * @param newValues  新值，SQL (相当于SET中的条件)或Json
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
-    * @return 是否成功
-    */
-  def updateByCond(newValues: String, condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Void]
+/**
+  * 删除
+  *
+  * @param condition  条件，SQL (相当于Where中的条件)或Json
+  * @param parameters 参数 ，Mongo不需要
+  * @param context    上下文
+  * @return 是否成功
+  */
+def deleteByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Void]
 
-  /**
-    * 删除
-    *
-    * @param id      主键
-    * @param context 上下文
-    * @return 是否成功
-    */
-  def deleteById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[Void]
+/**
+  * 获取一条记录
+  *
+  * @param id      主键
+  * @param context 上下文
+  * @return 获取到的记录
+  */
+def getById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[M]
 
-  /**
-    * 删除
-    *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
-    * @return 是否成功
-    */
-  def deleteByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Void]
+/**
+  * 获取一条记录
+  *
+  * @param condition  条件，SQL (相当于Where中的条件)或Json
+  * @param parameters 参数 ，Mongo不需要
+  * @param context    上下文
+  * @return 获取到的记录
+  */
+def getByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[M]
 
-  /**
-    * 获取一条记录
-    *
-    * @param id      主键
-    * @param context 上下文
-    * @return 获取到的记录
-    */
-  def getById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[M]
+/**
+  * 判断是否存在
+  *
+  * @param id      主键
+  * @param context 上下文
+  * @return 是否存在
+  */
+def existById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[Boolean]
 
-  /**
-    * 获取一条记录
-    *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
-    * @return 获取到的记录
-    */
-  def getByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[M]
+/**
+  * 判断是否存在
+  *
+  * @param condition  条件，SQL (相当于Where中的条件)或Json
+  * @param parameters 参数 ，Mongo不需要
+  * @param context    上下文
+  * @return 是否存在
+  */
+def existByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Boolean]
 
-  /**
-    * 判断是否存在
-    *
-    * @param id      主键
-    * @param context 上下文
-    * @return 是否存在
-    */
-  def existById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[Boolean]
+/**
+  * 查找
+  *
+  * @param condition  条件，SQL (相当于Where中的条件)或Json
+  * @param parameters 参数 ，Mongo不需要
+  * @param context    上下文
+  * @return 查找结果
+  */
+def find(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[List[M]]
 
-  /**
-    * 判断是否存在
-    *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
-    * @return 是否存在
-    */
-  def existByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Boolean]
+/**
+* 分页
+*
+* @param condition  条件，SQL (相当于Where中的条件)或Json
+* @param parameters 参数 ，Mongo不需要
+* @param pageNumber 当前页，从1开始
+* @param pageSize   每页条数
+* @param context    上下文
+* @return 分页结果
+*/
+def page(condition: String, parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10,
+           context: EZStorageContext = EZStorageContext()): Resp[Page[M]]
 
-  /**
-    * 查找
-    *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
-    * @return 查找结果
-    */
-  def find(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[List[M]]
+/**
+  * 计数
+  *
+  * @param condition  条件，SQL (相当于Where中的条件)或Json
+  * @param parameters 参数 ，Mongo不需要
+  * @param context    上下文
+  * @return 条数
+  */
+def count(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Long]
+----
 
-  /**
-  * 分页
+[source,scala]
+.继承自（Mongo或JDBC）StatusStorage[E]的方法
+----
+/**
+  * 获取一条启用的记录
+  *
+  * @param condition  条件，SQL (相当于Where中的条件)或Json
+  * @param parameters 参数 ，Mongo不需要
+  * @param context    上下文
+  * @return 获取到的记录
+  */
+def getEnabledByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = null): Resp[M]
+
+/**
+  * 启用记录查找
+  *
+  * @param condition  条件，SQL (相当于Where中的条件)或Json
+  * @param parameters 参数 ，Mongo不需要
+  * @param context    上下文
+  * @return 查找到的记录
+  */
+def findEnabled(condition: String, parameters: List[Any] = List(), context: EZStorageContext = null): Resp[List[M]]
+
+/**
+  * 启用记录分页
   *
   * @param condition  条件，SQL (相当于Where中的条件)或Json
   * @param parameters 参数 ，Mongo不需要
@@ -313,148 +358,101 @@ IMPORTANT: 如果持久化字段是复杂类型，MySQL的版本必须是5.7及�
   * @param context    上下文
   * @return 分页结果
   */
-  def page(condition: String, parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10,
-             context: EZStorageContext = EZStorageContext()): Resp[Page[M]]
+def pageEnabled(
+                 condition: String,
+                 parameters: List[Any] = List(),
+                 pageNumber: Long = 1, pageSize: Int = 10, context: EZStorageContext = null): Resp[Page[M]]
 
-  /**
-    * 计数
-    *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
-    * @return 条数
-    */
-  def count(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Long]
-----
+/**
+  * 判断启用记录是否存在
+  *
+  * @param condition  条件，SQL (相当于Where中的条件)或Json
+  * @param parameters 参数 ，Mongo不需要
+  * @param context    上下文
+  * @return 是否存在
+  */
+def existEnabledByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = null): Resp[Boolean]
 
-[source,scala]
-继承自（Mongo或JDBC）StatusStorage[E]的方法
-----
-  /**
-    * 获取一条启用的记录
-    *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
-    * @return 获取到的记录
-    */
-  def getEnabledByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = null): Resp[M]
+/**
+  * 启用记录计数
+  *
+  * @param condition  条件，SQL (相当于Where中的条件)或Json
+  * @param parameters 参数 ，Mongo不需要
+  * @param context    上下文
+  * @return 条数
+  */
+def countEnabled(condition: String, parameters: List[Any] = List(), context: EZStorageContext = null): Resp[Long]
 
-  /**
-    * 启用记录查找
-    *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
-    * @return 查找到的记录
-    */
-  def findEnabled(condition: String, parameters: List[Any] = List(), context: EZStorageContext = null): Resp[List[M]]
+/**
+  * 启用一条记录
+  *
+  * @param id      主键
+  * @param context 上下文
+  * @return 启用结果
+  */
+def enableById(id: Any, context: EZStorageContext = null): Resp[Void]
 
-  /**
-    * 启用记录分页
-    *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
-    * @param pageNumber 当前页，从1开始
-    * @param pageSize   每页条数
-    * @param context    上下文
-    * @return 分页结果
-    */
-  def pageEnabled(
-                   condition: String,
-                   parameters: List[Any] = List(),
-                   pageNumber: Long = 1, pageSize: Int = 10, context: EZStorageContext = null): Resp[Page[M]]
-
-  /**
-    * 判断启用记录是否存在
-    *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
-    * @return 是否存在
-    */
-  def existEnabledByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = null): Resp[Boolean]
-
-  /**
-    * 启用记录计数
-    *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
-    * @return 条数
-    */
-  def countEnabled(condition: String, parameters: List[Any] = List(), context: EZStorageContext = null): Resp[Long]
-
-  /**
-    * 启用一条记录
-    *
-    * @param id      主键
-    * @param context 上下文
-    * @return 启用结果
-    */
-  def enableById(id: Any, context: EZStorageContext = null): Resp[Void]
-
-  /**
-    * 禁用一条记录
-    *
-    * @param id      主键
-    * @param context 上下文
-    * @return 禁用结果
-    */
-  def disableById(id: Any, context: EZStorageContext = null): Resp[Void]
+/**
+  * 禁用一条记录
+  *
+  * @param id      主键
+  * @param context 上下文
+  * @return 禁用结果
+  */
+def disableById(id: Any, context: EZStorageContext = null): Resp[Void]
 ----
 
 NOTE: 以上所有方法都有`preX`和`postX`方法对，可以在实现的storage中重写以用于操作前及操作后处理，系统仅对操作前返回`Resp.success()`的结果做后续操作
 
 ===== Mongo特殊方法
 [source,scala]
-继承自MongoBaseStorage[E]的方法
+.继承自MongoBaseStorage[E]的方法
 ----
-  /**
-    * 附加条件查找
-    * @param condition 过滤条件
-    * @param sort 排序
-    * @param limit 获取记录数，默认为0，表示获取所有
-    * @param context 上下文
-    * @return 查找结果
-    */
-  def findWithOpt(condition: String = "{}", sort: Map[String, SortEnum], limit: Int = 0, context: EZStorageContext = EZStorageContext()): Resp[List[M]]
+ /**
+   * 附加条件查找
+   * @param condition 过滤条件
+   * @param sort 排序
+   * @param limit 获取记录数，默认为0，表示获取所有
+   * @param context 上下文
+   * @return 查找结果
+   */
+ def findWithOpt(condition: String = "{}", sort: Map[String, SortEnum], limit: Int = 0, context: EZStorageContext = EZStorageContext()): Resp[List[M]]
 
-  /**
-    * 附加条件分页
-    * @param condition  过滤条件
-    * @param pageNumber 当前页，从1开始
-    * @param pageSize   每页条数
-    * @param sort 排序
-    * @param context 上下文
-    * @return 分页结果
-    */
-  def pageWithOpt(
-                   condition: String = "{}", pageNumber: Long = 1, pageSize: Int = 10,
-                   sort: Map[String, SortEnum] = Map(), context: EZStorageContext = null): Resp[Page[M]]
+ /**
+   * 附加条件分页
+   * @param condition  过滤条件
+   * @param pageNumber 当前页，从1开始
+   * @param pageSize   每页条数
+   * @param sort 排序
+   * @param context 上下文
+   * @return 分页结果
+   */
+ def pageWithOpt(
+                  condition: String = "{}", pageNumber: Long = 1, pageSize: Int = 10,
+                  sort: Map[String, SortEnum] = Map(), context: EZStorageContext = null): Resp[Page[M]]
 
-  /**
-    * 聚合计算
-    *
-    * 例如：
-    * [{ "$$match": {<过滤条件>} },
-    *  {
-    *    // Group
-    *    "$$group": {
-    *       "_id": {
-    *           "platform":"$$platform",
-    *           "component":"$$component",
-    *           "module":"$$module",
-    *           "stage":"$$stage"
-    *       },
-    *       "count": { "$$sum": 1 }
-    *  }
-    * }]
-    * @param condition 计算条件
-    * @param context 上下文
-    * @return 计算结果
-    */
-  def aggregate(condition: JsonArray, context: EZStorageContext = null): Resp[JsonArray]
+ /**
+   * 聚合计算
+   *
+   * 例如：
+   * [{ "$$match": {<过滤条件>} },
+   *  {
+   *    // Group
+   *    "$$group": {
+   *       "_id": {
+   *           "platform":"$$platform",
+   *           "component":"$$component",
+   *           "module":"$$module",
+   *           "stage":"$$stage"
+   *       },
+   *       "count": { "$$sum": 1 }
+   *  }
+   * }]
+   * @param condition 计算条件
+   * @param context 上下文
+   * @return 计算结果
+   */
+ def aggregate(condition: JsonArray, context: EZStorageContext = null): Resp[JsonArray]
 ----
 
 ==== 适配器使用
