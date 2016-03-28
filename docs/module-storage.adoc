@@ -8,6 +8,8 @@
 
 NOTE: 关系型数据库目前的测试基于MySQL，其它数据库未做详细测试
 
+IMPORTANT: 数据字段应避免使用null值，字符用""、数字用0（或其它）、Bool用false 等代替
+
 === 5分钟上手
 
 . 添加依赖
@@ -144,7 +146,6 @@ NOTE: HikariCP的配置见 https://github.com/brettwooldridge/HikariCP#configura
 NOTE: BoneCP的配置见 http://www.jolbox.com/configuration.html
 
 NOTE: 本服务基于 `vertx-jdbc-client` 实现，更多配置见：http://vertx.io/docs/vertx-jdbc-client/java/#_configuration
-
 
 === 使用
 

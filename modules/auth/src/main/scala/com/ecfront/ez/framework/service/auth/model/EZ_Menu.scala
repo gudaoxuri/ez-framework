@@ -26,7 +26,7 @@ case class EZ_Menu() extends SecureModel with StatusModel {
   @BeanProperty var icon: String = ""
   @BeanProperty var translate: String = ""
   @BeanProperty var role_codes: List[String] = List[String]()
-  @BeanProperty var parent_code: String = null
+  @BeanProperty var parent_code: String = ""
   @BeanProperty var sort: Int = 0
   @BeanProperty var organization_code: String = _
 
@@ -78,6 +78,21 @@ trait EZ_Menu_Base extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] {
     if (model.uri.contains(BaseModel.SPLIT)) {
       Resp.badRequest(s"【uri】can't contains ${BaseModel.SPLIT}")
     } else {
+      if (model.organization_code == null) {
+        model.organization_code = ""
+      }
+      if (model.role_codes == null) {
+        model.role_codes = List()
+      }
+      if (model.icon == null) {
+        model.icon = ""
+      }
+      if (model.translate == null) {
+        model.translate = ""
+      }
+      if (model.parent_code == null) {
+        model.parent_code = ""
+      }
       model.code = assembleCode(model.uri, model.organization_code)
       super.preSaveOrUpdate(model, context)
     }

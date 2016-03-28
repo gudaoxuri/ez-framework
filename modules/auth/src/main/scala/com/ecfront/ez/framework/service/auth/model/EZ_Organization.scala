@@ -48,6 +48,21 @@ object EZ_Organization extends SecureStorageAdapter[EZ_Organization, EZ_Organiza
 
 trait EZ_Organization_Base extends SecureStorage[EZ_Organization] with StatusStorage[EZ_Organization] {
 
+  override def preSave(model: EZ_Organization, context: EZStorageContext): Resp[EZ_Organization] = {
+    preSaveOrUpdate(model, context)
+  }
+
+  override def preUpdate(model: EZ_Organization, context: EZStorageContext): Resp[EZ_Organization] = {
+    preSaveOrUpdate(model, context)
+  }
+
+  override def preSaveOrUpdate(model: EZ_Organization, context: EZStorageContext): Resp[EZ_Organization] = {
+    if (model.image == null) {
+      model.image = ""
+    }
+    super.preSaveOrUpdate(model, context)
+  }
+
   def getByCode(code: String): Resp[EZ_Organization]
 
   def deleteByCode(code: String): Resp[Void]

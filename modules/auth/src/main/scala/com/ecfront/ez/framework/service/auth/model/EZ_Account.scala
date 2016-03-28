@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.service.auth.model
 
-import com.ecfront.common.{EncryptHelper, FormatHelper, JsonHelper, Resp}
+import com.ecfront.common._
 import com.ecfront.ez.framework.service.auth.ServiceAdapter
 import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, _}
 import com.ecfront.ez.framework.service.storage.jdbc.{JDBCSecureStorage, JDBCStatusStorage}
@@ -29,6 +29,7 @@ case class EZ_Account() extends SecureModel with StatusModel {
   @Require
   @Label("Password")
   @BeanProperty var password: String = _
+  @Ignore var exchange_pwd: String = _
   @Require
   @Label("Email")
   @BeanProperty var email: String = _
@@ -128,6 +129,18 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
         Resp.badRequest(s"【login id】can't contains ${BaseModel.SPLIT}")
       } else {
         if (FormatHelper.validEmail(model.email)) {
+          if (model.image == null) {
+            model.image = ""
+          }
+          if (model.oauth == null) {
+            model.oauth = Map()
+          }
+          if (model.organization_code == null) {
+            model.organization_code = ""
+          }
+          if (model.role_codes == null) {
+            model.role_codes = List()
+          }
           if (model.ext_id == null) {
             model.ext_id = ""
           }
@@ -135,8 +148,9 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
             model.ext_info = Map()
           }
           model.code = assembleCode(model.login_id, model.organization_code)
-          // TODO
-          if (model.password != null && model.password.trim.length != 64) {
+          if (model.exchange_pwd != null) {
+            model.password = model.exchange_pwd
+          } else {
             model.password = packageEncryptPwd(model.login_id, model.password)
           }
           if (model.id == null || model.id.trim == "") {

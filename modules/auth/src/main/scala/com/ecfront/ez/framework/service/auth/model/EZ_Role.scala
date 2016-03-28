@@ -80,6 +80,12 @@ trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] {
       if (model.flag.contains(BaseModel.SPLIT)) {
         Resp.badRequest(s"【flag】can't contains ${BaseModel.SPLIT}")
       } else {
+        if (model.organization_code == null) {
+          model.organization_code = ""
+        }
+        if (model.resource_codes == null) {
+          model.resource_codes = List()
+        }
         model.code = assembleCode(model.flag, model.organization_code)
         super.preSaveOrUpdate(model, context)
       }
