@@ -85,6 +85,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
     if (codeR && codeR.body != null) {
       val accountR = EZ_Account.getByCode(codeR.body)
       if (accountR && accountR.body != null) {
+        accountR.body.exchange_pwd = accountR.body.password
         accountR.body.enable = true
         EZ_Account.update(accountR.body, context)
         Resp.success(RespRedirect(ServiceAdapter.loginUrl + "?action=active"))
@@ -221,7 +222,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
     if (newPasswordR && newPasswordR.body != null) {
       val accountR = EZ_Account.getByCode(newPasswordR.body._1)
       if (accountR && accountR.body != null) {
-        accountR.body.exchange_pwd = newPasswordR.body._2
+        accountR.body.password = newPasswordR.body._2
         EZ_Account.update(accountR.body, context)
         Resp.success(RespRedirect(ServiceAdapter.loginUrl + "?action=findpassword"))
       } else {

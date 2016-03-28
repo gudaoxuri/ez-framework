@@ -89,8 +89,8 @@
  </check>
  <check class="org.scalastyle.scalariform.CyclomaticComplexityChecker" level="warning" enabled="true">
   <parameters>
-   <!--ez 18 to 20-->
-   <parameter name="maximum"><![CDATA[20]]></parameter>
+   <!--ez 18 to 30-->
+   <parameter name="maximum"><![CDATA[30]]></parameter>
   </parameters>
  </check>
  <check class="org.scalastyle.scalariform.UppercaseLChecker" level="warning" enabled="true"></check>

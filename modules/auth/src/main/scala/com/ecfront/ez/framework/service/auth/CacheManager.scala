@@ -7,9 +7,9 @@ import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.service.auth.model._
 import com.ecfront.ez.framework.service.redis.RedisProcessor
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future, Promise}
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object CacheManager {
 
@@ -19,7 +19,7 @@ object CacheManager {
   private val TOKEN_ID_REL_FLAG = "ez.token.id.rel."
 
   // 资源列表 key : ez.resource.<resource code> value : any
-  private val RESOURCES_FLAG = "ez.resource."
+  private val RESOURCES_FLAG = "ez.resources"
   // 资源 关联 key : ez.resource.rel.<role code> value : <resource codes>
   private val RESOURCES_REL_FLAG = "ez.resource.rel."
 
@@ -99,16 +99,16 @@ object CacheManager {
   }
 
   def addResource(resourceCode: String): Resp[Void] = {
-    RedisProcessor.set(RESOURCES_FLAG + resourceCode, "")
+    RedisProcessor.hset(RESOURCES_FLAG, resourceCode, "")
   }
 
   def removeResource(resourceCode: String): Resp[Void] = {
-    RedisProcessor.del(RESOURCES_FLAG + resourceCode)
+    RedisProcessor.hdel(RESOURCES_FLAG, resourceCode)
   }
 
   def existResource(resourceCode: String): Future[Resp[Boolean]] = {
     val p = Promise[Resp[Boolean]]()
-    RedisProcessor.Async.get(RESOURCES_FLAG + resourceCode).onSuccess {
+    RedisProcessor.Async.hget(RESOURCES_FLAG, resourceCode).onSuccess {
       case resR =>
         if (resR.body != null) {
           p.success(Resp.success(true))
@@ -152,7 +152,7 @@ object CacheManager {
   }
 
   def getAndRemoveActiveAccount(encryption: String): Resp[String] = {
-    val resp=RedisProcessor.get(ACTIVE_ACCOUNT_FLAG + encryption.hashCode + "")
+    val resp = RedisProcessor.get(ACTIVE_ACCOUNT_FLAG + encryption.hashCode + "")
     RedisProcessor.del(ACTIVE_ACCOUNT_FLAG + encryption.hashCode + "")
     resp
   }
@@ -164,10 +164,10 @@ object CacheManager {
 
   def getAndRemoveNewPassword(encryption: String): Resp[(String, String)] = {
     val accountCodeR = RedisProcessor.get(ACTIVE_FIND_PASSWORD_FLAG + encryption.hashCode + "")
-     RedisProcessor.del(ACTIVE_FIND_PASSWORD_FLAG + encryption.hashCode + "")
+    RedisProcessor.del(ACTIVE_FIND_PASSWORD_FLAG + encryption.hashCode + "")
     if (accountCodeR && accountCodeR.body != null) {
       val newPasswordR = RedisProcessor.get(ACTIVE_NEW_PASSWORD_FLAG + accountCodeR.body)
-       RedisProcessor.del(ACTIVE_NEW_PASSWORD_FLAG + accountCodeR.body)
+      RedisProcessor.del(ACTIVE_NEW_PASSWORD_FLAG + accountCodeR.body)
       if (newPasswordR && newPasswordR.body != null) {
         Resp.success((accountCodeR.body, newPasswordR.body))
       } else {

@@ -18,21 +18,21 @@ case class Ext_Test_Account() extends BaseModel {
 
 }
 
-object Ext_Test_Account extends MongoBaseStorage[Ext_Test_Account] {
-
-  override def preSave(model: Ext_Test_Account, context: EZStorageContext): Resp[Ext_Test_Account] = {
-    logger.debug(model.toString)
-    super.preSave(model, context)
-  }
-}
-
-/*object Ext_Test_Account extends JDBCBaseStorage[Ext_Test_Account] {
+/*object Ext_Test_Account extends MongoBaseStorage[Ext_Test_Account] {
 
   override def preSave(model: Ext_Test_Account, context: EZStorageContext): Resp[Ext_Test_Account] = {
     logger.debug(model.toString)
     super.preSave(model, context)
   }
 }*/
+
+object Ext_Test_Account extends JDBCBaseStorage[Ext_Test_Account] {
+
+  override def preSave(model: Ext_Test_Account, context: EZStorageContext): Resp[Ext_Test_Account] = {
+    logger.debug(model.toString)
+    super.preSave(model, context)
+  }
+}
 
 
 

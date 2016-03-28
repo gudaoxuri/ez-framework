@@ -147,10 +147,10 @@ object Initiator extends LazyLogging {
         s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/account/bylogin/"
       )))
       EZ_Role.save(EZ_Role(EZ_Role.USER_ROLE_FLAG, "User", List(
-        s"{Method.POST}${BaseModel.SPLIT}/auth/manage/account/res/",
-        s"{Method.GET}${BaseModel.SPLIT}/auth/manage/account/res/:date/:fileName",
-        s"{Method.GET}${BaseModel.SPLIT}/auth/manage/account/bylogin/",
-        s"{Method.PUT}${BaseModel.SPLIT}/auth/manage/account/bylogin/"
+        s"${Method.POST}${BaseModel.SPLIT}/auth/manage/account/res/",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/res/:date/:fileName",
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/bylogin/",
+        s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/account/bylogin/"
       )))
 
       val account = EZ_Account(EZ_Account.SYSTEM_ACCOUNT_CODE, "i@sunisle.org", "Sys Admin", "admin", List(

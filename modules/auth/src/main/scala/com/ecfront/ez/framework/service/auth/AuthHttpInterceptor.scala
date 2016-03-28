@@ -47,7 +47,8 @@ object AuthHttpInterceptor extends HttpInterceptor {
                           // 登录用户所属角色列表中存在此资源
                           p.success(authContext)
                         } else {
-                          p.unAuthorized(s"Account【${tokenInfo.name}】in 【${tokenInfo.organization_code}】 no access to ${authContext.realUri}】")
+                          p.unAuthorized(s"Account【${tokenInfo.name}】in 【${tokenInfo.organization_code}】" +
+                            s" no access to ${authContext.method}:${authContext.realUri}】")
                         }
                     }
                   } else {
