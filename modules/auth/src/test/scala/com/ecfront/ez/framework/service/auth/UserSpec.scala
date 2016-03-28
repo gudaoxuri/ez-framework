@@ -48,7 +48,7 @@ class UserSpec extends MockStartupSpec {
   test("User Active test") {
 
     // Replace Real url in your email
-    val emailReceivedUrl = "http://127.0.0.1:8080/public/active/account/af4c3092-1d9c-4cb1-bd4f-0bdd938c9c6697612617911071/"
+    val emailReceivedUrl = "http://127.0.0.1:8080/public/active/account/e28f8045-8ba3-423e-93df-33c5d8a2348391556610745276/"
     assert(
       JsonHelper.toObject[Resp[String]](
         HttpClientProcessor.get(
@@ -64,7 +64,7 @@ class UserSpec extends MockStartupSpec {
   }
 
   // Step 3 Modify Account
-  test("User Get Or Update test") {
+  test("User Get or Update test") {
 
     val token = AuthService.doLogin("u1", "123", "").body.token
     val accountVO = JsonHelper.toObject[Resp[Account_VO]](
@@ -98,7 +98,7 @@ class UserSpec extends MockStartupSpec {
   test("User Active New Password test") {
 
     // Replace Real url in your email
-    val emailReceivedUrl = "http://127.0.0.1:8080/public/active/password/844e5d62-e92e-4c42-affc-1eb4a29b94f597986475888800/"
+    val emailReceivedUrl = "http://127.0.0.1:8080/public/active/password/efd592fa-f333-47dd-bf68-b67a1fc4597a91925706342443/"
 
     assert(JsonHelper.toObject[Resp[String]](
       HttpClientProcessor.get(

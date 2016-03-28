@@ -2,7 +2,7 @@ package com.ecfront.ez.framework.service.auth.manage
 
 import java.util.UUID
 
-import com.ecfront.common.{JsonHelper, Resp}
+import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.core.helper.FileType
 import com.ecfront.ez.framework.service.auth._
@@ -149,7 +149,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
             // 验证密码
             if (EZ_Account.packageEncryptPwd(account.login_id, body.current_password) == account.password) {
               if (body.new_password != null && body.new_password.nonEmpty) {
-                account.password = EZ_Account.packageEncryptPwd(account.login_id, body.new_password)
+                account.password = body.new_password
               }
               account.name = body.name
               account.email = body.email
@@ -221,7 +221,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
     if (newPasswordR && newPasswordR.body != null) {
       val accountR = EZ_Account.getByCode(newPasswordR.body._1)
       if (accountR && accountR.body != null) {
-        accountR.body.password = EZ_Account.packageEncryptPwd(accountR.body.login_id, newPasswordR.body._2)
+        accountR.body.password = newPasswordR.body._2
         EZ_Account.update(accountR.body, context)
         Resp.success(RespRedirect(ServiceAdapter.loginUrl + "?action=findpassword"))
       } else {
@@ -230,21 +230,6 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
     } else {
       Resp.notFound("Link illegal")
     }
-  }
-
-  /**
-    * 更新操作
-    *
-    * @param parameter 请求参数，必须包含`id`
-    * @param body      原始（字符串类型）请求体
-    * @param context   PRC上下文
-    * @return 更新结果
-    */
-  @PUT(":id/")
-  override def rpcUpdate(parameter: Map[String, String], body: String, context: EZAuthContext): Resp[EZ_Account] = {
-    val account = JsonHelper.toObject[EZ_Account](body)
-    account.password = EZ_Account.packageEncryptPwd(account.login_id, account.password)
-    EZ_Account.update(account, context)
   }
 
 }

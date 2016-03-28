@@ -69,8 +69,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     }
   }
 
-  def convertToEntity(obj:Any): M ={
-    JsonHelper.toObject(obj,_modelClazz)
+  def convertToEntity(obj: Any): M = {
+    JsonHelper.toObject(obj, _modelClazz)
   }
 
   /**

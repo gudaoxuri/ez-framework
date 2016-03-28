@@ -158,15 +158,14 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
   }
 
   private def doUpdate[M](tableName: String, idFieldName: String, idValue: Any, richValueInfos: mutable.Map[String, Any], clazz: Class[M]): Resp[M] = {
+    val setFields = richValueInfos.filterNot(_._1 == idFieldName).toList
     val sql =
       s"""
-         |INSERT INTO $tableName
-         | (${richValueInfos.keys.toList.mkString(",")})
-         | VALUES ( ${(for (i <- 0 until richValueInfos.size) yield "?").mkString(",")} )
-         | ON DUPLICATE KEY UPDATE
-         | ${richValueInfos.keys.filterNot(_ == idFieldName).toList.map(key => s"$key = VALUES($key)").mkString(",")}
+         |UPDATE $tableName SET
+         |  ${setFields.map(f => s"${f._1} = ? ").mkString(",")}
+         | WHERE $idFieldName = ?
        """.stripMargin
-    val updateR = JDBCProcessor.update(sql, richValueInfos.values.toList)
+    val updateR = JDBCProcessor.update(sql, setFields.map(_._2) :+ richValueInfos(idFieldName))
     if (updateR) {
       JDBCProcessor.get(
         s"SELECT * FROM $tableName WHERE $idFieldName  = ? ",

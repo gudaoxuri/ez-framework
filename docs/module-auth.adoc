@@ -103,6 +103,7 @@ EZAuthContext在EZRPCContext基础上添加了两个字段：
 
 ==== 说明
 
+. 无特殊说明的情况下所有请求的header Content-Type为application/json
 . 无特殊说明的情况下所有返回值均为Json，由以下格式构成：
 
  {

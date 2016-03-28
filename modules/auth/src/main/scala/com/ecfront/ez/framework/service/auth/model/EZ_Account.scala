@@ -135,11 +135,13 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
             model.ext_info = Map()
           }
           model.code = assembleCode(model.login_id, model.organization_code)
+          if (model.password != null && model.password.trim.length != 64) {
+            model.password = packageEncryptPwd(model.login_id, model.password)
+          }
           if (model.id == null || model.id.trim == "") {
             if (existByEmail(model.email, model.organization_code).body) {
               Resp.badRequest("【email】exist")
             } else {
-              model.password = packageEncryptPwd(model.login_id, model.password)
               if (EZ_Account.extAccountStorage != null) {
                 val extObj = EZ_Account.extAccountStorage.save(EZ_Account.extAccountStorage.convertToEntity(model.ext_info), context).body
                 model.ext_id = extObj.id
