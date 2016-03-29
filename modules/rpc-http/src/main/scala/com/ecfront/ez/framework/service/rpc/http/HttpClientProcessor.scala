@@ -115,7 +115,7 @@ object HttpClientProcessor extends LazyLogging {
       request(HttpMethod.DELETE, url, null, contentType)
     }
 
-    private def request(method: HttpMethod, url: String, body: Any, contentType: String): Future[String] = {
+    private[http] def request(method: HttpMethod, url: String, body: Any, contentType: String): Future[String] = {
       val p = Promise[String]()
       val clientChannel =
         if (url.trim.toLowerCase().startsWith("https")) {
