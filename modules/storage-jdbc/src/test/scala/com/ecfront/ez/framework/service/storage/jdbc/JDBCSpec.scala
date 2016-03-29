@@ -35,7 +35,7 @@ class JDBCSpec extends MockStartupSpec {
       """.stripMargin
     )
 
-    JDBC_Test_Entity.deleteByCond("1=1", List()).body
+    JDBC_Test_Entity.deleteByCond("", List()).body
 
     val jdbc = JDBC_Test_Entity()
     jdbc.age = 10

@@ -10,8 +10,7 @@
         "password": "123456",
         "max_pool_size": 1,
         "max_idle_time": 1800,
-        "idle_test_period": 120,
-        "validate": true
+        "idle_test_period": 120
       }
     }
   },
