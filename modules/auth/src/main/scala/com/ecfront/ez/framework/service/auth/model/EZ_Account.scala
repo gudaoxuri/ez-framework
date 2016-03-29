@@ -3,8 +3,9 @@ package com.ecfront.ez.framework.service.auth.model
 import com.ecfront.common._
 import com.ecfront.ez.framework.service.auth.ServiceAdapter
 import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, _}
-import com.ecfront.ez.framework.service.storage.jdbc.{JDBCSecureStorage, JDBCStatusStorage}
-import com.ecfront.ez.framework.service.storage.mongo.{MongoSecureStorage, MongoStatusStorage}
+import com.ecfront.ez.framework.service.storage.jdbc.{JDBCProcessor, JDBCSecureStorage, JDBCStatusStorage}
+import com.ecfront.ez.framework.service.storage.mongo.{MongoProcessor, MongoSecureStorage, MongoStatusStorage}
+import io.vertx.core.json.JsonObject
 
 import scala.beans.BeanProperty
 
@@ -25,28 +26,32 @@ case class EZ_Account() extends SecureModel with StatusModel {
   @Label("Name")
   @BeanProperty var name: String = _
   @Label("Image")
-  @BeanProperty var image: String = _
+  @BeanProperty var image: String = ""
   @Require
   @Label("Password")
   @BeanProperty var password: String = _
   // 此字段不为空时保存或更新账户时不对密码做加密
-  @Ignore var exchange_pwd: String = _
+  @Ignore var exchange_pwd: String = ""
   @Require
   @Label("Email")
   @BeanProperty var email: String = _
   @Label("Ext Id") // 用于关联其它对象以扩展属性，扩展Id多为业务系统用户信息表的主键
-  @BeanProperty var ext_id: String = _
+  @BeanProperty var ext_id: String = ""
   @Label("Ext Info")
-  @BeanProperty var ext_info: Map[String, Any] = _
+  @BeanProperty var ext_info: Map[String, Any] = Map()
   @Label("OAuth Info") // key=oauth服务标记，value=openid
-  @BeanProperty var oauth: Map[String, String] = _
-  @BeanProperty var organization_code: String = _
+  @BeanProperty var oauth: Map[String, String] = Map()
+  @BeanProperty var organization_code: String = ServiceAdapter.defaultOrganizationCode
   @BeanProperty var role_codes: List[String] = List[String]()
 
 }
 
 object EZ_Account extends SecureStorageAdapter[EZ_Account, EZ_Account_Base]
   with StatusStorageAdapter[EZ_Account, EZ_Account_Base] with EZ_Account_Base {
+
+  // 角色关联表，在useRelTable=true中启用
+  var TABLE_REL_ACCOUNT_ROLE = "ez_rel_account_role"
+
 
   val SYSTEM_ACCOUNT_CODE = "sysadmin"
 
@@ -108,6 +113,12 @@ object EZ_Account extends SecureStorageAdapter[EZ_Account, EZ_Account_Base]
   override def deleteByLoginIdOrEmail(loginIdOrEmail: String, organizationCode: String): Resp[Void] =
     storageObj.deleteByLoginIdOrEmail(loginIdOrEmail, organizationCode)
 
+  override def saveOrUpdateRelRoleData(accountCode: String, roleCodes: List[String]): Resp[Void] = storageObj.saveOrUpdateRelRoleData(accountCode, roleCodes)
+
+  override def deleteRelRoleData(accountCode: String): Resp[Void] = storageObj.deleteRelRoleData(accountCode)
+
+  override def getRelRoleData(accountCode: String): Resp[List[String]] = storageObj.getRelRoleData(accountCode)
+
 }
 
 trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Account] {
@@ -131,26 +142,8 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
         Resp.badRequest(s"【login id】can't contains ${BaseModel.SPLIT}")
       } else {
         if (FormatHelper.validEmail(model.email)) {
-          if (model.image == null) {
-            model.image = ""
-          }
-          if (model.oauth == null) {
-            model.oauth = Map()
-          }
-          if (model.organization_code == null) {
-            model.organization_code = ServiceAdapter.defaultOrganizationCode
-          }
-          if (model.role_codes == null) {
-            model.role_codes = List()
-          }
-          if (model.ext_id == null) {
-            model.ext_id = ""
-          }
-          if (model.ext_info == null) {
-            model.ext_info = Map()
-          }
           model.code = assembleCode(model.login_id, model.organization_code)
-          if (model.exchange_pwd != null) {
+          if (model.exchange_pwd != null && model.exchange_pwd.trim.nonEmpty) {
             model.password = model.exchange_pwd
           } else {
             model.password = packageEncryptPwd(model.login_id, model.password)
@@ -164,6 +157,10 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
                 model.ext_id = extObj.id
                 model.ext_info = Map()
               }
+              if (ServiceAdapter.useRelTable) {
+                saveOrUpdateRelRoleData(model.code, model.role_codes)
+                model.role_codes = null
+              }
               super.preSave(model, context)
             }
           } else {
@@ -176,6 +173,10 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
                   EZ_Account.extAccountStorage.convertToEntity(model.ext_info + (BaseModel.Id_FLAG -> model.ext_id)), context).body
                 model.ext_info = Map()
               }
+              if (ServiceAdapter.useRelTable) {
+                saveOrUpdateRelRoleData(model.code, model.role_codes)
+                model.role_codes = null
+              }
               super.preUpdate(model, context)
             }
           }
@@ -186,72 +187,81 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
     }
   }
 
+  override def postSave(saveResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    postGetX(saveResult)
+    super.postSave(saveResult, context)
+  }
+
+  override def postUpdate(updateResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    postGetX(updateResult)
+    super.postUpdate(updateResult, context)
+  }
+
+  override def postSaveOrUpdate(saveOrUpdateResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    postGetX(saveOrUpdateResult)
+    super.postSaveOrUpdate(saveOrUpdateResult, context)
+  }
+
   override def postGetEnabledByCond(condition: String, parameters: List[Any], getResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (getResult != null) {
-      if (getResult.ext_id != null && getResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
-        getResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(getResult.ext_id.trim).body)
-      }
-    }
+    postGetX(getResult)
     super.postGetEnabledByCond(condition, parameters, getResult, context)
   }
 
+  override def postGetById(id: Any, getResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    postGetX(getResult)
+    super.postGetById(id, getResult, context)
+  }
+
+  override def postGetByCond(condition: String, parameters: List[Any], getResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    postGetX(getResult)
+    super.postGetByCond(condition, parameters, getResult, context)
+  }
+
   override def postFindEnabled(condition: String, parameters: List[Any], findResult: List[EZ_Account], context: EZStorageContext): Resp[List[EZ_Account]] = {
-    if (findResult.nonEmpty && EZ_Account.extAccountStorage != null) {
-      findResult.foreach {
-        result =>
-          if (result.ext_id != null && result.ext_id.trim.nonEmpty) {
-            result.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(result.ext_id.trim).body)
-          }
-      }
-    }
+    postSearch(findResult)
     super.postFindEnabled(condition, parameters, findResult, context)
   }
 
   override def postPageEnabled(condition: String, parameters: List[Any],
                                pageNumber: Long, pageSize: Int, pageResult: Page[EZ_Account], context: EZStorageContext): Resp[Page[EZ_Account]] = {
-    if (pageResult.objects.nonEmpty && EZ_Account.extAccountStorage != null) {
-      pageResult.objects.foreach {
-        result =>
-          if (result.ext_id != null && result.ext_id.trim.nonEmpty) {
-            result.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(result.ext_id.trim).body)
-          }
-      }
-    }
+    postSearch(pageResult.objects)
     super.postPageEnabled(condition, parameters, pageNumber, pageSize, pageResult, context)
   }
 
-  override def postSave(saveResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (saveResult != null) {
-      if (saveResult.ext_id != null && saveResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
-        saveResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(saveResult.ext_id.trim).body)
-      }
-    }
-    super.postSave(saveResult, context)
+  override def postFind(condition: String, parameters: List[Any], findResult: List[EZ_Account], context: EZStorageContext): Resp[List[EZ_Account]] = {
+    postSearch(findResult)
+    super.postFind(condition, parameters, findResult, context)
   }
 
-  override def postUpdate(updateResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (updateResult != null) {
-      if (updateResult.ext_id != null && updateResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
-        updateResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(updateResult.ext_id.trim).body)
-      }
-    }
-    super.postUpdate(updateResult, context)
+  override def postPage(condition: String, parameters: List[Any],
+                        pageNumber: Long, pageSize: Int, pageResult: Page[EZ_Account], context: EZStorageContext): Resp[Page[EZ_Account]] = {
+    postSearch(pageResult.objects)
+    super.postPage(condition, parameters, pageNumber, pageSize, pageResult, context)
   }
 
-  override def postSaveOrUpdate(saveOrUpdateResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (saveOrUpdateResult != null) {
-      if (saveOrUpdateResult.ext_id != null && saveOrUpdateResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
-        saveOrUpdateResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(saveOrUpdateResult.ext_id.trim).body)
+  protected def postSearch(findResult: List[EZ_Account]): Unit = {
+    findResult.foreach {
+      result =>
+        postGetX(result)
+    }
+  }
+
+  protected def postGetX(getResult: EZ_Account): Unit = {
+    if (getResult != null) {
+      if (getResult.ext_id != null && getResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
+        getResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(getResult.ext_id.trim).body)
+      }
+      if (ServiceAdapter.useRelTable) {
+        getResult.role_codes = getRelRoleData(getResult.code).body
       }
     }
-    super.postSaveOrUpdate(saveOrUpdateResult, context)
   }
 
   override def preDeleteById(id: Any, context: EZStorageContext): Resp[Any] = {
-    if (EZ_Account.extAccountStorage != null) {
+    if (EZ_Account.extAccountStorage != null || ServiceAdapter.useRelTable) {
       val objR = doGetById(id, context)
-      if (objR && objR.body != null && objR.body.ext_id != null && objR.body.ext_id.trim.nonEmpty) {
-        EZ_Account.extAccountStorage.deleteById(objR.body.ext_id.trim)
+      if (objR && objR.body != null) {
+        preDeleteX(objR.body)
       }
     }
     super.preDeleteById(id, context)
@@ -259,61 +269,25 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
 
   override def preDeleteByCond(condition: String, parameters: List[Any],
                                context: EZStorageContext): Resp[(String, List[Any])] = {
-    if (EZ_Account.extAccountStorage != null) {
+    if (EZ_Account.extAccountStorage != null || ServiceAdapter.useRelTable) {
       val objR = doFind(condition, parameters, context)
       if (objR && objR.body != null && objR.body.nonEmpty) {
         objR.body.foreach {
           obj =>
-            if (obj.ext_id != null && obj.ext_id.trim.nonEmpty) {
-              EZ_Account.extAccountStorage.deleteById(obj.ext_id.trim)
-            }
+            preDeleteX(obj)
         }
       }
     }
     super.preDeleteByCond(condition, parameters, context)
   }
 
-  override def postGetById(id: Any, getResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (getResult != null) {
-      if (getResult.ext_id != null && getResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
-        getResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(getResult.ext_id.trim).body)
-      }
+  protected def preDeleteX(obj: EZ_Account): Any = {
+    if (EZ_Account.extAccountStorage != null && obj.ext_id != null && obj.ext_id.trim.nonEmpty) {
+      EZ_Account.extAccountStorage.deleteById(obj.ext_id.trim)
     }
-    super.postGetById(id, getResult, context)
-  }
-
-  override def postGetByCond(condition: String, parameters: List[Any], getResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (getResult != null) {
-      if (getResult.ext_id != null && getResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
-        getResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(getResult.ext_id.trim).body)
-      }
+    if (ServiceAdapter.useRelTable) {
+      deleteRelRoleData(obj.code)
     }
-    super.postGetByCond(condition, parameters, getResult, context)
-  }
-
-  override def postFind(condition: String, parameters: List[Any], findResult: List[EZ_Account], context: EZStorageContext): Resp[List[EZ_Account]] = {
-    if (findResult.nonEmpty && EZ_Account.extAccountStorage != null) {
-      findResult.foreach {
-        result =>
-          if (result.ext_id != null && result.ext_id.trim.nonEmpty) {
-            result.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(result.ext_id.trim).body)
-          }
-      }
-    }
-    super.postFind(condition, parameters, findResult, context)
-  }
-
-  override def postPage(condition: String, parameters: List[Any],
-                        pageNumber: Long, pageSize: Int, pageResult: Page[EZ_Account], context: EZStorageContext): Resp[Page[EZ_Account]] = {
-    if (pageResult.objects.nonEmpty && EZ_Account.extAccountStorage != null) {
-      pageResult.objects.foreach {
-        result =>
-          if (result.ext_id != null && result.ext_id.trim.nonEmpty) {
-            result.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(result.ext_id.trim).body)
-          }
-      }
-    }
-    super.postPage(condition, parameters, pageNumber, pageSize, pageResult, context)
   }
 
   override def preUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, String, List[Any])] =
@@ -351,6 +325,11 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
 
   def deleteByLoginIdOrEmail(loginIdOrEmail: String, organizationCode: String): Resp[Void]
 
+  def saveOrUpdateRelRoleData(accountCode: String, roleCodes: List[String]): Resp[Void]
+
+  def deleteRelRoleData(accountCode: String): Resp[Void]
+
+  def getRelRoleData(accountCode: String): Resp[List[String]]
 
 }
 
@@ -404,6 +383,32 @@ object EZ_Account_Mongo extends MongoSecureStorage[EZ_Account] with MongoStatusS
     deleteByCond( s"""{"$$or":[{"login_id":"$loginIdOrEmail"},{"email":"$loginIdOrEmail"}],"organization_code":"$organizationCode"}""")
   }
 
+  override def saveOrUpdateRelRoleData(accountCode: String, roleCodes: List[String]): Resp[Void] = {
+    deleteRelRoleData(accountCode)
+    roleCodes.foreach {
+      roleCode =>
+        MongoProcessor.save(EZ_Account.TABLE_REL_ACCOUNT_ROLE,
+          new JsonObject(s"""{"account_code":"$accountCode","role_code":"$roleCode"}""")
+        )
+    }
+    Resp.success(null)
+  }
+
+  override def deleteRelRoleData(accountCode: String): Resp[Void] = {
+    MongoProcessor.deleteByCond(EZ_Account.TABLE_REL_ACCOUNT_ROLE,
+      new JsonObject(s"""{"account_code":"$accountCode"}"""))
+  }
+
+  override def getRelRoleData(accountCode: String): Resp[List[String]] = {
+    val resp = MongoProcessor.find(EZ_Account.TABLE_REL_ACCOUNT_ROLE,
+      new JsonObject(s"""{"account_code":"$accountCode"}"""), null, 0, classOf[JsonObject])
+    if (resp) {
+      Resp.success(resp.body.map(_.getString("role_code")))
+    } else {
+      resp
+    }
+  }
+
 }
 
 object EZ_Account_JDBC extends JDBCSecureStorage[EZ_Account] with JDBCStatusStorage[EZ_Account] with EZ_Account_Base {
@@ -454,6 +459,30 @@ object EZ_Account_JDBC extends JDBCSecureStorage[EZ_Account] with JDBCStatusStor
 
   override def deleteByLoginIdOrEmail(loginIdOrEmail: String, organizationCode: String): Resp[Void] = {
     deleteByCond( s"""( login_id = ? OR email = ? ) AND organization_code  = ?""", List(loginIdOrEmail, loginIdOrEmail, organizationCode))
+  }
+
+  override def saveOrUpdateRelRoleData(accountCode: String, roleCodes: List[String]): Resp[Void] = {
+    deleteRelRoleData(accountCode)
+    JDBCProcessor.batch(
+      s"""INSERT INTO ${EZ_Account.TABLE_REL_ACCOUNT_ROLE} ( account_code , role_code ) VALUES ( ? , ? )""",
+      roleCodes.map {
+        roleCode => List(accountCode, roleCode)
+      })
+  }
+
+  override def deleteRelRoleData(accountCode: String): Resp[Void] = {
+    JDBCProcessor.update(s"""DELETE FROM ${EZ_Account.TABLE_REL_ACCOUNT_ROLE} WHERE account_code  = ? """, List(accountCode))
+  }
+
+  override def getRelRoleData(accountCode: String): Resp[List[String]] = {
+    val resp = JDBCProcessor.find(
+      s"""SELECT role_code FROM ${EZ_Account.TABLE_REL_ACCOUNT_ROLE} WHERE account_code  = ? """,
+      List(accountCode), classOf[JsonObject])
+    if (resp) {
+      Resp.success(resp.body.map(_.getString("role_code")))
+    } else {
+      resp
+    }
   }
 
 }

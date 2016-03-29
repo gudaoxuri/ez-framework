@@ -221,18 +221,22 @@ object JDBCProcessor extends LazyLogging {
       * @param conn          已存在的connection，为空时会新建
       * @return 处理结果
       */
-    def batch(sql: String, parameterList: List[List[Any]] = null, conn: SQLConnection = null): Future[Resp[Void]] = {
+    def batch(sql: String, parameterList: List[List[Any]], conn: SQLConnection = null): Future[Resp[Void]] = {
       val p = Promise[Resp[Void]]()
       logger.trace(s"JDBC batch : $sql [$parameterList]")
-      if (conn != null) {
-        doBatch(sql, parameterList, p, conn, autoClose = false)
-      } else {
-        db.onComplete {
-          case Success(connection) =>
-            doBatch(sql, parameterList, p, connection, autoClose = true)
-          case Failure(ex) =>
-            p.success(Resp.serverUnavailable(ex.getMessage))
+      if (parameterList.nonEmpty) {
+        if (conn != null) {
+          doBatch(sql, parameterList, p, conn, autoClose = false)
+        } else {
+          db.onComplete {
+            case Success(connection) =>
+              doBatch(sql, parameterList, p, connection, autoClose = true)
+            case Failure(ex) =>
+              p.success(Resp.serverUnavailable(ex.getMessage))
+          }
         }
+      } else {
+        p.success(Resp.success(null))
       }
       p.future
     }

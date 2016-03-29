@@ -22,7 +22,7 @@ case class EZ_Organization() extends BaseModel with SecureModel with StatusModel
   @Label("Name")
   @BeanProperty var name: String = _
   @Label("Image")
-  @BeanProperty var image: String = _
+  @BeanProperty var image: String = ""
 
 }
 
@@ -60,9 +60,6 @@ trait EZ_Organization_Base extends SecureStorage[EZ_Organization] with StatusSto
   }
 
   override def preSaveOrUpdate(model: EZ_Organization, context: EZStorageContext): Resp[EZ_Organization] = {
-    if (model.image == null) {
-      model.image = ""
-    }
     super.preSaveOrUpdate(model, context)
   }
 

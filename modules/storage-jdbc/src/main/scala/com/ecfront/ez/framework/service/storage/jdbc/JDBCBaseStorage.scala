@@ -10,13 +10,20 @@ import com.ecfront.ez.framework.service.storage.foundation.{BaseModel, BaseStora
   */
 trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
-  protected val _entityInfo =
+  protected var _entityInfo =
     if (JDBCEntityContainer.CONTAINER.contains(tableName)) {
       JDBCEntityContainer.CONTAINER(tableName)
     } else {
       JDBCEntityContainer.buildingEntityInfo(_modelClazz, tableName)
       JDBCEntityContainer.CONTAINER(tableName)
     }
+
+  override def customTableName(newName:String):Unit={
+    JDBCEntityContainer.CONTAINER.remove(tableName)
+    tableName=newName
+    JDBCEntityContainer.buildingEntityInfo(_modelClazz, tableName)
+    _entityInfo=JDBCEntityContainer.CONTAINER(tableName)
+  }
 
   override def doSave(model: M, context: EZStorageContext): Resp[M] = {
     val requireResp = storageCheck(model, _entityInfo)

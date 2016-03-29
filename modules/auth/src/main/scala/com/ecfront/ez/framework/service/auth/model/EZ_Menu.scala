@@ -3,8 +3,9 @@ package com.ecfront.ez.framework.service.auth.model
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.service.auth.ServiceAdapter
 import com.ecfront.ez.framework.service.storage.foundation._
-import com.ecfront.ez.framework.service.storage.jdbc.{JDBCSecureStorage, JDBCStatusStorage}
-import com.ecfront.ez.framework.service.storage.mongo.{MongoSecureStorage, MongoStatusStorage, SortEnum}
+import com.ecfront.ez.framework.service.storage.jdbc.{JDBCProcessor, JDBCSecureStorage, JDBCStatusStorage}
+import com.ecfront.ez.framework.service.storage.mongo.{MongoProcessor, MongoSecureStorage, MongoStatusStorage, SortEnum}
+import io.vertx.core.json.JsonObject
 
 import scala.beans.BeanProperty
 
@@ -28,12 +29,15 @@ case class EZ_Menu() extends SecureModel with StatusModel {
   @BeanProperty var role_codes: List[String] = List[String]()
   @BeanProperty var parent_code: String = ""
   @BeanProperty var sort: Int = 0
-  @BeanProperty var organization_code: String = _
+  @BeanProperty var organization_code: String = ServiceAdapter.defaultOrganizationCode
 
 }
 
 object EZ_Menu extends SecureStorageAdapter[EZ_Menu, EZ_Menu_Base]
   with StatusStorageAdapter[EZ_Menu, EZ_Menu_Base] with EZ_Menu_Base {
+
+  // 角色关联表，在useRelTable=true中启用
+  var TABLE_REL_MENU_ROLE = "ez_rel_menu_role"
 
   override protected val storageObj: EZ_Menu_Base =
     if (ServiceAdapter.mongoStorage) EZ_Menu_Mongo else EZ_Menu_JDBC
@@ -62,6 +66,12 @@ object EZ_Menu extends SecureStorageAdapter[EZ_Menu, EZ_Menu_Base]
   override def findEnableByOrganizationCodeWithSort(organizationCode: String): Resp[List[EZ_Menu]] =
     storageObj.findEnableByOrganizationCodeWithSort(organizationCode)
 
+  override def saveOrUpdateRelRoleData(menuCode: String, roleCodes: List[String]): Resp[Void] = storageObj.saveOrUpdateRelRoleData(menuCode, roleCodes)
+
+  override def deleteRelRoleData(menuCode: String): Resp[Void] = storageObj.deleteRelRoleData(menuCode)
+
+  override def getRelRoleData(menuCode: String): Resp[List[String]] = storageObj.getRelRoleData(menuCode)
+
 }
 
 trait EZ_Menu_Base extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] {
@@ -78,25 +88,108 @@ trait EZ_Menu_Base extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] {
     if (model.uri.contains(BaseModel.SPLIT)) {
       Resp.badRequest(s"【uri】can't contains ${BaseModel.SPLIT}")
     } else {
-      if (model.organization_code == null) {
-        model.organization_code = ServiceAdapter.defaultOrganizationCode
-      }
-      if (model.role_codes == null) {
-        model.role_codes = List()
-      }
-      if (model.icon == null) {
-        model.icon = ""
-      }
-      if (model.translate == null) {
-        model.translate = ""
-      }
-      if (model.parent_code == null) {
-        model.parent_code = ""
-      }
       model.code = assembleCode(model.uri, model.organization_code)
+      if (ServiceAdapter.useRelTable) {
+        saveOrUpdateRelRoleData(model.code, model.role_codes)
+        model.role_codes = null
+      }
       super.preSaveOrUpdate(model, context)
     }
   }
+
+  override def postSave(saveResult: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
+    postGetX(saveResult)
+    super.postSave(saveResult, context)
+  }
+
+  override def postUpdate(updateResult: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
+    postGetX(updateResult)
+    super.postUpdate(updateResult, context)
+  }
+
+  override def postSaveOrUpdate(saveOrUpdateResult: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
+    postGetX(saveOrUpdateResult)
+    super.postSaveOrUpdate(saveOrUpdateResult, context)
+  }
+
+  override def postGetEnabledByCond(condition: String, parameters: List[Any], getResult: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
+    postGetX(getResult)
+    super.postGetEnabledByCond(condition, parameters, getResult, context)
+  }
+
+  override def postGetById(id: Any, getResult: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
+    postGetX(getResult)
+    super.postGetById(id, getResult, context)
+  }
+
+  override def postGetByCond(condition: String, parameters: List[Any], getResult: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
+    postGetX(getResult)
+    super.postGetByCond(condition, parameters, getResult, context)
+  }
+
+  override def postFindEnabled(condition: String, parameters: List[Any], findResult: List[EZ_Menu], context: EZStorageContext): Resp[List[EZ_Menu]] = {
+    postSearch(findResult)
+    super.postFindEnabled(condition, parameters, findResult, context)
+  }
+
+  override def postPageEnabled(condition: String, parameters: List[Any],
+                               pageNumber: Long, pageSize: Int, pageResult: Page[EZ_Menu], context: EZStorageContext): Resp[Page[EZ_Menu]] = {
+    postSearch(pageResult.objects)
+    super.postPageEnabled(condition, parameters, pageNumber, pageSize, pageResult, context)
+  }
+
+  override def postFind(condition: String, parameters: List[Any], findResult: List[EZ_Menu], context: EZStorageContext): Resp[List[EZ_Menu]] = {
+    postSearch(findResult)
+    super.postFind(condition, parameters, findResult, context)
+  }
+
+  override def postPage(condition: String, parameters: List[Any],
+                        pageNumber: Long, pageSize: Int, pageResult: Page[EZ_Menu], context: EZStorageContext): Resp[Page[EZ_Menu]] = {
+    postSearch(pageResult.objects)
+    super.postPage(condition, parameters, pageNumber, pageSize, pageResult, context)
+  }
+
+  protected def postSearch(findResult: List[EZ_Menu]): Unit = {
+    findResult.foreach {
+      result =>
+        postGetX(result)
+    }
+  }
+
+  protected def postGetX(getResult: EZ_Menu): Unit = {
+    if (getResult != null) {
+      if (ServiceAdapter.useRelTable) {
+        getResult.role_codes = getRelRoleData(getResult.code).body
+      }
+    }
+  }
+
+  override def preDeleteById(id: Any, context: EZStorageContext): Resp[Any] = {
+    if (ServiceAdapter.useRelTable) {
+      val objR = doGetById(id, context)
+      if (objR && objR.body != null) {
+        deleteRelRoleData(objR.body.code)
+      }
+    }
+    super.preDeleteById(id, context)
+  }
+
+  override def preDeleteByCond(condition: String, parameters: List[Any],
+                               context: EZStorageContext): Resp[(String, List[Any])] = {
+    if (ServiceAdapter.useRelTable) {
+      val objR = doFind(condition, parameters, context)
+      if (objR && objR.body != null && objR.body.nonEmpty) {
+        objR.body.foreach {
+          obj =>
+            deleteRelRoleData(obj.code)
+        }
+      }
+    }
+    super.preDeleteByCond(condition, parameters, context)
+  }
+
+  override def preUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, String, List[Any])] =
+    Resp.notImplemented("")
 
   def assembleCode(uri: String, organizationCode: String): String = {
     organizationCode + BaseModel.SPLIT + uri
@@ -110,24 +203,64 @@ trait EZ_Menu_Base extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] {
 
   def findEnableByOrganizationCodeWithSort(organizationCode: String): Resp[List[EZ_Menu]]
 
+  def saveOrUpdateRelRoleData(menuCode: String, roleCodes: List[String]): Resp[Void]
+
+  def deleteRelRoleData(menuCode: String): Resp[Void]
+
+  def getRelRoleData(menuCode: String): Resp[List[String]]
+
 }
 
 object EZ_Menu_Mongo extends MongoSecureStorage[EZ_Menu] with MongoStatusStorage[EZ_Menu] with EZ_Menu_Base {
 
   override def findWithSort(): Resp[List[EZ_Menu]] = {
-    findWithOpt(s"""{}""", Map("sort" -> SortEnum.DESC))
+    val resp = findWithOpt(s"""{}""", Map("sort" -> SortEnum.DESC))
+    postSearch(resp.body)
+    resp
   }
 
   override def findEnableWithSort(): Resp[List[EZ_Menu]] = {
-    findWithOpt(s"""{"enable":true}""", Map("sort" -> SortEnum.DESC))
+    val resp = findWithOpt(s"""{"enable":true}""", Map("sort" -> SortEnum.DESC))
+    postSearch(resp.body)
+    resp
   }
 
   override def findByOrganizationCodeWithSort(organizationCode: String): Resp[List[EZ_Menu]] = {
-    findWithOpt(s"""{"organization_code":"$organizationCode"}""", Map("sort" -> SortEnum.DESC))
+    val resp = findWithOpt(s"""{"organization_code":"$organizationCode"}""", Map("sort" -> SortEnum.DESC))
+    postSearch(resp.body)
+    resp
   }
 
   override def findEnableByOrganizationCodeWithSort(organizationCode: String): Resp[List[EZ_Menu]] = {
-    findWithOpt(s"""{"enable":true,"organization_code":"$organizationCode"}""", Map("sort" -> SortEnum.DESC))
+    val resp = findWithOpt(s"""{"enable":true,"organization_code":"$organizationCode"}""", Map("sort" -> SortEnum.DESC))
+    postSearch(resp.body)
+    resp
+  }
+
+  override def saveOrUpdateRelRoleData(menuCode: String, roleCodes: List[String]): Resp[Void] = {
+    deleteRelRoleData(menuCode)
+    roleCodes.foreach {
+      roleCode =>
+        MongoProcessor.save(EZ_Menu.TABLE_REL_MENU_ROLE,
+          new JsonObject(s"""{"menu_code":"$menuCode","role_code":"$roleCode"}""")
+        )
+    }
+    Resp.success(null)
+  }
+
+  override def deleteRelRoleData(menuCode: String): Resp[Void] = {
+    MongoProcessor.deleteByCond(EZ_Menu.TABLE_REL_MENU_ROLE,
+      new JsonObject(s"""{"menu_code":"$menuCode"}"""))
+  }
+
+  override def getRelRoleData(menuCode: String): Resp[List[String]] = {
+    val resp = MongoProcessor.find(EZ_Menu.TABLE_REL_MENU_ROLE,
+      new JsonObject(s"""{"menu_code":"$menuCode"}"""), null, 0, classOf[JsonObject])
+    if (resp) {
+      Resp.success(resp.body.map(_.getString("role_code")))
+    } else {
+      resp
+    }
   }
 
 }
@@ -148,6 +281,30 @@ object EZ_Menu_JDBC extends JDBCSecureStorage[EZ_Menu] with JDBCStatusStorage[EZ
 
   override def findEnableByOrganizationCodeWithSort(organizationCode: String): Resp[List[EZ_Menu]] = {
     find(s"enable = ? AND organization_code = ? ORDER BY sort DESC", List(true, organizationCode))
+  }
+
+  override def saveOrUpdateRelRoleData(menuCode: String, roleCodes: List[String]): Resp[Void] = {
+    deleteRelRoleData(menuCode)
+    JDBCProcessor.batch(
+      s"""INSERT INTO ${EZ_Menu.TABLE_REL_MENU_ROLE} ( menu_code , role_code ) VALUES ( ? , ? )""",
+      roleCodes.map {
+        roleCode => List(menuCode, roleCode)
+      })
+  }
+
+  override def deleteRelRoleData(menuCode: String): Resp[Void] = {
+    JDBCProcessor.update(s"""DELETE FROM ${EZ_Menu.TABLE_REL_MENU_ROLE} WHERE menu_code  = ? """, List(menuCode))
+  }
+
+  override def getRelRoleData(menuCode: String): Resp[List[String]] = {
+    val resp = JDBCProcessor.find(
+      s"""SELECT role_code FROM ${EZ_Menu.TABLE_REL_MENU_ROLE} WHERE menu_code  = ? """,
+      List(menuCode), classOf[JsonObject])
+    if (resp) {
+      Resp.success(resp.body.map(_.getString("role_code")))
+    } else {
+      resp
+    }
   }
 
 }

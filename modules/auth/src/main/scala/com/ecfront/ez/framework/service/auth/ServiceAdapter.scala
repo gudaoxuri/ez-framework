@@ -3,10 +3,12 @@ package com.ecfront.ez.framework.service.auth
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZServiceAdapter
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
-import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Organization, EZ_Role}
+import com.ecfront.ez.framework.service.auth.model._
 import com.ecfront.ez.framework.service.rpc.foundation.AutoBuildingProcessor
 import com.ecfront.ez.framework.service.rpc.http.{HTTP, HttpInterceptor}
 import io.vertx.core.json.JsonObject
+
+import scala.collection.JavaConversions._
 
 object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
@@ -14,6 +16,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   var allowRegister: Boolean = _
   var customLogin: Boolean = _
   var selfActive: Boolean = _
+  var useRelTable: Boolean = _
   var defaultRoleFlag: String = _
   var defaultOrganizationCode: String = _
   var loginUrl: String = _
@@ -26,6 +29,22 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     allowRegister = parameter.getBoolean("allowRegister", false)
     customLogin = parameter.getBoolean("customLogin", false)
     selfActive = parameter.getBoolean("selfActive", true)
+    useRelTable = parameter.getBoolean("useRelTable", false)
+    if(parameter.containsKey("customTables")) {
+      parameter.getJsonObject("customTables").foreach {
+        item =>
+          item.getKey match {
+            case "organization" => EZ_Organization.customTableName(item.getValue.asInstanceOf[String])
+            case "account" => EZ_Account.customTableName(item.getValue.asInstanceOf[String])
+            case "resource" => EZ_Resource.customTableName(item.getValue.asInstanceOf[String])
+            case "role" => EZ_Role.customTableName(item.getValue.asInstanceOf[String])
+            case "menu" => EZ_Menu.customTableName(item.getValue.asInstanceOf[String])
+            case "rel_account_role" => EZ_Account.TABLE_REL_ACCOUNT_ROLE = item.getValue.asInstanceOf[String]
+            case "rel_role_resource" => EZ_Role.TABLE_REL_ROLE_RESOURCE = item.getValue.asInstanceOf[String]
+            case "rel_menu_role" => EZ_Menu.TABLE_REL_MENU_ROLE = item.getValue.asInstanceOf[String]
+          }
+      }
+    }
     defaultOrganizationCode = parameter.getString("defaultOrganizationCode", EZ_Organization.DEFAULT_ORGANIZATION_CODE)
     defaultRoleFlag = parameter.getString("defaultRoleFlag", EZ_Role.USER_ROLE_FLAG)
     loginUrl = parameter.getString("loginUrl", "#/auth/login")

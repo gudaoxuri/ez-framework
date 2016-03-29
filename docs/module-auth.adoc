@@ -21,12 +21,8 @@
 
  "auth": {},
  "storage.mongo": {
-   "hosts": [
-     {
-       "host": "<服务IP>",
-       "port": 27017
-     }
-   ],
+   "host": "<服务IP>",
+   "port": 27017,
    "db_name": "test"
  },
  "rpc.http": {
@@ -59,29 +55,52 @@
 ----
 "auth": {
   "allowRegister": false, <1>
-  "selfActive": true, <2>
-  "defaultRoleFlag": "user", <3>
-  "defaultOrganizationCode": "", <4>
-  "publicUriPrefix": "/public/", <5>
-  "loginUrl": "#/auth/login", <6>
-  "loginKeepSeconds": 0 , <7>
-  "activeKeepSeconds": 86400 , <8>
-  "extAccountStorage": "" , <9>
-  "storage":"mongo" <10>
+  "customLogin": false,  <2>
+  "selfActive": true, <3>
+  "defaultRoleFlag": "user", <4>
+  "defaultOrganizationCode": "", <5>
+  "publicUriPrefix": "/public/", <6>
+  "loginUrl": "#/auth/login", <7>
+  "loginKeepSeconds": 0, <8>
+  "activeKeepSeconds": 86400, <9>
+  "extAccountStorage": "", <10>
+  "useRelTable": false, <11>
+  "customTables": {  <12>
+    "organization": "",  <13>
+    "account": "",  <14>
+    "resource": "",  <15>
+    "role": "",  <16>
+    "menu": "",  <17>
+    "rel_account_role": "",  <18>
+    "rel_role_resource": "",  <19>
+    "rel_menu_role": ""  <20>
+  },
+  "storage":"mongo" <21>
 }
 ----
 <1> 是否允许注册，注册后账户处于禁用状态，需要激活
-<2> 是否允许自助激活，true：会发送激活邮件自助激活，false：需要管理员手工激活
-<3> 默认角色标识，注册时账户默认的角色
-<4> 默认组织编码，注册时账户默认的组织
-<5> 公开URI的前缀，以此前缀开头的URI不需要认证
-<6> 登录URL，注册或找回密码激活成功后会跳转到登录URL，如果此配置值不带http前缀则使用`rpc-http`中`webUrl`做为基础路径
-<7> 登录保持时间，单位秒，指定登录会话多少秒后过期，0表示不过期
-<8> 注册或找回密码激活有效期，单位秒
-<9> 扩展账号持久化类路径，可选，默认对于扩展的账号信息存储在`ez_account`表中的`ext_info`字段中，如果需要将扩展信息存储在独立表中时可以定义一个继承自`BaseModel`的实体及对应的持久化实现，然后指定其类路径
-<10> 持久化实现，支持`mongo`或`jdbc`
+<2> 是否启用自定义登录，如果为true的话默认登录URL会被禁用
+<3> 是否允许自助激活，true：会发送激活邮件自助激活，false：需要管理员手工激活
+<4> 默认角色标识，注册时账户默认的角色
+<5> 默认组织编码，注册时账户默认的组织
+<6> 公开URI的前缀，以此前缀开头的URI不需要认证
+<7> 登录URL，注册或找回密码激活成功后会跳转到登录URL，如果此配置值不带http前缀则使用`rpc-http`中`webUrl`做为基础路径
+<8> 登录保持时间，单位秒，指定登录会话多少秒后过期，0表示不过期
+<9> 注册或找回密码激活有效期，单位秒
+<10> 扩展账号持久化类路径，可选，默认对于扩展的账号信息存储在`ez_account`表中的`ext_info`字段中，如果需要将扩展信息存储在独立表中时可以定义一个继承自`BaseModel`的实体及对应的持久化实现，然后指定其类路径
+<11> 是否使用关联表（多对多关联中间表），多用于JDBC持久化，建议在原生不支持json的关系型数据启用此项
+<12> 是否使用自定义表名
+<13> 自定义组织表名
+<14> 自定义账户表名
+<15> 自定义资源表名
+<16> 自定义角色表名
+<17> 自定义菜单表名
+<18> 自定义账户角色关联表名
+<19> 自定义角色资源关联表名
+<20> 自定义菜单角色关联表名
+<21> 持久化实现，支持`mongo`或`jdbc`
 
-NOTE: 使用`jdbc`持久化时请先执行`ez_ddl.sql`以创建基础表
+NOTE: `storage:jdbc & useRelTable不存在或等于false`时请执行`ez_ddl.sql`以创建基础表，`storage:jdbc & useRelTable=true`时请执行`ez_ddl_with_rel.sql`以创建带关联表的基础表
 
 === 认证服务接入
 

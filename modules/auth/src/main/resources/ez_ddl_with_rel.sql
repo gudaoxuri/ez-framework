@@ -31,10 +31,9 @@ CREATE TABLE IF NOT EXISTS ez_account
     password varchar(200) NOT NULL COMMENT '密码' ,
     email varchar(200) NOT NULL COMMENT 'Email' ,
     ext_id varchar(200) NOT NULL COMMENT '扩展Id，用于关联其它对象以扩展属性，扩展Id多为业务系统用户信息表的主键' ,
-    ext_info JSON NOT NULL COMMENT '扩展信息，json格式' ,
-    oauth JSON NOT NULL COMMENT 'OAuth认证信息，json格式，key=oauth服务标记，value=openid' ,
+    ext_info text NOT NULL COMMENT '扩展信息，json格式' ,
+    oauth text NOT NULL COMMENT 'OAuth认证信息，json格式，key=oauth服务标记，value=openid' ,
     organization_code varchar(200)  NOT NULL COMMENT '所属组织编码' ,
-    role_codes JSON NOT NULL COMMENT '所属角色编码列表，json格式' ,
     enable BOOLEAN NOT NULL COMMENT '是否启用' ,
     create_user varchar(100) NOT NULL COMMENT '创建用户' ,
     create_org varchar(100) NOT NULL COMMENT '创建组织' ,
@@ -61,7 +60,6 @@ CREATE TABLE IF NOT EXISTS ez_role
     code varchar(200) NOT NULL COMMENT '角色编码，自动生成：所属组织编码@角色标记' ,
     name varchar(200) NOT NULL COMMENT '角色名称' ,
     flag varchar(200) NOT NULL COMMENT '角色标记' ,
-    resource_codes JSON NOT NULL COMMENT '可访问资源编码列表，json格式' ,
     organization_code varchar(200) NOT NULL COMMENT '所属组织编码' ,
     enable BOOLEAN NOT NULL COMMENT '是否启用' ,
     create_user varchar(100) NOT NULL COMMENT '创建用户' ,
@@ -114,7 +112,6 @@ CREATE TABLE IF NOT EXISTS ez_menu
     name varchar(200) NOT NULL COMMENT '菜单名称' ,
     icon varchar(200) NOT NULL COMMENT '菜单图标' ,
     translate varchar(200) NOT NULL COMMENT '菜单名称翻译标识（i18n用）' ,
-    role_codes JSON NOT NULL COMMENT '菜单所属角色编码列表，json格式' ,
     parent_code varchar(1000) NOT NULL COMMENT '父菜单编码，用于组装多级菜单' ,
     sort INT NOT NULL COMMENT '显示排序，倒序排列' ,
     organization_code varchar(200) NOT NULL COMMENT '所属组织编码' ,
@@ -134,3 +131,30 @@ CREATE TABLE IF NOT EXISTS ez_menu
     INDEX idx_update_time(update_time)
 )ENGINE=innodb DEFAULT CHARSET=utf8
 COMMENT '菜单表';
+
+CREATE TABLE IF NOT EXISTS ez_rel_account_role
+(
+    account_code varchar(200) NOT NULL COMMENT '账户编码' ,
+    role_code varchar(200) NOT NULL COMMENT '角色编码' ,
+    INDEX idx_account_code(account_code) ,
+    INDEX idx_role_code(role_code)
+)ENGINE=innodb DEFAULT CHARSET=utf8
+COMMENT '账户角色关联表';
+
+CREATE TABLE IF NOT EXISTS ez_rel_role_resource
+(
+    role_code varchar(200) NOT NULL COMMENT '角色编码' ,
+    resource_code varchar(200) NOT NULL COMMENT '资源编码' ,
+    INDEX idx_role_code(role_code),
+    INDEX idx_resource_code(resource_code)
+)ENGINE=innodb DEFAULT CHARSET=utf8
+COMMENT '角色资源关联表';
+
+CREATE TABLE IF NOT EXISTS ez_rel_menu_role
+(
+    menu_code varchar(200) NOT NULL COMMENT '菜单编码' ,
+    role_code varchar(200) NOT NULL COMMENT '角色编码' ,
+    INDEX idx_menu_code(menu_code) ,
+    INDEX idx_role_code(role_code)
+)ENGINE=innodb DEFAULT CHARSET=utf8
+COMMENT '菜单角色关联表';

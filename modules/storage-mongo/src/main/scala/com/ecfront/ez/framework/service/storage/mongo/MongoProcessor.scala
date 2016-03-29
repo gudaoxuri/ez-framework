@@ -129,8 +129,8 @@ object MongoProcessor extends LazyLogging {
     *
     * @param collection  集合名
     * @param query       查找条件，Json格式
-    * @param sort        排序方式
-    * @param limit       获取条数
+    * @param sort        排序方式 , null 表示不排序
+    * @param limit       获取条数 0 表示获取所有
     * @param resultClass 记录类型
     * @tparam E 记录类型
     * @return 获取到的记录
@@ -464,7 +464,7 @@ object MongoProcessor extends LazyLogging {
                   row.put(BaseModel.Id_FLAG, row.getString("_id"))
                   row.remove("_id")
                   row
-              }.asInstanceOf[List[E]]
+              }.toList.asInstanceOf[List[E]]
               p.success(Resp.success(result))
             }
           } else {
@@ -516,7 +516,7 @@ object MongoProcessor extends LazyLogging {
                         row.put(BaseModel.Id_FLAG, row.getString("_id"))
                         row.remove("_id")
                         row
-                    }.asInstanceOf[List[E]]
+                    }.toList.asInstanceOf[List[E]]
                   }
                   p.success(Resp.success(page))
                 } else {

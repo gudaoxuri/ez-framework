@@ -38,7 +38,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     .asInstanceOf[ParameterizedType].getActualTypeArguments()(0).asInstanceOf[Class[M]]
 
   // 表名
-  val tableName = _modelClazz.getSimpleName.toLowerCase
+  var tableName = _modelClazz.getSimpleName.toLowerCase
+
+  def customTableName(newName: String): Unit
 
   /**
     * 持久化前检查
@@ -797,6 +799,10 @@ trait BaseStorageAdapter[M <: BaseModel, O <: BaseStorage[M]] extends BaseStorag
 
   // 持久化对象
   protected val storageObj: O
+
+  override def customTableName(newName: String): Unit = {
+    storageObj.customTableName(newName)
+  }
 
   /**
     * 保存前处理

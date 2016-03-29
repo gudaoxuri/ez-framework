@@ -3,8 +3,9 @@ package com.ecfront.ez.framework.service.auth.model
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.service.auth.{CacheManager, ServiceAdapter}
 import com.ecfront.ez.framework.service.storage.foundation._
-import com.ecfront.ez.framework.service.storage.jdbc.{JDBCSecureStorage, JDBCStatusStorage}
-import com.ecfront.ez.framework.service.storage.mongo.{MongoSecureStorage, MongoStatusStorage}
+import com.ecfront.ez.framework.service.storage.jdbc.{JDBCProcessor, JDBCSecureStorage, JDBCStatusStorage}
+import com.ecfront.ez.framework.service.storage.mongo.{MongoProcessor, MongoSecureStorage, MongoStatusStorage}
+import io.vertx.core.json.JsonObject
 
 import scala.beans.BeanProperty
 
@@ -25,12 +26,15 @@ case class EZ_Role() extends BaseModel with SecureModel with StatusModel {
   @Label("Name")
   @BeanProperty var name: String = _
   @BeanProperty var resource_codes: List[String] = List[String]()
-  @BeanProperty var organization_code: String = _
+  @BeanProperty var organization_code: String = ServiceAdapter.defaultOrganizationCode
 
 }
 
 object EZ_Role extends SecureStorageAdapter[EZ_Role, EZ_Role_Base]
   with StatusStorageAdapter[EZ_Role, EZ_Role_Base] with EZ_Role_Base {
+
+  // 资源关联表，在useRelTable=true中启用
+  var TABLE_REL_ROLE_RESOURCE = "ez_rel_role_resource"
 
   // 默认系统管理员角色
   val SYSTEM_ROLE_FLAG = "system"
@@ -40,7 +44,7 @@ object EZ_Role extends SecureStorageAdapter[EZ_Role, EZ_Role_Base]
   override protected val storageObj: EZ_Role_Base =
     if (ServiceAdapter.mongoStorage) EZ_Role_Mongo else EZ_Role_JDBC
 
-  def apply(flag: String, name: String, resourceCodes: List[String],organizationCode:String=ServiceAdapter.defaultOrganizationCode): EZ_Role = {
+  def apply(flag: String, name: String, resourceCodes: List[String], organizationCode: String = ServiceAdapter.defaultOrganizationCode): EZ_Role = {
     val role = EZ_Role()
     role.flag = flag
     role.name = name
@@ -49,7 +53,6 @@ object EZ_Role extends SecureStorageAdapter[EZ_Role, EZ_Role_Base]
     role.enable = true
     role
   }
-
 
   override def findByOrganizationCode(organizationCode: String): Resp[List[EZ_Role]] = storageObj.findByOrganizationCode(organizationCode)
 
@@ -60,6 +63,12 @@ object EZ_Role extends SecureStorageAdapter[EZ_Role, EZ_Role_Base]
   override def getByCode(code: String): Resp[EZ_Role] = storageObj.getByCode(code)
 
   override def deleteByCode(code: String): Resp[Void] = storageObj.deleteByCode(code)
+
+  override def saveOrUpdateRelRoleData(roleCode: String, resourceCodes: List[String]): Resp[Void] = storageObj.saveOrUpdateRelRoleData(roleCode, resourceCodes)
+
+  override def deleteRelRoleData(roleCode: String): Resp[Void] = storageObj.deleteRelRoleData(roleCode)
+
+  override def getRelRoleData(roleCode: String): Resp[List[String]] = storageObj.getRelRoleData(roleCode)
 
 }
 
@@ -80,13 +89,11 @@ trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] {
       if (model.flag.contains(BaseModel.SPLIT)) {
         Resp.badRequest(s"【flag】can't contains ${BaseModel.SPLIT}")
       } else {
-        if (model.organization_code == null) {
-          model.organization_code = ServiceAdapter.defaultOrganizationCode
-        }
-        if (model.resource_codes == null) {
-          model.resource_codes = List()
-        }
         model.code = assembleCode(model.flag, model.organization_code)
+        if (ServiceAdapter.useRelTable) {
+          saveOrUpdateRelRoleData(model.code, model.resource_codes)
+          model.resource_codes = null
+        }
         super.preSaveOrUpdate(model, context)
       }
     }
@@ -108,6 +115,7 @@ trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] {
     if (saveResult.enable) {
       CacheManager.addResourceByRole(saveResult.code, saveResult.resource_codes)
     }
+    postGetX(saveResult)
     super.postSave(saveResult, context)
   }
 
@@ -115,6 +123,7 @@ trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] {
     if (updateResult.enable) {
       CacheManager.addResourceByRole(updateResult.code, updateResult.resource_codes)
     }
+    postGetX(updateResult)
     super.postUpdate(updateResult, context)
   }
 
@@ -122,12 +131,68 @@ trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] {
     if (saveOrUpdateResult.enable) {
       CacheManager.addResourceByRole(saveOrUpdateResult.code, saveOrUpdateResult.resource_codes)
     }
+    postGetX(saveOrUpdateResult)
     super.postSaveOrUpdate(saveOrUpdateResult, context)
   }
 
+  override def postGetEnabledByCond(condition: String, parameters: List[Any], getResult: EZ_Role, context: EZStorageContext): Resp[EZ_Role] = {
+    postGetX(getResult)
+    super.postGetEnabledByCond(condition, parameters, getResult, context)
+  }
+
+  override def postGetById(id: Any, getResult: EZ_Role, context: EZStorageContext): Resp[EZ_Role] = {
+    postGetX(getResult)
+    super.postGetById(id, getResult, context)
+  }
+
+  override def postGetByCond(condition: String, parameters: List[Any], getResult: EZ_Role, context: EZStorageContext): Resp[EZ_Role] = {
+    postGetX(getResult)
+    super.postGetByCond(condition, parameters, getResult, context)
+  }
+
+  override def postFindEnabled(condition: String, parameters: List[Any], findResult: List[EZ_Role], context: EZStorageContext): Resp[List[EZ_Role]] = {
+    postSearch(findResult)
+    super.postFindEnabled(condition, parameters, findResult, context)
+  }
+
+  override def postPageEnabled(condition: String, parameters: List[Any],
+                               pageNumber: Long, pageSize: Int, pageResult: Page[EZ_Role], context: EZStorageContext): Resp[Page[EZ_Role]] = {
+    postSearch(pageResult.objects)
+    super.postPageEnabled(condition, parameters, pageNumber, pageSize, pageResult, context)
+  }
+
+  override def postFind(condition: String, parameters: List[Any], findResult: List[EZ_Role], context: EZStorageContext): Resp[List[EZ_Role]] = {
+    postSearch(findResult)
+    super.postFind(condition, parameters, findResult, context)
+  }
+
+  override def postPage(condition: String, parameters: List[Any],
+                        pageNumber: Long, pageSize: Int, pageResult: Page[EZ_Role], context: EZStorageContext): Resp[Page[EZ_Role]] = {
+    postSearch(pageResult.objects)
+    super.postPage(condition, parameters, pageNumber, pageSize, pageResult, context)
+  }
+
+  protected def postSearch(findResult: List[EZ_Role]): Unit = {
+    findResult.foreach {
+      result =>
+        postGetX(result)
+    }
+  }
+
+  protected def postGetX(getResult: EZ_Role): Unit = {
+    if (getResult != null) {
+      if (ServiceAdapter.useRelTable) {
+        getResult.resource_codes = getRelRoleData(getResult.code).body
+      }
+    }
+  }
+
   override def postDeleteById(id: Any, context: EZStorageContext): Resp[Void] = {
-    val role = super.getById(id).body
-    CacheManager.removeResourceByRole(role.code)
+    val objR = doGetById(id, context)
+    if (objR && objR.body != null) {
+      CacheManager.removeResourceByRole(objR.body.code)
+      deleteRelRoleData(objR.body.code)
+    }
     super.postDeleteById(id, context)
   }
 
@@ -152,6 +217,12 @@ trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] {
   def getByCode(code: String): Resp[EZ_Role]
 
   def deleteByCode(code: String): Resp[Void]
+
+  def saveOrUpdateRelRoleData(roleCode: String, resourceRoles: List[String]): Resp[Void]
+
+  def deleteRelRoleData(roleCode: String): Resp[Void]
+
+  def getRelRoleData(roleCode: String): Resp[List[String]]
 
 }
 
@@ -182,6 +253,32 @@ object EZ_Role_Mongo extends MongoSecureStorage[EZ_Role] with MongoStatusStorage
     deleteByCond(s"""{"code":"$code"}""")
   }
 
+  override def saveOrUpdateRelRoleData(roleCode: String, resourceRoles: List[String]): Resp[Void] = {
+    deleteRelRoleData(roleCode)
+    resourceRoles.foreach {
+      resourceRole =>
+        MongoProcessor.save(EZ_Role.TABLE_REL_ROLE_RESOURCE,
+          new JsonObject(s"""{"role_code":"$roleCode","resource_code":"$resourceRole"}""")
+        )
+    }
+    Resp.success(null)
+  }
+
+  override def deleteRelRoleData(roleCode: String): Resp[Void] = {
+    MongoProcessor.deleteByCond(EZ_Role.TABLE_REL_ROLE_RESOURCE,
+      new JsonObject(s"""{"role_code":"$roleCode"}"""))
+  }
+
+  override def getRelRoleData(roleCode: String): Resp[List[String]] = {
+    val resp = MongoProcessor.find(EZ_Role.TABLE_REL_ROLE_RESOURCE,
+      new JsonObject(s"""{"role_code":"$roleCode"}"""), null, 0, classOf[JsonObject])
+    if (resp) {
+      Resp.success(resp.body.map(_.getString("resource_code")))
+    } else {
+      resp
+    }
+  }
+
 }
 
 object EZ_Role_JDBC extends JDBCSecureStorage[EZ_Role] with JDBCStatusStorage[EZ_Role] with EZ_Role_Base {
@@ -208,6 +305,30 @@ object EZ_Role_JDBC extends JDBCSecureStorage[EZ_Role] with JDBCStatusStorage[EZ
 
   override def deleteByCode(code: String): Resp[Void] = {
     deleteByCond( s"""code = ?""", List(code))
+  }
+
+  override def saveOrUpdateRelRoleData(roleCode: String, resourceRoles: List[String]): Resp[Void] = {
+    deleteRelRoleData(roleCode)
+    JDBCProcessor.batch(
+      s"""INSERT INTO ${EZ_Role.TABLE_REL_ROLE_RESOURCE} ( role_code , resource_code ) VALUES ( ? , ? )""",
+      resourceRoles.map {
+        resourceRole => List(roleCode, resourceRole)
+      })
+  }
+
+  override def deleteRelRoleData(roleCode: String): Resp[Void] = {
+    JDBCProcessor.update(s"""DELETE FROM ${EZ_Role.TABLE_REL_ROLE_RESOURCE} WHERE role_code  = ? """, List(roleCode))
+  }
+
+  override def getRelRoleData(roleCode: String): Resp[List[String]] = {
+    val resp = JDBCProcessor.find(
+      s"""SELECT resource_code FROM ${EZ_Role.TABLE_REL_ROLE_RESOURCE} WHERE role_code  = ? """,
+      List(roleCode), classOf[JsonObject])
+    if (resp) {
+      Resp.success(resp.body.map(_.getString("resource_code")))
+    } else {
+      resp
+    }
   }
 
 }

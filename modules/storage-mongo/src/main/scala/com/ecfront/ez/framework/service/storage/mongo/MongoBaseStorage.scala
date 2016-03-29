@@ -12,13 +12,20 @@ import io.vertx.core.json.{JsonArray, JsonObject}
   */
 trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
-  protected val _entityInfo =
+  protected var _entityInfo =
     if (MongoEntityContainer.CONTAINER.contains(tableName)) {
       MongoEntityContainer.CONTAINER(tableName)
     } else {
       MongoEntityContainer.buildingEntityInfo(_modelClazz, tableName)
       MongoEntityContainer.CONTAINER(tableName)
     }
+
+  override def customTableName(newName: String): Unit = {
+    MongoEntityContainer.CONTAINER.remove(tableName)
+    tableName = newName
+    MongoEntityContainer.buildingEntityInfo(_modelClazz, tableName)
+    _entityInfo = MongoEntityContainer.CONTAINER(tableName)
+  }
 
   override def doSave(model: M, context: EZStorageContext): Resp[M] = {
     val requireResp = storageCheck(model, _entityInfo)

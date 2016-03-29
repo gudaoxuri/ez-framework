@@ -11,10 +11,21 @@
         "defaultOrganizationCode": "",
         "publicUriPrefix": "/public/",
         "loginUrl": "#/auth/login",
-        "loginKeepSeconds": 0 , // 登录保持时间
-        "activeKeepSeconds": 86400 , // 注册激活和找回密码有效时间
-        "extAccountStorage": "" ,
-        "storage":"jdbc" // mongo or jdbc
+        "loginKeepSeconds": 0,
+        "activeKeepSeconds": 86400,
+        "extAccountStorage": "",
+        "useRelTable": true,
+        "customTables": {
+          "organization": "soa_organization",
+          "account": "soa_account",
+          "resource": "soa_resource",
+          "role": "soa_role",
+          "menu": "soa_menu",
+          "rel_account_role": "soa_rel_account_role",
+          "rel_role_resource": "soa_rel_role_resource",
+          "rel_menu_role": "soa_rel_menu_role"
+        },
+        "storage": "jdbc"
       },
       "storage.mongo": {
         "host": "192.168.4.99",
@@ -48,7 +59,7 @@
       "redis": {
         "host": "192.168.4.99",
         "port": 6379,
-        "db":1
+        "db": 1
       }
     }
   },
