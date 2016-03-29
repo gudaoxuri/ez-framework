@@ -49,3 +49,8 @@ object Id {
   val STRATEGY_UUID = "uuid"
 }
 
+@scala.annotation.meta.field
+case class ManyToMany(mapping: String, master: Boolean, fetch: Boolean) extends StaticAnnotation
+
+@scala.annotation.meta.field
+case class OneToMany(mapping: String, relField: String, fetch: Boolean) extends StaticAnnotation

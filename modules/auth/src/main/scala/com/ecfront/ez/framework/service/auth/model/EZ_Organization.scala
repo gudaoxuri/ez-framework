@@ -29,6 +29,9 @@ case class EZ_Organization() extends BaseModel with SecureModel with StatusModel
 object EZ_Organization extends SecureStorageAdapter[EZ_Organization, EZ_Organization_Base]
   with StatusStorageAdapter[EZ_Organization, EZ_Organization_Base] with EZ_Organization_Base {
 
+  // 默认组织
+  val DEFAULT_ORGANIZATION_CODE=""
+
   override protected val storageObj: EZ_Organization_Base =
     if (ServiceAdapter.mongoStorage) EZ_Organization_Mongo else EZ_Organization_JDBC
 

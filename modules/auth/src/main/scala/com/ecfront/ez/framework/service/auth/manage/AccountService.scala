@@ -11,7 +11,7 @@ import com.ecfront.ez.framework.service.email.EmailProcessor
 import com.ecfront.ez.framework.service.rpc.foundation._
 import com.ecfront.ez.framework.service.rpc.http.HTTP
 import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHttpService
-import com.ecfront.ez.framework.service.storage.foundation.BaseStorage
+import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, Page}
 
 /**
   * 账号管理
@@ -142,36 +142,34 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
   @PUT("bylogin/")
   def updateAccountByLoginId(parameter: Map[String, String], body: Account_VO, context: EZAuthContext): Resp[Void] = {
     if (context.token.isDefined && context.loginInfo.isDefined) {
-      if (body.login_id == context.loginInfo.get.login_id) {
-        val accountR = EZ_Account.getByLoginId(context.loginInfo.get.login_id, context.loginInfo.get.organization_code)
-        if (accountR) {
-          if (accountR.body != null) {
-            val account = accountR.body
-            // 验证密码
-            if (EZ_Account.packageEncryptPwd(account.login_id, body.current_password) == account.password) {
-              if (body.new_password != null && body.new_password.nonEmpty) {
-                account.password = body.new_password
-              }
-              account.name = body.name
-              account.email = body.email
-              account.image = body.image
-              val updateR = EZ_Account.update(account, context)
-              if (updateR) {
-                CacheManager.updateTokenInfo(updateR.body)
-              } else {
-                updateR
-              }
+      val accountR = EZ_Account.getByLoginId(context.loginInfo.get.login_id, context.loginInfo.get.organization_code)
+      if (accountR) {
+        if (accountR.body != null) {
+          val account = accountR.body
+          // 验证密码
+          if (EZ_Account.packageEncryptPwd(account.login_id, body.current_password) == account.password) {
+            if (body.new_password != null && body.new_password.nonEmpty) {
+              account.password = body.new_password
             } else {
-              Resp.badRequest("Old Password Error")
+              account.exchange_pwd = account.password
+            }
+            account.name = body.name
+            account.email = body.email
+            account.image = body.image
+            val updateR = EZ_Account.update(account, context)
+            if (updateR) {
+              CacheManager.updateTokenInfo(updateR.body)
+            } else {
+              updateR
             }
           } else {
-            Resp.unAuthorized("")
+            Resp.badRequest("Old Password Error")
           }
         } else {
-          accountR
+          Resp.unAuthorized("")
         }
       } else {
-        Resp.unAuthorized("")
+        accountR
       }
     } else {
       Resp.unAuthorized("Login Info not found")
@@ -191,7 +189,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
     val email = parameter("email")
     val newPassword = body("newPassword")
     // 找回密码只针对默认组织
-    val accountR = EZ_Account.getByEmail(email, "")
+    val accountR = EZ_Account.getByEmail(email, ServiceAdapter.defaultOrganizationCode)
     if (accountR && accountR.body != null) {
       val encryption = UUID.randomUUID().toString + System.nanoTime()
       CacheManager.addActiveNewPassword(encryption, accountR.body.code, newPassword)
@@ -231,6 +229,66 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
     } else {
       Resp.notFound("Link illegal")
     }
+  }
+
+  @POST("")
+  override def rpcSave(parameter: Map[String, String], body: String, context: EZAuthContext): Resp[EZ_Account] = {
+    val resp = super.rpcSave(parameter, body, context)
+    if (resp && resp.body != null) {
+      resp.body.password = null
+    }
+    resp
+  }
+
+  @PUT(":id/")
+  override def rpcUpdate(parameter: Map[String, String], body: String, context: EZAuthContext): Resp[EZ_Account] = {
+    val resp = super.rpcUpdate(parameter, body, context)
+    if (resp && resp.body != null) {
+      resp.body.password = null
+    }
+    resp
+  }
+
+  @GET("enable/")
+  override def rpcFindEnable(parameter: Map[String, String], context: EZAuthContext): Resp[List[EZ_Account]] = {
+    val resp = super.rpcFindEnable(parameter, context)
+    if (resp && resp.body.nonEmpty) {
+      resp.body.foreach {
+        _.password = null
+      }
+    }
+    resp
+  }
+
+  @GET("")
+  override def rpcFind(parameter: Map[String, String], context: EZAuthContext): Resp[List[EZ_Account]] = {
+    val resp = super.rpcFind(parameter, context)
+    if (resp && resp.body.nonEmpty) {
+      resp.body.foreach {
+        _.password = null
+      }
+    }
+    resp
+  }
+
+  @GET("page/:pageNumber/:pageSize/")
+  override def rpcPage(parameter: Map[String, String], context: EZAuthContext): Resp[Page[EZ_Account]] = {
+    val resp = super.rpcPage(parameter, context)
+    if (resp && resp.body.objects.nonEmpty) {
+      resp.body.objects.foreach {
+        _.password = null
+      }
+    }
+    resp
+  }
+
+  @GET(":id/")
+  override def rpcGet(parameter: Map[String, String], context: EZAuthContext): Resp[EZ_Account] = {
+    val resp = super.rpcGet(parameter, context)
+    if (resp && resp.body != null) {
+      resp.body.password = null
+    }
+    resp
   }
 
 }

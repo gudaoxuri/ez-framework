@@ -29,6 +29,7 @@ case class EZ_Account() extends SecureModel with StatusModel {
   @Require
   @Label("Password")
   @BeanProperty var password: String = _
+  // 此字段不为空时保存或更新账户时不对密码做加密
   @Ignore var exchange_pwd: String = _
   @Require
   @Label("Email")
@@ -64,7 +65,8 @@ object EZ_Account extends SecureStorageAdapter[EZ_Account, EZ_Account_Base]
   override protected val storageObj: EZ_Account_Base =
     if (ServiceAdapter.mongoStorage) EZ_Account_Mongo else EZ_Account_JDBC
 
-  def apply(loginId: String, email: String, name: String, password: String, roleCodes: List[String], organizationCode: String = ""): EZ_Account = {
+  def apply(loginId: String, email: String, name: String, password: String,
+            roleCodes: List[String], organizationCode: String = ServiceAdapter.defaultOrganizationCode): EZ_Account = {
     val account = EZ_Account()
     account.login_id = loginId
     account.email = email
@@ -136,7 +138,7 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
             model.oauth = Map()
           }
           if (model.organization_code == null) {
-            model.organization_code = ""
+            model.organization_code = ServiceAdapter.defaultOrganizationCode
           }
           if (model.role_codes == null) {
             model.role_codes = List()
@@ -185,8 +187,10 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
   }
 
   override def postGetEnabledByCond(condition: String, parameters: List[Any], getResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (getResult != null && getResult.ext_id != null && getResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
-      getResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(getResult.ext_id.trim).body)
+    if (getResult != null) {
+      if (getResult.ext_id != null && getResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
+        getResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(getResult.ext_id.trim).body)
+      }
     }
     super.postGetEnabledByCond(condition, parameters, getResult, context)
   }
@@ -195,7 +199,7 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
     if (findResult.nonEmpty && EZ_Account.extAccountStorage != null) {
       findResult.foreach {
         result =>
-          if (result != null && result.ext_id != null && result.ext_id.trim.nonEmpty) {
+          if (result.ext_id != null && result.ext_id.trim.nonEmpty) {
             result.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(result.ext_id.trim).body)
           }
       }
@@ -208,7 +212,7 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
     if (pageResult.objects.nonEmpty && EZ_Account.extAccountStorage != null) {
       pageResult.objects.foreach {
         result =>
-          if (result != null && result.ext_id != null && result.ext_id.trim.nonEmpty) {
+          if (result.ext_id != null && result.ext_id.trim.nonEmpty) {
             result.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(result.ext_id.trim).body)
           }
       }
@@ -217,22 +221,28 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
   }
 
   override def postSave(saveResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (saveResult != null && saveResult.ext_id != null && saveResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
-      saveResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(saveResult.ext_id.trim).body)
+    if (saveResult != null) {
+      if (saveResult.ext_id != null && saveResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
+        saveResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(saveResult.ext_id.trim).body)
+      }
     }
     super.postSave(saveResult, context)
   }
 
   override def postUpdate(updateResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (updateResult != null && updateResult.ext_id != null && updateResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
-      updateResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(updateResult.ext_id.trim).body)
+    if (updateResult != null) {
+      if (updateResult.ext_id != null && updateResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
+        updateResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(updateResult.ext_id.trim).body)
+      }
     }
     super.postUpdate(updateResult, context)
   }
 
   override def postSaveOrUpdate(saveOrUpdateResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (saveOrUpdateResult != null && saveOrUpdateResult.ext_id != null && saveOrUpdateResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
-      saveOrUpdateResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(saveOrUpdateResult.ext_id.trim).body)
+    if (saveOrUpdateResult != null) {
+      if (saveOrUpdateResult.ext_id != null && saveOrUpdateResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
+        saveOrUpdateResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(saveOrUpdateResult.ext_id.trim).body)
+      }
     }
     super.postSaveOrUpdate(saveOrUpdateResult, context)
   }
@@ -264,15 +274,19 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
   }
 
   override def postGetById(id: Any, getResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (getResult != null && getResult.ext_id != null && getResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
-      getResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(getResult.ext_id.trim).body)
+    if (getResult != null) {
+      if (getResult.ext_id != null && getResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
+        getResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(getResult.ext_id.trim).body)
+      }
     }
     super.postGetById(id, getResult, context)
   }
 
   override def postGetByCond(condition: String, parameters: List[Any], getResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    if (getResult != null && getResult.ext_id != null && getResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
-      getResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(getResult.ext_id.trim).body)
+    if (getResult != null) {
+      if (getResult.ext_id != null && getResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
+        getResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(getResult.ext_id.trim).body)
+      }
     }
     super.postGetByCond(condition, parameters, getResult, context)
   }
@@ -281,7 +295,7 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
     if (findResult.nonEmpty && EZ_Account.extAccountStorage != null) {
       findResult.foreach {
         result =>
-          if (result != null && result.ext_id != null && result.ext_id.trim.nonEmpty) {
+          if (result.ext_id != null && result.ext_id.trim.nonEmpty) {
             result.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(result.ext_id.trim).body)
           }
       }
@@ -294,7 +308,7 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
     if (pageResult.objects.nonEmpty && EZ_Account.extAccountStorage != null) {
       pageResult.objects.foreach {
         result =>
-          if (result != null && result.ext_id != null && result.ext_id.trim.nonEmpty) {
+          if (result.ext_id != null && result.ext_id.trim.nonEmpty) {
             result.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(result.ext_id.trim).body)
           }
       }

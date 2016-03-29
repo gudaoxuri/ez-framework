@@ -2,7 +2,7 @@ package com.ecfront.ez.framework.service.auth
 
 import com.ecfront.common.EncryptHelper
 import com.ecfront.ez.framework.core.test.MockStartupSpec
-import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Resource, EZ_Role}
+import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Organization, EZ_Resource, EZ_Role}
 import com.ecfront.ez.framework.service.rpc.foundation.Method
 import com.ecfront.ez.framework.service.storage.foundation.BaseModel
 
@@ -35,7 +35,7 @@ class AuthSpec extends MockStartupSpec {
         && accounts.head.login_id == EZ_Account.SYSTEM_ACCOUNT_CODE
         && accounts.head.name == "Sys Admin"
         && accounts.head.password == EncryptHelper.encrypt(EZ_Account.SYSTEM_ACCOUNT_CODE + "admin")
-        && accounts.head.organization_code == ""
+        && accounts.head.organization_code ==ServiceAdapter.defaultOrganizationCode
         && accounts.head.role_codes.size == 1
     )
 

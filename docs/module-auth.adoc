@@ -305,7 +305,6 @@ PUT /auth/manage/account/bylogin/?__ez_token__=<token>
 body
 [source,text]
 {
-  "login_id": String,  // 登录id
   "name": String, // 姓名
   "image": String, // 头像
   "email": String, // Email

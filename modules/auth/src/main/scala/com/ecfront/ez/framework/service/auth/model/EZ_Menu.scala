@@ -47,7 +47,7 @@ object EZ_Menu extends SecureStorageAdapter[EZ_Menu, EZ_Menu_Base]
     menu.translate = translate
     menu.role_codes = roleCodes
     menu.sort = sort
-    menu.organization_code = ""
+    menu.organization_code = ServiceAdapter.defaultOrganizationCode
     menu.enable = true
     menu
   }
@@ -79,7 +79,7 @@ trait EZ_Menu_Base extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] {
       Resp.badRequest(s"【uri】can't contains ${BaseModel.SPLIT}")
     } else {
       if (model.organization_code == null) {
-        model.organization_code = ""
+        model.organization_code = ServiceAdapter.defaultOrganizationCode
       }
       if (model.role_codes == null) {
         model.role_codes = List()

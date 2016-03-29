@@ -40,7 +40,7 @@ object EZ_Role extends SecureStorageAdapter[EZ_Role, EZ_Role_Base]
   override protected val storageObj: EZ_Role_Base =
     if (ServiceAdapter.mongoStorage) EZ_Role_Mongo else EZ_Role_JDBC
 
-  def apply(flag: String, name: String, resourceCodes: List[String],organizationCode:String=""): EZ_Role = {
+  def apply(flag: String, name: String, resourceCodes: List[String],organizationCode:String=ServiceAdapter.defaultOrganizationCode): EZ_Role = {
     val role = EZ_Role()
     role.flag = flag
     role.name = name
@@ -81,7 +81,7 @@ trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] {
         Resp.badRequest(s"【flag】can't contains ${BaseModel.SPLIT}")
       } else {
         if (model.organization_code == null) {
-          model.organization_code = ""
+          model.organization_code = ServiceAdapter.defaultOrganizationCode
         }
         if (model.resource_codes == null) {
           model.resource_codes = List()

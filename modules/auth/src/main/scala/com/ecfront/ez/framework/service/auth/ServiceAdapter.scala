@@ -3,7 +3,7 @@ package com.ecfront.ez.framework.service.auth
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZServiceAdapter
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
-import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Role}
+import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Organization, EZ_Role}
 import com.ecfront.ez.framework.service.rpc.foundation.AutoBuildingProcessor
 import com.ecfront.ez.framework.service.rpc.http.{HTTP, HttpInterceptor}
 import io.vertx.core.json.JsonObject
@@ -24,8 +24,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     publicUriPrefix = parameter.getString("publicUriPrefix", "/public/")
     allowRegister = parameter.getBoolean("allowRegister", false)
     selfActive = parameter.getBoolean("selfActive", true)
+    defaultOrganizationCode = parameter.getString("defaultOrganizationCode", EZ_Organization.DEFAULT_ORGANIZATION_CODE)
     defaultRoleFlag = parameter.getString("defaultRoleFlag", EZ_Role.USER_ROLE_FLAG)
-    defaultOrganizationCode = parameter.getString("defaultOrganizationCode", "")
     loginUrl = parameter.getString("loginUrl", "#/auth/login")
     loginKeepSeconds = parameter.getLong("loginKeepSeconds", 0L)
     activeKeepSeconds = parameter.getLong("activeKeepSeconds", 24L * 60 * 60)

@@ -16,13 +16,13 @@
         "storage":"jdbc" // mongo or jdbc
       },
       "storage.mongo": {
-        "host": "192.168.99.100",
+        "host": "192.168.4.99",
         "port": 27017,
         "db_name": "ez_test"
       },
       "storage.jdbc": {
         "driver_class": "com.mysql.jdbc.Driver",
-        "url": "jdbc:mysql://192.168.99.100:3306/ez_test?characterEncoding=UTF-8&autoReconnect=true",
+        "url": "jdbc:mysql://192.168.4.99:3306/ez_test?characterEncoding=UTF-8&autoReconnect=true",
         "user": "root",
         "password": "123456"
       },
@@ -45,7 +45,7 @@
         "password": "t~!Q`1q"
       },
       "redis": {
-        "host": "192.168.99.100",
+        "host": "192.168.4.99",
         "port": 6379,
         "db":1
       }

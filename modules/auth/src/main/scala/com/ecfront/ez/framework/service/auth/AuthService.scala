@@ -17,7 +17,7 @@ object AuthService {
     // id 可以是 login_id 或 email
     val id = body.getOrElse("id", "")
     val password = body.getOrElse("password", "")
-    val organizationCode = body.getOrElse("organizationCode", "")
+    val organizationCode = body.getOrElse("organizationCode", ServiceAdapter.defaultOrganizationCode)
     if (id != "" && password != "") {
       doLogin(id, password, organizationCode)
     } else {

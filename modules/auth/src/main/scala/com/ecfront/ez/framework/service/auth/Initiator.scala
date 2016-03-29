@@ -21,7 +21,7 @@ object Initiator extends LazyLogging {
       EZ_Resource.existByCond(s"""code = ?""", List(Method.GET + BaseModel.SPLIT + "/auth/manage/organization/"))
     }
     if (!exist.body) {
-      val org = EZ_Organization("", "default")
+      val org = EZ_Organization(ServiceAdapter.defaultOrganizationCode, "default")
       EZ_Organization.save(org)
 
       EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/organization/", s"Find Organizations"))
