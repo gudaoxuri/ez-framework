@@ -12,6 +12,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
   var publicUriPrefix: String = _
   var allowRegister: Boolean = _
+  var customLogin: Boolean = _
   var selfActive: Boolean = _
   var defaultRoleFlag: String = _
   var defaultOrganizationCode: String = _
@@ -23,6 +24,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   override def init(parameter: JsonObject): Resp[String] = {
     publicUriPrefix = parameter.getString("publicUriPrefix", "/public/")
     allowRegister = parameter.getBoolean("allowRegister", false)
+    customLogin = parameter.getBoolean("customLogin", false)
     selfActive = parameter.getBoolean("selfActive", true)
     defaultOrganizationCode = parameter.getString("defaultOrganizationCode", EZ_Organization.DEFAULT_ORGANIZATION_CODE)
     defaultRoleFlag = parameter.getString("defaultRoleFlag", EZ_Role.USER_ROLE_FLAG)

@@ -5,6 +5,7 @@
     "services": {
       "auth": {
         "allowRegister": true,
+        "customLogin": false,
         "selfActive": true,
         "defaultRoleFlag": "user",
         "defaultOrganizationCode": "",

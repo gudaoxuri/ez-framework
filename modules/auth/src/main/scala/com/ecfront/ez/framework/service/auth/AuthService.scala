@@ -14,14 +14,18 @@ object AuthService {
 
   @POST("/public/auth/login/")
   def login(parameter: Map[String, String], body: Map[String, String], context: EZAuthContext): Resp[Token_Info_VO] = {
-    // id 可以是 login_id 或 email
-    val id = body.getOrElse("id", "")
-    val password = body.getOrElse("password", "")
-    val organizationCode = body.getOrElse("organizationCode", ServiceAdapter.defaultOrganizationCode)
-    if (id != "" && password != "") {
-      doLogin(id, password, organizationCode)
-    } else {
-      Resp.badRequest("Missing required field : 【id】or 【password】")
+    if(!ServiceAdapter.customLogin) {
+      // id 可以是 login_id 或 email
+      val id = body.getOrElse("id", "")
+      val password = body.getOrElse("password", "")
+      val organizationCode = body.getOrElse("organizationCode", ServiceAdapter.defaultOrganizationCode)
+      if (id != "" && password != "") {
+        doLogin(id, password, organizationCode)
+      } else {
+        Resp.badRequest("Missing required field : 【id】or 【password】")
+      }
+    }else{
+      Resp.notImplemented("Custom login enabled")
     }
   }
 
