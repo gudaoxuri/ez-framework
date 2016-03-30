@@ -120,10 +120,15 @@ object RespHttpClientProcessor extends LazyLogging {
         case resp =>
           val json = new JsonObject(resp)
           val code = json.getString("code")
-          val result =
+          val result: Resp[E] =
             if (code == StandardCode.SUCCESS) {
-              val body = JsonHelper.toObject[E](json.getJsonObject("body").encode())
-              Resp.success(body)
+              val jsonBody = json.getJsonObject("body")
+              if (jsonBody == null) {
+                Resp[E](StandardCode.SUCCESS, "")
+              } else {
+                val body = JsonHelper.toObject[E](jsonBody.encode())
+                Resp.success[E](body)
+              }
             } else {
               Resp[E](code, json.getString("message"))
             }
