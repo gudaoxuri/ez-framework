@@ -76,7 +76,7 @@ object RespHttpClientProcessor extends LazyLogging {
       * @return 请求结果，string类型
       */
     def get[E: Manifest](url: String, contentType: String = "application/json; charset=utf-8"): Future[Resp[E]] = {
-      request(HttpMethod.GET, url, null, contentType)
+      request[E](HttpMethod.GET, url, null, contentType)
     }
 
     /**
@@ -88,7 +88,7 @@ object RespHttpClientProcessor extends LazyLogging {
       * @return 请求结果，string类型
       */
     def post[E: Manifest](url: String, body: Any, contentType: String = "application/json; charset=utf-8"): Future[Resp[E]] = {
-      request(HttpMethod.POST, url, body, contentType)
+      request[E](HttpMethod.POST, url, body, contentType)
     }
 
     /**
@@ -100,7 +100,7 @@ object RespHttpClientProcessor extends LazyLogging {
       * @return 请求结果，string类型
       */
     def put[E: Manifest](url: String, body: Any, contentType: String = "application/json; charset=utf-8"): Future[Resp[E]] = {
-      request(HttpMethod.PUT, url, body, contentType)
+      request[E](HttpMethod.PUT, url, body, contentType)
     }
 
     /**
@@ -111,7 +111,7 @@ object RespHttpClientProcessor extends LazyLogging {
       * @return 请求结果，string类型
       */
     def delete[E: Manifest](url: String, contentType: String = "application/json; charset=utf-8"): Future[Resp[E]] = {
-      request(HttpMethod.DELETE, url, null, contentType)
+      request[E](HttpMethod.DELETE, url, null, contentType)
     }
 
     private def request[E: Manifest](method: HttpMethod, url: String, body: Any, contentType: String): Future[Resp[E]] = {
@@ -120,10 +120,13 @@ object RespHttpClientProcessor extends LazyLogging {
         case resp =>
           val json = new JsonObject(resp)
           val code = json.getString("code")
-          val result = Resp[E](code, json.getString("message"))
-          if (code == StandardCode.SUCCESS) {
-            result.body = JsonHelper.toObject[E](json.getJsonObject("body").encode())
-          }
+          val result =
+            if (code == StandardCode.SUCCESS) {
+              val body = JsonHelper.toObject[E](json.getJsonObject("body").encode())
+              Resp.success(body)
+            } else {
+              Resp[E](code, json.getString("message"))
+            }
           p.success(result)
       }
       p.future
