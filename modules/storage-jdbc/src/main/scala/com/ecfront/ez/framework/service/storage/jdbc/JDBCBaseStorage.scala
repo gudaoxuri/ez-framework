@@ -18,15 +18,15 @@ trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
       JDBCEntityContainer.CONTAINER(tableName)
     }
 
-  override def customTableName(newName:String):Unit={
+  override def customTableName(newName: String): Unit = {
     JDBCEntityContainer.CONTAINER.remove(tableName)
-    tableName=newName
+    tableName = newName
     JDBCEntityContainer.buildingEntityInfo(_modelClazz, tableName)
-    _entityInfo=JDBCEntityContainer.CONTAINER(tableName)
+    _entityInfo = JDBCEntityContainer.CONTAINER(tableName)
   }
 
   override def doSave(model: M, context: EZStorageContext): Resp[M] = {
-    val requireResp = storageCheck(model, _entityInfo)
+    val requireResp = storageCheck(model, _entityInfo, isUpdate = false)
     if (requireResp) {
       JDBCExecutor.save(_entityInfo, getMapValue(model).filter(_._2 != null), _modelClazz)
     } else {
@@ -35,7 +35,7 @@ trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
   }
 
   override def doUpdate(model: M, context: EZStorageContext): Resp[M] = {
-    val requireResp = storageCheck(model, _entityInfo)
+    val requireResp = storageCheck(model, _entityInfo, isUpdate = true)
     if (requireResp) {
       JDBCExecutor.update(_entityInfo, getIdValue(model), getMapValue(model).filter(_._2 != null), _modelClazz)
     } else {
@@ -44,7 +44,7 @@ trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
   }
 
   override def doSaveOrUpdate(model: M, context: EZStorageContext): Resp[M] = {
-    val requireResp = storageCheck(model, _entityInfo)
+    val requireResp = storageCheck(model, _entityInfo, model.id != null && model.id.nonEmpty)
     if (requireResp) {
       JDBCExecutor.saveOrUpdate(_entityInfo, getIdValue(model), getMapValue(model).filter(_._2 != null), _modelClazz)
     } else {

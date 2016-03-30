@@ -24,7 +24,7 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
     if (entityInfo.idStrategy == Id.STRATEGY_SEQ && richValueInfo.contains(idFieldName) && richValueInfo(idFieldName) == 0) {
       richValueInfo -= idFieldName
     }
-    if (entityInfo.uniqueFieldNames.nonEmpty) {
+    if (entityInfo.uniqueFieldNames.nonEmpty && (entityInfo.uniqueFieldNames.toSet & richValueInfo.keys.toSet).nonEmpty) {
       val existQuery = entityInfo.uniqueFieldNames.filter(richValueInfo.contains).map {
         field =>
           field + "= ?" -> richValueInfo(field)
@@ -127,33 +127,41 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
     val idFieldName = entityInfo.idFieldName
     val richValueInfo = collection.mutable.Map[String, Any]()
     richValueInfo ++= valueInfo
-    if (entityInfo.uniqueFieldNames.nonEmpty) {
-      val existQuery = entityInfo.uniqueFieldNames.filter(richValueInfo.contains).map {
-        field =>
-          field + "= ?" -> richValueInfo(field)
-      }.toMap
-      val existR = JDBCProcessor.exist(
-        s"SELECT 1 FROM $tableName WHERE ${existQuery.keys.toList.mkString(" OR ") + s" AND $idFieldName != ? "} ",
-        existQuery.values.toList.filter(_ != null) ++ List(idValue)
-      )
-      if (existR) {
-        if (existR.body) {
-          Resp.badRequest(entityInfo.uniqueFieldNames.map {
-            field =>
-              if (entityInfo.fieldLabel.contains(field)) {
-                entityInfo.fieldLabel(field)
-              } else {
-                field
-              }
-          }.mkString("[", ",", "]") + " must be unique")
+    if (!richValueInfo.forall(_._1 == idFieldName)) {
+      if (entityInfo.uniqueFieldNames.nonEmpty && (entityInfo.uniqueFieldNames.toSet & richValueInfo.keys.toSet).nonEmpty) {
+        val existQuery = entityInfo.uniqueFieldNames.filter(richValueInfo.contains).map {
+          field =>
+            field + "= ?" -> richValueInfo(field)
+        }.toMap
+        val existR = JDBCProcessor.exist(
+          s"SELECT 1 FROM $tableName WHERE ${existQuery.keys.toList.mkString(" OR ") + s" AND $idFieldName != ? "} ",
+          existQuery.values.toList.filter(_ != null) ++ List(idValue)
+        )
+        if (existR) {
+          if (existR.body) {
+            Resp.badRequest(entityInfo.uniqueFieldNames.map {
+              field =>
+                if (entityInfo.fieldLabel.contains(field)) {
+                  entityInfo.fieldLabel(field)
+                } else {
+                  field
+                }
+            }.mkString("[", ",", "]") + " must be unique")
+          } else {
+            doUpdate(tableName, idFieldName, idValue, richValueInfo, clazz)
+          }
         } else {
-          doUpdate(tableName, idFieldName, idValue, richValueInfo, clazz)
+          existR
         }
       } else {
-        existR
+        doUpdate(tableName, idFieldName, idValue, richValueInfo, clazz)
       }
     } else {
-      doUpdate(tableName, idFieldName, idValue, richValueInfo, clazz)
+      JDBCProcessor.get(
+        s"SELECT * FROM $tableName WHERE $idFieldName  = ? ",
+        List(idValue),
+        clazz
+      )
     }
   }
 

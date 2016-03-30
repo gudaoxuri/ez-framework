@@ -28,7 +28,7 @@ class UserSpec extends MockStartupSpec {
           account)).message == "【email】format error")
 
     account.name = "u1"
-    account.email = "i@sunisle.org"
+    account.email = "admin" + EZ_Account.VIRTUAL_EMAIL
     assert(
       JsonHelper.toObject[Resp[String]](
         HttpClientProcessor.post(
@@ -48,7 +48,7 @@ class UserSpec extends MockStartupSpec {
   test("User Active test") {
 
     // Replace Real url in your email
-    val emailReceivedUrl = "http://127.0.0.1:8080/public/active/account/a94af3ec-ddbf-45cf-bd2a-8c3de0326e53102121759202773/"
+    val emailReceivedUrl = "http://127.0.0.1:8080/public/active/account/98beec5a-b268-4368-88c1-1ff238ec76a6279961670291146/"
     assert(
       JsonHelper.toObject[Resp[String]](
         HttpClientProcessor.get(
@@ -88,7 +88,6 @@ class UserSpec extends MockStartupSpec {
 
   // Step 4 Find Password
   test("User Find Password test") {
-
     JsonHelper.toObject[Resp[Void]](
       HttpClientProcessor.put(
         s"http://0.0.0.0:8080/public/findpassword/net@sunisle.org/", Map("newPassword" -> "abc"))).body
@@ -98,7 +97,7 @@ class UserSpec extends MockStartupSpec {
   test("User Active New Password test") {
 
     // Replace Real url in your email
-    val emailReceivedUrl = "http://127.0.0.1:8080/public/active/password/aadf1c42-f88e-47b5-a31b-bd9cf8eaaca2102278653334011/"
+    val emailReceivedUrl = "http://127.0.0.1:8080/public/active/password/4d9e91f5-e17f-4ec3-825c-a3673fd4ab6d280462896308880/"
 
     assert(JsonHelper.toObject[Resp[String]](
       HttpClientProcessor.get(

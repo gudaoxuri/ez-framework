@@ -26,23 +26,25 @@ case class EZ_Account() extends SecureModel with StatusModel {
   @Label("Name")
   @BeanProperty var name: String = _
   @Label("Image")
-  @BeanProperty var image: String = ""
+  @BeanProperty var image: String = _
   @Require
   @Label("Password")
   @BeanProperty var password: String = _
   // 此字段不为空时保存或更新账户时不对密码做加密
-  @Ignore var exchange_pwd: String = ""
+  @Ignore var exchange_pwd: String = _
   @Require
   @Label("Email")
   @BeanProperty var email: String = _
   @Label("Ext Id") // 用于关联其它对象以扩展属性，扩展Id多为业务系统用户信息表的主键
-  @BeanProperty var ext_id: String = ""
+  @BeanProperty var ext_id: String = _
   @Label("Ext Info")
-  @BeanProperty var ext_info: Map[String, Any] = Map()
+  @Ignore var exchange_ext_info: Map[String, Any] = _
+  @BeanProperty var ext_info: Map[String, Any] = _
   @Label("OAuth Info") // key=oauth服务标记，value=openid
-  @BeanProperty var oauth: Map[String, String] = Map()
-  @BeanProperty var organization_code: String = ServiceAdapter.defaultOrganizationCode
-  @BeanProperty var role_codes: List[String] = List[String]()
+  @BeanProperty var oauth: Map[String, String] = _
+  @BeanProperty var organization_code: String = _
+  @Ignore var exchange_role_codes: List[String] = _
+  @BeanProperty var role_codes: List[String] = _
 
 }
 
@@ -51,7 +53,6 @@ object EZ_Account extends SecureStorageAdapter[EZ_Account, EZ_Account_Base]
 
   // 角色关联表，在useRelTable=true中启用
   var TABLE_REL_ACCOUNT_ROLE = "ez_rel_account_role"
-
 
   val SYSTEM_ACCOUNT_CODE = "sysadmin"
 
@@ -124,14 +125,6 @@ object EZ_Account extends SecureStorageAdapter[EZ_Account, EZ_Account_Base]
 trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Account] {
 
   override def preSave(model: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    preSaveOrUpdate(model, context)
-  }
-
-  override def preUpdate(model: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    preSaveOrUpdate(model, context)
-  }
-
-  override def preSaveOrUpdate(model: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
     if (model.login_id == null || model.login_id.trim.isEmpty
       || model.password == null || model.password.trim.isEmpty
       || model.email == null || model.email.trim.isEmpty) {
@@ -142,43 +135,39 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
         Resp.badRequest(s"【login id】can't contains ${BaseModel.SPLIT}")
       } else {
         if (FormatHelper.validEmail(model.email)) {
-          model.code = assembleCode(model.login_id, model.organization_code)
           if (model.exchange_pwd != null && model.exchange_pwd.trim.nonEmpty) {
             model.password = model.exchange_pwd
           } else {
             model.password = packageEncryptPwd(model.login_id, model.password)
           }
-          if (model.id == null || model.id.trim == "") {
-            if (existByEmail(model.email, model.organization_code).body) {
-              Resp.badRequest("【email】exist")
-            } else {
-              if (EZ_Account.extAccountStorage != null) {
-                val extObj = EZ_Account.extAccountStorage.save(EZ_Account.extAccountStorage.convertToEntity(model.ext_info), context).body
-                model.ext_id = extObj.id
-                model.ext_info = Map()
-              }
-              if (ServiceAdapter.useRelTable) {
-                saveOrUpdateRelRoleData(model.code, model.role_codes)
-                model.role_codes = null
-              }
-              super.preSave(model, context)
-            }
+          if (existByEmail(model.email, model.organization_code).body) {
+            Resp.badRequest("【email】exist")
           } else {
-            val existEmail = getByEmail(model.email, model.organization_code).body
-            if (existEmail != null && existEmail.code != model.code) {
-              Resp.badRequest("【email】exist")
-            } else {
-              if (model.ext_id.nonEmpty && EZ_Account.extAccountStorage != null) {
-                EZ_Account.extAccountStorage.update(
-                  EZ_Account.extAccountStorage.convertToEntity(model.ext_info + (BaseModel.Id_FLAG -> model.ext_id)), context).body
-                model.ext_info = Map()
-              }
-              if (ServiceAdapter.useRelTable) {
-                saveOrUpdateRelRoleData(model.code, model.role_codes)
-                model.role_codes = null
-              }
-              super.preUpdate(model, context)
+            model.code = assembleCode(model.login_id, model.organization_code)
+            if (model.image == null) {
+              model.image = ""
             }
+            if (model.organization_code == null) {
+              model.organization_code = ServiceAdapter.defaultOrganizationCode
+            }
+            if (model.oauth == null) {
+              model.oauth = Map()
+            }
+            if (model.ext_id == null) {
+              model.ext_id = ""
+            }
+            if (model.ext_info == null) {
+              model.ext_info = Map()
+            }
+            if (ServiceAdapter.useRelTable) {
+              model.exchange_role_codes = model.role_codes
+              model.role_codes = null
+            }
+            if (EZ_Account.extAccountStorage != null) {
+              model.exchange_ext_info = model.ext_info
+              model.ext_info = Map()
+            }
+            super.preSave(model, context)
           }
         } else {
           Resp.badRequest("【email】format error")
@@ -187,19 +176,94 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
     }
   }
 
-  override def postSave(saveResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    postGetX(saveResult)
-    super.postSave(saveResult, context)
+  override def preUpdate(model: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    val oldModel = EZ_Account.getById(model.id).body
+    if (oldModel == null) {
+      Resp.notFound("")
+    } else {
+      model.code = null
+      model.login_id = null
+      model.organization_code = null
+      if (EZ_Account.extAccountStorage != null) {
+        model.exchange_ext_info = model.ext_info
+        model.ext_info = Map()
+      }
+      if (ServiceAdapter.useRelTable) {
+        model.exchange_role_codes = model.role_codes
+        model.role_codes = null
+      }
+      if (model.exchange_pwd != null && model.exchange_pwd.trim.nonEmpty) {
+        model.password = model.exchange_pwd
+      } else if (model.password != null && model.password.trim.nonEmpty) {
+        model.password = packageEncryptPwd(oldModel.login_id, model.password)
+      }
+      if (model.email != null && model.email != "") {
+        if (FormatHelper.validEmail(model.email)) {
+          val existEmail = getByEmail(model.email, oldModel.organization_code).body
+          if (existEmail != null && existEmail.code != oldModel.code) {
+            Resp.badRequest("【email】exist")
+          } else {
+            super.preUpdate(model, context)
+          }
+        } else {
+          Resp.badRequest("【email】format error")
+        }
+      } else {
+        super.preUpdate(model, context)
+      }
+    }
   }
 
-  override def postUpdate(updateResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    postGetX(updateResult)
-    super.postUpdate(updateResult, context)
+  override def preSaveOrUpdate(model: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    if (model.id == null || model.id.trim == "") {
+      preSave(model, context)
+    } else {
+      preUpdate(model, context)
+    }
   }
 
-  override def postSaveOrUpdate(saveOrUpdateResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
-    postGetX(saveOrUpdateResult)
-    super.postSaveOrUpdate(saveOrUpdateResult, context)
+  override def postSave(saveResult: EZ_Account, preResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    postSaveOrUpdate(saveResult, preResult, context)
+  }
+
+  override def postUpdate(updateResult: EZ_Account, preResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    postSaveOrUpdate(updateResult, preResult, context)
+  }
+
+  override def postSaveOrUpdate(saveOrUpdateResult: EZ_Account, preResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
+    if (preResult.id == null || preResult.id.trim == "") {
+      if (EZ_Account.extAccountStorage != null) {
+        val extObj = EZ_Account.extAccountStorage.save(EZ_Account.extAccountStorage.convertToEntity(preResult.exchange_ext_info), context).body
+        saveOrUpdateResult.ext_id = extObj.id
+        saveOrUpdateResult.role_codes = null
+        doUpdate(saveOrUpdateResult, context)
+        saveOrUpdateResult.ext_info = preResult.exchange_ext_info
+      }
+      if (ServiceAdapter.useRelTable) {
+        saveOrUpdateRelRoleData(saveOrUpdateResult.code, preResult.exchange_role_codes)
+        saveOrUpdateResult.role_codes = preResult.exchange_role_codes
+      }
+      super.postUpdate(saveOrUpdateResult, preResult, context)
+    } else {
+      if (EZ_Account.extAccountStorage != null) {
+        if (preResult.exchange_ext_info != null && preResult.exchange_ext_info.nonEmpty) {
+          EZ_Account.extAccountStorage.update(
+            EZ_Account.extAccountStorage.convertToEntity(preResult.exchange_ext_info + (BaseModel.Id_FLAG -> saveOrUpdateResult.ext_id)), context).body
+          saveOrUpdateResult.ext_info = preResult.exchange_ext_info
+        } else {
+          saveOrUpdateResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(saveOrUpdateResult.ext_id.trim).body)
+        }
+      }
+      if (ServiceAdapter.useRelTable) {
+        if (preResult.exchange_role_codes != null && preResult.exchange_role_codes.nonEmpty) {
+          saveOrUpdateRelRoleData(saveOrUpdateResult.code, preResult.exchange_role_codes)
+          saveOrUpdateResult.role_codes = preResult.exchange_role_codes
+        } else {
+          saveOrUpdateResult.role_codes = getRelRoleData(saveOrUpdateResult.code).body
+        }
+      }
+      super.postSave(saveOrUpdateResult, preResult, context)
+    }
   }
 
   override def postGetEnabledByCond(condition: String, parameters: List[Any], getResult: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
@@ -248,7 +312,7 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
 
   protected def postGetX(getResult: EZ_Account): Unit = {
     if (getResult != null) {
-      if (getResult.ext_id != null && getResult.ext_id.trim.nonEmpty && EZ_Account.extAccountStorage != null) {
+      if (EZ_Account.extAccountStorage != null) {
         getResult.ext_info = JsonHelper.toObject[Map[String, Any]](EZ_Account.extAccountStorage.getById(getResult.ext_id.trim).body)
       }
       if (ServiceAdapter.useRelTable) {

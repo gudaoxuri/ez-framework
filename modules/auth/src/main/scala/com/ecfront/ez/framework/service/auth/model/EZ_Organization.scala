@@ -22,7 +22,7 @@ case class EZ_Organization() extends BaseModel with SecureModel with StatusModel
   @Label("Name")
   @BeanProperty var name: String = _
   @Label("Image")
-  @BeanProperty var image: String = ""
+  @BeanProperty var image: String = _
 
 }
 
@@ -30,7 +30,7 @@ object EZ_Organization extends SecureStorageAdapter[EZ_Organization, EZ_Organiza
   with StatusStorageAdapter[EZ_Organization, EZ_Organization_Base] with EZ_Organization_Base {
 
   // 默认组织
-  val DEFAULT_ORGANIZATION_CODE=""
+  val DEFAULT_ORGANIZATION_CODE = ""
 
   override protected val storageObj: EZ_Organization_Base =
     if (ServiceAdapter.mongoStorage) EZ_Organization_Mongo else EZ_Organization_JDBC
@@ -52,6 +52,9 @@ object EZ_Organization extends SecureStorageAdapter[EZ_Organization, EZ_Organiza
 trait EZ_Organization_Base extends SecureStorage[EZ_Organization] with StatusStorage[EZ_Organization] {
 
   override def preSave(model: EZ_Organization, context: EZStorageContext): Resp[EZ_Organization] = {
+    if (model.image == null) {
+      model.image = ""
+    }
     preSaveOrUpdate(model, context)
   }
 

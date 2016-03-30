@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.service.auth.model
 
-import com.ecfront.common.Resp
+import com.ecfront.common.{Ignore, Resp}
 import com.ecfront.ez.framework.service.auth.{CacheManager, ServiceAdapter}
 import com.ecfront.ez.framework.service.storage.foundation._
 import com.ecfront.ez.framework.service.storage.jdbc.{JDBCProcessor, JDBCSecureStorage, JDBCStatusStorage}
@@ -25,8 +25,9 @@ case class EZ_Role() extends BaseModel with SecureModel with StatusModel {
   @Require
   @Label("Name")
   @BeanProperty var name: String = _
-  @BeanProperty var resource_codes: List[String] = List[String]()
-  @BeanProperty var organization_code: String = ServiceAdapter.defaultOrganizationCode
+  @Ignore var exchange_resource_codes: List[String] = _
+  @BeanProperty var resource_codes: List[String] = _
+  @BeanProperty var organization_code: String = _
 
 }
 
@@ -83,19 +84,67 @@ trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] {
   }
 
   override def preSaveOrUpdate(model: EZ_Role, context: EZStorageContext): Resp[EZ_Role] = {
-    if (model.flag == null || model.flag.trim.isEmpty) {
-      Resp.badRequest("Require【flag】")
-    } else {
-      if (model.flag.contains(BaseModel.SPLIT)) {
-        Resp.badRequest(s"【flag】can't contains ${BaseModel.SPLIT}")
+    if (ServiceAdapter.useRelTable) {
+      model.exchange_resource_codes = model.resource_codes
+      model.resource_codes = null
+    }
+    if (model.id == null || model.id.trim == "") {
+      if (model.flag == null || model.flag.trim.isEmpty) {
+        Resp.badRequest("Require【flag】")
       } else {
-        model.code = assembleCode(model.flag, model.organization_code)
-        if (ServiceAdapter.useRelTable) {
-          saveOrUpdateRelRoleData(model.code, model.resource_codes)
-          model.resource_codes = null
+        if (model.flag.contains(BaseModel.SPLIT)) {
+          Resp.badRequest(s"【flag】can't contains ${BaseModel.SPLIT}")
+        } else {
+          model.code = assembleCode(model.flag, model.organization_code)
+          if (model.organization_code == null) {
+            model.organization_code = ServiceAdapter.defaultOrganizationCode
+          }
+          super.preSave(model, context)
         }
-        super.preSaveOrUpdate(model, context)
       }
+    } else {
+      if (!EZ_Role.existById(model.id).body) {
+        Resp.notFound("")
+      } else {
+        model.code = null
+        model.flag = null
+        model.organization_code = null
+        super.preUpdate(model, context)
+      }
+    }
+  }
+
+  override def postSave(saveResult: EZ_Role, preResult: EZ_Role, context: EZStorageContext): Resp[EZ_Role] = {
+    postSaveOrUpdate(saveResult, preResult, context)
+  }
+
+  override def postUpdate(updateResult: EZ_Role, preResult: EZ_Role, context: EZStorageContext): Resp[EZ_Role] = {
+    postSaveOrUpdate(updateResult, preResult, context)
+  }
+
+  override def postSaveOrUpdate(saveOrUpdateResult: EZ_Role, preResult: EZ_Role, context: EZStorageContext): Resp[EZ_Role] = {
+    if (preResult.id == null || preResult.id.trim == "") {
+      if (ServiceAdapter.useRelTable) {
+        saveOrUpdateRelRoleData(saveOrUpdateResult.code, preResult.exchange_resource_codes)
+        saveOrUpdateResult.resource_codes = preResult.exchange_resource_codes
+      }
+      if (saveOrUpdateResult.enable) {
+        CacheManager.addResourceByRole(saveOrUpdateResult.code, saveOrUpdateResult.resource_codes)
+      }
+      super.postUpdate(saveOrUpdateResult, preResult, context)
+    } else {
+      if (ServiceAdapter.useRelTable) {
+        if (preResult.exchange_resource_codes != null && preResult.exchange_resource_codes.nonEmpty) {
+          saveOrUpdateRelRoleData(saveOrUpdateResult.code, preResult.exchange_resource_codes)
+          saveOrUpdateResult.resource_codes = preResult.exchange_resource_codes
+        } else {
+          saveOrUpdateResult.resource_codes = getRelRoleData(saveOrUpdateResult.code).body
+        }
+      }
+      if (saveOrUpdateResult.enable) {
+        CacheManager.addResourceByRole(saveOrUpdateResult.code, saveOrUpdateResult.resource_codes)
+      }
+      super.postSave(saveOrUpdateResult, preResult, context)
     }
   }
 
@@ -109,30 +158,6 @@ trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] {
     val role = super.getById(id).body
     CacheManager.removeResourceByRole(role.code)
     super.postDisableById(id, context)
-  }
-
-  override def postSave(saveResult: EZ_Role, context: EZStorageContext): Resp[EZ_Role] = {
-    if (saveResult.enable) {
-      CacheManager.addResourceByRole(saveResult.code, saveResult.resource_codes)
-    }
-    postGetX(saveResult)
-    super.postSave(saveResult, context)
-  }
-
-  override def postUpdate(updateResult: EZ_Role, context: EZStorageContext): Resp[EZ_Role] = {
-    if (updateResult.enable) {
-      CacheManager.addResourceByRole(updateResult.code, updateResult.resource_codes)
-    }
-    postGetX(updateResult)
-    super.postUpdate(updateResult, context)
-  }
-
-  override def postSaveOrUpdate(saveOrUpdateResult: EZ_Role, context: EZStorageContext): Resp[EZ_Role] = {
-    if (saveOrUpdateResult.enable) {
-      CacheManager.addResourceByRole(saveOrUpdateResult.code, saveOrUpdateResult.resource_codes)
-    }
-    postGetX(saveOrUpdateResult)
-    super.postSaveOrUpdate(saveOrUpdateResult, context)
   }
 
   override def postGetEnabledByCond(condition: String, parameters: List[Any], getResult: EZ_Role, context: EZStorageContext): Resp[EZ_Role] = {

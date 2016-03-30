@@ -10,7 +10,7 @@ import scala.beans.BeanProperty
 trait StatusModel extends BaseModel {
 
   @Index
-  @BeanProperty var enable: Boolean = _
+  @BeanProperty var enable: Boolean = true
 
 }
 

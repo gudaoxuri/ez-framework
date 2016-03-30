@@ -28,7 +28,7 @@ trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
   }
 
   override def doSave(model: M, context: EZStorageContext): Resp[M] = {
-    val requireResp = storageCheck(model, _entityInfo)
+    val requireResp = storageCheck(model, _entityInfo, isUpdate = false)
     if (requireResp) {
       val save = convertToJsonObject(_entityInfo, model)
       MongoExecutor.save(_entityInfo, tableName, save, _modelClazz)
@@ -38,7 +38,7 @@ trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
   }
 
   override def doUpdate(model: M, context: EZStorageContext): Resp[M] = {
-    val requireResp = storageCheck(model, _entityInfo)
+    val requireResp = storageCheck(model, _entityInfo, isUpdate = true)
     if (requireResp) {
       val update = convertToJsonObject(_entityInfo, model)
       MongoExecutor.update(_entityInfo, tableName, model.id, update, _modelClazz)
@@ -48,7 +48,7 @@ trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
   }
 
   override def doSaveOrUpdate(model: M, context: EZStorageContext): Resp[M] = {
-    val requireResp = storageCheck(model, _entityInfo)
+    val requireResp = storageCheck(model, _entityInfo, model.id != null && model.id.nonEmpty)
     if (requireResp) {
       val saveOrUpdate = convertToJsonObject(_entityInfo, model)
       MongoExecutor.saveOrUpdate(_entityInfo, tableName, model.id, saveOrUpdate, _modelClazz)

@@ -131,18 +131,22 @@ object CacheManager {
     val p = Promise[Resp[Boolean]]()
     val counter = new AtomicInteger(roleCodes.size)
     val isFind = new AtomicBoolean(false)
-    roleCodes.foreach {
-      roleCode =>
-        RedisProcessor.Async.lget(RESOURCES_REL_FLAG + roleCode).onSuccess {
-          case resR =>
-            if (resR.body != null && resR.body.contains(resourceCode)) {
-              isFind.set(true)
-              p.success(Resp.success(true))
-            }
-            if (counter.decrementAndGet() == 0 && !isFind.get()) {
-              p.success(Resp.success(false))
-            }
-        }
+    if (roleCodes.isEmpty) {
+      p.success(Resp.success(false))
+    } else {
+      roleCodes.foreach {
+        roleCode =>
+          RedisProcessor.Async.lget(RESOURCES_REL_FLAG + roleCode).onSuccess {
+            case resR =>
+              if (resR.body != null && resR.body.contains(resourceCode)) {
+                isFind.set(true)
+                p.success(Resp.success(true))
+              }
+              if (counter.decrementAndGet() == 0 && !isFind.get()) {
+                p.success(Resp.success(false))
+              }
+          }
+      }
     }
     p.future
   }

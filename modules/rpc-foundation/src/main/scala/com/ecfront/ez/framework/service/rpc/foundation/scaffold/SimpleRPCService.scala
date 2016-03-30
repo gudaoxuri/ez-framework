@@ -54,6 +54,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
     } else {
       logger.trace(s" RPC simple update : $body")
       val model = JsonHelper.toObject(body, modelClazz)
+      model.id=parameter("id")
       storageObj.update(model, context.toStorageContext)
     }
   }

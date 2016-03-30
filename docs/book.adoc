@@ -17,3 +17,7 @@ include::module-email.adoc[]
 include::module-redis.adoc[]
 
 include::module-distributed.adoc[]
+
+include::module-kafka.adoc[]
+
+include::module-master-slave.adoc[]

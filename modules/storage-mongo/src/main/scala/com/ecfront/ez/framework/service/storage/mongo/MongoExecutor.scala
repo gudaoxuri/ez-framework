@@ -4,11 +4,12 @@ import com.ecfront.common.Resp
 import com.ecfront.ez.framework.service.storage.foundation.BaseModel
 import io.vertx.core.json.{JsonArray, JsonObject}
 
+import scala.collection.JavaConversions._
 
 private[mongo] object MongoExecutor {
 
   def save[M](entityInfo: MongoEntityInfo, collection: String, save: JsonObject, clazz: Class[M]): Resp[M] = {
-    if (entityInfo.uniqueFieldNames.nonEmpty) {
+    if (entityInfo.uniqueFieldNames.nonEmpty && (entityInfo.uniqueFieldNames.toSet & save.fieldNames().toSet).nonEmpty) {
       val existQuery = new JsonArray()
       entityInfo.uniqueFieldNames.filter(save.containsKey).foreach {
         field =>
@@ -47,7 +48,7 @@ private[mongo] object MongoExecutor {
   }
 
   def update[M](entityInfo: MongoEntityInfo, collection: String, id: String, update: JsonObject, clazz: Class[M]): Resp[M] = {
-    if (entityInfo.uniqueFieldNames.nonEmpty) {
+    if (entityInfo.uniqueFieldNames.nonEmpty && (entityInfo.uniqueFieldNames.toSet & update.fieldNames().toSet).nonEmpty) {
       val existQuery = new JsonObject()
       entityInfo.uniqueFieldNames.filter(update.containsKey).foreach {
         field =>

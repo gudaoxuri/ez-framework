@@ -43,7 +43,7 @@ object KafkaProcessor extends LazyLogging {
   private val consumers = ArrayBuffer[Consumer]()
 
   /**
-    * 关闭
+    * 关闭所有实例
     */
   def close(): Unit = {
     producers.foreach(_.close())
@@ -101,6 +101,9 @@ object KafkaProcessor extends LazyLogging {
       p.future
     }
 
+    /**
+      * 关闭当前生产者
+      */
     def close(): Unit = {
       if (producer != null) producer.close()
     }
@@ -166,6 +169,9 @@ object KafkaProcessor extends LazyLogging {
       })
     }
 
+    /**
+      * 关闭当前消费者
+      */
     def close(): Unit = {
       if (consumer != null) consumer.shutdown()
     }

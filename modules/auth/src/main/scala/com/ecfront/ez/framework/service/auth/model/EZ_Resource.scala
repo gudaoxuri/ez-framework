@@ -82,25 +82,25 @@ trait EZ_Resource_Base extends SecureStorage[EZ_Resource] with StatusStorage[EZ_
     super.postDisableById(id, context)
   }
 
-  override def postSave(saveResult: EZ_Resource, context: EZStorageContext): Resp[EZ_Resource] = {
+  override def postSave(saveResult: EZ_Resource, preResult: EZ_Resource, context: EZStorageContext): Resp[EZ_Resource] = {
     if (saveResult.enable) {
       CacheManager.addResource(saveResult.code)
     }
-    super.postSave(saveResult, context)
+    super.postSave(saveResult, preResult, context)
   }
 
-  override def postUpdate(updateResult: EZ_Resource, context: EZStorageContext): Resp[EZ_Resource] = {
+  override def postUpdate(updateResult: EZ_Resource, preResult: EZ_Resource, context: EZStorageContext): Resp[EZ_Resource] = {
     if (updateResult.enable) {
       CacheManager.addResource(updateResult.code)
     }
-    super.postUpdate(updateResult, context)
+    super.postUpdate(updateResult, preResult, context)
   }
 
-  override def postSaveOrUpdate(saveOrUpdateResult: EZ_Resource, context: EZStorageContext): Resp[EZ_Resource] = {
+  override def postSaveOrUpdate(saveOrUpdateResult: EZ_Resource, preResult: EZ_Resource, context: EZStorageContext): Resp[EZ_Resource] = {
     if (saveOrUpdateResult.enable) {
       CacheManager.addResource(saveOrUpdateResult.code)
     }
-    super.postSaveOrUpdate(saveOrUpdateResult, context)
+    super.postSaveOrUpdate(saveOrUpdateResult, preResult, context)
   }
 
   override def postDeleteById(id: Any, context: EZStorageContext): Resp[Void] = {

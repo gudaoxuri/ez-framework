@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.service.auth.model
 
-import com.ecfront.common.Resp
+import com.ecfront.common.{Ignore, Resp}
 import com.ecfront.ez.framework.service.auth.ServiceAdapter
 import com.ecfront.ez.framework.service.storage.foundation._
 import com.ecfront.ez.framework.service.storage.jdbc.{JDBCProcessor, JDBCSecureStorage, JDBCStatusStorage}
@@ -24,12 +24,13 @@ case class EZ_Menu() extends SecureModel with StatusModel {
   @Require
   @Label("Name")
   @BeanProperty var name: String = _
-  @BeanProperty var icon: String = ""
-  @BeanProperty var translate: String = ""
-  @BeanProperty var role_codes: List[String] = List[String]()
-  @BeanProperty var parent_code: String = ""
+  @BeanProperty var icon: String = _
+  @BeanProperty var translate: String = _
+  @Ignore var exchange_role_codes: List[String] = _
+  @BeanProperty var role_codes: List[String] = _
+  @BeanProperty var parent_code: String = _
   @BeanProperty var sort: Int = 0
-  @BeanProperty var organization_code: String = ServiceAdapter.defaultOrganizationCode
+  @BeanProperty var organization_code: String =_
 
 }
 
@@ -85,31 +86,74 @@ trait EZ_Menu_Base extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] {
   }
 
   override def preSaveOrUpdate(model: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
-    if (model.uri.contains(BaseModel.SPLIT)) {
-      Resp.badRequest(s"【uri】can't contains ${BaseModel.SPLIT}")
-    } else {
-      model.code = assembleCode(model.uri, model.organization_code)
-      if (ServiceAdapter.useRelTable) {
-        saveOrUpdateRelRoleData(model.code, model.role_codes)
-        model.role_codes = null
+    if (model.id == null || model.id.trim == "") {
+      if (model.uri.contains(BaseModel.SPLIT)) {
+        Resp.badRequest(s"【uri】can't contains ${BaseModel.SPLIT}")
+      } else {
+        model.code = assembleCode(model.uri, model.organization_code)
+        if (model.organization_code == null) {
+          model.organization_code = ServiceAdapter.defaultOrganizationCode
+        }
+        if (model.parent_code == null) {
+          model.parent_code = ""
+        }
+        if (model.icon == null) {
+          model.icon = ""
+        }
+        if (model.translate == null) {
+          model.translate = ""
+        }
+        if (model.role_codes == null) {
+          model.role_codes = List()
+        }
+        if (ServiceAdapter.useRelTable) {
+          model.exchange_role_codes = model.role_codes
+          model.role_codes = null
+        }
+        super.preSave(model, context)
       }
-      super.preSaveOrUpdate(model, context)
+    } else {
+      if (!EZ_Menu.existById(model.id).body) {
+        Resp.notFound("")
+      } else {
+        model.code = null
+        model.uri = null
+        model.organization_code = null
+        if (ServiceAdapter.useRelTable) {
+          model.exchange_role_codes = model.role_codes
+          model.role_codes = null
+        }
+        super.preUpdate(model, context)
+      }
     }
   }
 
-  override def postSave(saveResult: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
-    postGetX(saveResult)
-    super.postSave(saveResult, context)
+  override def postSave(saveResult: EZ_Menu, preResult: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
+    postSaveOrUpdate(saveResult, preResult, context)
   }
 
-  override def postUpdate(updateResult: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
-    postGetX(updateResult)
-    super.postUpdate(updateResult, context)
+  override def postUpdate(updateResult: EZ_Menu, preResult: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
+    postSaveOrUpdate(updateResult, preResult, context)
   }
 
-  override def postSaveOrUpdate(saveOrUpdateResult: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
-    postGetX(saveOrUpdateResult)
-    super.postSaveOrUpdate(saveOrUpdateResult, context)
+  override def postSaveOrUpdate(saveOrUpdateResult: EZ_Menu, preResult: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
+    if (preResult.id == null || preResult.id.trim == "") {
+      if (ServiceAdapter.useRelTable) {
+        saveOrUpdateRelRoleData(saveOrUpdateResult.code, preResult.exchange_role_codes)
+        saveOrUpdateResult.role_codes = preResult.exchange_role_codes
+      }
+      super.postUpdate(saveOrUpdateResult, preResult, context)
+    } else {
+      if (ServiceAdapter.useRelTable) {
+        if (preResult.exchange_role_codes != null && preResult.exchange_role_codes.nonEmpty) {
+          saveOrUpdateRelRoleData(saveOrUpdateResult.code, preResult.exchange_role_codes)
+          saveOrUpdateResult.role_codes = preResult.exchange_role_codes
+        } else {
+          saveOrUpdateResult.role_codes = getRelRoleData(saveOrUpdateResult.code).body
+        }
+      }
+      super.postSave(saveOrUpdateResult, preResult, context)
+    }
   }
 
   override def postGetEnabledByCond(condition: String, parameters: List[Any], getResult: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {

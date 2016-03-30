@@ -331,6 +331,8 @@ body
   "new_password": String // 新密码，如果要修改密码此字段必填
 }
 
+IMPORTANT: `current_password`必须填写正确，否则无法修改
+
 *响应内容主体*
 
 null

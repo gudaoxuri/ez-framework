@@ -47,22 +47,27 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     *
     * @param model      实体对象
     * @param entityInfo 实体信息
+    * @param isUpdate   是否是更新操作
     * @tparam E 实体类型
     * @return 是否通过
     */
-  protected def storageCheck[E <: BaseEntityInfo](model: M, entityInfo: E): Resp[Void] = {
+  protected def storageCheck[E <: BaseEntityInfo](model: M, entityInfo: E, isUpdate: Boolean): Resp[Void] = {
     if (entityInfo.requireFieldNames.nonEmpty) {
-      // 必填项检查
-      val errorFields = entityInfo.requireFieldNames.filter(BeanHelper.getValue(model, _).get == null).map {
-        requireField =>
-          if (entityInfo.fieldLabel.contains(requireField)) {
-            entityInfo.fieldLabel(requireField)
-          } else {
-            requireField
-          }
-      }
-      if (errorFields.nonEmpty) {
-        Resp.badRequest(errorFields.mkString("[", ",", "]") + " not null")
+      if (!isUpdate) {
+        // 必填项检查
+        val errorFields = entityInfo.requireFieldNames.filter(BeanHelper.getValue(model, _).get == null).map {
+          requireField =>
+            if (entityInfo.fieldLabel.contains(requireField)) {
+              entityInfo.fieldLabel(requireField)
+            } else {
+              requireField
+            }
+        }
+        if (errorFields.nonEmpty) {
+          Resp.badRequest(errorFields.mkString("[", ",", "]") + " not null")
+        } else {
+          Resp.success(null)
+        }
       } else {
         Resp.success(null)
       }
@@ -88,10 +93,11 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * 保存后处理
     *
     * @param saveResult 保存后的实体对象
+    * @param preResult  保存前的实体对象
     * @param context    上下文
     * @return 处理后的实体对象
     */
-  def postSave(saveResult: M, context: EZStorageContext): Resp[M] = Resp.success(saveResult)
+  def postSave(saveResult: M, preResult: M, context: EZStorageContext): Resp[M] = Resp.success(saveResult)
 
   /**
     * 保存
@@ -105,7 +111,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     if (preR) {
       val doR = doSave(preR.body, context)
       if (doR) {
-        postSave(doR.body, context)
+        postSave(doR.body, preR.body, context)
       } else {
         doR
       }
@@ -136,10 +142,11 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * 更新后处理
     *
     * @param updateResult 更新后的实体对象
+    * @param preResult    更新前的实体对象
     * @param context      上下文
     * @return 处理后的实体对象
     */
-  def postUpdate(updateResult: M, context: EZStorageContext): Resp[M] = Resp.success(updateResult)
+  def postUpdate(updateResult: M, preResult: M, context: EZStorageContext): Resp[M] = Resp.success(updateResult)
 
   /**
     * 更新
@@ -149,11 +156,12 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @return 更新后的实体对象
     */
   def update(model: M, context: EZStorageContext = EZStorageContext()): Resp[M] = {
+    model.id = model.id.trim
     val preR = preUpdate(model, context)
     if (preR) {
       val doR = doUpdate(preR.body, context)
       if (doR) {
-        postUpdate(doR.body, context)
+        postUpdate(doR.body, preR.body, context)
       } else {
         doR
       }
@@ -184,10 +192,11 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * 保存或更新后处理
     *
     * @param saveOrUpdateResult 保存或更新后的实体对象
+    * @param preResult          保存或更新前的实体对象
     * @param context            上下文
     * @return 处理后的实体对象
     */
-  def postSaveOrUpdate(saveOrUpdateResult: M, context: EZStorageContext): Resp[M] = Resp.success(saveOrUpdateResult)
+  def postSaveOrUpdate(saveOrUpdateResult: M, preResult: M, context: EZStorageContext): Resp[M] = Resp.success(saveOrUpdateResult)
 
   /**
     * 保存或更新
@@ -197,11 +206,14 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @return 保存或更新后的实体对象
     */
   def saveOrUpdate(model: M, context: EZStorageContext = EZStorageContext()): Resp[M] = {
+    if (model.id != null) {
+      model.id = model.id.trim
+    }
     val preR = preSaveOrUpdate(model, context)
     if (preR) {
       val doR = doSaveOrUpdate(preR.body, context)
       if (doR) {
-        postSaveOrUpdate(doR.body, context)
+        postSaveOrUpdate(doR.body, preR.body, context)
       } else {
         doR
       }
@@ -817,10 +829,11 @@ trait BaseStorageAdapter[M <: BaseModel, O <: BaseStorage[M]] extends BaseStorag
     * 保存后处理
     *
     * @param saveResult 保存后的实体对象
+    * @param preResult  保存前的实体对象
     * @param context    上下文
     * @return 处理后的实体对象
     */
-  override def postSave(saveResult: M, context: EZStorageContext): Resp[M] = storageObj.postSave(saveResult, context)
+  override def postSave(saveResult: M, preResult: M, context: EZStorageContext): Resp[M] = storageObj.postSave(saveResult, preResult, context)
 
   /**
     * 保存
@@ -844,10 +857,11 @@ trait BaseStorageAdapter[M <: BaseModel, O <: BaseStorage[M]] extends BaseStorag
     * 更新后处理
     *
     * @param updateResult 更新后的实体对象
+    * @param preResult    更新前的实体对象
     * @param context      上下文
     * @return 处理后的实体对象
     */
-  override def postUpdate(updateResult: M, context: EZStorageContext): Resp[M] = storageObj.postUpdate(updateResult, context)
+  override def postUpdate(updateResult: M, preResult: M, context: EZStorageContext): Resp[M] = storageObj.postUpdate(updateResult, preResult, context)
 
   /**
     * 更新
@@ -871,10 +885,12 @@ trait BaseStorageAdapter[M <: BaseModel, O <: BaseStorage[M]] extends BaseStorag
     * 保存或更新后处理
     *
     * @param saveOrUpdateResult 保存或更新后的实体对象
+    * @param preResult          保存或更新前的实体对象
     * @param context            上下文
     * @return 处理后的实体对象
     */
-  override def postSaveOrUpdate(saveOrUpdateResult: M, context: EZStorageContext): Resp[M] = storageObj.postSaveOrUpdate(saveOrUpdateResult, context)
+  override def postSaveOrUpdate(saveOrUpdateResult: M, preResult: M, context: EZStorageContext): Resp[M] =
+    storageObj.postSaveOrUpdate(saveOrUpdateResult, preResult, context)
 
   /**
     * 保存或更新

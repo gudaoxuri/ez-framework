@@ -153,7 +153,7 @@ object Initiator extends LazyLogging {
         s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/account/bylogin/"
       )))
 
-      val account = EZ_Account(EZ_Account.SYSTEM_ACCOUNT_CODE, "admin"+EZ_Account.VIRTUAL_EMAIL, "Sys Admin", "admin", List(
+      val account = EZ_Account(EZ_Account.SYSTEM_ACCOUNT_CODE, "admin" + EZ_Account.VIRTUAL_EMAIL, "Sys Admin", "admin", List(
         BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_FLAG
       ))
       EZ_Account.save(account)
