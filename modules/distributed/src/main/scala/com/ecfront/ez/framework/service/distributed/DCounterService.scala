@@ -16,10 +16,24 @@ case class DCounterService(key: String) extends LazyLogging {
     this
   }
 
+  def get: Long = {
+    counter.get()
+  }
+
   def inc(): Long = {
     counter.incrementAndGet()
   }
 
+  def dec(): Long = {
+    counter.decrementAndGet()
+  }
+
+  /**
+    * 有上限的inc
+    *
+    * @param maxValue 最大值
+    * @return 当前值
+    */
   def inc(maxValue: Long): Long = {
     this.synchronized {
       val lock = DLockService("__" + key + "_counter")
@@ -41,6 +55,12 @@ case class DCounterService(key: String) extends LazyLogging {
     }
   }
 
+  /**
+    * 有上限的inc并返回是否增加了
+    *
+    * @param maxValue 最大值
+    * @return 是否增加了，已达上限返回false
+    */
   def incWithStatus(maxValue: Long): Boolean = {
     this.synchronized {
       val lock = DLockService("__" + key + "_counter")
@@ -63,14 +83,12 @@ case class DCounterService(key: String) extends LazyLogging {
     }
   }
 
-  def get: Long = {
-    counter.get()
-  }
-
-  def dec(): Long = {
-    counter.decrementAndGet()
-  }
-
+  /**
+    * 有下限的dec
+    *
+    * @param minValue 最小值
+    * @return 当前值
+    */
   def dec(minValue: Long): Long = {
     this.synchronized {
       val lock = DLockService("__" + key + "_counter")
@@ -92,6 +110,12 @@ case class DCounterService(key: String) extends LazyLogging {
     }
   }
 
+  /**
+    * 有下限的inc并返回是否减少了
+    *
+    * @param minValue 最小值
+    * @return 是否减少了，已达下限返回false
+    */
   def decWithStatus(minValue: Long): Boolean = {
     this.synchronized {
       val lock = DLockService("__" + key + "_counter")
@@ -114,7 +138,7 @@ case class DCounterService(key: String) extends LazyLogging {
     }
   }
 
-  def delete() = {
+  def delete(): this.type = {
     counter.delete()
     this
   }

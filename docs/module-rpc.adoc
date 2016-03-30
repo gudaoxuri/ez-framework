@@ -1,10 +1,11 @@
-== HTTP服务
+== RPC服务
 
 === 功能
 
-. 支持基于注解的HTTP服务发现
+. 支持HTTP和WebSocket服务
+. 基于注解服务发现
 . Restful风格，支持GET POST PUT DELETE等常用方法
-. 支持HTTP及HTTPS
+. 支持HTTPS
 . 支持Json跨域请求
 . 支持拦截器栈，可适配权限认证等服务
 . 提供同步及异步HTTP客户端
@@ -16,23 +17,28 @@
 
  <dependency>
    <groupId>com.ecfront</groupId>
-   <artifactId>ezf-rpc-http</artifactId>
+   <artifactId>ezf-rpc-<http或websocket></artifactId>
    <version>3.0.0-SNAPSHOT</version>
  <dependency>
 
 . 添加配置
 
+ // HTTP
  "rpc.http": {
-   "servicePath": "com.foo.api",
-   "host": "0.0.0.0"
+   "servicePath": "com.foo.api"
+ }
+ 
+ // 或 WebSocket
+ "rpc.websocket": {
+   "servicePath": "com.foo.api"
  }
 
 . 在`com.foo.api`包下添加scala类
 
  @RPC("/test/")
- @HTTP
+ @HTTP 或 @WebSocket
  object TestService {
-    @POST("")
+    @POST("") 或 @REQUEST("")
     def getTest(parameter: Map[String, String],body:String, context: EZRPCContext): Resp[String] = {
       Resp.success(String)
     }
@@ -44,14 +50,47 @@
  
 . 访问
 
+ // HTTP
  POST http://127.0.0.1/test/" body: "Hello World"
  返回 "Hello World"
+ 
+ // 或 WebSocket
+ 写个HTML页面
+ <html>
+ <head></head>
+ <script>
+     var socket_resource;
+     if (window.WebSocket) {
+         socket= new WebSocket("ws://localhost/test/");
+         socket.onmessage = function (event) {
+             console.log("received : " + JSON.parse(event.data));
+         };
+         socket.onopen = function (event) {
+             console.log("opened!");
+         };
+         socket.onclose = function (event) {
+             console.log("closed.");
+         };
+     } else {
+         alert("Your browser does not support Websockets. (Use Chrome)");
+     }
+     function send() {
+         socket.send(JSON.stringify({
+             f1: "1111"
+         }));
+     }
+ </script>
+ <body>
+ <input id="btnSend" type="button" value="POST" onclick="send()"/>
+ </body>
+ </html>
+ 打开测试，OK
 
 === 依赖
 
 服务依赖：storage.mongo或storage.jdbc（可选，使用CRUD脚手架服务时必选）
 
-=== 配置
+=== HTTP配置
 
 ----
 "rpc.http": {
@@ -83,9 +122,22 @@ IMPORTANT: 资源目录(resourcePath），需要禁用此目录及子孙目录�
 
 NOTE: SSL证书路径为相对路径时，它的根路径查找顺序为 1）启动参数中conf指定的路径，2）当前的classPath，3）./config/
 
+=== WebSocket配置
+
+----
+"rpc.websocket": {
+  "servicePath": "", <1>
+  "host": "127.0.0.1", <2>
+  "port": 80 <3>
+}
+----
+<1> WebSocket服务发现的根包，系统会以此包为基础，扫描子孙路径下所有带@RPC及@WebSocket的类，并将其类中带@REQUEST注解的方法加入到路由表中
+<2> IP或主机名
+<3> 端口号
+
 === 使用
 
-==== 注解及方法定义
+==== HTTP服务注解及方法定义
 [source,scala]
 ----
  @RPC("/test/") // 指定RPC注解，参数`/test/`表示uri的根路径
@@ -141,6 +193,23 @@ TIP: 目前POST及PUT请求体不支持直接解析自定义泛型对象，内�
 IMPORTANT: URI必须严格对应，如 `/test` 与 `/test/` 不是同一个路径
 
 IMPORTANT: URI变量以 `:` 开头，变量名只能是字母或数字
+
+
+==== WebSocket服务注解及方法定义
+[source,scala]
+----
+ @RPC("/test/") // 指定RPC注解，参数`/test/`表示uri的根路径
+ @WebSocket // 指定WebSocket注解，表示此类可提供WebSocket服务
+ object DemoService { 
+
+     // 此注解表示此方法支持WebSocket请求，方法形参与HTTP的@POST类似
+     @REQUEST("")
+     def getTest(parameter: Map[String, String],body:String,context: EZRPCContext): Resp[String] = {
+       Resp.success("Hello World")
+     }
+
+ }
+----
 
 ==== SimpleHttpService脚手架
 
@@ -343,4 +412,19 @@ def put(url: String, body: Any, contentType: String = "application/json; charset
   * @return 请求结果，string类型
   */
 def delete(url: String, contentType: String = "application/json; charset=utf-8"): Future[String]
+----
+
+==== WebSocket消息推送管理
+
+[source,scala]
+.WebSocketMessagePushManager
+----
+/**
+  * 向所有客户端推送消息
+  *
+  * @param method 连接方法，目前只限于 `REQUEST` 方法
+  * @param path   连接路径
+  * @param data   消息
+  */
+def ws(method: String, path: String, data: Any): Unit
 ----

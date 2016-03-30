@@ -1,0 +1,186 @@
+== 常用分布式服务
+
+=== 功能
+
+. 分布式计数
+. 分布式锁
+. 分布式Map
+. 分布式阻塞和非阻塞队列
+. 分布式消息发布订阅
+
+=== 5分钟上手
+
+. 添加依赖
+
+ <dependency>
+   <groupId>com.ecfront</groupId>
+   <artifactId>ezf-distributed</artifactId>
+   <version>3.0.0-SNAPSHOT</version>
+ <dependency>
+
+. 添加配置
+
+ "distributed": {},
+ "redis": {}
+
+. 测试服务
+
+ EZManager.start()
+ // 创建test_counter计数器
+ val counter = DCounterService("test_counter")
+ // 设置成10
+ counter.set(10)
+ // 加1
+ counter.inc()
+ // 减1
+ counter.dec()
+ // 删除
+ counter.delete()
+
+=== 依赖
+
+服务依赖：redis
+
+=== 配置
+
+----
+"distributed": {}
+----
+
+_分布式服务本身没有配置项_
+
+=== 使用
+
+==== 分布式AtomicLong
+
+[source,scala]
+.DAtomicLongService(key: String) <1>
+----
+  def set(value: Long)
+  def get: Long
+----
+<1> key AtomicLong名
+
+==== 分布式阻塞队列
+
+[source,scala]
+.DBlockingQueueService[M](key: String) <1>
+----
+  def put(value: M)
+  def peek(): M
+  def take(): M
+  def size(): Int
+  def delete()
+----
+<1> key 队列名,M 队列项的类型
+
+==== 分布式CountDownLatch
+
+[source,scala]
+.DCountDownLatchService(key: String) <1>
+----
+  def set(value: Long)
+  def await(time: Long = -1, unit: TimeUnit = null)
+  def get: Long
+  def countDown()
+  def delete()
+----
+<1> key CountDownLatch名
+
+==== 分布式原子计数器
+
+[source,scala]
+.DCounterService(key: String) <1>
+----
+  def set(value: Long)
+  def get: Long
+  def inc(): Long
+  def dec(): Long
+
+  /**
+    * 有上限的inc
+    *
+    * @param maxValue 最大值
+    * @return 当前值
+    */
+  def inc(maxValue: Long): Long
+
+  /**
+    * 有上限的inc并返回是否增加了
+    *
+    * @param maxValue 最大值
+    * @return 是否增加了，已达上限返回false
+    */
+  def incWithStatus(maxValue: Long): Boolean
+
+  /**
+    * 有下限的dec
+    *
+    * @param minValue 最小值
+    * @return 当前值
+    */
+  def dec(minValue: Long): Long
+
+  /**
+    * 有下限的inc并返回是否减少了
+    *
+    * @param minValue 最小值
+    * @return 是否减少了，已达下限返回false
+    */
+  def decWithStatus(minValue: Long): Boolean
+
+  def delete()
+----
+<1> key 计数器名
+
+==== 分布式锁
+
+[source,scala]
+.DLockService(key: String) <1>
+----
+  def lock(leaseTime: Long = -1, unit: TimeUnit = null)
+  def tryLock(waitTime: Long = 0, leaseTime: Long = -1, unit: TimeUnit = TimeUnit.MILLISECONDS): Boolean
+  def unLock(): Boolean
+  def isLock: Boolean
+  def delete()
+----
+<1> key 锁名
+
+==== 分布式Map，key为string , value为自定义类型
+
+[source,scala]
+.DMapService[M](key: String) <1>
+----
+  def put(key: String, value: M)
+  def putIfAbsent(key: String, value: M)
+  def contains(key: String): Boolean
+  def foreach(fun: (String, M) => Unit)
+  def get(key: String): M
+  def remove(key: String)
+  def clear()
+----
+<1> key Map名,M Map项的类型
+
+==== 分布式队列（不阻塞）
+
+[source,scala]
+.DQueueService[M](key: String) <1>
+----
+  def add(value: M)
+  def peek(): M
+  def poll(): M
+  def size(): Int
+  def delete()
+----
+<1> key 队列名,M 队列项的类型
+
+==== 分布式消息队列
+
+[source,scala]
+.DTopicService[M](key: String) <1>
+----
+  def publish(message: M)
+  def subscribe(fun: => M => Unit)
+----
+<1> key 消息队列名,M 消息队列项的类型
+

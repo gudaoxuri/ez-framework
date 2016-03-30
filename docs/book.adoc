@@ -8,8 +8,12 @@
 
 include::module-storage.adoc[]
 
-include::module-rpc.http.adoc[]
+include::module-rpc.adoc[]
 
 include::module-auth.adoc[]
 
 include::module-email.adoc[]
+
+include::module-redis.adoc[]
+
+include::module-distributed.adoc[]

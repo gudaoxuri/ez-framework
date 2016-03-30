@@ -12,18 +12,23 @@ import scala.concurrent.{Await, Promise}
 
 object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
+  private val DEFAULT_WEBSOCKET_PORT: Integer = 80
+
+
   override def init(parameter: JsonObject): Resp[String] = {
     val servicePath = parameter.getString("servicePath")
+    val port = parameter.getInteger("port", DEFAULT_WEBSOCKET_PORT)
+    val host = parameter.getString("host", "127.0.0.1")
     AutoBuildingProcessor.autoBuilding[WebSocket](servicePath, classOf[WebSocket])
     val p = Promise[Resp[String]]()
     EZContext.vertx
       .createHttpServer().websocketHandler(new WebSocketServerProcessor)
-      .listen(parameter.getInteger("port"), parameter.getString("host"), new Handler[AsyncResult[HttpServer]] {
+      .listen(port, host, new Handler[AsyncResult[HttpServer]] {
         override def handle(event: AsyncResult[HttpServer]): Unit = {
           if (event.succeeded()) {
             p.success(Resp.success(
               s"""WS start successful.
-                  | ws://${parameter.getString("host")}:${parameter.getInteger("port")}/""".stripMargin))
+                  | ws://$host:$port/""".stripMargin))
           } else {
             logger.error(s"WS start fail .", event.cause())
             p.success(Resp.serverError(s"WS start fail : ${event.cause().getMessage}"))

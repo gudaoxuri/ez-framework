@@ -209,7 +209,7 @@ GET /public/menu/?__ez_token__=<token>  `__ez_token__`可选，不加时显示�
 
 *响应内容主体*
 
-[source,text]
+[source,json]
 [
   {
     "code": String, // 菜单编码

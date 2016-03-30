@@ -55,7 +55,6 @@
   "keyStorePassword": "<可选>", <13>
   "allowRcptErrors": "<可选>" <14>
 }
-}
 ----
 <1> SMTP服务IP
 <2> SMTP服务端口号
