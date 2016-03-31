@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.service.storage.jdbc
 
 import com.ecfront.common.Resp
-import com.ecfront.ez.framework.service.storage.foundation.Id
+import com.ecfront.ez.framework.service.storage.foundation.{Id, SecureModel}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.json.JsonArray
 import io.vertx.core.{AsyncResult, Handler}
@@ -126,7 +126,7 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
     val tableName = entityInfo.tableName
     val idFieldName = entityInfo.idFieldName
     val richValueInfo = collection.mutable.Map[String, Any]()
-    richValueInfo ++= valueInfo
+    richValueInfo ++= valueInfo.filterNot(_._1==SecureModel.CREATE_TIME_FLAG)
     if (!richValueInfo.forall(_._1 == idFieldName)) {
       if (entityInfo.uniqueFieldNames.nonEmpty && (entityInfo.uniqueFieldNames.toSet & richValueInfo.keys.toSet).nonEmpty) {
         val existQuery = entityInfo.uniqueFieldNames.filter(richValueInfo.contains).map {

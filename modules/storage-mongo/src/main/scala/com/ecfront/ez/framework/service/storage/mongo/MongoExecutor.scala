@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.service.storage.mongo
 
 import com.ecfront.common.Resp
-import com.ecfront.ez.framework.service.storage.foundation.BaseModel
+import com.ecfront.ez.framework.service.storage.foundation.{BaseModel, SecureModel}
 import io.vertx.core.json.{JsonArray, JsonObject}
 
 import scala.collection.JavaConversions._
@@ -48,42 +48,49 @@ private[mongo] object MongoExecutor {
   }
 
   def update[M](entityInfo: MongoEntityInfo, collection: String, id: String, update: JsonObject, clazz: Class[M]): Resp[M] = {
-    if (entityInfo.uniqueFieldNames.nonEmpty && (entityInfo.uniqueFieldNames.toSet & update.fieldNames().toSet).nonEmpty) {
-      val existQuery = new JsonObject()
-      entityInfo.uniqueFieldNames.filter(update.containsKey).foreach {
-        field =>
-          existQuery.put(field, update.getValue(field))
+    if (!update.isEmpty) {
+      if (update.containsKey(SecureModel.CREATE_TIME_FLAG)) {
+        update.remove(SecureModel.CREATE_TIME_FLAG)
       }
-      existQuery.put("_id", new JsonObject().put("$ne", id))
-      val existR = MongoProcessor.exist(collection, existQuery)
-      if (existR) {
-        if (existR.body) {
-          Resp.badRequest(entityInfo.uniqueFieldNames.map {
-            field =>
-              if (entityInfo.fieldLabel.contains(field)) {
-                entityInfo.fieldLabel(field)
-              } else {
-                field
-              }
-          }.mkString("[", ",", "]") + " must be unique")
-        } else {
-          val updateR = MongoProcessor.update(collection, id, update)
-          if (updateR) {
-            MongoProcessor.getById(collection, updateR.body, clazz)
+      if (entityInfo.uniqueFieldNames.nonEmpty && (entityInfo.uniqueFieldNames.toSet & update.fieldNames().toSet).nonEmpty) {
+        val existQuery = new JsonObject()
+        entityInfo.uniqueFieldNames.filter(update.containsKey).foreach {
+          field =>
+            existQuery.put(field, update.getValue(field))
+        }
+        existQuery.put("_id", new JsonObject().put("$ne", id))
+        val existR = MongoProcessor.exist(collection, existQuery)
+        if (existR) {
+          if (existR.body) {
+            Resp.badRequest(entityInfo.uniqueFieldNames.map {
+              field =>
+                if (entityInfo.fieldLabel.contains(field)) {
+                  entityInfo.fieldLabel(field)
+                } else {
+                  field
+                }
+            }.mkString("[", ",", "]") + " must be unique")
           } else {
-            updateR
+            val updateR = MongoProcessor.update(collection, id, update)
+            if (updateR) {
+              MongoProcessor.getById(collection, updateR.body, clazz)
+            } else {
+              updateR
+            }
           }
+        } else {
+          existR
         }
       } else {
-        existR
+        val updateR = MongoProcessor.update(collection, id, update)
+        if (updateR) {
+          MongoProcessor.getById(collection, updateR.body, clazz)
+        } else {
+          updateR
+        }
       }
     } else {
-      val updateR = MongoProcessor.update(collection, id, update)
-      if (updateR) {
-        MongoProcessor.getById(collection, updateR.body, clazz)
-      } else {
-        updateR
-      }
+      MongoProcessor.getById(collection, id, clazz)
     }
   }
 
