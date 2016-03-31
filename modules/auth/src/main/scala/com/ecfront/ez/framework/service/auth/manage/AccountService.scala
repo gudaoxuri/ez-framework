@@ -187,7 +187,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
   @PUT("/public/findpassword/:email/")
   def findPassword(parameter: Map[String, String], body: Map[String, String], context: EZAuthContext): Resp[Void] = {
     val email = parameter("email")
-    val newPassword = body("newPassword")
+    val newPassword = body("new_password")
     // 找回密码只针对默认组织
     val accountR = EZ_Account.getByEmail(email, ServiceAdapter.defaultOrganizationCode)
     if (accountR && accountR.body != null) {

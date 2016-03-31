@@ -175,6 +175,8 @@ body:
   "ext_info": Map[String, Any] // 扩展信息
 }
 
+NOTE: `ext_id`只在使用`extAccountStorage`时有意义
+
 ==== 注销
 
 *请求*
@@ -271,7 +273,7 @@ PUT /public/findpassword/<email>/
 body
 [source,text]
 {
-  "newPassword": String  // 新的密码
+  "new_password": String  // 新的密码
 }
 
 *响应内容主体*
@@ -382,11 +384,10 @@ PUT /auth/manage/resource/<资源id>/?__ez_token__=<token>
 body
 [source,text]
 {
-  "id": String,  // 数据库id
-  "method": String,  // Http方法，大写
-  "uri": String,  // 资源URI
   "name": String // 资源名称
 }
+
+NOTE: 只能修改`name`
 
 *响应内容主体*
 
@@ -551,11 +552,11 @@ PUT /auth/manage/organization/<组织id>/?__ez_token__=<token>
 body
 [source,text]
 {
-  "id": String,  // 数据库id
-  "code": String,  // 组织编码
   "name": String, // 组织名称
   "image": String // 组织图标
 }
+
+NOTE: 只能修改`name`和`image`
 
 *响应内容主体*
 
@@ -749,12 +750,12 @@ PUT /auth/manage/role/<角色id>/?__ez_token__=<token>
 body
 [source,text]
 {
-  "id": String,  // 数据库id
-  "flag": String,  // 角色标识
   "name": String, // 角色名称
   "resource_codes": List[String], // 所属资源编码列表
-  "organization_code": String // 所属组织编码
 }
+
+NOTE: 只能修改`name`和`resource_codes`
+
 
 *响应内容主体*
 
@@ -933,16 +934,15 @@ PUT /auth/manage/account/<账户id>/?__ez_token__=<token>
 body
 [source,text]
 {
-  "id": String,  // 数据库id
   "name": String, // 姓名
   "email": String, // email
   "image": String, // 头像URL
   "password": String, // 密码
   "role_codes": List[String], // 角色编码列表
-  "organization_code": String, // 所属组织编码
-  "ext_id": String, // 扩展Id
   "ext_info": Map[String, Any] // 扩展信息
 }
+
+NOTE: 只能修改`name`、`email`、`image`、`password`、`role_codes`和`ext_info`
 
 *响应内容主体*
 
@@ -1144,16 +1144,15 @@ PUT /auth/manage/menu/<菜单id>/?__ez_token__=<token>
 body
 [source,text]
 {
-  "id": String,  // 数据库id
-  "uri": String, // 菜单点击的URI
   "name": String, // 菜单名称
   "icon": String, // 菜单图标名称
   "translate": String, // 菜单翻译（i18n用）
   "role_codes": List[String], // 所属角色编码列表
   "parent_code": String, // 父菜单编码，用于多级菜单
-  "sort": Int, // 排序，倒序
-  "organization_code": String // 所属组织编码
+  "sort": Int // 排序，倒序
 }
+
+NOTE: 只能修改`name`、`icon`、`translate`、`parent_code`、`role_codes`和`sort`
 
 *响应内容主体*
 

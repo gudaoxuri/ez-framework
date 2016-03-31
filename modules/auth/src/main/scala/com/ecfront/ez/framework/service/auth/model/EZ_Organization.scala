@@ -59,11 +59,16 @@ trait EZ_Organization_Base extends SecureStorage[EZ_Organization] with StatusSto
   }
 
   override def preUpdate(model: EZ_Organization, context: EZStorageContext): Resp[EZ_Organization] = {
+    model.code = null
     preSaveOrUpdate(model, context)
   }
 
   override def preSaveOrUpdate(model: EZ_Organization, context: EZStorageContext): Resp[EZ_Organization] = {
-    super.preSaveOrUpdate(model, context)
+    if (model.id == null || model.id.trim == "") {
+      preSave(model, context)
+    } else {
+      preUpdate(model, context)
+    }
   }
 
   def getByCode(code: String): Resp[EZ_Organization]
