@@ -66,7 +66,7 @@ class UserSpec extends MockStartupSpec {
   // Step 3 Modify Account
   test("User Get or Update test") {
 
-    val token = AuthService.doLogin("u1", "123", "").body.token
+    val token = AuthService.doLogin("u1", "123", "",new EZAuthContext).body.token
     val accountVO = JsonHelper.toObject[Resp[Account_VO]](
       HttpClientProcessor.get(
         s"http://0.0.0.0:8080/auth/manage/account/bylogin/?__ez_token__=$token")).body
@@ -105,7 +105,7 @@ class UserSpec extends MockStartupSpec {
     ).code == StandardCode.NOT_FOUND)
     val result = HttpClientProcessor.get(emailReceivedUrl)
     println(result)
-    assert(AuthService.doLogin("u1", "abc", ""))
+    assert(AuthService.doLogin("u1", "abc", "",new EZAuthContext))
 
   }
 

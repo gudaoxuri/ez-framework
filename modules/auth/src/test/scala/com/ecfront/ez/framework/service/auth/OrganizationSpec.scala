@@ -30,7 +30,7 @@ class OrganizationSpec extends MockStartupSpec {
     EZ_Account.save(account)
 
     // login
-    val loginResp = AuthService.doLogin("u1", "123", "org1")
+    val loginResp = AuthService.doLogin("u1", "123", "org1",new EZAuthContext)
     assert(loginResp
       && loginResp.body.token != ""
       && loginResp.body.login_id == "u1"

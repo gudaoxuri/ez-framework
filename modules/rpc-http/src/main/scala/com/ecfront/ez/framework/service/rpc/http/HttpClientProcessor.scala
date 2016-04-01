@@ -2,9 +2,9 @@ package com.ecfront.ez.framework.service.rpc.http
 
 import com.ecfront.common.JsonHelper
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http._
+import io.vertx.core.{Handler, Vertx}
 import org.jsoup.nodes.Document
 
 import scala.concurrent.duration.Duration
@@ -18,8 +18,14 @@ import scala.concurrent.{Await, Future, Promise}
   */
 object HttpClientProcessor extends LazyLogging {
 
-  var httpClient: HttpClient = _
-  var httpClients: HttpClient = _
+
+  private var httpClient: HttpClient = _
+  private var httpClients: HttpClient = _
+
+  def init(vertx: Vertx): Unit = {
+    httpClient = vertx.createHttpClient()
+    httpClients = vertx.createHttpClient(new HttpClientOptions().setSsl(true).setVerifyHost(false).setTrustAll(true))
+  }
 
   /**
     * GET 请求

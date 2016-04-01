@@ -18,7 +18,7 @@ class MenuSpec extends MockStartupSpec {
     val pubMenus = AuthService.doGetMenus(List(),"").body
     assert(pubMenus.length == 3)
 
-    val roleCodes = AuthService.doLogin("sysadmin", "admin","").body.role_codes
+    val roleCodes = AuthService.doLogin("sysadmin", "admin","",new EZAuthContext).body.role_codes
     val authMenus = AuthService.doGetMenus(roleCodes,"").body
     assert(authMenus.length == 5)
 

@@ -3,7 +3,7 @@ package com.ecfront.ez.framework.service.rpc.http
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.{EZContext, EZServiceAdapter}
 import com.ecfront.ez.framework.service.rpc.foundation.AutoBuildingProcessor
-import io.vertx.core.http.{HttpClientOptions, HttpServer, HttpServerOptions}
+import io.vertx.core.http.{HttpServer, HttpServerOptions}
 import io.vertx.core.json.JsonObject
 import io.vertx.core.net.JksOptions
 import io.vertx.core.{AsyncResult, Handler}
@@ -60,8 +60,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
           }
         }
       })
-    HttpClientProcessor.httpClient = EZContext.vertx.createHttpClient()
-    HttpClientProcessor.httpClients = EZContext.vertx.createHttpClient(new HttpClientOptions().setSsl(true).setVerifyHost(false).setTrustAll(true))
+    HttpClientProcessor.init(EZContext.vertx)
     val serviceR = Await.result(p.future, Duration.Inf)
     serviceR
   }

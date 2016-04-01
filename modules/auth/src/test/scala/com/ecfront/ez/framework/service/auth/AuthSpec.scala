@@ -40,8 +40,8 @@ class AuthSpec extends MockStartupSpec {
     )
 
     // login
-    assert(!AuthService.doLogin(EZ_Account.SYSTEM_ACCOUNT_CODE, "errorpwd", ""))
-    val loginResp = AuthService.doLogin(EZ_Account.SYSTEM_ACCOUNT_CODE, "admin", "")
+    assert(!AuthService.doLogin(EZ_Account.SYSTEM_ACCOUNT_CODE, "errorpwd", "",new EZAuthContext))
+    val loginResp = AuthService.doLogin(EZ_Account.SYSTEM_ACCOUNT_CODE, "admin", "",new EZAuthContext)
     assert(loginResp
       && loginResp.body.token != ""
       && loginResp.body.login_id == EZ_Account.SYSTEM_ACCOUNT_CODE

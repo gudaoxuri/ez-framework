@@ -4,27 +4,29 @@ import com.ecfront.common.Resp
 import com.ecfront.ez.framework.service.auth.model._
 import com.ecfront.ez.framework.service.rpc.foundation.{GET, POST, RPC}
 import com.ecfront.ez.framework.service.rpc.http.HTTP
+import com.typesafe.scalalogging.slf4j.LazyLogging
 
 @RPC("/auth/")
 @HTTP
-object AuthService {
+object AuthService extends LazyLogging {
 
   // 前端传入的token标识
   val VIEW_TOKEN_FLAG = "__ez_token__"
 
   @POST("/public/auth/login/")
   def login(parameter: Map[String, String], body: Map[String, String], context: EZAuthContext): Resp[Token_Info_VO] = {
-    if(!ServiceAdapter.customLogin) {
+    if (!ServiceAdapter.customLogin) {
       // id 可以是 login_id 或 email
       val id = body.getOrElse("id", "")
       val password = body.getOrElse("password", "")
       val organizationCode = body.getOrElse("organizationCode", ServiceAdapter.defaultOrganizationCode)
       if (id != "" && password != "") {
-        doLogin(id, password, organizationCode)
+        doLogin(id, password, organizationCode, context)
       } else {
-        Resp.badRequest("Missing required field : 【id】or 【password】")
+        logger.warn(s"[login] missing required field : 【id】or 【password】from ${context.remoteIP}")
+        Resp.badRequest(s"Missing required field : 【id】or 【password】")
       }
-    }else{
+    } else {
       Resp.notImplemented("Custom login enabled")
     }
   }
@@ -32,21 +34,26 @@ object AuthService {
   /**
     * 登录
     */
-  def doLogin(loginIdOrEmail: String, password: String, organizationCode: String): Resp[Token_Info_VO] = {
+  def doLogin(loginIdOrEmail: String, password: String, organizationCode: String, context: EZAuthContext): Resp[Token_Info_VO] = {
     val getR = EZ_Account.getByLoginIdOrEmail(loginIdOrEmail, organizationCode)
     if (getR && getR.body != null) {
       val account = getR.body
       if (EZ_Account.packageEncryptPwd(account.login_id, password) == account.password) {
         if (account.enable) {
-          CacheManager.addTokenInfo(account)
+          val tokenInfo = CacheManager.addTokenInfo(account)
+          logger.info(s"[login] success ,token:${tokenInfo.body.token} id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+          tokenInfo
         } else {
+          logger.warn(s"[login] account disabled by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
           Resp.notFound(s"Account disabled")
         }
       } else {
-        Resp.notFound(s"【password】NOT match")
+        logger.warn(s"[login] password not match by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+        Resp.notFound(s"【password】 not match")
       }
     } else {
-      Resp.notFound(s"【 $loginIdOrEmail】NOT exist in 【$organizationCode】")
+      logger.warn(s"[login] account not exist in  by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+      Resp.notFound(s"Account not exist")
     }
   }
 
@@ -68,7 +75,7 @@ object AuthService {
     goGetLoginInfo(parameter(VIEW_TOKEN_FLAG))
   }
 
-  def goGetLoginInfo(token: String): Resp[Token_Info_VO] ={
+  def goGetLoginInfo(token: String): Resp[Token_Info_VO] = {
     CacheManager.getTokenInfo(token)
   }
 
