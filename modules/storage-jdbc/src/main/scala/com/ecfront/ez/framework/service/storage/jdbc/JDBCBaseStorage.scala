@@ -28,7 +28,10 @@ trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
   override def doSave(model: M, context: EZStorageContext): Resp[M] = {
     val requireResp = storageCheck(model, _entityInfo, isUpdate = false)
     if (requireResp) {
-      JDBCExecutor.save(_entityInfo, getMapValue(model).filter(_._2 != null), _modelClazz)
+      JDBCExecutor.save(_entityInfo, getMapValue(model).filter(i => i._2 != null
+        && !_entityInfo.nowBySaveFieldNames.contains(i._1)
+        && !_entityInfo.nowByUpdateFieldNames.contains(i._1)
+      ), _modelClazz)
     } else {
       requireResp
     }
@@ -37,7 +40,11 @@ trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
   override def doUpdate(model: M, context: EZStorageContext): Resp[M] = {
     val requireResp = storageCheck(model, _entityInfo, isUpdate = true)
     if (requireResp) {
-      JDBCExecutor.update(_entityInfo, getIdValue(model), getMapValue(model).filter(_._2 != null), _modelClazz)
+      JDBCExecutor.update(_entityInfo, getIdValue(model),
+        getMapValue(model).filter(i => i._2 != null
+          && !_entityInfo.nowBySaveFieldNames.contains(i._1)
+          && !_entityInfo.nowByUpdateFieldNames.contains(i._1)
+        ), _modelClazz)
     } else {
       requireResp
     }
@@ -46,7 +53,11 @@ trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
   override def doSaveOrUpdate(model: M, context: EZStorageContext): Resp[M] = {
     val requireResp = storageCheck(model, _entityInfo, model.id != null && model.id.nonEmpty)
     if (requireResp) {
-      JDBCExecutor.saveOrUpdate(_entityInfo, getIdValue(model), getMapValue(model).filter(_._2 != null), _modelClazz)
+      JDBCExecutor.saveOrUpdate(_entityInfo, getIdValue(model),
+        getMapValue(model).filter(i => i._2 != null
+          && !_entityInfo.nowBySaveFieldNames.contains(i._1)
+          && !_entityInfo.nowByUpdateFieldNames.contains(i._1)
+        ), _modelClazz)
     } else {
       requireResp
     }

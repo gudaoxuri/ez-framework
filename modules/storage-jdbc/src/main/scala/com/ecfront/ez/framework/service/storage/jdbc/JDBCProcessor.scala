@@ -1,5 +1,6 @@
 package com.ecfront.ez.framework.service.storage.jdbc
 
+import java.util.Date
 import java.util.concurrent.atomic.AtomicLong
 
 import com.ecfront.common.{BeanHelper, JsonHelper, Resp}
@@ -696,7 +697,7 @@ object JDBCProcessor extends LazyLogging {
           case p if
           p.isInstanceOf[String] || p.isInstanceOf[Int] || p.isInstanceOf[Long] || p.isInstanceOf[Boolean] ||
             p.isInstanceOf[Double] || p.isInstanceOf[Float] || p.isInstanceOf[BigDecimal] ||
-            p.isInstanceOf[Char] || p.isInstanceOf[Short] || p.isInstanceOf[Byte]
+            p.isInstanceOf[Char] || p.isInstanceOf[Short] || p.isInstanceOf[Byte] || p.isInstanceOf[Date]
           => p
           case p =>
             JsonHelper.toJsonString(p)
@@ -709,7 +710,7 @@ object JDBCProcessor extends LazyLogging {
       */
     private val classJsonInfo = collection.mutable.Map[String, List[String]]()
 
-    private val baseTypes = Set("String", "Int", "Long", "Boolean", "Double", "Float", "BigDecimal", "Char", "Short", "Byte")
+    private val baseTypes = Set("String", "Int", "Long", "Boolean", "Double", "Float", "BigDecimal", "Char", "Short", "Byte","java.util.Date")
 
     private[jdbc] def convertObject[E](row: JsonObject, resultClass: Class[E]): E = {
       if (!classJsonInfo.contains(resultClass.getName)) {

@@ -67,24 +67,12 @@ trait SecureStorage[M <: SecureModel] extends BaseStorage[M] {
     */
   private def wrapSecureSave(model: M, context: EZStorageContext = EZStorageContext()): Unit = {
     val now = TimeHelper.msf.format(new Date()).toLong
-    if (model.create_user == null) {
-      model.create_user = context.optAccount
-    }
-    if (model.create_time == 0) {
-      model.create_time = now
-    }
-    if (model.create_org == null) {
-      model.create_org = context.optOrganization
-    }
-    if (model.update_user == null) {
-      model.update_user = context.optAccount
-    }
-    if (model.update_time == 0) {
-      model.update_time = now
-    }
-    if (model.update_org == null) {
-      model.update_org = context.optOrganization
-    }
+    model.create_user = context.optAccount
+    model.create_time = now
+    model.create_org = context.optOrganization
+    model.update_user = context.optAccount
+    model.update_time = now
+    model.update_org = context.optOrganization
   }
 
   /**
@@ -95,15 +83,9 @@ trait SecureStorage[M <: SecureModel] extends BaseStorage[M] {
     */
   private def wrapSecureUpdate(model: M, context: EZStorageContext = EZStorageContext()): Unit = {
     val now = TimeHelper.msf.format(new Date()).toLong
-    if (model.update_user == null) {
-      model.update_user = context.optAccount
-    }
-    if (model.update_time == 0) {
-      model.update_time = now
-    }
-    if (model.update_org == null) {
-      model.update_org = context.optOrganization
-    }
+    model.update_user = context.optAccount
+    model.update_time = now
+    model.update_org = context.optOrganization
   }
 
 }

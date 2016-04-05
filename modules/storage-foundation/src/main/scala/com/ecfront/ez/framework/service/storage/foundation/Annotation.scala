@@ -37,6 +37,21 @@ case class Require() extends StaticAnnotation
 case class Label(label: String) extends StaticAnnotation
 
 /**
+  * 插入时使用当前时间函数
+  *
+  */
+@scala.annotation.meta.field
+case class NowBySave() extends StaticAnnotation
+
+/**
+  * 更新时使用当前时间函数
+  *
+  */
+@scala.annotation.meta.field
+case class NowByUpdate() extends StaticAnnotation
+
+
+/**
   * 主键策略，默认是uuid，可选 seq
   *
   * @param strategy 主键策略

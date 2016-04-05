@@ -1,5 +1,7 @@
 package com.ecfront.ez.framework.service.storage.jdbc
 
+import java.util.Date
+
 import com.ecfront.common.StandardCode
 import com.ecfront.ez.framework.core.test.MockStartupSpec
 import com.ecfront.ez.framework.service.storage.foundation._
@@ -19,6 +21,11 @@ class JDBCSpec extends MockStartupSpec {
         | id INT NOT NULL AUTO_INCREMENT ,
         | name varchar(100) NOT NULL ,
         | age INT NOT NULL ,
+        | time timestamp NOT NULL default CURRENT_TIMESTAMP,
+        | time_auto_create timestamp NOT NULL,
+        | time_auto_update timestamp NOT NULL,
+        | date1 datetime,
+        | date2 date,
         | rel1 JSON ,
         | rel2 JSON ,
         | rel3 JSON ,
@@ -124,6 +131,9 @@ class JDBCSpec extends MockStartupSpec {
     jdbc.id = "1"
     jdbc.name = "n4"
     jdbc.age = 1
+    jdbc.time = new Date()
+    jdbc.date1 = new Date()
+    jdbc.date2 = new Date()
     jdbc.rel1 = List("1", "2")
     jdbc.rel2 = Map("s" -> "sss")
     val relModel = new Rel_Model()
@@ -135,19 +145,27 @@ class JDBCSpec extends MockStartupSpec {
     assert(jdbc.rel1 == List("1", "2"))
     assert(jdbc.rel2 == Map("s" -> "sss"))
     assert(jdbc.rel3.head.f == "r")
-    assert(jdbc.rel4.f ==  "r")
+    assert(jdbc.rel4.f == "r")
+    assert(jdbc.time_auto_create != null)
+    assert(jdbc.time_auto_update != null)
+    assert(jdbc.time != null)
+    assert(jdbc.date1 != null)
+    assert(jdbc.date2 != null)
     jdbc.rel1 = List("new")
     jdbc.rel2 = Map("new" -> "new")
     val newRelModel = new Rel_Model()
     newRelModel.f = "new"
     jdbc.rel3 = List(newRelModel)
     jdbc.rel4 = newRelModel
-
+    jdbc.time = null
     jdbc = JDBC_Test_Entity.update(jdbc).body
     assert(jdbc.rel1 == List("new"))
     assert(jdbc.rel2 == Map("new" -> "new"))
     assert(jdbc.rel3.head.f == "new")
     assert(jdbc.rel4.f == "new")
+    assert(jdbc.time_auto_create != null)
+    assert(jdbc.time_auto_update != null)
+    assert(jdbc.time_auto_create != jdbc.time_auto_update)
 
     jdbc = JDBC_Test_Entity.find("").body.head
     assert(jdbc.rel1 == List("new"))
@@ -179,6 +197,14 @@ case class JDBC_Test_Entity() extends SecureModel with StatusModel {
   @Label("姓名")
   @BeanProperty var name: String = _
   @BeanProperty var age: Int = _
+  @NowBySave
+  @BeanProperty var time_auto_create: Date = _
+  @NowBySave
+  @NowByUpdate
+  @BeanProperty var time_auto_update: Date = _
+  @BeanProperty var time: Date = _
+  @BeanProperty var date1: Date = _
+  @BeanProperty var date2: Date = _
   @BeanProperty var rel1: List[String] = _
   @BeanProperty var rel2: Map[String, Any] = _
   @BeanProperty var rel3: List[Rel_Model] = _

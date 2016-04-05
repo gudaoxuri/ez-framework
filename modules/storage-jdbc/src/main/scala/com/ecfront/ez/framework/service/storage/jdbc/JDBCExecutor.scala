@@ -44,24 +44,31 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
               }
           }.mkString("[", ",", "]") + " must be unique")
         } else {
-          doSave(tableName, idFieldName, richValueInfo, clazz)
+          doSave(tableName, idFieldName, richValueInfo, clazz, entityInfo)
         }
       } else {
         existR
       }
     } else {
-      doSave(tableName, idFieldName, richValueInfo, clazz)
+      doSave(tableName, idFieldName, richValueInfo, clazz, entityInfo)
     }
   }
 
-  private def doSave[M](tableName: String, idFieldName: String, richValueInfos: mutable.Map[String, Any], clazz: Class[M]): Resp[M] = {
+  private def doSave[M](tableName: String, idFieldName: String, richValueInfos: mutable.Map[String, Any],
+                        clazz: Class[M], entityInfo: JDBCEntityInfo): Resp[M] = {
     val idValue = if (richValueInfos.contains(idFieldName)) richValueInfos(idFieldName) else null
+    var fieldsSql = richValueInfos.keys.mkString(",")
+    var valuesSql = (for (i <- 0 until richValueInfos.size) yield " ? ").mkString(",")
+    if (entityInfo.nowBySaveFieldNames.nonEmpty) {
+      fieldsSql += entityInfo.nowBySaveFieldNames.mkString(",", ",", "")
+      valuesSql += entityInfo.nowBySaveFieldNames.map(_ => " now() ").mkString(",", ",", "")
+    }
     if (idValue != null) {
       val sql =
         s"""
            |INSERT INTO $tableName
-           | (${richValueInfos.keys.mkString(",")})
-           | SELECT ${(for (i <- 0 until richValueInfos.size) yield "?").mkString(",")}
+           | ( $fieldsSql )
+           | SELECT $valuesSql
            | FROM DUAL WHERE NOT EXISTS ( SELECT 1 FROM $tableName WHERE $idFieldName = ? )
        """.stripMargin
       JDBCProcessor.update(sql, richValueInfos.values.toList ++ List(idValue))
@@ -75,8 +82,8 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
       val sql =
         s"""
            |INSERT INTO $tableName
-           | (${richValueInfos.keys.mkString(",")})
-           | VALUES ( ${(for (i <- 0 until richValueInfos.size) yield "?").mkString(",")} )
+           | ( $fieldsSql )
+           | VALUES ( $valuesSql )
        """.stripMargin
       // 要获取保存后的id
       JDBCProcessor.Async.db.onComplete {
@@ -126,7 +133,7 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
     val tableName = entityInfo.tableName
     val idFieldName = entityInfo.idFieldName
     val richValueInfo = collection.mutable.Map[String, Any]()
-    richValueInfo ++= valueInfo.filterNot(_._1==SecureModel.CREATE_TIME_FLAG)
+    richValueInfo ++= valueInfo.filterNot(_._1 == SecureModel.CREATE_TIME_FLAG)
     if (!richValueInfo.forall(_._1 == idFieldName)) {
       if (entityInfo.uniqueFieldNames.nonEmpty && (entityInfo.uniqueFieldNames.toSet & richValueInfo.keys.toSet).nonEmpty) {
         val existQuery = entityInfo.uniqueFieldNames.filter(richValueInfo.contains).map {
@@ -148,13 +155,13 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
                 }
             }.mkString("[", ",", "]") + " must be unique")
           } else {
-            doUpdate(tableName, idFieldName, idValue, richValueInfo, clazz)
+            doUpdate(tableName, idFieldName, idValue, richValueInfo, clazz, entityInfo)
           }
         } else {
           existR
         }
       } else {
-        doUpdate(tableName, idFieldName, idValue, richValueInfo, clazz)
+        doUpdate(tableName, idFieldName, idValue, richValueInfo, clazz, entityInfo)
       }
     } else {
       JDBCProcessor.get(
@@ -165,12 +172,17 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
     }
   }
 
-  private def doUpdate[M](tableName: String, idFieldName: String, idValue: Any, richValueInfos: mutable.Map[String, Any], clazz: Class[M]): Resp[M] = {
+  private def doUpdate[M](tableName: String, idFieldName: String, idValue: Any, richValueInfos: mutable.Map[String, Any],
+                          clazz: Class[M], entityInfo: JDBCEntityInfo): Resp[M] = {
     val setFields = richValueInfos.filterNot(_._1 == idFieldName).toList
+    var setSql = setFields.map(f => s"${f._1} = ? ").mkString(",")
+    if (entityInfo.nowByUpdateFieldNames.nonEmpty) {
+      setSql += entityInfo.nowByUpdateFieldNames.map(i => s"$i = now() ").mkString(",", ",", "")
+    }
     val sql =
       s"""
          |UPDATE $tableName SET
-         |  ${setFields.map(f => s"${f._1} = ? ").mkString(",")}
+         |  $setSql
          | WHERE $idFieldName = ?
        """.stripMargin
     val updateR = JDBCProcessor.update(sql, setFields.map(_._2) :+ richValueInfos(idFieldName))
