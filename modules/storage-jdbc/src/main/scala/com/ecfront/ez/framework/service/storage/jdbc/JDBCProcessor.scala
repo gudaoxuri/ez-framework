@@ -305,7 +305,7 @@ object JDBCProcessor extends LazyLogging {
           new Handler[AsyncResult[ResultSet]] {
             override def handle(event: AsyncResult[ResultSet]): Unit = {
               if (event.succeeded()) {
-                val row = if (event.result().getNumRows == 1) {
+                val row = if (event.result().getNumRows > 0) {
                   event.result().getRows.get(0)
                 } else {
                   null
@@ -710,7 +710,7 @@ object JDBCProcessor extends LazyLogging {
       */
     private val classJsonInfo = collection.mutable.Map[String, List[String]]()
 
-    private val baseTypes = Set("String", "Int", "Long", "Boolean", "Double", "Float", "BigDecimal", "Char", "Short", "Byte","java.util.Date")
+    private val baseTypes = Set("String", "Int", "Long", "Boolean", "Double", "Float", "BigDecimal", "Char", "Short", "Byte", "java.util.Date")
 
     private[jdbc] def convertObject[E](row: JsonObject, resultClass: Class[E]): E = {
       if (!classJsonInfo.contains(resultClass.getName)) {
