@@ -813,6 +813,7 @@ trait BaseStorageAdapter[M <: BaseModel, O <: BaseStorage[M]] extends BaseStorag
   protected val storageObj: O
 
   override def customTableName(newName: String): Unit = {
+    tableName=newName
     storageObj.customTableName(newName)
   }
 

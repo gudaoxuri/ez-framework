@@ -19,7 +19,13 @@ trait JDBCStatusStorage[M <: StatusModel] extends JDBCBaseStorage[M] with Status
   }
 
   override def appendEnabled(condition: String): String = {
-    condition + " AND enable = true "
+    val cond =
+      if (condition == null || condition.trim == "") {
+        "1=1"
+      } else {
+        condition
+      }
+    cond + " AND enable = true "
   }
 
 }

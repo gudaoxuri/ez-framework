@@ -3,7 +3,7 @@ package com.ecfront.ez.framework.service.rpc.http
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.http._
-import io.vertx.core.json.JsonObject
+import io.vertx.core.json.{JsonArray, JsonObject}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -122,11 +122,16 @@ object RespHttpClientProcessor extends LazyLogging {
           val code = json.getString("code")
           val result: Resp[E] =
             if (code == StandardCode.SUCCESS) {
-              val jsonBody = json.getJsonObject("body")
+              val jsonBody = json.getValue("body")
               if (jsonBody == null) {
                 Resp[E](StandardCode.SUCCESS, "")
               } else {
-                val body = JsonHelper.toObject[E](jsonBody.encode())
+                val body = jsonBody match {
+                  case array: JsonArray =>
+                    JsonHelper.toObject[E](array.encode())
+                  case _ =>
+                    JsonHelper.toObject[E](jsonBody.asInstanceOf[JsonObject].encode())
+                }
                 Resp.success[E](body)
               }
             } else {
