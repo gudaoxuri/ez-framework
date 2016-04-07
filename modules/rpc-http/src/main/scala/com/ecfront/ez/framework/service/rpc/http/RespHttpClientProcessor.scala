@@ -129,8 +129,10 @@ object RespHttpClientProcessor extends LazyLogging {
                 val body = jsonBody match {
                   case array: JsonArray =>
                     JsonHelper.toObject[E](array.encode())
-                  case _ =>
+                  case array: JsonObject =>
                     JsonHelper.toObject[E](jsonBody.asInstanceOf[JsonObject].encode())
+                  case _ =>
+                    jsonBody.asInstanceOf[E]
                 }
                 Resp.success[E](body)
               }
