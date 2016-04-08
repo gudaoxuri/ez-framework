@@ -104,6 +104,13 @@
   "ssl": { <8>
     "keyPath": "", <9>
     "keyPassword": "" <10>
+  },
+  monitor": { <11>
+    "slow": {<12>
+      "time": 10000, <13>
+      "includes": [], <14>
+      "excludes": [] <15>
+    }
   }
 }
 ----
@@ -117,10 +124,17 @@
 <8> SSL配置
 <9> SSL证书路径，可以是绝对路径，也可以是相对路径
 <10> SSL证书密码
+<11> 是否使用请求监控
+<12> 是否使用慢请求监控
+<13> 慢请求时间定义，请求大于此时间会记录到日志，单位毫秒
+<14> 包含的请求URI，如果此字段存在，那么只会记录此URI中的请求
+<15> 排除的请求URI，如果此字段存在，那么在此URI中的请求都不会记录
 
 IMPORTANT: 资源目录(resourcePath），需要禁用此目录及子孙目录的执行权限
 
 NOTE: SSL证书路径为相对路径时，它的根路径查找顺序为 1）启动参数中conf指定的路径，2）当前的classPath，3）./config/
+
+NOTE: `includes`和`excludes`是排他的，当`includes`不为空时`excludes`将失效
 
 === WebSocket配置
 

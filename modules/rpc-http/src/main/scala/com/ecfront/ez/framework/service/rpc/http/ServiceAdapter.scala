@@ -1,13 +1,16 @@
 package com.ecfront.ez.framework.service.rpc.http
 
 import com.ecfront.common.Resp
+import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
 import com.ecfront.ez.framework.core.{EZContext, EZServiceAdapter}
 import com.ecfront.ez.framework.service.rpc.foundation.AutoBuildingProcessor
+import com.ecfront.ez.framework.service.rpc.http.interceptor.SlowMonitorInterceptor
 import io.vertx.core.http.{HttpServer, HttpServerOptions}
-import io.vertx.core.json.JsonObject
+import io.vertx.core.json.{JsonArray, JsonObject}
 import io.vertx.core.net.JksOptions
 import io.vertx.core.{AsyncResult, Handler}
 
+import scala.collection.JavaConversions._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Promise}
 
@@ -15,6 +18,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
   private val DEFAULT_HTTP_PORT: Integer = 80
   private val DEFAULT_HTTPS_PORT: Integer = 443
+  private val DEFAULT_SLOW_TIME: Long = 10000L
 
   var resourcePath: String = _
   var webUrl: String = _
@@ -60,6 +64,19 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
           }
         }
       })
+    if (parameter.containsKey("monitor")) {
+      val monitor = parameter.getJsonObject("monitor")
+      if (monitor.containsKey("slow")) {
+        val slow = monitor.getJsonObject("slow")
+        SlowMonitorInterceptor.init(
+          slow.getLong("time", DEFAULT_SLOW_TIME),
+          slow.getJsonArray("includes", new JsonArray()).map(_.asInstanceOf[String]).toSet,
+          slow.getJsonArray("excludes", new JsonArray()).map(_.asInstanceOf[String]).toSet
+        )
+        EZAsyncInterceptorProcessor.register(HttpInterceptor.category, SlowMonitorInterceptor)
+      }
+    }
+
     HttpClientProcessor.init(EZContext.vertx)
     val serviceR = Await.result(p.future, Duration.Inf)
     serviceR
