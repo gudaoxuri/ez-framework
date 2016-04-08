@@ -16,13 +16,14 @@ object SchedulerProcessor extends LazyLogging {
     *
     * @param scheduler 调度任务
     */
-  def save(scheduler: EZ_Scheduler): Unit = {
+  def save(scheduler: EZ_Scheduler): EZ_Scheduler = {
     scheduler.enable = true
     scheduler.parameterstr = JsonHelper.toJsonString(scheduler.parameters)
     val saveR = EZ_Scheduler.save(scheduler)
     if (saveR) {
       JobHelper.add(scheduler.name, scheduler.cron, classOf[ScheduleJobProxy], packageScheduler(scheduler), quartzScheduler)
     }
+    saveR.body
   }
 
   /**
@@ -30,13 +31,14 @@ object SchedulerProcessor extends LazyLogging {
     *
     * @param scheduler 调度任务
     */
-  def update(scheduler: EZ_Scheduler): Unit = {
+  def update(scheduler: EZ_Scheduler): EZ_Scheduler = {
     scheduler.enable = true
     scheduler.parameterstr = JsonHelper.toJsonString(scheduler.parameters)
     val updateR = EZ_Scheduler.update(scheduler)
     if (updateR) {
       JobHelper.modify(scheduler.name, scheduler.cron, classOf[ScheduleJobProxy], packageScheduler(scheduler), quartzScheduler)
     }
+    updateR.body
   }
 
   private def packageScheduler(scheduler: EZ_Scheduler): Map[String, Any] = {
@@ -52,13 +54,12 @@ object SchedulerProcessor extends LazyLogging {
   /**
     * 删除调度信息
     *
-    * @param id 调度任务ID
+    * @param name 调度任务名称
     */
-  def delete(id: String): Unit = {
-    val getR = EZ_Scheduler.getById(id)
-    val deleteR = EZ_Scheduler.deleteById(id)
+  def delete(name: String): Unit = {
+    val deleteR = EZ_Scheduler.deleteByName(name)
     if (deleteR) {
-      JobHelper.remove(getR.body.name, quartzScheduler)
+      JobHelper.remove(name, quartzScheduler)
     }
   }
 

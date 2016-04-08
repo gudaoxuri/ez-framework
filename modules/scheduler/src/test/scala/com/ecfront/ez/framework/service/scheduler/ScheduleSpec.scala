@@ -11,13 +11,22 @@ class ScheduleSpec extends MockStartupSpec {
 
     val cdl = new CountDownLatch(1)
 
-    val scheduler = EZ_Scheduler()
+    SchedulerProcessor.delete("测试")
+
+    var scheduler = EZ_Scheduler()
     scheduler.name = "测试"
     scheduler.cron = "* * * * * ?"
     scheduler.module = "scheduler"
     scheduler.clazz = TestScheduleJob.getClass.getName
     scheduler.parameters = Map("p1" -> 1, "p2" -> "1")
-    SchedulerProcessor.save(scheduler)
+    scheduler=SchedulerProcessor.save(scheduler)
+
+    scheduler.parameters = Map("p1" -> 22222, "p2" -> "1")
+        SchedulerProcessor.update(scheduler)
+
+    Thread.sleep(10000)
+
+    SchedulerProcessor.delete("测试")
 
     cdl.await()
 
@@ -30,8 +39,7 @@ object TestScheduleJob extends ScheduleJob {
   override def execute(scheduler: EZ_Scheduler): Resp[Void] = {
 
     assert(scheduler.clazz == TestScheduleJob.getClass.getName)
-    assert(scheduler.parameters("p1") == 1)
-    assert(scheduler.parameters("p2") == "1")
+    println(">>>>"+ scheduler.parameters)
 
     Resp.success(null)
   }

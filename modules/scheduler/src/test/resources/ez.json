@@ -4,7 +4,7 @@
     "module": "scheduler",
     "services": {
       "scheduler":{
-        "storage":"jdbc" // mongo or jdbc
+        "storage":"mongo" // mongo or jdbc
       },
       "storage.mongo": {
         "hosts": [
