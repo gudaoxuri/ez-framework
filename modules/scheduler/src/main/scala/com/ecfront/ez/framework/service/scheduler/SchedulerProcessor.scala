@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.service.scheduler
 
 import com.ecfront.common.JsonHelper
+import com.ecfront.ez.framework.service.storage.foundation.Page
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.quartz.impl.StdSchedulerFactory
 
@@ -70,6 +71,18 @@ object SchedulerProcessor extends LazyLogging {
     */
   def saveLog(log: EZ_Scheduler_Log): Unit = {
     EZ_Scheduler_Log.save(log, null)
+  }
+
+  /**
+    * 根据调度名称分页获取日志
+    *
+    * @param name       调度名称
+    * @param pageNumber 当前页，从1开始
+    * @param pageSize   每页条数
+    * @return 日志集
+    */
+  def pageLogsByName(name: String, pageNumber: Long, pageSize: Int): Page[EZ_Scheduler_Log] = {
+    EZ_Scheduler_Log.pageByName(name, pageNumber, pageSize).body
   }
 
   /**

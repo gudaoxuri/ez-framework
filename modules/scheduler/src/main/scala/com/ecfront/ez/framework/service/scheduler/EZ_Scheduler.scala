@@ -29,7 +29,6 @@ case class EZ_Scheduler() extends SecureModel with StatusModel {
 
 }
 
-
 object EZ_Scheduler extends SecureStorageAdapter[EZ_Scheduler, EZ_Scheduler_Base]
   with StatusStorageAdapter[EZ_Scheduler, EZ_Scheduler_Base] with EZ_Scheduler_Base {
 

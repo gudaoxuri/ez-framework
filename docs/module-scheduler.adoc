@@ -85,7 +85,12 @@ SchedulerProcessor.update(scheduler)
 
 === 删除调度任务 ===
 ...
-SchedulerProcessor.delete(<调度任务名称>)
+SchedulerProcessor.delete("<调度任务名称>")
+...
+
+=== 根据调度名称分页获取日志 ===
+...
+SchedulerProcessor.pageLogsByName("<调度任务名称>", <当前页，从1开始>, <每页条数>)
 ...
 
 === 调度任务回调 ===
