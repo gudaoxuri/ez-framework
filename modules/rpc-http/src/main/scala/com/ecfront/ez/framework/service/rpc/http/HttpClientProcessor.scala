@@ -1,10 +1,18 @@
 package com.ecfront.ez.framework.service.rpc.http
 
+import java.io.File
+import java.nio.file.Files
+import java.util.Date
+
 import com.ecfront.common.JsonHelper
+import com.ecfront.ez.framework.core.EZContext
+import com.ecfront.ez.framework.service.rpc.foundation.ReqFile
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.buffer.Buffer
+import io.vertx.core.file.{AsyncFile, FileProps, OpenOptions}
 import io.vertx.core.http._
-import io.vertx.core.{Handler, Vertx}
+import io.vertx.core.streams.Pump
+import io.vertx.core.{AsyncResult, Handler, Vertx}
 import org.jsoup.nodes.Document
 
 import scala.concurrent.duration.Duration
@@ -122,6 +130,13 @@ object HttpClientProcessor extends LazyLogging {
     }
 
     private[http] def request(method: HttpMethod, url: String, body: Any, contentType: String): Future[String] = {
+      val realContextType = if (body != null && body.isInstanceOf[File]) {
+        "multipart/form-data"
+      } else if (body != null && body.isInstanceOf[ReqFile]) {
+        "multipart/form-data; boundary=ez_boundary"
+      } else {
+        contentType
+      }
       val p = Promise[String]()
       val clientChannel =
         if (url.trim.toLowerCase().startsWith("https")) {
@@ -142,9 +157,9 @@ object HttpClientProcessor extends LazyLogging {
             }
           })
         }
-      }).putHeader("content-type", contentType)
+      }).putHeader("content-type", realContextType)
       if (body != null) {
-        contentType.toLowerCase match {
+        realContextType.toLowerCase match {
           case t if t.toLowerCase == "application/x-www-form-urlencoded" && body.isInstanceOf[Map[_, _]] =>
             client.end(body.asInstanceOf[Map[String, String]].map(i => i._1 + "=" + i._2).mkString("&"))
           case t if t.toLowerCase.contains("xml") =>
@@ -157,8 +172,47 @@ object HttpClientProcessor extends LazyLogging {
                 logger.error(s"Not support return type [${body.getClass.getName}] by xml")
                 client.end()
             }
+          case t if t.toLowerCase.contains("multipart/form-data") =>
+            body match {
+              case reqFile: ReqFile =>
+                client.setChunked(false)
+                client.end(getBufferBody(reqFile.file, reqFile.fieldName, reqFile.fileName))
+              case _ =>
+                val fs = EZContext.vertx.fileSystem()
+                val path = body.asInstanceOf[File].getPath
+                fs.props(path, new Handler[AsyncResult[FileProps]] {
+                  override def handle(event: AsyncResult[FileProps]): Unit = {
+                    client.headers().set("content-length", String.valueOf(event.result().size()))
+                    fs.open(path, new OpenOptions(), new Handler[AsyncResult[AsyncFile]] {
+                      override def handle(event: AsyncResult[AsyncFile]): Unit = {
+                        val file = event.result()
+                        val pump = Pump.pump(file, client)
+                        file.endHandler(new Handler[Void] {
+                          override def handle(event: Void): Unit = {
+                            client.end()
+                          }
+                        })
+                        pump.start()
+                      }
+                    })
+                  }
+                })
+            }
           case _ =>
-            client.end(JsonHelper.toJsonString(body))
+            val str = body match {
+              case b: String =>
+                body.asInstanceOf[String]
+              case b if b.isInstanceOf[Int] || b.isInstanceOf[Long] ||
+                b.isInstanceOf[Float] || b.isInstanceOf[Double] ||
+                b.isInstanceOf[Char] || b.isInstanceOf[Short] ||
+                b.isInstanceOf[BigDecimal] || b.isInstanceOf[Boolean] ||
+                b.isInstanceOf[Byte] || b.isInstanceOf[Date]
+              =>
+                b.toString
+              case _ =>
+                JsonHelper.toJsonString(body)
+            }
+            client.end(str)
         }
       } else {
         client.end()
@@ -167,6 +221,25 @@ object HttpClientProcessor extends LazyLogging {
     }
 
   }
+
+  private def getBufferBody(file: File, fieldName: String, fileName: String = null): Buffer = {
+    val finalFileName = if (fileName == null) {
+      file.getName.substring(0, file.getName.lastIndexOf(".")) + "_" + System.nanoTime() + "." + file.getName.substring(file.getName.lastIndexOf(".") + 1)
+    } else {
+      fileName
+    }
+    val buffer = Buffer.buffer()
+    buffer.appendString("--ez_boundary\r\n")
+    buffer.appendString("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + finalFileName + "\"\r\n")
+    buffer.appendString("Content-Type: application/octet-stream\r\n")
+    buffer.appendString("Content-Transfer-Encoding: binary\r\n")
+    buffer.appendString("\r\n")
+    buffer.appendBytes(Files.readAllBytes(file.toPath))
+    buffer.appendString("\r\n")
+    buffer.appendString("--ez_boundary--\r\n")
+    buffer
+  }
+
 
 }
 
