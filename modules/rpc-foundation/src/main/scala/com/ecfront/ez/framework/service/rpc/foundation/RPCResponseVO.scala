@@ -23,4 +23,4 @@ case class Raw(raw: Any)
   * @param fieldName 对应的field名称
   * @param fileName  生成的文件名称
   */
-case class ReqFile(file: File, fieldName: String, fileName: String)
+case class ReqFile(file: File, fieldName: String, fileName: String=null)
