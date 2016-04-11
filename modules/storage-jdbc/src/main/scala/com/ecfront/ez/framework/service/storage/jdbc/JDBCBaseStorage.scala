@@ -133,7 +133,7 @@ trait JDBCBaseStorage[M <: BaseModel] extends BaseStorage[M] {
 
   override def doCount(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Long] = {
     JDBCProcessor.count(
-      s"SELECT count(1) FROM $tableName WHERE ${packageCondition(condition)} ",
+      s"SELECT 1 FROM $tableName WHERE ${packageCondition(condition)} ",
       parameters
     )
   }

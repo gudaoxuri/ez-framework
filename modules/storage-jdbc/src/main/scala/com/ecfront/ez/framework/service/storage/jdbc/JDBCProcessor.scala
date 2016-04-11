@@ -155,16 +155,19 @@ object JDBCProcessor extends LazyLogging {
       */
     def update(sql: String, parameters: List[Any] = null, conn: SQLConnection = null): Future[Resp[Void]] = {
       val p = Promise[Resp[Void]]()
-      val finalParameters = formatParameters(parameters)
-      logger.trace(s"JDBC update : $sql [$finalParameters]")
-      if (conn != null) {
-        doUpdate(sql, p, finalParameters, conn, autoClose = false)
+      val finalParameterR = formatParameters(parameters)
+      if (!finalParameterR) {
+        p.success(finalParameterR)
       } else {
-        db.onComplete {
-          case Success(connection) =>
-            doUpdate(sql, p, finalParameters, connection, autoClose = true)
-          case Failure(ex) =>
-            p.success(Resp.serverUnavailable(ex.getMessage))
+        if (conn != null) {
+          doUpdate(sql, p, finalParameterR.body, conn, autoClose = false)
+        } else {
+          db.onComplete {
+            case Success(connection) =>
+              doUpdate(sql, p, finalParameterR.body, connection, autoClose = true)
+            case Failure(ex) =>
+              p.success(Resp.serverUnavailable(ex.getMessage))
+          }
         }
       }
       p.future
@@ -172,6 +175,7 @@ object JDBCProcessor extends LazyLogging {
 
     private def doUpdate(sql: String, p: Promise[Resp[Void]], finalParameters: List[Any], conn: SQLConnection, autoClose: Boolean): Unit = {
       try {
+        logger.trace(s"JDBC update : $sql [$finalParameters]")
         if (finalParameters == null) {
           conn.update(sql,
             new Handler[AsyncResult[UpdateResult]] {
@@ -224,7 +228,6 @@ object JDBCProcessor extends LazyLogging {
       */
     def batch(sql: String, parameterList: List[List[Any]], conn: SQLConnection = null): Future[Resp[Void]] = {
       val p = Promise[Resp[Void]]()
-      logger.trace(s"JDBC batch : $sql [$parameterList]")
       if (parameterList.nonEmpty) {
         if (conn != null) {
           doBatch(sql, parameterList, p, conn, autoClose = false)
@@ -244,26 +247,31 @@ object JDBCProcessor extends LazyLogging {
 
     private def doBatch(sql: String, parameterList: List[List[Any]], p: Promise[Resp[Void]], conn: SQLConnection, autoClose: Boolean): Unit = {
       try {
+        logger.trace(s"JDBC batch : $sql [$parameterList]")
         val counter = new AtomicLong(parameterList.length)
         parameterList.foreach {
           parameters =>
-            val finalParameters = formatParameters(parameters)
-            conn.updateWithParams(sql,
-              new JsonArray(finalParameters),
-              new Handler[AsyncResult[UpdateResult]] {
-                override def handle(event: AsyncResult[UpdateResult]): Unit = {
-                  if (!event.succeeded()) {
-                    logger.warn(s"JDBC execute error : $sql [$finalParameters]", event.cause())
-                  }
-                  if (counter.decrementAndGet() == 0) {
-                    if (autoClose) {
-                      conn.close()
+            val finalParameterR = formatParameters(parameters)
+            if (!finalParameterR) {
+              p.success(finalParameterR)
+            } else {
+              conn.updateWithParams(sql,
+                new JsonArray(finalParameterR.body),
+                new Handler[AsyncResult[UpdateResult]] {
+                  override def handle(event: AsyncResult[UpdateResult]): Unit = {
+                    if (!event.succeeded()) {
+                      logger.warn(s"JDBC execute error : $sql [${finalParameterR.body}]", event.cause())
                     }
-                    p.success(Resp.success(null))
+                    if (counter.decrementAndGet() == 0) {
+                      if (autoClose) {
+                        conn.close()
+                      }
+                      p.success(Resp.success(null))
+                    }
                   }
                 }
-              }
-            )
+              )
+            }
         }
       } catch {
         case ex: Throwable =>
@@ -285,7 +293,6 @@ object JDBCProcessor extends LazyLogging {
       */
     def get[E](sql: String, parameters: List[Any], resultClass: Class[E], conn: SQLConnection = null): Future[Resp[E]] = {
       val p = Promise[Resp[E]]()
-      logger.trace(s"JDBC get : $sql [$parameters]")
       if (conn != null) {
         doGet(sql, parameters, resultClass, p, conn, autoClose = false)
       } else {
@@ -300,6 +307,7 @@ object JDBCProcessor extends LazyLogging {
 
     private def doGet[E](sql: String, parameters: List[Any], resultClass: Class[E], p: Promise[Resp[E]], conn: SQLConnection, autoClose: Boolean): Object = {
       try {
+        logger.trace(s"JDBC get : $sql [$parameters]")
         conn.queryWithParams(sql,
           new JsonArray(parameters),
           new Handler[AsyncResult[ResultSet]] {
@@ -313,16 +321,22 @@ object JDBCProcessor extends LazyLogging {
                 if (autoClose) {
                   conn.close()
                 }
-                if (row != null) {
-                  if (resultClass != classOf[JsonObject]) {
-                    val result = Resp.success(convertObject(row, resultClass))
-                    p.success(result)
+                try {
+                  if (row != null) {
+                    if (resultClass != classOf[JsonObject]) {
+                      val result = Resp.success(convertObject(row, resultClass))
+                      p.success(result)
+                    } else {
+                      val result = Resp.success(row.asInstanceOf[E])
+                      p.success(result)
+                    }
                   } else {
-                    val result = Resp.success(row.asInstanceOf[E])
-                    p.success(result)
+                    p.success(Resp.success(null.asInstanceOf[E]))
                   }
-                } else {
-                  p.success(Resp.success(null.asInstanceOf[E]))
+                } catch {
+                  case e: Throwable =>
+                    p.success(Resp.serverError("Data convert error :" + e.getMessage))
+                    logger.error("Data convert error :" + e.getMessage, e)
                 }
               } else {
                 if (autoClose) {
@@ -354,7 +368,6 @@ object JDBCProcessor extends LazyLogging {
       */
     def find[E](sql: String, parameters: List[Any], resultClass: Class[E], conn: SQLConnection = null): Future[Resp[List[E]]] = {
       val p = Promise[Resp[List[E]]]()
-      logger.trace(s"JDBC find : $sql [$parameters]")
       if (conn != null) {
         doFind(sql, parameters, resultClass, p, conn, autoClose = false)
       } else {
@@ -370,6 +383,7 @@ object JDBCProcessor extends LazyLogging {
     private def doFind[E](sql: String, parameters: List[Any], resultClass: Class[E],
                           p: Promise[Resp[List[E]]], conn: SQLConnection, autoClose: Boolean): Unit = {
       try {
+        logger.trace(s"JDBC find : $sql [$parameters]")
         conn.queryWithParams(sql,
           new JsonArray(parameters),
           new Handler[AsyncResult[ResultSet]] {
@@ -379,14 +393,20 @@ object JDBCProcessor extends LazyLogging {
                 if (autoClose) {
                   conn.close()
                 }
-                if (resultClass != classOf[JsonObject]) {
-                  val result = Resp.success(rows.map {
-                    convertObject(_, resultClass)
-                  })
-                  p.success(result)
-                } else {
-                  val result = Resp.success(rows.asInstanceOf[List[E]])
-                  p.success(result)
+                try {
+                  if (resultClass != classOf[JsonObject]) {
+                    val result = Resp.success(rows.map {
+                      convertObject(_, resultClass)
+                    })
+                    p.success(result)
+                  } else {
+                    val result = Resp.success(rows.asInstanceOf[List[E]])
+                    p.success(result)
+                  }
+                } catch {
+                  case e: Throwable =>
+                    p.success(Resp.serverError("Data convert error :" + e.getMessage))
+                    logger.error("Data convert error :" + e.getMessage, e)
                 }
               } else {
                 if (autoClose) {
@@ -421,7 +441,6 @@ object JDBCProcessor extends LazyLogging {
     def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int,
                 resultClass: Class[E], conn: SQLConnection = null): Future[Resp[Page[E]]] = {
       val p = Promise[Resp[Page[E]]]()
-      logger.trace(s"JDBC page : $sql [$parameters]")
       if (conn != null) {
         doPage(sql, parameters, pageNumber, pageSize, resultClass, p, conn, autoClose = false)
       } else {
@@ -446,6 +465,7 @@ object JDBCProcessor extends LazyLogging {
               page.recordTotal = countResp.body
               page.pageTotal = (page.recordTotal + pageSize - 1) / pageSize
               val limitSql = s"$sql limit ${(pageNumber - 1) * pageSize} ,$pageSize"
+              logger.trace(s"JDBC page : $limitSql [$parameters]")
               conn.queryWithParams(limitSql,
                 new JsonArray(parameters),
                 new Handler[AsyncResult[ResultSet]] {
@@ -455,14 +475,20 @@ object JDBCProcessor extends LazyLogging {
                       if (autoClose) {
                         conn.close()
                       }
-                      if (resultClass != classOf[JsonObject]) {
-                        page.objects = rows.map {
-                          convertObject(_, resultClass)
+                      try {
+                        if (resultClass != classOf[JsonObject]) {
+                          page.objects = rows.map {
+                            convertObject(_, resultClass)
+                          }
+                        } else {
+                          page.objects = rows.asInstanceOf[List[E]]
                         }
-                      } else {
-                        page.objects = rows.asInstanceOf[List[E]]
+                        p.success(Resp.success(page))
+                      } catch {
+                        case e: Throwable =>
+                          p.success(Resp.serverError("Data convert error :" + e.getMessage))
+                          logger.error("Data convert error :" + e.getMessage, e)
                       }
-                      p.success(Resp.success(page))
                     } else {
                       if (autoClose) {
                         conn.close()
@@ -498,7 +524,6 @@ object JDBCProcessor extends LazyLogging {
       */
     def count(sql: String, parameters: List[Any], conn: SQLConnection = null): Future[Resp[Long]] = {
       val p = Promise[Resp[Long]]()
-      logger.trace(s"JDBC count : $sql [$parameters]")
       if (conn != null) {
         doCount(sql, parameters, p, conn, autoClose = false)
       } else {
@@ -514,6 +539,7 @@ object JDBCProcessor extends LazyLogging {
     private def doCount(sql: String, parameters: List[Any], p: Promise[Resp[Long]], conn: SQLConnection, autoClose: Boolean): Unit = {
       try {
         val countSql = s"SELECT COUNT(1) FROM ( $sql ) _${System.currentTimeMillis()}"
+        logger.trace(s"JDBC count : $countSql [$parameters]")
         conn.queryWithParams(countSql,
           new JsonArray(parameters),
           new Handler[AsyncResult[ResultSet]] {
@@ -522,8 +548,14 @@ object JDBCProcessor extends LazyLogging {
                 if (autoClose) {
                   conn.close()
                 }
-                val result = Resp.success[Long](event.result().getResults.get(0).getLong(0))
-                p.success(result)
+                try {
+                  val result = Resp.success[Long](event.result().getResults.get(0).getLong(0))
+                  p.success(result)
+                } catch {
+                  case e: Throwable =>
+                    p.success(Resp.serverError("Data convert error :" + e.getMessage))
+                    logger.error("Data convert error :" + e.getMessage, e)
+                }
               } else {
                 if (autoClose) {
                   conn.close()
@@ -552,7 +584,6 @@ object JDBCProcessor extends LazyLogging {
       */
     def exist(sql: String, parameters: List[Any], conn: SQLConnection = null): Future[Resp[Boolean]] = {
       val p = Promise[Resp[Boolean]]()
-      logger.trace(s"JDBC exist : $sql [$parameters]")
       if (conn != null) {
         doExist(sql, parameters, p, conn, autoClose = false)
       } else {
@@ -567,6 +598,7 @@ object JDBCProcessor extends LazyLogging {
 
     private def doExist(sql: String, parameters: List[Any], p: Promise[Resp[Boolean]], conn: SQLConnection, autoClose: Boolean): Unit = {
       try {
+        logger.trace(s"JDBC exist : $sql [$parameters]")
         conn.queryWithParams(sql,
           new JsonArray(parameters),
           new Handler[AsyncResult[ResultSet]] {
@@ -689,18 +721,25 @@ object JDBCProcessor extends LazyLogging {
       p.future
     }
 
-    private[jdbc] def formatParameters(parameters: List[Any]): List[Any] = {
+    private[jdbc] def formatParameters(parameters: List[Any]): Resp[List[Any]] = {
       if (parameters == null) {
-        null
+        Resp.success(null)
       } else {
-        parameters.map {
-          case p if
-          p.isInstanceOf[String] || p.isInstanceOf[Int] || p.isInstanceOf[Long] || p.isInstanceOf[Boolean] ||
-            p.isInstanceOf[Double] || p.isInstanceOf[Float] || p.isInstanceOf[BigDecimal] ||
-            p.isInstanceOf[Char] || p.isInstanceOf[Short] || p.isInstanceOf[Byte] || p.isInstanceOf[Date]
-          => p
-          case p =>
-            JsonHelper.toJsonString(p)
+        try {
+          val result = parameters.map {
+            case p if
+            p.isInstanceOf[String] || p.isInstanceOf[Int] || p.isInstanceOf[Long] || p.isInstanceOf[Boolean] ||
+              p.isInstanceOf[Double] || p.isInstanceOf[Float] || p.isInstanceOf[BigDecimal] ||
+              p.isInstanceOf[Char] || p.isInstanceOf[Short] || p.isInstanceOf[Byte] || p.isInstanceOf[Date]
+            => p
+            case p =>
+              JsonHelper.toJsonString(p)
+          }
+          Resp.success(result)
+        } catch {
+          case e: Throwable =>
+            logger.error("Data format error : " + e.getMessage, e)
+            Resp.serverError("Data format error : " + e.getMessage)
         }
       }
     }

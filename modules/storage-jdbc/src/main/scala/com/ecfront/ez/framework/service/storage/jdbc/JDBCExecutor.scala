@@ -88,42 +88,46 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
       // 要获取保存后的id
       JDBCProcessor.Async.db.onComplete {
         case Success(conn) =>
-          conn.updateWithParams(sql,
-            new JsonArray(JDBCProcessor.Async.formatParameters(richValueInfos.values.toList)),
-            new Handler[AsyncResult[UpdateResult]] {
-              override def handle(event: AsyncResult[UpdateResult]): Unit = {
-                if (event.succeeded()) {
-                  conn.query("SELECT LAST_INSERT_ID()", new Handler[AsyncResult[ResultSet]] {
-                    override def handle(event2: AsyncResult[ResultSet]): Unit = {
-                      if (event2.succeeded()) {
-                        val row = event2.result().getRows.get(0).getLong("LAST_INSERT_ID()")
-                        conn.query(s"SELECT * FROM $tableName WHERE $idFieldName = $row ", new Handler[AsyncResult[ResultSet]] {
-                          override def handle(event3: AsyncResult[ResultSet]): Unit = {
-                            if (event3.succeeded()) {
-                              val result = event3.result().getRows.get(0)
-                              p.success(Resp.success(JDBCProcessor.Async.convertObject(result, clazz)))
-                            } else {
-                              logger.error(s"JDBC execute error ", event3.cause())
-                              p.success(Resp.serverError(event3.cause().getMessage))
+          val formatR = JDBCProcessor.Async.formatParameters(richValueInfos.values.toList)
+          if (!formatR) {
+            p.success(formatR)
+          } else {
+            conn.updateWithParams(sql,new JsonArray(formatR.body),
+              new Handler[AsyncResult[UpdateResult]] {
+                override def handle(event: AsyncResult[UpdateResult]): Unit = {
+                  if (event.succeeded()) {
+                    conn.query("SELECT LAST_INSERT_ID()", new Handler[AsyncResult[ResultSet]] {
+                      override def handle(event2: AsyncResult[ResultSet]): Unit = {
+                        if (event2.succeeded()) {
+                          val row = event2.result().getRows.get(0).getLong("LAST_INSERT_ID()")
+                          conn.query(s"SELECT * FROM $tableName WHERE $idFieldName = $row ", new Handler[AsyncResult[ResultSet]] {
+                            override def handle(event3: AsyncResult[ResultSet]): Unit = {
+                              if (event3.succeeded()) {
+                                val result = event3.result().getRows.get(0)
+                                p.success(Resp.success(JDBCProcessor.Async.convertObject(result, clazz)))
+                              } else {
+                                logger.error(s"JDBC execute error ", event3.cause())
+                                p.success(Resp.serverError(event3.cause().getMessage))
+                              }
+                              conn.close()
                             }
-                            conn.close()
-                          }
-                        })
-                      } else {
-                        conn.close()
-                        logger.error(s"JDBC execute error ", event2.cause())
-                        p.success(Resp.serverError(event2.cause().getMessage))
+                          })
+                        } else {
+                          conn.close()
+                          logger.error(s"JDBC execute error ", event2.cause())
+                          p.success(Resp.serverError(event2.cause().getMessage))
+                        }
                       }
-                    }
-                  })
-                } else {
-                  conn.close()
-                  logger.error(s"JDBC execute error ", event.cause())
-                  p.success(Resp.serverError(event.cause().getMessage))
+                    })
+                  } else {
+                    conn.close()
+                    logger.error(s"JDBC execute error ", event.cause())
+                    p.success(Resp.serverError(event.cause().getMessage))
+                  }
                 }
               }
-            }
-          )
+            )
+          }
       }
       Await.result(p.future, Duration.Inf)
     }

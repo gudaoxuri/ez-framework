@@ -97,6 +97,7 @@ class JDBCSpec extends MockStartupSpec {
 
     var findResult = JDBC_Test_Entity.find(" 1=1 ORDER BY create_time ASC").body
     assert(findResult.size == 4)
+    assert(4 == JDBC_Test_Entity.count("").body)
     assert(findResult.head.name == "n1")
     findResult = JDBC_Test_Entity.find("name like ? ORDER BY create_time DESC", List("n%")).body
     assert(findResult.size == 3)
