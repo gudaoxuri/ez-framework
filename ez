@@ -79,9 +79,13 @@ deploy(){
     stop $app_code
 
     if [ -d app/$app_code/ ] ; then
+     echo "backup $app_code"
+     mkdir -p backup/$app_code/
+     tar -czf backup/$app_code/`date +%Y%m%d%H%M%S`.tar.gz -C app/$app_code ./
      echo "delete $app_code"
      rm -rf app/$app_code/
     fi
+
     mkdir -p app/$app_code/config/
     cp -r prepare/$app_code/* app/$app_code/
     cp -r config/$app_code/* app/$app_code/config/
