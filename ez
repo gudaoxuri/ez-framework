@@ -113,6 +113,8 @@ tip(){
 
 # ============== load ==============
 
+. /etc/profile
+
 if [ $# -eq 0 ] ; then 
  tip
 fi
