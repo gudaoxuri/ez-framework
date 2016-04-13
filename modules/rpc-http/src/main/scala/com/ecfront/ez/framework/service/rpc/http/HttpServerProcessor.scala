@@ -11,9 +11,8 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpServerFileUpload, HttpServerRequest, HttpServerResponse}
 import io.vertx.core.{AsyncResult, Future, Handler}
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.parser.Parser
+import org.joox.JOOX._
+import org.w3c.dom.Document
 
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -139,7 +138,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
                 case t if t.contains("json") => JsonHelper.toObject(body, fun.requestClass)
                 case t if t.contains("xml") =>
                   if (fun.requestClass == classOf[Document]) {
-                    Jsoup.parse(body.asInstanceOf[String], "", Parser.xmlParser())
+                    $(body.asInstanceOf[String]).document()
                   } else if (fun.requestClass == classOf[String]) {
                     body.asInstanceOf[String]
                   } else {
@@ -200,24 +199,29 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
                 ""
               } else {
                 r.body match {
-                  case b: Document => b.outerHtml()
+                  case b: Document =>
+                    $(b).toString
                   case b: String => b
                   case _ =>
                     logger.error(s"Not support return type [${r.body.getClass.getName}] by xml")
                     s"""<?xml version="1.0" encoding="UTF-8"?>
-                        |<error>
-                        | <code>-1</code>
-                        | <message>Not support return type [${r.body.getClass.getName}] by xml</message>
-                        |</error>
+                        |<xml>
+                        | <error>
+                        |  <code>-1</code>
+                        |  <message>Not support return type [${r.body.getClass.getName}] by xml</message>
+                        | </error>
+                        |</xml>
                  """.stripMargin
                 }
               }
             } else {
               s"""<?xml version="1.0" encoding="UTF-8"?>
-                  |<error>
-                  | <code>${r.code}</code>
-                  | <message>${r.message}</message>
-                  |</error>
+                  |<xml>
+                  | <error>
+                  |  <code>${r.code}</code>
+                  |  <message>${r.message}</message>
+                  | </error>
+                  |</xml>
                  """.stripMargin
             }
           case _ => r.toString

@@ -13,7 +13,8 @@ import io.vertx.core.file.{AsyncFile, FileProps, OpenOptions}
 import io.vertx.core.http._
 import io.vertx.core.streams.Pump
 import io.vertx.core.{AsyncResult, Handler, Vertx}
-import org.jsoup.nodes.Document
+import org.w3c.dom.Document
+import org.joox.JOOX._
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future, Promise}
@@ -165,7 +166,7 @@ object HttpClientProcessor extends LazyLogging {
           case t if t.toLowerCase.contains("xml") =>
             body match {
               case b: Document =>
-                client.end(b.outerHtml())
+                client.end($(b).toString)
               case b: String =>
                 client.end(b)
               case _ =>
