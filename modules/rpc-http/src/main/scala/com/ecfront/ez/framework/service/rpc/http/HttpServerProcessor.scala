@@ -71,7 +71,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
     context.remoteIP = ip
     context.method = request.method().name()
     context.templateUri = result._4
-    context.realUri = request.path()
+    context.realUri = request.uri()
     context.parameters = parameters.map { i => i._1 -> URLDecoder.decode(i._2, "UTF-8") }
     context.accept = accept.toLowerCase()
     context.contentType = contentType.toLowerCase()

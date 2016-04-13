@@ -62,7 +62,7 @@ class WebSocketServerProcessor extends Handler[ServerWebSocket] with LazyLogging
     context.remoteIP = ip
     context.method = method
     context.templateUri = path
-    context.realUri = request.path()
+    context.realUri = request.uri()
     context.parameters = parameters.map { i => i._1 -> URLDecoder.decode(i._2, "UTF-8") }
     EZContext.vertx.executeBlocking(new Handler[Future[Resp[Any]]] {
       override def handle(e: Future[Resp[Any]]): Unit = {
