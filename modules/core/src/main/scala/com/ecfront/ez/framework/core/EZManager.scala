@@ -24,13 +24,20 @@ object EZManager extends LazyLogging {
   private var ezServices: List[EZServiceAdapter[_]] = null
 
   /**
-    * 解析服务配置，要求在classpath根路径下存在`ez.json`文件
+    * 解析服务配置 , 默认情况下加载classpath根路径下的`ez.json`文件
     *
+    * @param configContent 使用自定义配置内容（json格式）
     * @return 服务配置
     */
-  private def startInParseConfig(): Resp[EZConfig] = {
+  private def startInParseConfig(configContent: String = null): Resp[EZConfig] = {
     try {
-      val jsonConfig = new JsonObject(Source.fromFile(EZContext.confPath + "ez.json", "UTF-8").mkString)
+      val finalConfigContent =
+        if (configContent == null) {
+          Source.fromFile(EZContext.confPath + "ez.json", "UTF-8").mkString
+        } else {
+          configContent
+        }
+      val jsonConfig = new JsonObject(finalConfigContent)
       Resp.success(JsonHelper.toObject(jsonConfig.encode(), classOf[EZConfig]))
     } catch {
       case e: Throwable =>
@@ -109,12 +116,15 @@ object EZManager extends LazyLogging {
 
   /**
     * 启动EZ服务
+    *
+    * @param configContent 使用自定义配置内容（json格式）
+    * @return 启动是否成功
     */
-  def start(): Resp[String] = {
+  def start(configContent: String = null): Resp[String] = {
     EZContext.vertx = Vertx.vertx()
     logEnter("Starting...")
     logger.info("\r\n=== Parse Config ...")
-    val ezConfigR = startInParseConfig()
+    val ezConfigR = startInParseConfig(configContent)
     if (ezConfigR) {
       val ezConfig = ezConfigR.body
       EZContext.app = ezConfig.ez.app
