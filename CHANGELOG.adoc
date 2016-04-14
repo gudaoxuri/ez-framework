@@ -1,7 +1,11 @@
-= 3.0.0
+== ChangeLog
 
-== 功能
+=== 3.0.0
+
+==== Features
 
 . 核心架构重写
+
+==== Bug Fixes
 
 

@@ -1,14 +1,19 @@
-= 开发环境
+== Contributing
+
+==== Environment
 
 . JDK 1.8
 . Scala 2.11
+. Mongo 3.x（可选）
+. Redis 3.x（可选）
+. Kafka 0.8.x（可选）
 
-= 构建
+==== Build
 
 . `git clone https://github.com/gudaoxuri/ez-framework.git`
 . 使用IDE导入Maven工程，各组件都是独立Maven工程
 
-= 提交申请
+==== Submit
 
 . 提交前请确保:
 

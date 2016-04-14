@@ -3,6 +3,7 @@
 === 功能
 
 . 支持Mongo或关系型数据库（JDBC）
+. 统一API
 . 轻量级ORMapping，无Session处理
 . 注解支持
 

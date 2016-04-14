@@ -1,32 +1,69 @@
-= Scala中功能全面、使用简单的服务框架
+= EZ.F - Scala中功能全面、使用简单的服务框架
 
 image::https://img.shields.io/travis/gudaoxuri/ez-framework.svg[link="https://travis-ci.org/gudaoxuri/ez-framework"]
 
-== 特点
+== 设计理念
 
-. 模块化服务设计
-. 类库形式，侵入性低，集成友好
-. 核心模块提供同步与异步两种模型
-. 集成了常用的服务，全栈支持
-. 简单友好的API
+. **类库化** 低侵入，虽然以“框架”称呼，但实际上是**多个类库的集合**，这里没有__容器__，不会与您的工程强耦合
+. **模块化** 所有功能按需选择，让您的工程尽可能轻量
+. **高性能** 核心模块提供同步与异步两种模型，高性能需求可选择异步模型
+. **功能全面** 集成了常用的服务，全栈支持
+. **使用简单** 各API都尽可能地统一与简化，降低使用成本
 
-== 功能
+== 功能列表
 
-. RPC服务，支持HTTP(s)、WebSocket两种通道
-. 存储服务，支持Mongo及JDBC两类数据源（库）
+. RPC服务
+.. 支持HTTP和WebSocket服务
+.. 基于注解服务发现
+.. Restful风格，支持GET POST PUT DELETE等常用方法
+.. 支持HTTPS
+.. 支持Json跨域请求
+.. 支持拦截器栈，可适配权限认证等服务
+.. 提供同步及异步HTTP客户端
+.. 提供CRUD脚手架服务
+.. 支持HTML与XML处理
+
+. 存储服务
+.. 支持Mongo或关系型数据库（JDBC）
+.. 统一API
+.. 轻量级ORMapping，无Session处理
+.. 注解支持
+
 . 调度服务
+.. 支持cron表达式的调度任务
+.. 支持按模块调度
+.. 支持JDBC或Mongo的持久化
+
 . Redis缓存服务
+.. 支持Redis的常用操作
+.. 支持同步与异步操作
+
 . 基于RBAC的基础HTTP认证
-. 基于OAuth2的HTTP认证
+.. 支持RBAC的认证服务
+.. 支持菜单级和资源级（action）的授权
+.. 支持JDBC或Mongo的持久化
+.. 支持自助注册及密码找回
+
 . 邮件服务
+.. 支持同步或异步的邮件发送服务
+.. 支持添加附件
+
 . Kakfa服务
+
 . Master-Slave服务
-. 常用分布式服务，如分布式计数、锁、Map、阻塞和非阻塞队列、消息发布订阅等
-. 拦截器栈
+
+. 常用分布式服务
+.. 分布式计数
+.. 分布式锁
+.. 分布式Map
+.. 分布式阻塞和非阻塞队列
+.. 分布式消息发布订阅
+
+. 支持自定义同步或异步的拦截器栈处理
 
 == Maven
 
-[source]
+[source,xml]
 ----
 <!-- 核心包 -->
 <dependency>
@@ -42,13 +79,9 @@ image::https://img.shields.io/travis/gudaoxuri/ez-framework.svg[link="https://tr
 </dependency>
 ----
 
-== 示例
+== 文档
 
 https://github.com/gudaoxuri/ez-framework/wiki[https://github.com/gudaoxuri/ez-framework/wiki]
-
-=== Check out sources
-
-`git clone https://github.com/gudaoxuri/ez-framework.git`
 
 === License
 
