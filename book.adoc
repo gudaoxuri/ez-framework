@@ -1,4 +1,4 @@
-= EZ-Framework Document
+= EZ-Framework(EZ.F) Document
 gudaoxuri
 v3.0.0
 :doctype: book
@@ -9,16 +9,27 @@ v3.0.0
 :numbered:
 
 include::README.adoc[]
-include::docs/module-summary.adoc[]
+
 include::docs/module-storage.adoc[]
+
 include::docs/module-rpc.adoc[]
+
 include::docs/module-auth.adoc[]
+
 include::docs/module-email.adoc[]
+
 include::docs/module-redis.adoc[]
+
 include::docs/module-distributed.adoc[]
+
 include::docs/module-scheduler.adoc[]
+
 include::docs/module-kafka.adoc[]
+
 include::docs/module-master-slave.adoc[]
+
 include::CONTRIBUTING.adoc[]
+
 include::ROADMAP.adoc[]
+
 include::CHANGELOG.adoc[]
