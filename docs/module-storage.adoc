@@ -795,7 +795,7 @@ def exist(collection: String, query: JsonObject): Future[Resp[Boolean]]
 def aggregate(collection: String, query: JsonArray): Future[Resp[JsonArray]]
 ----
 
-==== Mongo低层API使用
+==== JDBC低层API使用
 
 ===== 同步操作
 
