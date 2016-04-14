@@ -5,7 +5,8 @@
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.4-dev">
-<title>EZ-Framework Document</title>
+<meta name="author" content="gudaoxuri">
+<title>EZ-Framework(EZ.F) Document</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! normalize.css v2.1.2 | MIT License | git.io/normalize */
@@ -2131,134 +2132,236 @@ p {
 </head>
 <body class="book toc2 toc-left">
 <div id="header">
-<h1>EZ-Framework Document</h1>
+<h1>EZ-Framework(EZ.F) Document</h1>
+<div class="details">
+<span id="author" class="author">gudaoxuri</span><br>
+<span id="revnumber">version 3.0.0</span>
+</div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
+<ul class="sectlevel0">
+<li><a href="#trueez-f-scala">EZ.F - Scala中功能全面、使用简单的服务框架</a>
 <ul class="sectlevel1">
-<li><a href="#true-">1. 持久化服务</a>
+<li><a href="#true-">1. 设计理念</a></li>
+<li><a href="#true--2">2. 功能列表</a></li>
+<li><a href="#true--3">3. 使用</a></li>
+<li><a href="#true--4">4. 文档</a></li>
+<li><a href="#truelicense">5. License</a></li>
+<li><a href="#true--5">6. 持久化服务</a>
 <ul class="sectlevel2">
-<li><a href="#true--2">1.1. 功能</a></li>
-<li><a href="#true5">1.2. 5分钟上手</a></li>
-<li><a href="#true--3">1.3. 依赖</a></li>
-<li><a href="#truemongo">1.4. Mongo配置</a></li>
-<li><a href="#truejdbc">1.5. JDBC配置</a></li>
-<li><a href="#true--4">1.6. 使用</a>
+<li><a href="#true--6">6.1. 功能</a></li>
+<li><a href="#true5">6.2. 5分钟上手</a></li>
+<li><a href="#true--7">6.3. 依赖</a></li>
+<li><a href="#truemongo">6.4. Mongo配置</a></li>
+<li><a href="#truejdbc">6.5. JDBC配置</a></li>
+<li><a href="#true--8">6.6. 使用</a>
 <ul class="sectlevel3">
-<li><a href="#true--5">1.6.1. 注解及方法定义</a></li>
-<li><a href="#true--6">1.6.2. 常用方法</a></li>
-<li><a href="#true--7">1.6.3. 适配器使用</a></li>
-<li><a href="#truemongo-api">1.6.4. Mongo低层API使用</a></li>
-<li><a href="#truemongo-api-2">1.6.5. Mongo低层API使用</a></li>
+<li><a href="#true--9">6.6.1. 注解及方法定义</a></li>
+<li><a href="#true--10">6.6.2. 常用方法</a></li>
+<li><a href="#true--11">6.6.3. 适配器使用</a></li>
+<li><a href="#truemongo-api">6.6.4. Mongo低层API使用</a></li>
+<li><a href="#truemongo-api-2">6.6.5. Mongo低层API使用</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#truehttp">2. HTTP服务</a>
+<li><a href="#truerpc">7. RPC服务</a>
 <ul class="sectlevel2">
-<li><a href="#true--12">2.1. 功能</a></li>
-<li><a href="#true5-2">2.2. 5分钟上手</a></li>
-<li><a href="#true--13">2.3. 依赖</a></li>
-<li><a href="#true--14">2.4. 配置</a></li>
-<li><a href="#true--15">2.5. 使用</a>
+<li><a href="#true--16">7.1. 功能</a></li>
+<li><a href="#true5-2">7.2. 5分钟上手</a></li>
+<li><a href="#true--17">7.3. 依赖</a></li>
+<li><a href="#truehttp">7.4. HTTP配置</a></li>
+<li><a href="#truewebsocket">7.5. WebSocket配置</a></li>
+<li><a href="#true--18">7.6. 使用</a>
 <ul class="sectlevel3">
-<li><a href="#true--16">2.5.1. 注解及方法定义</a></li>
-<li><a href="#truesimplehttpservice">2.5.2. SimpleHttpService脚手架</a></li>
-<li><a href="#truehttp-2">2.5.3. HTTP客户端</a></li>
+<li><a href="#truehttp-2">7.6.1. HTTP服务注解及方法定义</a></li>
+<li><a href="#truewebsocket-2">7.6.2. WebSocket服务注解及方法定义</a></li>
+<li><a href="#truesimplehttpservice">7.6.3. SimpleHttpService脚手架</a></li>
+<li><a href="#truehttp-3">7.6.4. HTTP客户端</a></li>
+<li><a href="#truewebsocket-3">7.6.5. WebSocket消息推送管理</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#true--19">3. 认证服务</a>
+<li><a href="#true--21">8. 认证服务</a>
 <ul class="sectlevel2">
-<li><a href="#true--20">3.1. 功能</a></li>
-<li><a href="#true5-3">3.2. 5分钟上手</a></li>
-<li><a href="#true--21">3.3. 依赖</a></li>
-<li><a href="#true--22">3.4. 配置</a></li>
-<li><a href="#true--23">3.5. 认证服务接入</a></li>
-<li><a href="#true--24">3.6. 预定义认证接口调用</a>
+<li><a href="#true--22">8.1. 功能</a></li>
+<li><a href="#true5-3">8.2. 5分钟上手</a></li>
+<li><a href="#true--23">8.3. 依赖</a></li>
+<li><a href="#true--24">8.4. 配置</a></li>
+<li><a href="#true--25">8.5. 认证服务接入</a></li>
+<li><a href="#true--26">8.6. 预定义认证接口调用</a>
 <ul class="sectlevel3">
-<li><a href="#true--25">3.6.1. 说明</a></li>
-<li><a href="#true--26">3.6.2. 登录</a></li>
-<li><a href="#true--27">3.6.3. 注销</a></li>
-<li><a href="#true--28">3.6.4. 获取登录信息</a></li>
-<li><a href="#true--29">3.6.5. 获取菜单（带权限过滤）</a></li>
-<li><a href="#true--30">3.6.6. 注册</a></li>
-<li><a href="#true--31">3.6.7. 激活账号</a></li>
-<li><a href="#true--32">3.6.8. 找回（重置）密码</a></li>
-<li><a href="#true--33">3.6.9. 激活新密码</a></li>
-<li><a href="#true--34">3.6.10. 获取登录账号信息</a></li>
-<li><a href="#true--35">3.6.11. 更新登录账号信息</a></li>
-<li><a href="#true--36">3.6.12. （管理接口）添加资源</a></li>
-<li><a href="#true--37">3.6.13. （管理接口）更新资源</a></li>
-<li><a href="#true--38">3.6.14. （管理接口）查找资源列表</a></li>
-<li><a href="#true--39">3.6.15. （管理接口）查找启用资源列表</a></li>
-<li><a href="#true--40">3.6.16. （管理接口）分页查找资源列表</a></li>
-<li><a href="#true--41">3.6.17. （管理接口）获取一个资源</a></li>
-<li><a href="#true--42">3.6.18. （管理接口）删除一个资源</a></li>
-<li><a href="#true--43">3.6.19. （管理接口）启用一个资源</a></li>
-<li><a href="#true--44">3.6.20. （管理接口）禁用一个资源</a></li>
-<li><a href="#true--45">3.6.21. （管理接口）导出资源列表</a></li>
-<li><a href="#true--46">3.6.22. （管理接口）添加组织</a></li>
-<li><a href="#true--47">3.6.23. （管理接口）更新组织</a></li>
-<li><a href="#true--48">3.6.24. （管理接口）查找组织列表</a></li>
-<li><a href="#true--49">3.6.25. （管理接口）查找启用组织列表</a></li>
-<li><a href="#true--50">3.6.26. （管理接口）分页查找组织列表</a></li>
-<li><a href="#true--51">3.6.27. （管理接口）获取一个组织</a></li>
-<li><a href="#true--52">3.6.28. （管理接口）删除一个组织</a></li>
-<li><a href="#true--53">3.6.29. （管理接口）启用一个组织</a></li>
-<li><a href="#true--54">3.6.30. （管理接口）禁用一个组织</a></li>
-<li><a href="#true--55">3.6.31. （管理接口）导出组织列表</a></li>
-<li><a href="#true--56">3.6.32. （管理接口）上传组织图标</a></li>
-<li><a href="#true--57">3.6.33. （管理接口）获取组织图标</a></li>
-<li><a href="#true--58">3.6.34. （管理接口）添加角色</a></li>
-<li><a href="#true--59">3.6.35. （管理接口）更新角色</a></li>
-<li><a href="#true--60">3.6.36. （管理接口）查找角色列表</a></li>
-<li><a href="#true--61">3.6.37. （管理接口）查找启用角色列表</a></li>
-<li><a href="#true--62">3.6.38. （管理接口）分页查找角色列表</a></li>
-<li><a href="#true--63">3.6.39. （管理接口）获取一个角色</a></li>
-<li><a href="#true--64">3.6.40. （管理接口）删除一个角色</a></li>
-<li><a href="#true--65">3.6.41. （管理接口）启用一个角色</a></li>
-<li><a href="#true--66">3.6.42. （管理接口）禁用一个角色</a></li>
-<li><a href="#true--67">3.6.43. （管理接口）导出角色列表</a></li>
-<li><a href="#true--68">3.6.44. （管理接口）添加账户</a></li>
-<li><a href="#true--69">3.6.45. （管理接口）更新账户</a></li>
-<li><a href="#true--70">3.6.46. （管理接口）查找账户列表</a></li>
-<li><a href="#true--71">3.6.47. （管理接口）查找启用账户列表</a></li>
-<li><a href="#true--72">3.6.48. （管理接口）分页查找账户列表</a></li>
-<li><a href="#true--73">3.6.49. （管理接口）获取一个账户</a></li>
-<li><a href="#true--74">3.6.50. （管理接口）删除一个账户</a></li>
-<li><a href="#true--75">3.6.51. （管理接口）启用一个账户</a></li>
-<li><a href="#true--76">3.6.52. （管理接口）禁用一个账户</a></li>
-<li><a href="#true--77">3.6.53. （管理接口）导出账户列表</a></li>
-<li><a href="#true--78">3.6.54. （管理接口）上传账户头像</a></li>
-<li><a href="#true--79">3.6.55. （管理接口）获取账户头像</a></li>
-<li><a href="#true--80">3.6.56. （管理接口）添加菜单</a></li>
-<li><a href="#true--81">3.6.57. （管理接口）更新菜单</a></li>
-<li><a href="#true--82">3.6.58. （管理接口）查找菜单列表</a></li>
-<li><a href="#true--83">3.6.59. （管理接口）查找启用菜单列表</a></li>
-<li><a href="#true--84">3.6.60. （管理接口）分页查找菜单列表</a></li>
-<li><a href="#true--85">3.6.61. （管理接口）获取一个菜单</a></li>
-<li><a href="#true--86">3.6.62. （管理接口）删除一个菜单</a></li>
-<li><a href="#true--87">3.6.63. （管理接口）启用一个菜单</a></li>
-<li><a href="#true--88">3.6.64. （管理接口）禁用一个菜单</a></li>
-<li><a href="#true--89">3.6.65. （管理接口）导出菜单列表</a></li>
+<li><a href="#true--27">8.6.1. 说明</a></li>
+<li><a href="#true--28">8.6.2. 登录</a></li>
+<li><a href="#true--29">8.6.3. 注销</a></li>
+<li><a href="#true--30">8.6.4. 获取登录信息</a></li>
+<li><a href="#true--31">8.6.5. 获取菜单（带权限过滤）</a></li>
+<li><a href="#true--32">8.6.6. 注册</a></li>
+<li><a href="#true--33">8.6.7. 激活账号</a></li>
+<li><a href="#true--34">8.6.8. 找回（重置）密码</a></li>
+<li><a href="#true--35">8.6.9. 激活新密码</a></li>
+<li><a href="#true--36">8.6.10. 获取登录账号信息</a></li>
+<li><a href="#true--37">8.6.11. 更新登录账号信息</a></li>
+<li><a href="#true--38">8.6.12. （管理接口）添加资源</a></li>
+<li><a href="#true--39">8.6.13. （管理接口）更新资源</a></li>
+<li><a href="#true--40">8.6.14. （管理接口）查找资源列表</a></li>
+<li><a href="#true--41">8.6.15. （管理接口）查找启用资源列表</a></li>
+<li><a href="#true--42">8.6.16. （管理接口）分页查找资源列表</a></li>
+<li><a href="#true--43">8.6.17. （管理接口）获取一个资源</a></li>
+<li><a href="#true--44">8.6.18. （管理接口）删除一个资源</a></li>
+<li><a href="#true--45">8.6.19. （管理接口）启用一个资源</a></li>
+<li><a href="#true--46">8.6.20. （管理接口）禁用一个资源</a></li>
+<li><a href="#true--47">8.6.21. （管理接口）导出资源列表</a></li>
+<li><a href="#true--48">8.6.22. （管理接口）添加组织</a></li>
+<li><a href="#true--49">8.6.23. （管理接口）更新组织</a></li>
+<li><a href="#true--50">8.6.24. （管理接口）查找组织列表</a></li>
+<li><a href="#true--51">8.6.25. （管理接口）查找启用组织列表</a></li>
+<li><a href="#true--52">8.6.26. （管理接口）分页查找组织列表</a></li>
+<li><a href="#true--53">8.6.27. （管理接口）获取一个组织</a></li>
+<li><a href="#true--54">8.6.28. （管理接口）删除一个组织</a></li>
+<li><a href="#true--55">8.6.29. （管理接口）启用一个组织</a></li>
+<li><a href="#true--56">8.6.30. （管理接口）禁用一个组织</a></li>
+<li><a href="#true--57">8.6.31. （管理接口）导出组织列表</a></li>
+<li><a href="#true--58">8.6.32. （管理接口）上传组织图标</a></li>
+<li><a href="#true--59">8.6.33. （管理接口）获取组织图标</a></li>
+<li><a href="#true--60">8.6.34. （管理接口）添加角色</a></li>
+<li><a href="#true--61">8.6.35. （管理接口）更新角色</a></li>
+<li><a href="#true--62">8.6.36. （管理接口）查找角色列表</a></li>
+<li><a href="#true--63">8.6.37. （管理接口）查找启用角色列表</a></li>
+<li><a href="#true--64">8.6.38. （管理接口）分页查找角色列表</a></li>
+<li><a href="#true--65">8.6.39. （管理接口）获取一个角色</a></li>
+<li><a href="#true--66">8.6.40. （管理接口）删除一个角色</a></li>
+<li><a href="#true--67">8.6.41. （管理接口）启用一个角色</a></li>
+<li><a href="#true--68">8.6.42. （管理接口）禁用一个角色</a></li>
+<li><a href="#true--69">8.6.43. （管理接口）导出角色列表</a></li>
+<li><a href="#true--70">8.6.44. （管理接口）添加账户</a></li>
+<li><a href="#true--71">8.6.45. （管理接口）更新账户</a></li>
+<li><a href="#true--72">8.6.46. （管理接口）查找账户列表</a></li>
+<li><a href="#true--73">8.6.47. （管理接口）查找启用账户列表</a></li>
+<li><a href="#true--74">8.6.48. （管理接口）分页查找账户列表</a></li>
+<li><a href="#true--75">8.6.49. （管理接口）获取一个账户</a></li>
+<li><a href="#true--76">8.6.50. （管理接口）删除一个账户</a></li>
+<li><a href="#true--77">8.6.51. （管理接口）启用一个账户</a></li>
+<li><a href="#true--78">8.6.52. （管理接口）禁用一个账户</a></li>
+<li><a href="#true--79">8.6.53. （管理接口）导出账户列表</a></li>
+<li><a href="#true--80">8.6.54. （管理接口）上传账户头像</a></li>
+<li><a href="#true--81">8.6.55. （管理接口）获取账户头像</a></li>
+<li><a href="#true--82">8.6.56. （管理接口）添加菜单</a></li>
+<li><a href="#true--83">8.6.57. （管理接口）更新菜单</a></li>
+<li><a href="#true--84">8.6.58. （管理接口）查找菜单列表</a></li>
+<li><a href="#true--85">8.6.59. （管理接口）查找启用菜单列表</a></li>
+<li><a href="#true--86">8.6.60. （管理接口）分页查找菜单列表</a></li>
+<li><a href="#true--87">8.6.61. （管理接口）获取一个菜单</a></li>
+<li><a href="#true--88">8.6.62. （管理接口）删除一个菜单</a></li>
+<li><a href="#true--89">8.6.63. （管理接口）启用一个菜单</a></li>
+<li><a href="#true--90">8.6.64. （管理接口）禁用一个菜单</a></li>
+<li><a href="#true--91">8.6.65. （管理接口）导出菜单列表</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#true--90">4. 邮件服务</a>
+<li><a href="#true--92">9. 邮件服务</a>
 <ul class="sectlevel2">
-<li><a href="#true--91">4.1. 功能</a></li>
-<li><a href="#true5-4">4.2. 5分钟上手</a></li>
-<li><a href="#true--92">4.3. 依赖</a></li>
-<li><a href="#true--93">4.4. 配置</a>
+<li><a href="#true--93">9.1. 功能</a></li>
+<li><a href="#true5-4">9.2. 5分钟上手</a></li>
+<li><a href="#true--94">9.3. 依赖</a></li>
+<li><a href="#true--95">9.4. 配置</a>
 <ul class="sectlevel3">
-<li><a href="#trueqq">4.4.1. QQ企业邮箱配置示例</a></li>
+<li><a href="#trueqq">9.4.1. QQ企业邮箱配置示例</a></li>
 </ul>
 </li>
-<li><a href="#true--94">4.5. 使用</a>
+<li><a href="#true--96">9.5. 使用</a>
 <ul class="sectlevel3">
-<li><a href="#true--95">4.5.1. 同步操作</a></li>
+<li><a href="#true--97">9.5.1. 同步操作</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#trueredis">10. Redis服务</a>
+<ul class="sectlevel2">
+<li><a href="#true--99">10.1. 功能</a></li>
+<li><a href="#true5-5">10.2. 5分钟上手</a></li>
+<li><a href="#true--100">10.3. 依赖</a></li>
+<li><a href="#true--101">10.4. 配置</a></li>
+<li><a href="#true--102">10.5. 使用</a>
+<ul class="sectlevel3">
+<li><a href="#true--103">10.5.1. 同步操作</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#true--105">11. 常用分布式服务</a>
+<ul class="sectlevel2">
+<li><a href="#true--106">11.1. 功能</a></li>
+<li><a href="#true5-6">11.2. 5分钟上手</a></li>
+<li><a href="#true--107">11.3. 依赖</a></li>
+<li><a href="#true--108">11.4. 配置</a></li>
+<li><a href="#true--109">11.5. 使用</a>
+<ul class="sectlevel3">
+<li><a href="#true-atomiclong">11.5.1. 分布式AtomicLong</a></li>
+<li><a href="#true--110">11.5.2. 分布式阻塞队列</a></li>
+<li><a href="#true-countdownlatch">11.5.3. 分布式CountDownLatch</a></li>
+<li><a href="#true--111">11.5.4. 分布式原子计数器</a></li>
+<li><a href="#true--112">11.5.5. 分布式锁</a></li>
+<li><a href="#true-map-key-string-value">11.5.6. 分布式Map，key为string , value为自定义类型</a></li>
+<li><a href="#true--113">11.5.7. 分布式队列（不阻塞）</a></li>
+<li><a href="#true--114">11.5.8. 分布式消息队列</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#true--115">12. 调度服务</a>
+<ul class="sectlevel2">
+<li><a href="#true--116">12.1. 功能</a></li>
+<li><a href="#true5-7">12.2. 5分钟上手</a></li>
+<li><a href="#true--117">12.3. 依赖</a></li>
+<li><a href="#true--118">12.4. 配置</a></li>
+<li><a href="#true--119">12.5. 使用</a></li>
+</ul>
+</li>
+<li><a href="#truekafka">13. Kafka服务</a>
+<ul class="sectlevel2">
+<li><a href="#true--120">13.1. 功能</a></li>
+<li><a href="#true5-8">13.2. 5分钟上手</a></li>
+<li><a href="#true--121">13.3. 依赖</a></li>
+<li><a href="#true--122">13.4. 配置</a></li>
+<li><a href="#true--123">13.5. 使用</a></li>
+<li><a href="#trueapi">13.6. API</a></li>
+</ul>
+</li>
+<li><a href="#truemaster-slave">14. Master-Slave服务</a>
+<ul class="sectlevel2">
+<li><a href="#true--124">14.1. 功能</a></li>
+<li><a href="#true5-9">14.2. 5分钟上手</a></li>
+<li><a href="#true--125">14.3. 依赖</a></li>
+<li><a href="#true--126">14.4. 配置</a></li>
+<li><a href="#true--127">14.5. 使用</a></li>
+<li><a href="#trueapi-2">14.6. API</a></li>
+</ul>
+</li>
+<li><a href="#truecontributing">15. Contributing</a>
+<ul class="sectlevel3">
+<li><a href="#trueenvironment">15.1. Environment</a></li>
+<li><a href="#truebuild">15.2. Build</a></li>
+<li><a href="#truesubmit">15.3. Submit</a></li>
+</ul>
+</li>
+<li><a href="#trueroadmap">16. Roadmap</a>
+<ul class="sectlevel2">
+<li><a href="#true3-1-0">16.1. 3.1.0</a></li>
+<li><a href="#true3-0-0">16.2. 3.0.0</a></li>
+<li><a href="#true3-0-0-snapshot">16.3. 3.0.0-SNAPSHOT</a></li>
+</ul>
+</li>
+<li><a href="#truechangelog">17. ChangeLog</a>
+<ul class="sectlevel2">
+<li><a href="#true3-0-0-2">17.1. 3.0.0</a>
+<ul class="sectlevel3">
+<li><a href="#truefeatures">17.1.1. Features</a></li>
+<li><a href="#truebug-fixes">17.1.2. Bug Fixes</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -2267,15 +2370,246 @@ p {
 </div>
 </div>
 <div id="content">
+<h1 id="trueez-f-scala" class="sect0"><a class="anchor" href="#trueez-f-scala"></a>EZ.F - Scala中功能全面、使用简单的服务框架</h1>
+<div class="openblock partintro">
+<div class="content">
+<div class="imageblock">
+<div class="content">
+<a class="image" href="https://travis-ci.org/gudaoxuri/ez-framework"><img src="https://img.shields.io/travis/gudaoxuri/ez-framework.svg" alt="ez framework.svg"></a>
+</div>
+</div>
+</div>
+</div>
 <div class="sect1">
-<h2 id="true-"><a class="anchor" href="#true-"></a>1. 持久化服务</h2>
+<h2 id="true-"><a class="anchor" href="#true-"></a>1. 设计理念</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>类库化</strong> 低侵入，虽然以“框架”称呼，但实际上是<strong>多个类库的集合</strong>，这里没有<em>容器</em>，不会与您的工程强耦合</p>
+</li>
+<li>
+<p><strong>模块化</strong> 所有功能按需选择，让您的工程尽可能轻量</p>
+</li>
+<li>
+<p><strong>高性能</strong> 核心模块提供同步与异步两种模型，高性能需求可选择异步模型</p>
+</li>
+<li>
+<p><strong>功能全面</strong> 集成了常用的服务，全栈支持</p>
+</li>
+<li>
+<p><strong>使用简单</strong> 各API都尽可能地统一与简化，降低使用成本</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="true--2"><a class="anchor" href="#true--2"></a>2. 功能列表</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>RPC服务</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>支持HTTP和WebSocket服务</p>
+</li>
+<li>
+<p>基于注解服务发现</p>
+</li>
+<li>
+<p>Restful风格，支持GET POST PUT DELETE等常用方法</p>
+</li>
+<li>
+<p>支持HTTPS</p>
+</li>
+<li>
+<p>支持Json跨域请求</p>
+</li>
+<li>
+<p>支持拦截器栈，可适配权限认证等服务</p>
+</li>
+<li>
+<p>提供同步及异步HTTP客户端</p>
+</li>
+<li>
+<p>提供CRUD脚手架服务</p>
+</li>
+<li>
+<p>支持HTML与XML处理</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>存储服务</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>支持Mongo或关系型数据库（JDBC）</p>
+</li>
+<li>
+<p>统一API</p>
+</li>
+<li>
+<p>轻量级ORMapping，无Session处理</p>
+</li>
+<li>
+<p>注解支持</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>调度服务</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>支持cron表达式的调度任务</p>
+</li>
+<li>
+<p>支持按模块调度</p>
+</li>
+<li>
+<p>支持JDBC或Mongo的持久化</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Redis缓存服务</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>支持Redis的常用操作</p>
+</li>
+<li>
+<p>支持同步与异步操作</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>基于RBAC的基础HTTP认证</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>支持RBAC的认证服务</p>
+</li>
+<li>
+<p>支持菜单级和资源级（action）的授权</p>
+</li>
+<li>
+<p>支持JDBC或Mongo的持久化</p>
+</li>
+<li>
+<p>支持自助注册及密码找回</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>邮件服务</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>支持同步或异步的邮件发送服务</p>
+</li>
+<li>
+<p>支持添加附件</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Kakfa服务</p>
+</li>
+<li>
+<p>Master-Slave服务</p>
+</li>
+<li>
+<p>常用分布式服务</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>分布式计数</p>
+</li>
+<li>
+<p>分布式锁</p>
+</li>
+<li>
+<p>分布式Map</p>
+</li>
+<li>
+<p>分布式阻塞和非阻塞队列</p>
+</li>
+<li>
+<p>分布式消息发布订阅</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>支持自定义同步或异步的拦截器栈处理</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="true--3"><a class="anchor" href="#true--3"></a>3. 使用</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>通过Maven引用</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml" data-lang="xml">&lt;!-- 核心包 --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
+    &lt;artifactId&gt;ezf-core&lt;/artifactId&gt;
+    &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- 各服务模块包 --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
+    &lt;artifactId&gt;ezf-&lt;服务模块&gt;&lt;/artifactId&gt;
+    &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="true--4"><a class="anchor" href="#true--4"></a>4. 文档</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="http://gudaoxuri.github.io/ez-framework">http://gudaoxuri.github.io/ez-framework</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="truelicense"><a class="anchor" href="#truelicense"></a>5. License</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Under version 2.0 of the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="true--5"><a class="anchor" href="#true--5"></a>6. 持久化服务</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="true--2"><a class="anchor" href="#true--2"></a>1.1. 功能</h3>
+<h3 id="true--6"><a class="anchor" href="#true--6"></a>6.1. 功能</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
 <p>支持Mongo或关系型数据库（JDBC）</p>
+</li>
+<li>
+<p>统一API</p>
 </li>
 <li>
 <p>轻量级ORMapping，无Session处理</p>
@@ -2297,9 +2631,21 @@ p {
 </tr>
 </table>
 </div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+数据字段应避免使用null值，字符用""、数字用0（或其它）、Bool用false 等代替
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect2">
-<h3 id="true5"><a class="anchor" href="#true5"></a>1.2. 5分钟上手</h3>
+<h3 id="true5"><a class="anchor" href="#true5"></a>6.2. 5分钟上手</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -2407,13 +2753,13 @@ JDBC方式需要手工创建数据库及数据表
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--3"><a class="anchor" href="#true--3"></a>1.3. 依赖</h3>
+<h3 id="true--7"><a class="anchor" href="#true--7"></a>6.3. 依赖</h3>
 <div class="paragraph">
 <p>环境依赖：mongo或关系型数据库</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="truemongo"><a class="anchor" href="#truemongo"></a>1.4. Mongo配置</h3>
+<h3 id="truemongo"><a class="anchor" href="#truemongo"></a>6.4. Mongo配置</h3>
 <div class="listingblock">
 <div class="content">
 <pre>"storage.mongo": {
@@ -2510,7 +2856,7 @@ JDBC方式需要手工创建数据库及数据表
 </div>
 </div>
 <div class="sect2">
-<h3 id="truejdbc"><a class="anchor" href="#truejdbc"></a>1.5. JDBC配置</h3>
+<h3 id="truejdbc"><a class="anchor" href="#truejdbc"></a>6.5. JDBC配置</h3>
 <div class="listingblock">
 <div class="content">
 <pre>"storage.jdbc": {
@@ -2582,9 +2928,9 @@ BoneCP的配置见 <a href="http://www.jolbox.com/configuration.html" class="bar
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--4"><a class="anchor" href="#true--4"></a>1.6. 使用</h3>
+<h3 id="true--8"><a class="anchor" href="#true--8"></a>6.6. 使用</h3>
 <div class="sect3">
-<h4 id="true--5"><a class="anchor" href="#true--5"></a>1.6.1. 注解及方法定义</h4>
+<h4 id="true--9"><a class="anchor" href="#true--9"></a>6.6.1. 注解及方法定义</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">// 使用Entity注解表示此类可以持久化（实体）
@@ -2651,7 +2997,7 @@ object JDBC_Test_Entity extends JDBCSecureStorage[Test_Entity] with JDBCStatusSt
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--6"><a class="anchor" href="#true--6"></a>1.6.2. 常用方法</h4>
+<h4 id="true--10"><a class="anchor" href="#true--10"></a>6.6.2. 常用方法</h4>
 <div class="listingblock">
 <div class="title">继承自（Mongo或JDBC）BaseStorage[E]的方法</div>
 <div class="content">
@@ -2926,7 +3272,7 @@ def disableById(id: Any, context: EZStorageContext = null): Resp[Void]</code></p
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--7"><a class="anchor" href="#true--7"></a>1.6.3. 适配器使用</h4>
+<h4 id="true--11"><a class="anchor" href="#true--11"></a>6.6.3. 适配器使用</h4>
 <div class="paragraph">
 <p>当业务模块需要可选择支持Mongo或JDBC时可以用适配器，以减少业务编码</p>
 </div>
@@ -2986,9 +3332,9 @@ object EZ_Role extends SecureStorageAdapter[EZ_Role, EZ_Role_Base]
 </div>
 </div>
 <div class="sect3">
-<h4 id="truemongo-api"><a class="anchor" href="#truemongo-api"></a>1.6.4. Mongo低层API使用</h4>
+<h4 id="truemongo-api"><a class="anchor" href="#truemongo-api"></a>6.6.4. Mongo低层API使用</h4>
 <div class="sect4">
-<h5 id="true--8"><a class="anchor" href="#true--8"></a>同步操作</h5>
+<h5 id="true--12"><a class="anchor" href="#true--12"></a>同步操作</h5>
 <div class="listingblock">
 <div class="title">MongoProcessor</div>
 <div class="content">
@@ -3127,7 +3473,7 @@ def aggregate(collection: String, query: JsonArray): Resp[JsonArray]</code></pre
 </div>
 </div>
 <div class="sect4">
-<h5 id="true--9"><a class="anchor" href="#true--9"></a>异步操作</h5>
+<h5 id="true--13"><a class="anchor" href="#true--13"></a>异步操作</h5>
 <div class="listingblock">
 <div class="title">MongoProcessor.Async</div>
 <div class="content">
@@ -3267,162 +3613,219 @@ def aggregate(collection: String, query: JsonArray): Future[Resp[JsonArray]]</co
 </div>
 </div>
 <div class="sect3">
-<h4 id="truemongo-api-2"><a class="anchor" href="#truemongo-api-2"></a>1.6.5. Mongo低层API使用</h4>
+<h4 id="truemongo-api-2"><a class="anchor" href="#truemongo-api-2"></a>6.6.5. Mongo低层API使用</h4>
 <div class="sect4">
-<h5 id="true--10"><a class="anchor" href="#true--10"></a>同步操作</h5>
+<h5 id="true--14"><a class="anchor" href="#true--14"></a>同步操作</h5>
 <div class="listingblock">
 <div class="title">JDBCProcessor</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">/**
-  * update
-  *
-  * @param sql        sql
-  * @param parameters 参数
-  * @param retryTimes 重试次数，失败会重试10次
-  * @return update结果
-  */
-def update(sql: String, parameters: List[Any] = null, retryTimes: Int = 0): Resp[Void]
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">  /**
+    * update
+    *
+    * @param sql        sql
+    * @param parameters 参数
+    * @param conn       已存在的connection，为空时会新建
+    * @return update结果
+    */
+  def update(sql: String, parameters: List[Any] = null, conn: SQLConnection = null): Resp[Void]
 
-/**
-  * 批处理
-  *
-  * @param sql           sql
-  * @param parameterList 参数列表
-  * @return 处理结果
-  */
-def batch(sql: String, parameterList: List[List[Any]] = null): Resp[Void]
+  /**
+    * 批处理
+    *
+    * @param sql           sql
+    * @param parameterList 参数列表
+    * @param conn          已存在的connection，为空时会新建
+    * @return 处理结果
+    */
+  def batch(sql: String, parameterList: List[List[Any]] = null, conn: SQLConnection = null): Resp[Void]
 
-/**
-  * 获取一条记录
-  *
-  * @param sql         sql
-  * @param parameters  参数
-  * @param resultClass 记录类型
-  * @tparam E 记录类型
-  * @return 获取到的记录
-  */
-def get[E](sql: String, parameters: List[Any], resultClass: Class[E]): Resp[E]
+  /**
+    * 获取一条记录
+    *
+    * @param sql         sql
+    * @param parameters  参数
+    * @param resultClass 记录类型
+    * @param conn        已存在的connection，为空时会新建
+    * @tparam E 记录类型
+    * @return 获取到的记录
+    */
+  def get[E](sql: String, parameters: List[Any], resultClass: Class[E], conn: SQLConnection = null): Resp[E]
 
-/**
-  * 查找
-  *
-  * @param sql         sql
-  * @param parameters  参数
-  * @param resultClass 记录类型
-  * @tparam E 记录类型
-  * @return 获取到的记录
-  */
-def find[E](sql: String, parameters: List[Any], resultClass: Class[E]): Resp[List[E]]
+  /**
+    * 查找
+    *
+    * @param sql         sql
+    * @param parameters  参数
+    * @param resultClass 记录类型
+    * @param conn        已存在的connection，为空时会新建
+    * @tparam E 记录类型
+    * @return 获取到的记录
+    */
+  def find[E](sql: String, parameters: List[Any], resultClass: Class[E], conn: SQLConnection = null): Resp[List[E]]
 
-/**
-  * 分页
-  *
-  * @param sql         sql
-  * @param parameters  参数
-  * @param pageNumber  当前页，从1开始
-  * @param pageSize    每页条数
-  * @param resultClass 记录类型
-  * @tparam E 记录类型
-  * @return 获取到的记录
-  */
-def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int, resultClass: Class[E]): Resp[Page[E]]
+  /**
+    * 分页
+    *
+    * @param sql         sql
+    * @param parameters  参数
+    * @param pageNumber  当前页，从1开始
+    * @param pageSize    每页条数
+    * @param resultClass 记录类型
+    * @param conn        已存在的connection，为空时会新建
+    * @tparam E 记录类型
+    * @return 获取到的记录
+    */
+  def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int, resultClass: Class[E], conn: SQLConnection = null): Resp[Page[E]]
 
-/**
-  * 计数
-  *
-  * @param sql        sql
-  * @param parameters 参数
-  * @return 计数结果
-  */
-def count(sql: String, parameters: List[Any]): Resp[Long]
+  /**
+    * 计数
+    *
+    * @param sql        sql
+    * @param parameters 参数
+    * @param conn       已存在的connection，为空时会新建
+    * @return 计数结果
+    */
+  def count(sql: String, parameters: List[Any], conn: SQLConnection = null): Resp[Long]
 
-/**
-  * 判断是否存在
-  *
-  * @param sql        sql
-  * @param parameters 参数
-  * @return 是否存在
-  */
-def exist(sql: String, parameters: List[Any]): Resp[Boolean]</code></pre>
+  /**
+    * 判断是否存在
+    *
+    * @param sql        sql
+    * @param parameters 参数
+    * @param conn       已存在的connection，为空时会新建
+    * @return 是否存在
+    */
+  def exist(sql: String, parameters: List[Any], conn: SQLConnection = null): Resp[Boolean]
+
+  /**
+    * 开始事务
+    *
+    * @return 当前事务的连接信息
+    */
+  def openTx(): SQLConnection
+
+  /**
+    * 回滚事务
+    *
+    * @param conn 当前事务的连接信息
+    */
+  def rollback(conn: SQLConnection): Unit
+
+  /**
+    * 提交事务
+    *
+    * @param conn 当前事务的连接信息
+    */
+  def commit(conn: SQLConnection): Unit</code></pre>
 </div>
 </div>
 </div>
 <div class="sect4">
-<h5 id="true--11"><a class="anchor" href="#true--11"></a>异步操作</h5>
+<h5 id="true--15"><a class="anchor" href="#true--15"></a>异步操作</h5>
 <div class="listingblock">
 <div class="title">JDBCProcessor.Async</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">/**
-  * update
-  *
-  * @param sql        sql
-  * @param parameters 参数
-  * @param retryTimes 重试次数，失败会重试10次
-  * @return update结果
-  */
-def update(sql: String, parameters: List[Any] = null, retryTimes: Int = 0): Future[Resp[Void]]
+      * update
+      *
+      * @param sql        sql
+      * @param parameters 参数
+      * @param conn       已存在的connection，为空时会新建
+      * @return update结果
+      */
+    def update(sql: String, parameters: List[Any] = null, conn: SQLConnection = null): Future[Resp[Void]]
 
-/**
-  * 批处理
-  *
-  * @param sql           sql
-  * @param parameterList 参数列表
-  * @return 处理结果
-  */
-def batch(sql: String, parameterList: List[List[Any]] = null): Future[Resp[Void]]
+    /**
+      * 批处理
+      *
+      * @param sql           sql
+      * @param parameterList 参数列表
+      * @param conn          已存在的connection，为空时会新建
+      * @return 处理结果
+      */
+    def batch(sql: String, parameterList: List[List[Any]], conn: SQLConnection = null): Future[Resp[Void]]
 
-/**
-  * 获取一条记录
-  *
-  * @param sql         sql
-  * @param parameters  参数
-  * @param resultClass 记录类型
-  * @tparam E 记录类型
-  * @return 获取到的记录
-  */
-def get[E](sql: String, parameters: List[Any], resultClass: Class[E]): Future[Resp[E]]
+    /**
+      * 获取一条记录
+      *
+      * @param sql         sql
+      * @param parameters  参数
+      * @param resultClass 记录类型
+      * @param conn        已存在的connection，为空时会新建
+      * @tparam E 记录类型
+      * @return 获取到的记录
+      */
+    def get[E](sql: String, parameters: List[Any], resultClass: Class[E], conn: SQLConnection = null): Future[Resp[E]]
 
-/**
-  * 查找
-  *
-  * @param sql         sql
-  * @param parameters  参数
-  * @param resultClass 记录类型
-  * @tparam E 记录类型
-  * @return 获取到的记录
-  */
-def find[E](sql: String, parameters: List[Any], resultClass: Class[E]): Future[Resp[List[E]]]
+    /**
+      * 查找
+      *
+      * @param sql         sql
+      * @param parameters  参数
+      * @param resultClass 记录类型
+      * @param conn        已存在的connection，为空时会新建
+      * @tparam E 记录类型
+      * @return 获取到的记录
+      */
+    def find[E](sql: String, parameters: List[Any], resultClass: Class[E], conn: SQLConnection = null): Future[Resp[List[E]]]
 
-/**
-  * 分页
-  *
-  * @param sql         sql
-  * @param parameters  参数
-  * @param pageNumber  当前页，从1开始
-  * @param pageSize    每页条数
-  * @param resultClass 记录类型
-  * @tparam E 记录类型
-  * @return 获取到的记录
-  */
-def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int, resultClass: Class[E]): Future[Resp[Page[E]]]
+    /**
+      * 分页
+      *
+      * @param sql         sql
+      * @param parameters  参数
+      * @param pageNumber  当前页，从1开始
+      * @param pageSize    每页条数
+      * @param resultClass 记录类型
+      * @param conn        已存在的connection，为空时会新建
+      * @tparam E 记录类型
+      * @return 获取到的记录
+      */
+    def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int,
+                resultClass: Class[E], conn: SQLConnection = null): Future[Resp[Page[E]]]
 
-/**
-  * 计数
-  *
-  * @param sql        sql
-  * @param parameters 参数
-  * @return 计数结果
-  */
-def count(sql: String, parameters: List[Any]): Future[Resp[Long]]
+    /**
+      * 计数
+      *
+      * @param sql        sql
+      * @param parameters 参数
+      * @param conn       已存在的connection，为空时会新建
+      * @return 计数结果
+      */
+    def count(sql: String, parameters: List[Any], conn: SQLConnection = null): Future[Resp[Long]]
 
-/**
-  * 判断是否存在
-  *
-  * @param sql        sql
-  * @param parameters 参数
-  * @return 是否存在
-  */
-def exist(sql: String, parameters: List[Any]): Future[Resp[Boolean]]</code></pre>
+    /**
+      * 判断是否存在
+      *
+      * @param sql        sql
+      * @param parameters 参数
+      * @param conn       已存在的connection，为空时会新建
+      * @return 是否存在
+      */
+    def exist(sql: String, parameters: List[Any], conn: SQLConnection = null): Future[Resp[Boolean]]
+
+    /**
+      * 开始事务
+      *
+      * @return 当前事务的连接信息
+      */
+    def openTx(): Future[SQLConnection]
+
+    /**
+      * 回滚事务
+      *
+      * @param conn 当前事务的连接信息
+      * @return 是否成功
+      */
+    def rollback(conn: SQLConnection): Future[Void]
+
+    /**
+      * 提交事务
+      *
+      * @param conn 当前事务的连接信息
+      * @return 是否成功
+      */
+    def commit(conn: SQLConnection): Future[Void]</code></pre>
 </div>
 </div>
 </div>
@@ -3431,20 +3834,23 @@ def exist(sql: String, parameters: List[Any]): Future[Resp[Boolean]]</code></pre
 </div>
 </div>
 <div class="sect1">
-<h2 id="truehttp"><a class="anchor" href="#truehttp"></a>2. HTTP服务</h2>
+<h2 id="truerpc"><a class="anchor" href="#truerpc"></a>7. RPC服务</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="true--12"><a class="anchor" href="#true--12"></a>2.1. 功能</h3>
+<h3 id="true--16"><a class="anchor" href="#true--16"></a>7.1. 功能</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>支持基于注解的HTTP服务发现</p>
+<p>支持HTTP和WebSocket服务</p>
+</li>
+<li>
+<p>基于注解服务发现</p>
 </li>
 <li>
 <p>Restful风格，支持GET POST PUT DELETE等常用方法</p>
 </li>
 <li>
-<p>支持HTTP及HTTPS</p>
+<p>支持HTTPS</p>
 </li>
 <li>
 <p>支持Json跨域请求</p>
@@ -3458,11 +3864,14 @@ def exist(sql: String, parameters: List[Any]): Future[Resp[Boolean]]</code></pre
 <li>
 <p>提供CRUD脚手架服务</p>
 </li>
+<li>
+<p>支持HTML与XML处理</p>
+</li>
 </ol>
 </div>
 </div>
 <div class="sect2">
-<h3 id="true5-2"><a class="anchor" href="#true5-2"></a>2.2. 5分钟上手</h3>
+<h3 id="true5-2"><a class="anchor" href="#true5-2"></a>7.2. 5分钟上手</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -3471,7 +3880,7 @@ def exist(sql: String, parameters: List[Any]): Future[Resp[Boolean]]</code></pre
 <div class="content">
 <pre>&lt;dependency&gt;
   &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
-  &lt;artifactId&gt;ezf-rpc-http&lt;/artifactId&gt;
+  &lt;artifactId&gt;ezf-rpc-&lt;http或websocket&gt;&lt;/artifactId&gt;
   &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
 &lt;dependency&gt;</pre>
 </div>
@@ -3481,9 +3890,17 @@ def exist(sql: String, parameters: List[Any]): Future[Resp[Boolean]]</code></pre
 <p>添加配置</p>
 <div class="literalblock">
 <div class="content">
-<pre>"rpc.http": {
-  "servicePath": "com.foo.api",
-  "host": "0.0.0.0"
+<pre>// HTTP
+"rpc.http": {
+  "servicePath": "com.foo.api"
+}</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>// 或 WebSocket
+"rpc.websocket": {
+  "servicePath": "com.foo.api"
 }</pre>
 </div>
 </div>
@@ -3493,9 +3910,9 @@ def exist(sql: String, parameters: List[Any]): Future[Resp[Boolean]]</code></pre
 <div class="literalblock">
 <div class="content">
 <pre>@RPC("/test/")
-@HTTP
+@HTTP 或 @WebSocket
 object TestService {
-   @POST("")
+   @POST("") 或 @REQUEST("")
    def getTest(parameter: Map[String, String],body:String, context: EZRPCContext): Resp[String] = {
      Resp.success(String)
    }
@@ -3515,8 +3932,44 @@ object TestService {
 <p>访问</p>
 <div class="literalblock">
 <div class="content">
-<pre>POST http://127.0.0.1/test/" body: "Hello World"
+<pre>// HTTP
+POST http://127.0.0.1/test/" body: "Hello World"
 返回 "Hello World"</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>// 或 WebSocket
+写个HTML页面
+&lt;html&gt;
+&lt;head&gt;&lt;/head&gt;
+&lt;script&gt;
+    var socket_resource;
+    if (window.WebSocket) {
+        socket= new WebSocket("ws://localhost/test/");
+        socket.onmessage = function (event) {
+            console.log("received : " + JSON.parse(event.data));
+        };
+        socket.onopen = function (event) {
+            console.log("opened!");
+        };
+        socket.onclose = function (event) {
+            console.log("closed.");
+        };
+    } else {
+        alert("Your browser does not support Websockets. (Use Chrome)");
+    }
+    function send() {
+        socket.send(JSON.stringify({
+            f1: "1111"
+        }));
+    }
+&lt;/script&gt;
+&lt;body&gt;
+&lt;input id="btnSend" type="button" value="POST" onclick="send()"/&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+打开测试，OK</pre>
 </div>
 </div>
 </li>
@@ -3524,13 +3977,13 @@ object TestService {
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--13"><a class="anchor" href="#true--13"></a>2.3. 依赖</h3>
+<h3 id="true--17"><a class="anchor" href="#true--17"></a>7.3. 依赖</h3>
 <div class="paragraph">
 <p>服务依赖：storage.mongo或storage.jdbc（可选，使用CRUD脚手架服务时必选）</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--14"><a class="anchor" href="#true--14"></a>2.4. 配置</h3>
+<h3 id="truehttp"><a class="anchor" href="#truehttp"></a>7.4. HTTP配置</h3>
 <div class="listingblock">
 <div class="content">
 <pre>"rpc.http": {
@@ -3544,6 +3997,13 @@ object TestService {
   "ssl": { <i class="conum" data-value="8"></i><b>(8)</b>
     "keyPath": "", <i class="conum" data-value="9"></i><b>(9)</b>
     "keyPassword": "" <i class="conum" data-value="10"></i><b>(10)</b>
+  },
+  monitor": { <i class="conum" data-value="11"></i><b>(11)</b>
+    "slow": {<i class="conum" data-value="12"></i><b>(12)</b>
+      "time": 10000, <i class="conum" data-value="13"></i><b>(13)</b>
+      "includes": [], <i class="conum" data-value="14"></i><b>(14)</b>
+      "excludes": [] <i class="conum" data-value="15"></i><b>(15)</b>
+    }
   }
 }</pre>
 </div>
@@ -3590,6 +4050,26 @@ object TestService {
 <td><i class="conum" data-value="10"></i><b>10</b></td>
 <td>SSL证书密码</td>
 </tr>
+<tr>
+<td><i class="conum" data-value="11"></i><b>11</b></td>
+<td>是否使用请求监控</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="12"></i><b>12</b></td>
+<td>是否使用慢请求监控</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="13"></i><b>13</b></td>
+<td>慢请求时间定义，请求大于此时间会记录到日志，单位毫秒</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="14"></i><b>14</b></td>
+<td>包含的请求URI，如果此字段存在，那么只会记录此URI中的请求，格式：method:uri</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="15"></i><b>15</b></td>
+<td>排除的请求URI，如果此字段存在，那么在此URI中的请求都不会记录，格式：method:uri</td>
+</tr>
 </table>
 </div>
 <div class="admonitionblock important">
@@ -3616,11 +4096,51 @@ SSL证书路径为相对路径时，它的根路径查找顺序为 1）启动参
 </tr>
 </table>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>includes</code>和<code>excludes</code>是排他的，当<code>includes</code>不为空时<code>excludes</code>将失效
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect2">
-<h3 id="true--15"><a class="anchor" href="#true--15"></a>2.5. 使用</h3>
+<h3 id="truewebsocket"><a class="anchor" href="#truewebsocket"></a>7.5. WebSocket配置</h3>
+<div class="listingblock">
+<div class="content">
+<pre>"rpc.websocket": {
+  "servicePath": "", <i class="conum" data-value="1"></i><b>(1)</b>
+  "host": "127.0.0.1", <i class="conum" data-value="2"></i><b>(2)</b>
+  "port": 80 <i class="conum" data-value="3"></i><b>(3)</b>
+}</pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>WebSocket服务发现的根包，系统会以此包为基础，扫描子孙路径下所有带@RPC及@WebSocket的类，并将其类中带@REQUEST注解的方法加入到路由表中</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>IP或主机名</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>端口号</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--18"><a class="anchor" href="#true--18"></a>7.6. 使用</h3>
 <div class="sect3">
-<h4 id="true--16"><a class="anchor" href="#true--16"></a>2.5.1. 注解及方法定义</h4>
+<h4 id="truehttp-2"><a class="anchor" href="#truehttp-2"></a>7.6.1. HTTP服务注解及方法定义</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-scala" data-lang="scala"> @RPC("/test/") // 指定RPC注解，参数`/test/`表示uri的根路径
@@ -3709,7 +4229,25 @@ URI变量以 <code>:</code> 开头，变量名只能是字母或数字
 </div>
 </div>
 <div class="sect3">
-<h4 id="truesimplehttpservice"><a class="anchor" href="#truesimplehttpservice"></a>2.5.2. SimpleHttpService脚手架</h4>
+<h4 id="truewebsocket-2"><a class="anchor" href="#truewebsocket-2"></a>7.6.2. WebSocket服务注解及方法定义</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala"> @RPC("/test/") // 指定RPC注解，参数`/test/`表示uri的根路径
+ @WebSocket // 指定WebSocket注解，表示此类可提供WebSocket服务
+ object DemoService {
+
+     // 此注解表示此方法支持WebSocket请求，方法形参与HTTP的@POST类似
+     @REQUEST("")
+     def getTest(parameter: Map[String, String],body:String,context: EZRPCContext): Resp[String] = {
+       Resp.success("Hello World")
+     }
+
+ }</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="truesimplehttpservice"><a class="anchor" href="#truesimplehttpservice"></a>7.6.3. SimpleHttpService脚手架</h4>
 <div class="paragraph">
 <p>为简化常规的CRUD应用，可继承SimpleHttpService，此类中已定义了基本的CRUD、上传、下载、导出等操作</p>
 </div>
@@ -3919,9 +4457,9 @@ object EZ_Resource extends MongoBaseStorage[EZ_Resource] with MongoStatusStorage
 </div>
 </div>
 <div class="sect3">
-<h4 id="truehttp-2"><a class="anchor" href="#truehttp-2"></a>2.5.3. HTTP客户端</h4>
+<h4 id="truehttp-3"><a class="anchor" href="#truehttp-3"></a>7.6.4. HTTP客户端</h4>
 <div class="sect4">
-<h5 id="true--17"><a class="anchor" href="#true--17"></a>同步操作</h5>
+<h5 id="true--19"><a class="anchor" href="#true--19"></a>同步操作</h5>
 <div class="listingblock">
 <div class="title">HttpClientProcessor</div>
 <div class="content">
@@ -3966,7 +4504,7 @@ def delete(url: String, contentType: String = "application/json; charset=utf-8")
 </div>
 </div>
 <div class="sect4">
-<h5 id="true--18"><a class="anchor" href="#true--18"></a>异步操作</h5>
+<h5 id="true--20"><a class="anchor" href="#true--20"></a>异步操作</h5>
 <div class="listingblock">
 <div class="title">HttpClientProcessor.Async</div>
 <div class="content">
@@ -4011,14 +4549,30 @@ def delete(url: String, contentType: String = "application/json; charset=utf-8")
 </div>
 </div>
 </div>
+<div class="sect3">
+<h4 id="truewebsocket-3"><a class="anchor" href="#truewebsocket-3"></a>7.6.5. WebSocket消息推送管理</h4>
+<div class="listingblock">
+<div class="title">WebSocketMessagePushManager</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">/**
+  * 向所有客户端推送消息
+  *
+  * @param method 连接方法，目前只限于 `REQUEST` 方法
+  * @param path   连接路径
+  * @param data   消息
+  */
+def ws(method: String, path: String, data: Any): Unit</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="true--19"><a class="anchor" href="#true--19"></a>3. 认证服务</h2>
+<h2 id="true--21"><a class="anchor" href="#true--21"></a>8. 认证服务</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="true--20"><a class="anchor" href="#true--20"></a>3.1. 功能</h3>
+<h3 id="true--22"><a class="anchor" href="#true--22"></a>8.1. 功能</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -4037,7 +4591,7 @@ def delete(url: String, contentType: String = "application/json; charset=utf-8")
 </div>
 </div>
 <div class="sect2">
-<h3 id="true5-3"><a class="anchor" href="#true5-3"></a>3.2. 5分钟上手</h3>
+<h3 id="true5-3"><a class="anchor" href="#true5-3"></a>8.2. 5分钟上手</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -4058,12 +4612,8 @@ def delete(url: String, contentType: String = "application/json; charset=utf-8")
 <div class="content">
 <pre>"auth": {},
 "storage.mongo": {
-  "hosts": [
-    {
-      "host": "&lt;服务IP&gt;",
-      "port": 27017
-    }
-  ],
+  "host": "&lt;服务IP&gt;",
+  "port": 27017,
   "db_name": "test"
 },
 "rpc.http": {
@@ -4098,7 +4648,7 @@ def delete(url: String, contentType: String = "application/json; charset=utf-8")
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--21"><a class="anchor" href="#true--21"></a>3.3. 依赖</h3>
+<h3 id="true--23"><a class="anchor" href="#true--23"></a>8.3. 依赖</h3>
 <div class="paragraph">
 <p>服务依赖：rpc.http、redis、storage.mongo或storage.jdbc、mail（可选，允许注册或开放找回密码功能时必选）</p>
 </div>
@@ -4107,20 +4657,32 @@ def delete(url: String, contentType: String = "application/json; charset=utf-8")
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--22"><a class="anchor" href="#true--22"></a>3.4. 配置</h3>
+<h3 id="true--24"><a class="anchor" href="#true--24"></a>8.4. 配置</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json" data-lang="json">"auth": {
   "allowRegister": false, <i class="conum" data-value="1"></i><b>(1)</b>
-  "selfActive": true, <i class="conum" data-value="2"></i><b>(2)</b>
-  "defaultRoleFlag": "user", <i class="conum" data-value="3"></i><b>(3)</b>
-  "defaultOrganizationCode": "", <i class="conum" data-value="4"></i><b>(4)</b>
-  "publicUriPrefix": "/public/", <i class="conum" data-value="5"></i><b>(5)</b>
-  "loginUrl": "#/auth/login", <i class="conum" data-value="6"></i><b>(6)</b>
-  "loginKeepSeconds": 0 , <i class="conum" data-value="7"></i><b>(7)</b>
-  "activeKeepSeconds": 86400 , <i class="conum" data-value="8"></i><b>(8)</b>
-  "extAccountStorage": "" , <i class="conum" data-value="9"></i><b>(9)</b>
-  "storage":"mongo" <i class="conum" data-value="10"></i><b>(10)</b>
+  "customLogin": false,  <i class="conum" data-value="2"></i><b>(2)</b>
+  "selfActive": true, <i class="conum" data-value="3"></i><b>(3)</b>
+  "defaultRoleFlag": "user", <i class="conum" data-value="4"></i><b>(4)</b>
+  "defaultOrganizationCode": "", <i class="conum" data-value="5"></i><b>(5)</b>
+  "publicUriPrefix": "/public/", <i class="conum" data-value="6"></i><b>(6)</b>
+  "loginUrl": "#/auth/login", <i class="conum" data-value="7"></i><b>(7)</b>
+  "loginKeepSeconds": 0, <i class="conum" data-value="8"></i><b>(8)</b>
+  "activeKeepSeconds": 86400, <i class="conum" data-value="9"></i><b>(9)</b>
+  "extAccountStorage": "", <i class="conum" data-value="10"></i><b>(10)</b>
+  "useRelTable": false, <i class="conum" data-value="11"></i><b>(11)</b>
+  "customTables": {  <i class="conum" data-value="12"></i><b>(12)</b>
+    "organization": "",  <i class="conum" data-value="13"></i><b>(13)</b>
+    "account": "",  <i class="conum" data-value="14"></i><b>(14)</b>
+    "resource": "",  <i class="conum" data-value="15"></i><b>(15)</b>
+    "role": "",  <i class="conum" data-value="16"></i><b>(16)</b>
+    "menu": "",  <i class="conum" data-value="17"></i><b>(17)</b>
+    "rel_account_role": "",  <i class="conum" data-value="18"></i><b>(18)</b>
+    "rel_role_resource": "",  <i class="conum" data-value="19"></i><b>(19)</b>
+    "rel_menu_role": ""  <i class="conum" data-value="20"></i><b>(20)</b>
+  },
+  "storage":"mongo" <i class="conum" data-value="21"></i><b>(21)</b>
 }</code></pre>
 </div>
 </div>
@@ -4132,38 +4694,82 @@ def delete(url: String, contentType: String = "application/json; charset=utf-8")
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>是否允许自助激活，true：会发送激活邮件自助激活，false：需要管理员手工激活</td>
+<td>是否启用自定义登录，如果为true的话默认登录URL会被禁用</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>默认角色标识，注册时账户默认的角色</td>
+<td>是否允许自助激活，true：会发送激活邮件自助激活，false：需要管理员手工激活</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>默认组织编码，注册时账户默认的组织</td>
+<td>默认角色标识，注册时账户默认的角色</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>公开URI的前缀，以此前缀开头的URI不需要认证</td>
+<td>默认组织编码，注册时账户默认的组织</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>登录URL，注册或找回密码激活成功后会跳转到登录URL，如果此配置值不带http前缀则使用<code>rpc-http</code>中<code>webUrl</code>做为基础路径</td>
+<td>公开URI的前缀，以此前缀开头的URI不需要认证</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="7"></i><b>7</b></td>
-<td>登录保持时间，单位秒，指定登录会话多少秒后过期，0表示不过期</td>
+<td>登录URL，注册或找回密码激活成功后会跳转到登录URL，如果此配置值不带http前缀则使用<code>rpc-http</code>中<code>webUrl</code>做为基础路径</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
-<td>注册或找回密码激活有效期，单位秒</td>
+<td>登录保持时间，单位秒，指定登录会话多少秒后过期，0表示不过期</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="9"></i><b>9</b></td>
-<td>扩展账号持久化类路径，可选，默认对于扩展的账号信息存储在<code>ez_account</code>表中的<code>ext_info</code>字段中，如果需要将扩展信息存储在独立表中时可以定义一个继承自<code>BaseModel</code>的实体及对应的持久化实现，然后指定其类路径</td>
+<td>注册或找回密码激活有效期，单位秒</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="10"></i><b>10</b></td>
+<td>扩展账号持久化类路径，可选，默认对于扩展的账号信息存储在<code>ez_account</code>表中的<code>ext_info</code>字段中，如果需要将扩展信息存储在独立表中时可以定义一个继承自<code>BaseModel</code>的实体及对应的持久化实现，然后指定其类路径</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="11"></i><b>11</b></td>
+<td>是否使用关联表（多对多关联中间表），多用于JDBC持久化，建议在原生不支持json的关系型数据启用此项</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="12"></i><b>12</b></td>
+<td>是否使用自定义表名</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="13"></i><b>13</b></td>
+<td>自定义组织表名</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="14"></i><b>14</b></td>
+<td>自定义账户表名</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="15"></i><b>15</b></td>
+<td>自定义资源表名</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="16"></i><b>16</b></td>
+<td>自定义角色表名</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="17"></i><b>17</b></td>
+<td>自定义菜单表名</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="18"></i><b>18</b></td>
+<td>自定义账户角色关联表名</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="19"></i><b>19</b></td>
+<td>自定义角色资源关联表名</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="20"></i><b>20</b></td>
+<td>自定义菜单角色关联表名</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="21"></i><b>21</b></td>
 <td>持久化实现，支持<code>mongo</code>或<code>jdbc</code></td>
 </tr>
 </table>
@@ -4175,14 +4781,14 @@ def delete(url: String, contentType: String = "application/json; charset=utf-8")
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-使用<code>jdbc</code>持久化时请先执行<code>ez_ddl.sql</code>以创建基础表
+<code>storage:jdbc &amp; useRelTable不存在或等于false</code>时请执行<code>ez_ddl.sql</code>以创建基础表，<code>storage:jdbc &amp; useRelTable=true</code>时请执行<code>ez_ddl_with_rel.sql</code>以创建带关联表的基础表
 </td>
 </tr>
 </table>
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--23"><a class="anchor" href="#true--23"></a>3.5. 认证服务接入</h3>
+<h3 id="true--25"><a class="anchor" href="#true--25"></a>8.5. 认证服务接入</h3>
 <div class="paragraph">
 <p>在原有HTTP服务方法中修改 <code>EZRPCContext</code> 为 <code>EZAuthContext</code> 即可，如</p>
 </div>
@@ -4207,11 +4813,14 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--24"><a class="anchor" href="#true--24"></a>3.6. 预定义认证接口调用</h3>
+<h3 id="true--26"><a class="anchor" href="#true--26"></a>8.6. 预定义认证接口调用</h3>
 <div class="sect3">
-<h4 id="true--25"><a class="anchor" href="#true--25"></a>3.6.1. 说明</h4>
+<h4 id="true--27"><a class="anchor" href="#true--27"></a>8.6.1. 说明</h4>
 <div class="olist arabic">
 <ol class="arabic">
+<li>
+<p>无特殊说明的情况下所有请求的header Content-Type为application/json</p>
+</li>
 <li>
 <p>无特殊说明的情况下所有返回值均为Json，由以下格式构成：</p>
 <div class="literalblock">
@@ -4246,7 +4855,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--26"><a class="anchor" href="#true--26"></a>3.6.2. 登录</h4>
+<h4 id="true--28"><a class="anchor" href="#true--28"></a>8.6.2. 登录</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4284,9 +4893,21 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 }</code></pre>
 </div>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>ext_id</code>只在使用<code>extAccountStorage</code>时有意义
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect3">
-<h4 id="true--27"><a class="anchor" href="#true--27"></a>3.6.3. 注销</h4>
+<h4 id="true--29"><a class="anchor" href="#true--29"></a>8.6.3. 注销</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4303,7 +4924,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--28"><a class="anchor" href="#true--28"></a>3.6.4. 获取登录信息</h4>
+<h4 id="true--30"><a class="anchor" href="#true--30"></a>8.6.4. 获取登录信息</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4320,7 +4941,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--29"><a class="anchor" href="#true--29"></a>3.6.5. 获取菜单（带权限过滤）</h4>
+<h4 id="true--31"><a class="anchor" href="#true--31"></a>8.6.5. 获取菜单（带权限过滤）</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4334,7 +4955,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-text" data-lang="text">[
+<pre class="highlightjs highlight"><code class="language-json" data-lang="json">[
   {
     "code": String, // 菜单编码
     "uri": String, // 菜单点击的URI
@@ -4352,7 +4973,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--30"><a class="anchor" href="#true--30"></a>3.6.6. 注册</h4>
+<h4 id="true--32"><a class="anchor" href="#true--32"></a>8.6.6. 注册</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4383,7 +5004,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--31"><a class="anchor" href="#true--31"></a>3.6.7. 激活账号</h4>
+<h4 id="true--33"><a class="anchor" href="#true--33"></a>8.6.7. 激活账号</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4400,7 +5021,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--32"><a class="anchor" href="#true--32"></a>3.6.8. 找回（重置）密码</h4>
+<h4 id="true--34"><a class="anchor" href="#true--34"></a>8.6.8. 找回（重置）密码</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4415,7 +5036,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-text" data-lang="text">{
-  "newPassword": String  // 新的密码
+  "new_password": String  // 新的密码
 }</code></pre>
 </div>
 </div>
@@ -4427,7 +5048,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--33"><a class="anchor" href="#true--33"></a>3.6.9. 激活新密码</h4>
+<h4 id="true--35"><a class="anchor" href="#true--35"></a>8.6.9. 激活新密码</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4444,7 +5065,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--34"><a class="anchor" href="#true--34"></a>3.6.10. 获取登录账号信息</h4>
+<h4 id="true--36"><a class="anchor" href="#true--36"></a>8.6.10. 获取登录账号信息</h4>
 <div class="ulist">
 <ul>
 <li>
@@ -4478,7 +5099,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--35"><a class="anchor" href="#true--35"></a>3.6.11. 更新登录账号信息</h4>
+<h4 id="true--37"><a class="anchor" href="#true--37"></a>8.6.11. 更新登录账号信息</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4493,7 +5114,6 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-text" data-lang="text">{
-  "login_id": String,  // 登录id
   "name": String, // 姓名
   "image": String, // 头像
   "email": String, // Email
@@ -4501,6 +5121,18 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
   "new_password": String // 新密码，如果要修改密码此字段必填
 }</code></pre>
 </div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<code>current_password</code>必须填写正确，否则无法修改
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p><strong>响应内容主体</strong></p>
@@ -4510,7 +5142,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--36"><a class="anchor" href="#true--36"></a>3.6.12. （管理接口）添加资源</h4>
+<h4 id="true--38"><a class="anchor" href="#true--38"></a>8.6.12. （管理接口）添加资源</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4554,7 +5186,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--37"><a class="anchor" href="#true--37"></a>3.6.13. （管理接口）更新资源</h4>
+<h4 id="true--39"><a class="anchor" href="#true--39"></a>8.6.13. （管理接口）更新资源</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4569,12 +5201,21 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-text" data-lang="text">{
-  "id": String,  // 数据库id
-  "method": String,  // Http方法，大写
-  "uri": String,  // 资源URI
   "name": String // 资源名称
 }</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+只能修改<code>name</code>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p><strong>响应内容主体</strong></p>
@@ -4584,7 +5225,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--38"><a class="anchor" href="#true--38"></a>3.6.14. （管理接口）查找资源列表</h4>
+<h4 id="true--40"><a class="anchor" href="#true--40"></a>8.6.14. （管理接口）查找资源列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4608,7 +5249,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--39"><a class="anchor" href="#true--39"></a>3.6.15. （管理接口）查找启用资源列表</h4>
+<h4 id="true--41"><a class="anchor" href="#true--41"></a>8.6.15. （管理接口）查找启用资源列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4625,7 +5266,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--40"><a class="anchor" href="#true--40"></a>3.6.16. （管理接口）分页查找资源列表</h4>
+<h4 id="true--42"><a class="anchor" href="#true--42"></a>8.6.16. （管理接口）分页查找资源列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4656,7 +5297,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--41"><a class="anchor" href="#true--41"></a>3.6.17. （管理接口）获取一个资源</h4>
+<h4 id="true--43"><a class="anchor" href="#true--43"></a>8.6.17. （管理接口）获取一个资源</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4673,7 +5314,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--42"><a class="anchor" href="#true--42"></a>3.6.18. （管理接口）删除一个资源</h4>
+<h4 id="true--44"><a class="anchor" href="#true--44"></a>8.6.18. （管理接口）删除一个资源</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4690,7 +5331,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--43"><a class="anchor" href="#true--43"></a>3.6.19. （管理接口）启用一个资源</h4>
+<h4 id="true--45"><a class="anchor" href="#true--45"></a>8.6.19. （管理接口）启用一个资源</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4707,7 +5348,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--44"><a class="anchor" href="#true--44"></a>3.6.20. （管理接口）禁用一个资源</h4>
+<h4 id="true--46"><a class="anchor" href="#true--46"></a>8.6.20. （管理接口）禁用一个资源</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4724,7 +5365,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--45"><a class="anchor" href="#true--45"></a>3.6.21. （管理接口）导出资源列表</h4>
+<h4 id="true--47"><a class="anchor" href="#true--47"></a>8.6.21. （管理接口）导出资源列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4741,7 +5382,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--46"><a class="anchor" href="#true--46"></a>3.6.22. （管理接口）添加组织</h4>
+<h4 id="true--48"><a class="anchor" href="#true--48"></a>8.6.22. （管理接口）添加组织</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4784,7 +5425,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--47"><a class="anchor" href="#true--47"></a>3.6.23. （管理接口）更新组织</h4>
+<h4 id="true--49"><a class="anchor" href="#true--49"></a>8.6.23. （管理接口）更新组织</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4799,12 +5440,22 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-text" data-lang="text">{
-  "id": String,  // 数据库id
-  "code": String,  // 组织编码
   "name": String, // 组织名称
   "image": String // 组织图标
 }</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+只能修改<code>name</code>和<code>image</code>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p><strong>响应内容主体</strong></p>
@@ -4814,7 +5465,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--48"><a class="anchor" href="#true--48"></a>3.6.24. （管理接口）查找组织列表</h4>
+<h4 id="true--50"><a class="anchor" href="#true--50"></a>8.6.24. （管理接口）查找组织列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4838,7 +5489,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--49"><a class="anchor" href="#true--49"></a>3.6.25. （管理接口）查找启用组织列表</h4>
+<h4 id="true--51"><a class="anchor" href="#true--51"></a>8.6.25. （管理接口）查找启用组织列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4855,7 +5506,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--50"><a class="anchor" href="#true--50"></a>3.6.26. （管理接口）分页查找组织列表</h4>
+<h4 id="true--52"><a class="anchor" href="#true--52"></a>8.6.26. （管理接口）分页查找组织列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4886,7 +5537,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--51"><a class="anchor" href="#true--51"></a>3.6.27. （管理接口）获取一个组织</h4>
+<h4 id="true--53"><a class="anchor" href="#true--53"></a>8.6.27. （管理接口）获取一个组织</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4903,7 +5554,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--52"><a class="anchor" href="#true--52"></a>3.6.28. （管理接口）删除一个组织</h4>
+<h4 id="true--54"><a class="anchor" href="#true--54"></a>8.6.28. （管理接口）删除一个组织</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4920,7 +5571,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--53"><a class="anchor" href="#true--53"></a>3.6.29. （管理接口）启用一个组织</h4>
+<h4 id="true--55"><a class="anchor" href="#true--55"></a>8.6.29. （管理接口）启用一个组织</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4937,7 +5588,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--54"><a class="anchor" href="#true--54"></a>3.6.30. （管理接口）禁用一个组织</h4>
+<h4 id="true--56"><a class="anchor" href="#true--56"></a>8.6.30. （管理接口）禁用一个组织</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4954,7 +5605,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--55"><a class="anchor" href="#true--55"></a>3.6.31. （管理接口）导出组织列表</h4>
+<h4 id="true--57"><a class="anchor" href="#true--57"></a>8.6.31. （管理接口）导出组织列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4971,7 +5622,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--56"><a class="anchor" href="#true--56"></a>3.6.32. （管理接口）上传组织图标</h4>
+<h4 id="true--58"><a class="anchor" href="#true--58"></a>8.6.32. （管理接口）上传组织图标</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -4991,7 +5642,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--57"><a class="anchor" href="#true--57"></a>3.6.33. （管理接口）获取组织图标</h4>
+<h4 id="true--59"><a class="anchor" href="#true--59"></a>8.6.33. （管理接口）获取组织图标</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5008,7 +5659,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--58"><a class="anchor" href="#true--58"></a>3.6.34. （管理接口）添加角色</h4>
+<h4 id="true--60"><a class="anchor" href="#true--60"></a>8.6.34. （管理接口）添加角色</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5054,7 +5705,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--59"><a class="anchor" href="#true--59"></a>3.6.35. （管理接口）更新角色</h4>
+<h4 id="true--61"><a class="anchor" href="#true--61"></a>8.6.35. （管理接口）更新角色</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5069,13 +5720,22 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-text" data-lang="text">{
-  "id": String,  // 数据库id
-  "flag": String,  // 角色标识
   "name": String, // 角色名称
   "resource_codes": List[String], // 所属资源编码列表
-  "organization_code": String // 所属组织编码
 }</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+只能修改<code>name</code>和<code>resource_codes</code>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p><strong>响应内容主体</strong></p>
@@ -5085,7 +5745,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--60"><a class="anchor" href="#true--60"></a>3.6.36. （管理接口）查找角色列表</h4>
+<h4 id="true--62"><a class="anchor" href="#true--62"></a>8.6.36. （管理接口）查找角色列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5109,7 +5769,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--61"><a class="anchor" href="#true--61"></a>3.6.37. （管理接口）查找启用角色列表</h4>
+<h4 id="true--63"><a class="anchor" href="#true--63"></a>8.6.37. （管理接口）查找启用角色列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5126,7 +5786,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--62"><a class="anchor" href="#true--62"></a>3.6.38. （管理接口）分页查找角色列表</h4>
+<h4 id="true--64"><a class="anchor" href="#true--64"></a>8.6.38. （管理接口）分页查找角色列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5157,7 +5817,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--63"><a class="anchor" href="#true--63"></a>3.6.39. （管理接口）获取一个角色</h4>
+<h4 id="true--65"><a class="anchor" href="#true--65"></a>8.6.39. （管理接口）获取一个角色</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5174,7 +5834,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--64"><a class="anchor" href="#true--64"></a>3.6.40. （管理接口）删除一个角色</h4>
+<h4 id="true--66"><a class="anchor" href="#true--66"></a>8.6.40. （管理接口）删除一个角色</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5191,7 +5851,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--65"><a class="anchor" href="#true--65"></a>3.6.41. （管理接口）启用一个角色</h4>
+<h4 id="true--67"><a class="anchor" href="#true--67"></a>8.6.41. （管理接口）启用一个角色</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5208,7 +5868,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--66"><a class="anchor" href="#true--66"></a>3.6.42. （管理接口）禁用一个角色</h4>
+<h4 id="true--68"><a class="anchor" href="#true--68"></a>8.6.42. （管理接口）禁用一个角色</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5225,7 +5885,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--67"><a class="anchor" href="#true--67"></a>3.6.43. （管理接口）导出角色列表</h4>
+<h4 id="true--69"><a class="anchor" href="#true--69"></a>8.6.43. （管理接口）导出角色列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5242,7 +5902,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--68"><a class="anchor" href="#true--68"></a>3.6.44. （管理接口）添加账户</h4>
+<h4 id="true--70"><a class="anchor" href="#true--70"></a>8.6.44. （管理接口）添加账户</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5299,7 +5959,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--69"><a class="anchor" href="#true--69"></a>3.6.45. （管理接口）更新账户</h4>
+<h4 id="true--71"><a class="anchor" href="#true--71"></a>8.6.45. （管理接口）更新账户</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5314,17 +5974,26 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-text" data-lang="text">{
-  "id": String,  // 数据库id
   "name": String, // 姓名
   "email": String, // email
   "image": String, // 头像URL
   "password": String, // 密码
   "role_codes": List[String], // 角色编码列表
-  "organization_code": String, // 所属组织编码
-  "ext_id": String, // 扩展Id
   "ext_info": Map[String, Any] // 扩展信息
 }</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+只能修改<code>name</code>、<code>email</code>、<code>image</code>、<code>password</code>、<code>role_codes</code>和<code>ext_info</code>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p><strong>响应内容主体</strong></p>
@@ -5334,7 +6003,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--70"><a class="anchor" href="#true--70"></a>3.6.46. （管理接口）查找账户列表</h4>
+<h4 id="true--72"><a class="anchor" href="#true--72"></a>8.6.46. （管理接口）查找账户列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5358,7 +6027,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--71"><a class="anchor" href="#true--71"></a>3.6.47. （管理接口）查找启用账户列表</h4>
+<h4 id="true--73"><a class="anchor" href="#true--73"></a>8.6.47. （管理接口）查找启用账户列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5375,7 +6044,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--72"><a class="anchor" href="#true--72"></a>3.6.48. （管理接口）分页查找账户列表</h4>
+<h4 id="true--74"><a class="anchor" href="#true--74"></a>8.6.48. （管理接口）分页查找账户列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5406,7 +6075,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--73"><a class="anchor" href="#true--73"></a>3.6.49. （管理接口）获取一个账户</h4>
+<h4 id="true--75"><a class="anchor" href="#true--75"></a>8.6.49. （管理接口）获取一个账户</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5423,7 +6092,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--74"><a class="anchor" href="#true--74"></a>3.6.50. （管理接口）删除一个账户</h4>
+<h4 id="true--76"><a class="anchor" href="#true--76"></a>8.6.50. （管理接口）删除一个账户</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5440,7 +6109,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--75"><a class="anchor" href="#true--75"></a>3.6.51. （管理接口）启用一个账户</h4>
+<h4 id="true--77"><a class="anchor" href="#true--77"></a>8.6.51. （管理接口）启用一个账户</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5457,7 +6126,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--76"><a class="anchor" href="#true--76"></a>3.6.52. （管理接口）禁用一个账户</h4>
+<h4 id="true--78"><a class="anchor" href="#true--78"></a>8.6.52. （管理接口）禁用一个账户</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5474,7 +6143,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--77"><a class="anchor" href="#true--77"></a>3.6.53. （管理接口）导出账户列表</h4>
+<h4 id="true--79"><a class="anchor" href="#true--79"></a>8.6.53. （管理接口）导出账户列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5491,7 +6160,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--78"><a class="anchor" href="#true--78"></a>3.6.54. （管理接口）上传账户头像</h4>
+<h4 id="true--80"><a class="anchor" href="#true--80"></a>8.6.54. （管理接口）上传账户头像</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5511,7 +6180,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--79"><a class="anchor" href="#true--79"></a>3.6.55. （管理接口）获取账户头像</h4>
+<h4 id="true--81"><a class="anchor" href="#true--81"></a>8.6.55. （管理接口）获取账户头像</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5528,7 +6197,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--80"><a class="anchor" href="#true--80"></a>3.6.56. （管理接口）添加菜单</h4>
+<h4 id="true--82"><a class="anchor" href="#true--82"></a>8.6.56. （管理接口）添加菜单</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5582,7 +6251,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--81"><a class="anchor" href="#true--81"></a>3.6.57. （管理接口）更新菜单</h4>
+<h4 id="true--83"><a class="anchor" href="#true--83"></a>8.6.57. （管理接口）更新菜单</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5597,17 +6266,26 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-text" data-lang="text">{
-  "id": String,  // 数据库id
-  "uri": String, // 菜单点击的URI
   "name": String, // 菜单名称
   "icon": String, // 菜单图标名称
   "translate": String, // 菜单翻译（i18n用）
   "role_codes": List[String], // 所属角色编码列表
   "parent_code": String, // 父菜单编码，用于多级菜单
-  "sort": Int, // 排序，倒序
-  "organization_code": String // 所属组织编码
+  "sort": Int // 排序，倒序
 }</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+只能修改<code>name</code>、<code>icon</code>、<code>translate</code>、<code>parent_code</code>、<code>role_codes</code>和<code>sort</code>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p><strong>响应内容主体</strong></p>
@@ -5617,7 +6295,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--82"><a class="anchor" href="#true--82"></a>3.6.58. （管理接口）查找菜单列表</h4>
+<h4 id="true--84"><a class="anchor" href="#true--84"></a>8.6.58. （管理接口）查找菜单列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5641,7 +6319,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--83"><a class="anchor" href="#true--83"></a>3.6.59. （管理接口）查找启用菜单列表</h4>
+<h4 id="true--85"><a class="anchor" href="#true--85"></a>8.6.59. （管理接口）查找启用菜单列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5658,7 +6336,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--84"><a class="anchor" href="#true--84"></a>3.6.60. （管理接口）分页查找菜单列表</h4>
+<h4 id="true--86"><a class="anchor" href="#true--86"></a>8.6.60. （管理接口）分页查找菜单列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5689,7 +6367,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--85"><a class="anchor" href="#true--85"></a>3.6.61. （管理接口）获取一个菜单</h4>
+<h4 id="true--87"><a class="anchor" href="#true--87"></a>8.6.61. （管理接口）获取一个菜单</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5706,7 +6384,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--86"><a class="anchor" href="#true--86"></a>3.6.62. （管理接口）删除一个菜单</h4>
+<h4 id="true--88"><a class="anchor" href="#true--88"></a>8.6.62. （管理接口）删除一个菜单</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5723,7 +6401,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--87"><a class="anchor" href="#true--87"></a>3.6.63. （管理接口）启用一个菜单</h4>
+<h4 id="true--89"><a class="anchor" href="#true--89"></a>8.6.63. （管理接口）启用一个菜单</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5740,7 +6418,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--88"><a class="anchor" href="#true--88"></a>3.6.64. （管理接口）禁用一个菜单</h4>
+<h4 id="true--90"><a class="anchor" href="#true--90"></a>8.6.64. （管理接口）禁用一个菜单</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5757,7 +6435,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect3">
-<h4 id="true--89"><a class="anchor" href="#true--89"></a>3.6.65. （管理接口）导出菜单列表</h4>
+<h4 id="true--91"><a class="anchor" href="#true--91"></a>8.6.65. （管理接口）导出菜单列表</h4>
 <div class="paragraph">
 <p><strong>请求</strong></p>
 </div>
@@ -5777,10 +6455,10 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect1">
-<h2 id="true--90"><a class="anchor" href="#true--90"></a>4. 邮件服务</h2>
+<h2 id="true--92"><a class="anchor" href="#true--92"></a>9. 邮件服务</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="true--91"><a class="anchor" href="#true--91"></a>4.1. 功能</h3>
+<h3 id="true--93"><a class="anchor" href="#true--93"></a>9.1. 功能</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -5793,7 +6471,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </div>
 </div>
 <div class="sect2">
-<h3 id="true5-4"><a class="anchor" href="#true5-4"></a>4.2. 5分钟上手</h3>
+<h3 id="true5-4"><a class="anchor" href="#true5-4"></a>9.2. 5分钟上手</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -5837,13 +6515,13 @@ EmailProcessor.send(
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--92"><a class="anchor" href="#true--92"></a>4.3. 依赖</h3>
+<h3 id="true--94"><a class="anchor" href="#true--94"></a>9.3. 依赖</h3>
 <div class="paragraph">
 <p>无</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--93"><a class="anchor" href="#true--93"></a>4.4. 配置</h3>
+<h3 id="true--95"><a class="anchor" href="#true--95"></a>9.4. 配置</h3>
 <div class="listingblock">
 <div class="content">
 <pre>"email": {
@@ -5861,7 +6539,6 @@ EmailProcessor.send(
   "keyStore ": "&lt;可选&gt;", <i class="conum" data-value="12"></i><b>(12)</b>
   "keyStorePassword": "&lt;可选&gt;", <i class="conum" data-value="13"></i><b>(13)</b>
   "allowRcptErrors": "&lt;可选&gt;" <i class="conum" data-value="14"></i><b>(14)</b>
-}
 }</pre>
 </div>
 </div>
@@ -5922,7 +6599,7 @@ EmailProcessor.send(
 </table>
 </div>
 <div class="sect3">
-<h4 id="trueqq"><a class="anchor" href="#trueqq"></a>4.4.1. QQ企业邮箱配置示例</h4>
+<h4 id="trueqq"><a class="anchor" href="#trueqq"></a>9.4.1. QQ企业邮箱配置示例</h4>
 <div class="listingblock">
 <div class="content">
 <pre>"email": {
@@ -5940,9 +6617,9 @@ EmailProcessor.send(
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--94"><a class="anchor" href="#true--94"></a>4.5. 使用</h3>
+<h3 id="true--96"><a class="anchor" href="#true--96"></a>9.5. 使用</h3>
 <div class="sect3">
-<h4 id="true--95"><a class="anchor" href="#true--95"></a>4.5.1. 同步操作</h4>
+<h4 id="true--97"><a class="anchor" href="#true--97"></a>9.5.1. 同步操作</h4>
 <div class="listingblock">
 <div class="title">EmailProcessor</div>
 <div class="content">
@@ -6007,7 +6684,7 @@ EmailProcessor.send(
 </div>
 </div>
 <div class="sect4">
-<h5 id="true--96"><a class="anchor" href="#true--96"></a>异步操作</h5>
+<h5 id="true--98"><a class="anchor" href="#true--98"></a>异步操作</h5>
 <div class="listingblock">
 <div class="title">EmailProcessor.Async</div>
 <div class="content">
@@ -6074,10 +6751,1437 @@ EmailProcessor.send(
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="trueredis"><a class="anchor" href="#trueredis"></a>10. Redis服务</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="true--99"><a class="anchor" href="#true--99"></a>10.1. 功能</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>支持Redis的常用操作</p>
+</li>
+<li>
+<p>支持同步与异步操作</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true5-5"><a class="anchor" href="#true5-5"></a>10.2. 5分钟上手</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>添加依赖</p>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
+  &lt;artifactId&gt;ezf-redis&lt;/artifactId&gt;
+  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+&lt;dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>添加配置</p>
+<div class="literalblock">
+<div class="content">
+<pre>"distributed": {},
+"redis": {
+  "host": "&lt;redis IP&gt;"
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>测试服务</p>
+<div class="literalblock">
+<div class="content">
+<pre>EZManager.start()
+// 删除n_test
+RedisProcessor.del("n_test")
+// 判断是否存在n_test
+RedisProcessor.exists("n_test")
+// 添加n_test值 4秒后过期
+RedisProcessor.set("n_test", s"""{"name":"jzy"}""", 4)
+// 获取n_test值
+RedisProcessor.get("n_test")</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--100"><a class="anchor" href="#true--100"></a>10.3. 依赖</h3>
+<div class="paragraph">
+<p>环境依赖：redis 3.x</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--101"><a class="anchor" href="#true--101"></a>10.4. 配置</h3>
+<div class="listingblock">
+<div class="content">
+<pre>"redis": {
+  "host": "127.0.0.1", <i class="conum" data-value="1"></i><b>(1)</b>
+  "port": 6379, <i class="conum" data-value="2"></i><b>(2)</b>
+  "auth": null, <i class="conum" data-value="3"></i><b>(3)</b>
+  "db": 0, <i class="conum" data-value="4"></i><b>(4)</b>
+}</pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Redis服务IP</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Redis服务端口号</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Redis认证密码</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>连接的db库名</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--102"><a class="anchor" href="#true--102"></a>10.5. 使用</h3>
+<div class="sect3">
+<h4 id="true--103"><a class="anchor" href="#true--103"></a>10.5.1. 同步操作</h4>
+<div class="listingblock">
+<div class="title">RedisProcessor</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">   /**
+    * 暴露redis client ，用于自定义操作
+    *
+    * @return redis client
+    */
+  def custom(): RedisClient
+
+  /**
+    * key是否存在
+    *
+    * @param key key
+    * @return 是否存在
+    */
+  def exists(key: String): Resp[Boolean]
+
+  /**
+    * 获取字符串值
+    *
+    * @param key key
+    * @return 字符串值
+    */
+  def get(key: String): Resp[String]
+
+  /**
+    * 设置字符串
+    *
+    * @param key    key
+    * @param value  value
+    * @param expire 过期时间(seconds)，0表示永不过期
+    * @return 是否成功
+    */
+  def set(key: String, value: String, expire: Long = 0): Resp[Void]
+
+  /**
+    * 删除key
+    *
+    * @param key key
+    * @return 是否成功
+    */
+  def del(key: String): Resp[Void]
+
+  /**
+    * 设置列表
+    *
+    * @param key    key
+    * @param values values
+    * @param expire 过期时间(seconds)，0表示永不过期
+    * @return 是否成功
+    */
+  def lmset(key: String, values: List[String], expire: Long = 0): Resp[Void]
+
+  /**
+    * 添加列表值
+    *
+    * @param key   key
+    * @param value value
+    * @return 是否成功
+    */
+  def lpush(key: String, value: String): Resp[Void]
+
+  /**
+    * 修改列表中索引对应的值
+    *
+    * @param key   key
+    * @param value value
+    * @param index 索引
+    * @return 是否成功
+    */
+  def lset(key: String, value: String, index: Long): Resp[Void]
+
+  /**
+    * 弹出栈顶的列表值
+    * 注意，Redis的列表是栈结构，先进后出
+    *
+    * @param key key
+    * @return 栈顶的列表值
+    */
+  def lpop(key: String): Resp[String]
+
+  /**
+    * 获取列表中索引对应的值
+    * 注意，Redis的列表是栈结构，先进后出
+    *
+    * @param key   key
+    * @param index 索引
+    * @return 索引对应的值
+    */
+  def lindex(key: String, index: Long): Resp[String]
+
+  /**
+    * 获取列表值的长度
+    *
+    * @param key key
+    * @return 长度
+    */
+  def llen(key: String): Resp[Long]
+
+  /**
+    * 获取列表中的所有值
+    *
+    * @param key key
+    * @return 值列表
+    */
+  def lget(key: String): Resp[List[String]]
+
+  /**
+    * 设置Hash集合
+    *
+    * @param key    key
+    * @param values values
+    * @param expire 过期时间(seconds)，0表示永不过期
+    * @return 是否成功
+    */
+  def hmset(key: String, values: Map[String, String], expire: Long = 0): Resp[Void]
+
+  /**
+    * 修改Hash集合field对应的值
+    *
+    * @param key   key
+    * @param field field
+    * @param value value
+    * @return 是否成功
+    */
+  def hset(key: String, field: String, value: String): Resp[Void]
+
+  /**
+    * 获取Hash集合field对应的值
+    *
+    * @param key   key
+    * @param field field
+    * @return field对应的值
+    */
+  def hget(key: String, field: String): Resp[String]
+
+  /**
+    * 判断Hash集合field是否存在
+    *
+    * @param key   key
+    * @param field field
+    * @return 是否存在
+    */
+  def hexists(key: String, field: String): Resp[Boolean]
+
+  /**
+    * 获取Hash集合的所有值
+    *
+    * @param key key
+    * @return 所有值
+    */
+  def hgetall(key: String): Resp[Map[String, String]]
+
+  /**
+    * 删除Hash集合是对应的field
+    *
+    * @param key   key
+    * @param field field
+    * @return 是否成功
+    */
+  def hdel(key: String, field: String): Resp[Void]
+
+  /**
+    * 原子加操作
+    *
+    * @param key       key，key不存在时会自动创建值为0的对象
+    * @param incrValue 要增加的值，必须是Long Int Float 或 Double
+    * @return 是否成功
+    */
+  def incr(key: String, incrValue: Any): Resp[Void]
+
+  /**
+    * 原子减操作
+    *
+    * @param key       key key，key不存在时会自动创建值为0的对象
+    * @param decrValue 要减少的值，必须是Long  或 Int
+    * @return 是否成功
+    */
+  def decr(key: String, decrValue: Any): Resp[Void]</code></pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="true--104"><a class="anchor" href="#true--104"></a>异步操作</h5>
+<div class="listingblock">
+<div class="title">RedisProcessor.Async</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">    /**
+      * key是否存在
+      *
+      * @param key key
+      * @return 是否存在
+      */
+    def exists(key: String): Future[Resp[Boolean]]
+
+    /**
+      * 获取字符串值
+      *
+      * @param key key
+      * @return 字符串值
+      */
+    def get(key: String): Future[Resp[String]]
+
+    /**
+      * 设置字符串
+      *
+      * @param key    key
+      * @param value  value
+      * @param expire 过期时间(seconds)，0表示永不过期
+      * @return 是否成功
+      */
+    def set(key: String, value: String, expire: Long = 0): Future[Resp[Void]]
+
+    /**
+      * 删除key
+      *
+      * @param key key
+      * @return 是否成功
+      */
+    def del(key: String): Future[Resp[Void]]
+
+    /**
+      * 设置列表
+      *
+      * @param key    key
+      * @param values values
+      * @param expire 过期时间(seconds)，0表示永不过期
+      * @return 是否成功
+      */
+    def lmset(key: String, values: List[String], expire: Long = 0): Future[Resp[Void]]
+
+    /**
+      * 添加列表值
+      *
+      * @param key   key
+      * @param value value
+      * @return 是否成功
+      */
+    def lpush(key: String, value: String): Future[Resp[Void]]
+
+    /**
+      * 修改列表中索引对应的值
+      *
+      * @param key   key
+      * @param value value
+      * @param index 索引
+      * @return 是否成功
+      */
+    def lset(key: String, value: String, index: Long): Future[Resp[Void]]
+
+    /**
+      * 弹出栈顶的列表值
+      * 注意，Redis的列表是栈结构，先进后出
+      *
+      * @param key key
+      * @return 栈顶的列表值
+      */
+    def lpop(key: String): Future[Resp[String]]
+
+    /**
+      * 获取列表中索引对应的值
+      * 注意，Redis的列表是栈结构，先进后出
+      *
+      * @param key   key
+      * @param index 索引
+      * @return 索引对应的值
+      */
+    def lindex(key: String, index: Long): Future[Resp[String]]
+
+    /**
+      * 获取列表值的长度
+      *
+      * @param key key
+      * @return 长度
+      */
+    def llen(key: String): Future[Resp[Long]]
+
+    /**
+      * 获取列表中的所有值
+      *
+      * @param key key
+      * @return 值列表
+      */
+    def lget(key: String): Future[Resp[List[String]]]
+
+    /**
+      * 设置Hash集合
+      *
+      * @param key    key
+      * @param values values
+      * @param expire 过期时间(seconds)，0表示永不过期
+      * @return 是否成功
+      */
+    def hmset(key: String, values: Map[String, String], expire: Long = 0): Future[Resp[Void]]
+
+    /**
+      * 修改Hash集合field对应的值
+      *
+      * @param key   key
+      * @param field field
+      * @param value value
+      * @return 是否成功
+      */
+    def hset(key: String, field: String, value: String): Future[Resp[Void]]
+
+    /**
+      * 获取Hash集合field对应的值
+      *
+      * @param key   key
+      * @param field field
+      * @return field对应的值
+      */
+    def hget(key: String, field: String): Future[Resp[String]]
+
+    /**
+      * 判断Hash集合field是否存在
+      *
+      * @param key   key
+      * @param field field
+      * @return 是否存在
+      */
+    def hexists(key: String, field: String): Future[Resp[Boolean]]
+
+    /**
+      * 获取Hash集合的所有值
+      *
+      * @param key key
+      * @return 所有值
+      */
+    def hgetall(key: String): Future[Resp[Map[String, String]]]
+
+    /**
+      * 删除Hash集合是对应的field
+      *
+      * @param key   key
+      * @param field field
+      * @return 是否成功
+      */
+    def hdel(key: String, field: String): Future[Resp[Void]]
+
+    /**
+      * 原子加操作
+      *
+      * @param key       key，key不存在时会自动创建值为0的对象
+      * @param incrValue 要增加的值，必须是Long Int Float 或 Double
+      * @return 是否成功
+      */
+    def incr(key: String, incrValue: Any): Future[Resp[Void]]
+
+    /**
+      * 原子减操作
+      *
+      * @param key       key key，key不存在时会自动创建值为0的对象
+      * @param decrValue 要减少的值，必须是Long  或 Int
+      * @return 是否成功
+      */
+    def decr(key: String, decrValue: Any): Future[Resp[Void]]</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="true--105"><a class="anchor" href="#true--105"></a>11. 常用分布式服务</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="true--106"><a class="anchor" href="#true--106"></a>11.1. 功能</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>分布式计数</p>
+</li>
+<li>
+<p>分布式锁</p>
+</li>
+<li>
+<p>分布式Map</p>
+</li>
+<li>
+<p>分布式阻塞和非阻塞队列</p>
+</li>
+<li>
+<p>分布式消息发布订阅</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true5-6"><a class="anchor" href="#true5-6"></a>11.2. 5分钟上手</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>添加依赖</p>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
+  &lt;artifactId&gt;ezf-distributed&lt;/artifactId&gt;
+  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+&lt;dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>添加配置</p>
+<div class="literalblock">
+<div class="content">
+<pre>"distributed": {},
+"redis": {}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>测试服务</p>
+<div class="literalblock">
+<div class="content">
+<pre>EZManager.start()
+// 创建test_counter计数器
+val counter = DCounterService("test_counter")
+// 设置成10
+counter.set(10)
+// 加1
+counter.inc()
+// 减1
+counter.dec()
+// 删除
+counter.delete()</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--107"><a class="anchor" href="#true--107"></a>11.3. 依赖</h3>
+<div class="paragraph">
+<p>服务依赖：redis</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--108"><a class="anchor" href="#true--108"></a>11.4. 配置</h3>
+<div class="listingblock">
+<div class="content">
+<pre>"distributed": {}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><em>分布式服务本身没有配置项</em></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--109"><a class="anchor" href="#true--109"></a>11.5. 使用</h3>
+<div class="sect3">
+<h4 id="true-atomiclong"><a class="anchor" href="#true-atomiclong"></a>11.5.1. 分布式AtomicLong</h4>
+<div class="listingblock">
+<div class="title">DAtomicLongService(key: String) &lt;1&gt;</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">  def set(value: Long)
+  def get: Long</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>key AtomicLong名</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="true--110"><a class="anchor" href="#true--110"></a>11.5.2. 分布式阻塞队列</h4>
+<div class="listingblock">
+<div class="title">DBlockingQueueService[M](key: String) &lt;1&gt;</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">  def put(value: M)
+  def peek(): M
+  def take(): M
+  def size(): Int
+  def delete()</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>key 队列名,M 队列项的类型</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="true-countdownlatch"><a class="anchor" href="#true-countdownlatch"></a>11.5.3. 分布式CountDownLatch</h4>
+<div class="listingblock">
+<div class="title">DCountDownLatchService(key: String) &lt;1&gt;</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">  def set(value: Long)
+  def await(time: Long = -1, unit: TimeUnit = null)
+  def get: Long
+  def countDown()
+  def delete()</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>key CountDownLatch名</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="true--111"><a class="anchor" href="#true--111"></a>11.5.4. 分布式原子计数器</h4>
+<div class="listingblock">
+<div class="title">DCounterService(key: String) &lt;1&gt;</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">  def set(value: Long)
+  def get: Long
+  def inc(): Long
+  def dec(): Long
+
+  /**
+    * 有上限的inc
+    *
+    * @param maxValue 最大值
+    * @return 当前值
+    */
+  def inc(maxValue: Long): Long
+
+  /**
+    * 有上限的inc并返回是否增加了
+    *
+    * @param maxValue 最大值
+    * @return 是否增加了，已达上限返回false
+    */
+  def incWithStatus(maxValue: Long): Boolean
+
+  /**
+    * 有下限的dec
+    *
+    * @param minValue 最小值
+    * @return 当前值
+    */
+  def dec(minValue: Long): Long
+
+  /**
+    * 有下限的inc并返回是否减少了
+    *
+    * @param minValue 最小值
+    * @return 是否减少了，已达下限返回false
+    */
+  def decWithStatus(minValue: Long): Boolean
+
+  def delete()</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>key 计数器名</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="true--112"><a class="anchor" href="#true--112"></a>11.5.5. 分布式锁</h4>
+<div class="listingblock">
+<div class="title">DLockService(key: String) &lt;1&gt;</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">  def lock(leaseTime: Long = -1, unit: TimeUnit = null)
+  def tryLock(waitTime: Long = 0, leaseTime: Long = -1, unit: TimeUnit = TimeUnit.MILLISECONDS): Boolean
+  def unLock(): Boolean
+  def isLock: Boolean
+  def delete()</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>key 锁名</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="true-map-key-string-value"><a class="anchor" href="#true-map-key-string-value"></a>11.5.6. 分布式Map，key为string , value为自定义类型</h4>
+<div class="listingblock">
+<div class="title">DMapService[M](key: String) &lt;1&gt;</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">  def put(key: String, value: M)
+  def putIfAbsent(key: String, value: M)
+  def contains(key: String): Boolean
+  def foreach(fun: (String, M) =&gt; Unit)
+  def get(key: String): M
+  def remove(key: String)
+  def clear()</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>key Map名,M Map项的类型</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="true--113"><a class="anchor" href="#true--113"></a>11.5.7. 分布式队列（不阻塞）</h4>
+<div class="listingblock">
+<div class="title">DQueueService[M](key: String) &lt;1&gt;</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">  def add(value: M)
+  def peek(): M
+  def poll(): M
+  def size(): Int
+  def delete()</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>key 队列名,M 队列项的类型</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="true--114"><a class="anchor" href="#true--114"></a>11.5.8. 分布式消息队列</h4>
+<div class="listingblock">
+<div class="title">DTopicService[M](key: String) &lt;1&gt;</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">  def publish(message: M)
+  def subscribe(fun: =&gt; M =&gt; Unit)</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>key 消息队列名,M 消息队列项的类型</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="true--115"><a class="anchor" href="#true--115"></a>12. 调度服务</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="true--116"><a class="anchor" href="#true--116"></a>12.1. 功能</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>支持cron表达式的调度任务</p>
+</li>
+<li>
+<p>支持按模块调度</p>
+</li>
+<li>
+<p>支持JDBC或Mongo的持久化</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true5-7"><a class="anchor" href="#true5-7"></a>12.2. 5分钟上手</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>添加依赖</p>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
+  &lt;artifactId&gt;ezf-scheduler&lt;/artifactId&gt;
+  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+&lt;dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>添加配置</p>
+<div class="literalblock">
+<div class="content">
+<pre>"scheduler":{
+   "storage":"mongo"
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>添加调度代码</p>
+<div class="literalblock">
+<div class="content">
+<pre>// 添加调度任务
+val scheduler = EZ_Scheduler()
+scheduler.name = "测试" // 任务名称
+scheduler.cron = "* * * * * ?" // 调度周期
+scheduler.module = EZContext.module // 要调度的模块
+scheduler.clazz = TestScheduleJob.getClass.getName // 任务回调对应的类
+scheduler.parameters = Map("p1" -&gt; 1, "p2" -&gt; "1") // 任务参数
+SchedulerProcessor.save(scheduler) // 保存</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>object TestScheduleJob extends ScheduleJob {
+  override def execute(scheduler: EZ_Scheduler): Resp[Void] = {
+    println("Scheduler callback:" + scheduler.name)
+    Resp.success(null)
+  }
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>启动服务</p>
+<div class="literalblock">
+<div class="content">
+<pre>EZManager.start()</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--117"><a class="anchor" href="#true--117"></a>12.3. 依赖</h3>
+<div class="paragraph">
+<p>服务依赖：storage.mongo或storage.jdbc</p>
+</div>
+<div class="paragraph">
+<p>环境依赖：mongo或mysql</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--118"><a class="anchor" href="#true--118"></a>12.4. 配置</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json" data-lang="json">"scheduler": {
+  "storage": "" <i class="conum" data-value="1"></i><b>(1)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>持久化实现，支持<code>mongo</code>或<code>jdbc</code></td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>storage:jdbc</code>时请执行<code>ez_ddl.sql</code>以创建基础表
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--119"><a class="anchor" href="#true--119"></a>12.5. 使用</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">=== 保存调度任务 ===
+
+// 调度任务是EZ_Scheduler对象
+val scheduler = EZ_Scheduler()
+scheduler.name = "" // 任务名称
+scheduler.cron = "" // 调度周期
+scheduler.module = "" // 要调度的模块
+scheduler.clazz = "" // 任务回调对应的类，要实现ScheduleJob接口
+scheduler.parameters = Map() // 任务参数
+SchedulerProcessor.save(scheduler) // 保存
+
+=== 更新调度任务 ===
+...
+SchedulerProcessor.update(scheduler)
+...
+
+=== 删除调度任务 ===
+...
+SchedulerProcessor.delete("&lt;调度任务名称&gt;")
+...
+
+=== 根据调度名称分页获取日志 ===
+...
+SchedulerProcessor.pageLogsByName("&lt;调度任务名称&gt;", &lt;当前页，从1开始&gt;, &lt;每页条数&gt;)
+...
+
+=== 调度任务回调 ===
+
+/**
+  * 调度器回调基类，所有调度作业回调处理都要继承此类
+  */
+trait ScheduleJob {
+
+  /**
+    * 调度器回调时的执行方法
+    *
+    * @param scheduler 调度信息
+    * @return 执行结果
+    */
+  def execute(scheduler: EZ_Scheduler): Resp[Void]
+
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="truekafka"><a class="anchor" href="#truekafka"></a>13. Kafka服务</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="true--120"><a class="anchor" href="#true--120"></a>13.1. 功能</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>实现Kafka服务封装</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true5-8"><a class="anchor" href="#true5-8"></a>13.2. 5分钟上手</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>添加依赖</p>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
+  &lt;artifactId&gt;ezf-kafka&lt;/artifactId&gt;
+  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+&lt;dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>添加配置</p>
+<div class="literalblock">
+<div class="content">
+<pre>"kafka": {
+  "brokerList": "&lt;broker ip:port&gt;",
+  "zkList": "&lt;zookeeper ip:port&gt;"
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>测试服务</p>
+<div class="literalblock">
+<div class="content">
+<pre>EZManager.start()
+// 定义第一个消费者，属于group1
+val consumer1 = KafkaProcessor.Consumer("group1", "topic1")
+consumer1.receive(new ReceivedCallback {
+  override def callback(message: String): Resp[Void] = {
+    // 收到消息
+    println("consumer1 -&gt; " + message)
+    // 关闭此消费者，这时第二个消费者可以收到消息
+    consumer1.close()
+    Resp.success(null)
+  }
+})
+// 定义第二个消费者，也属于group1，第一个与第二消费者是竞争关系，同一消息只会被其中一个消 费
+KafkaProcessor.Consumer("group1", "topic1").receive(new ReceivedCallback {
+  override def callback(message: String): Resp[Void] = {
+    // 收到消息
+    println("consumer2 -&gt; " + message)
+    Resp.success(null)
+  }
+})
+// 定义第三个消费者，属于group2，这个消费者可以收到所有消息
+KafkaProcessor.Consumer("group2", "topic1").receive(new ReceivedCallback {
+  override def callback(message: String): Resp[Void] = {
+    // 收到消息
+    println("consumer3 -&gt; " + message)
+    Resp.success(null)
+  }
+})
+// 定义一个生产者
+val producer = KafkaProcessor.Producer("topic1", "client1")
+for (i &lt;- 0 to 5) {
+  producer.send(s"【$i】haha...")
+}</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--121"><a class="anchor" href="#true--121"></a>13.3. 依赖</h3>
+<div class="paragraph">
+<p>环境依赖：kafka 0.8.x</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--122"><a class="anchor" href="#true--122"></a>13.4. 配置</h3>
+<div class="listingblock">
+<div class="content">
+<pre>"kafka": {
+  "brokerList": "", <i class="conum" data-value="1"></i><b>(1)</b>
+  "zkList": "" <i class="conum" data-value="2"></i><b>(2)</b>
+}</pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Kafka broker地址列表，格式为: ip:port,&#8230;&#8203;</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Zookeeper地址列表，格式为: ip:port,&#8230;&#8203;</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--123"><a class="anchor" href="#true--123"></a>13.5. 使用</h3>
+<div class="paragraph">
+<p>见示例<code>com.ecfront.ez.framework.examples.kafka</code></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="trueapi"><a class="anchor" href="#trueapi"></a>13.6. API</h3>
+<div class="listingblock">
+<div class="title">KafkaProcessor</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">  /**
+  * 生产者类
+  *
+  * @param topic    主题
+  * @param clientId 客户端ID
+  */
+case class Producer(topic: String, clientId: String) {
+
+  /**
+    * 发送消息
+    *
+    * @param message 消息
+    */
+  def send(message: String): Unit
+
+  /**
+    * 发送消息
+    *
+    * @param message 消息
+    * @return 是否成功 ,返回对应的消息ID（自动生成）和message
+    */
+  def sendFuture(message: String): Future[Resp[(String, String)]]
+
+	/**
+    * 关闭当前生产者
+    */
+  def close(): Unit
+
+}
+
+/**
+  * 消费者类
+  *
+  * @param groupId            组ID，用于发布-订阅模式
+  * @param topic              主题
+  * @param autoCommit         是否自动提交
+  * @param autoCommitInterval 自动提供间隔
+  */
+case class Consumer(groupId: String, topic: String, autoCommit: Boolean = false, autoCommitInterval: Long = DEFAULT_AUTO_COMMIT_INTERVAL) {
+
+/**
+    * 接收消息
+    *
+    * @param fun 收到消息后的回调方法
+    */
+  def receive(fun: ReceivedCallback): Unit
+
+	/**
+    * 关闭当前消费者
+    */
+  def close(): Unit
+
+}
+
+  /**
+  * 关闭所有实例
+  */
+def close(): Unit</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="truemaster-slave"><a class="anchor" href="#truemaster-slave"></a>14. Master-Slave服务</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="true--124"><a class="anchor" href="#true--124"></a>14.1. 功能</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>master-slave模型封装</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true5-9"><a class="anchor" href="#true5-9"></a>14.2. 5分钟上手</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>添加依赖</p>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;dependency&gt;
+  &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
+  &lt;artifactId&gt;ezf-master-slave&lt;/artifactId&gt;
+  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+&lt;dependency&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>添加配置</p>
+<div class="literalblock">
+<div class="content">
+<pre>"masterslave": {
+  "clusterId": "ez.test"
+},
+"kafka": {
+  "brokerList": "&lt;broker ip:port&gt;",
+  "zkList": "&lt;zookeeper ip:port&gt;"
+}</pre>
+</div>
+</div>
+</li>
+<li>
+<p>测试服务</p>
+<div class="literalblock">
+<div class="content">
+<pre>EZManager.start()</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--125"><a class="anchor" href="#true--125"></a>14.3. 依赖</h3>
+<div class="paragraph">
+<p>服务依赖：kafka、redis(如果需要HA支持)
+环境依赖：kafka 0.8.x、redis 3.x</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--126"><a class="anchor" href="#true--126"></a>14.4. 配置</h3>
+<div class="listingblock">
+<div class="content">
+<pre>"masterslave": {
+  "clusterId": "", <i class="conum" data-value="1"></i><b>(1)</b>
+  "ha":false, <i class="conum" data-value="2"></i><b>(2)</b>
+  "category": { <i class="conum" data-value="3"></i><b>(3)</b>
+    "": { <i class="conum" data-value="4"></i><b>(4)</b>
+      "pool": 5, <i class="conum" data-value="5"></i><b>(5)</b>
+      "newThread": true <i class="conum" data-value="6"></i><b>(6)</b>
+    }
+ }</pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>集群ID，同一ID的节点会被视为同一集群</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>是否启用HA，启用HA时需要Redis支持</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Worker执行器列表</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Worker执行器名</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>当前执行器并发数</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>当前执行器是否在新线程中执行</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true--127"><a class="anchor" href="#true--127"></a>14.5. 使用</h3>
+<div class="paragraph">
+<p>见示例<code>com.ecfront.ez.framework.examples.masterslave</code></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="trueapi-2"><a class="anchor" href="#trueapi-2"></a>14.6. API</h3>
+<div class="listingblock">
+<div class="title">KafkaProcessor</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">  /**
+  * 生产者类
+  *
+  * @param topic    主题
+  * @param clientId 客户端ID
+  */
+case class Producer(topic: String, clientId: String) {
+
+  /**
+    * 发送消息
+    *
+    * @param message 消息
+    */
+  def send(message: String): Unit
+
+  /**
+    * 发送消息
+    *
+    * @param message 消息
+    * @return 是否成功 ,返回对应的消息ID（自动生成）和message
+    */
+  def sendFuture(message: String): Future[Resp[(String, String)]]
+
+	/**
+    * 关闭当前生产者
+    */
+  def close(): Unit
+
+}
+
+/**
+  * 消费者类
+  *
+  * @param groupId            组ID，用于发布-订阅模式
+  * @param topic              主题
+  * @param autoCommit         是否自动提交
+  * @param autoCommitInterval 自动提供间隔
+  */
+case class Consumer(groupId: String, topic: String, autoCommit: Boolean = false, autoCommitInterval: Long = DEFAULT_AUTO_COMMIT_INTERVAL) {
+
+/**
+    * 接收消息
+    *
+    * @param fun 收到消息后的回调方法
+    */
+  def receive(fun: ReceivedCallback): Unit
+
+	/**
+    * 关闭当前消费者
+    */
+  def close(): Unit
+
+}
+
+  /**
+  * 关闭所有实例
+  */
+def close(): Unit</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="truecontributing"><a class="anchor" href="#truecontributing"></a>15. Contributing</h2>
+<div class="sectionbody">
+<div class="sect3">
+<h4 id="trueenvironment"><a class="anchor" href="#trueenvironment"></a>15.1. Environment</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>JDK 1.8</p>
+</li>
+<li>
+<p>Scala 2.11</p>
+</li>
+<li>
+<p>Mongo 3.x（可选）</p>
+</li>
+<li>
+<p>Redis 3.x（可选）</p>
+</li>
+<li>
+<p>Kafka 0.8.x（可选）</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="truebuild"><a class="anchor" href="#truebuild"></a>15.2. Build</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><code>git clone <a href="https://github.com/gudaoxuri/ez-framework.git" class="bare">https://github.com/gudaoxuri/ez-framework.git</a></code></p>
+</li>
+<li>
+<p>使用IDE导入Maven工程，各组件都是独立Maven工程</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="truesubmit"><a class="anchor" href="#truesubmit"></a>15.3. Submit</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>提交前请确保:</p>
+<div class="literalblock">
+<div class="content">
+<pre>已完成变更代码的单元测试
+代码风格检查（mvn scalastyle:check）通过：0 errors 0 warnings</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="trueroadmap"><a class="anchor" href="#trueroadmap"></a>16. Roadmap</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="true3-1-0"><a class="anchor" href="#true3-1-0"></a>16.1. 3.1.0</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>动态多数据源 支持</p>
+</li>
+<li>
+<p>SimpleRPC 添加排序、过滤等功能</p>
+</li>
+<li>
+<p>i18n支持</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true3-0-0"><a class="anchor" href="#true3-0-0"></a>16.2. 3.0.0</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>添加示例</p>
+</li>
+<li>
+<p>更多的边界测试</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="true3-0-0-snapshot"><a class="anchor" href="#true3-0-0-snapshot"></a>16.3. 3.0.0-SNAPSHOT</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>重写核心架构</p>
+</li>
+<li>
+<p>规范代码组织</p>
+</li>
+<li>
+<p>完善注释注解</p>
+</li>
+<li>
+<p>添加示例代码</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="truechangelog"><a class="anchor" href="#truechangelog"></a>17. ChangeLog</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="true3-0-0-2"><a class="anchor" href="#true3-0-0-2"></a>17.1. 3.0.0</h3>
+<div class="sect3">
+<h4 id="truefeatures"><a class="anchor" href="#truefeatures"></a>17.1.1. Features</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>核心架构重写</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="truebug-fixes"><a class="anchor" href="#truebug-fixes"></a>17.1.2. Bug Fixes</h4>
+
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2016-03-28 13:39:50
+Version 3.0.0<br>
+Last updated 2016-04-14 08:26:39
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/github.min.css">

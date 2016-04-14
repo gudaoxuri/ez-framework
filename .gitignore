@@ -1,7 +1,7 @@
-***/target/
+**/.idea/
+**/target/
 
-*.class
-*.log
-
-.idea
-*.iml
+**/*.class
+**/*.log
+**/.idea
+**/*.iml
