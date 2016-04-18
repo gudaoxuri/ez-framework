@@ -163,7 +163,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
               updateR
             }
           } else {
-            Resp.badRequest("Old Password Error")
+            Resp.conflict("Old Password Error")
           }
         } else {
           Resp.unAuthorized("")

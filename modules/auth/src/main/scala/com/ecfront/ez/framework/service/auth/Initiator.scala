@@ -84,9 +84,6 @@ object Initiator extends LazyLogging {
       EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/res/:date/:fileName", s"Download Menu file"))
       EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/menu/export/", s"Export Menu file"))
 
-      EZ_Resource.save(EZ_Resource(Method.GET, "/auth/manage/account/bylogin/", s"Fetch Account By Login"))
-      EZ_Resource.save(EZ_Resource(Method.PUT, "/auth/manage/account/bylogin/", s"Update Account By Login"))
-
       EZ_Role.save(EZ_Role(EZ_Role.SYSTEM_ROLE_FLAG, "System", List(
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/organization/page/:pageNumber/:pageSize/",
@@ -142,15 +139,11 @@ object Initiator extends LazyLogging {
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/:id/disable/",
         s"${Method.POST}${BaseModel.SPLIT}/auth/manage/menu/res/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/res/:date/:fileName",
-        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/export/",
-        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/bylogin/",
-        s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/account/bylogin/"
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/export/"
       )))
       EZ_Role.save(EZ_Role(EZ_Role.USER_ROLE_FLAG, "User", List(
         s"${Method.POST}${BaseModel.SPLIT}/auth/manage/account/res/",
-        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/res/:date/:fileName",
-        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/bylogin/",
-        s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/account/bylogin/"
+        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/res/:date/:fileName"
       )))
 
       val account = EZ_Account(EZ_Account.SYSTEM_ACCOUNT_CODE, "admin" + EZ_Account.VIRTUAL_EMAIL, "Sys Admin", "admin", List(

@@ -163,8 +163,8 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
             })
           } catch {
             case e: Exception =>
-              logger.error("Execute function error.", e)
-              returnContent(Resp.serverError(e.getMessage), response, newContext.accept, newContext.contentType)
+              logger.error("Request content error.", e)
+              returnContent(Resp.unsupportedMediaType(e.getMessage), response, newContext.accept, newContext.contentType)
           }
         } else {
           returnContent(interResp, request.response(), context.accept, context.contentType)

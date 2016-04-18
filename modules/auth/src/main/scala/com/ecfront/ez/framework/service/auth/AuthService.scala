@@ -45,11 +45,11 @@ object AuthService extends LazyLogging {
           tokenInfo
         } else {
           logger.warn(s"[login] account disabled by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
-          Resp.notFound(s"Account disabled")
+          Resp.locked(s"Account disabled")
         }
       } else {
         logger.warn(s"[login] password not match by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
-        Resp.notFound(s"【password】 not match")
+        Resp.conflict(s"【password】 not match")
       }
     } else {
       logger.warn(s"[login] account not exist in  by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
