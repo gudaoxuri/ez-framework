@@ -1,5 +1,6 @@
 package com.ecfront.ez.framework.service.distributed
 
+import com.ecfront.ez.framework.service.redis.RedisProcessor
 import org.redisson.core.{MessageListener, RTopic}
 
 /**
@@ -10,7 +11,7 @@ import org.redisson.core.{MessageListener, RTopic}
   */
 case class DTopicService[M](key: String) {
 
-  private val topic: RTopic[M] = DistributedProcessor.redis.getTopic(key)
+  private val topic: RTopic[M] = RedisProcessor.redis.getTopic(key)
 
   def publish(message: M): this.type = {
     topic.publish(message)

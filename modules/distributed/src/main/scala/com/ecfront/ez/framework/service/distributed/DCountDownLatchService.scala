@@ -2,6 +2,7 @@ package com.ecfront.ez.framework.service.distributed
 
 import java.util.concurrent.TimeUnit
 
+import com.ecfront.ez.framework.service.redis.RedisProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 /**
@@ -11,10 +12,10 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
   */
 case class DCountDownLatchService(key: String) extends LazyLogging {
 
-  private val countDownLatch = DistributedProcessor.redis.getCountDownLatch(key)
+  private val countDownLatch = RedisProcessor.redis.getCountDownLatch(key)
 
   def set(value: Long): this.type = {
-    DistributedProcessor.redis.getAtomicLong(key).set(value)
+    RedisProcessor.redis.getAtomicLong(key).set(value)
     this
   }
 

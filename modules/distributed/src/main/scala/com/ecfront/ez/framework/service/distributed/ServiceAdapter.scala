@@ -9,16 +9,10 @@ import scala.collection.mutable
 object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
   override def init(parameter: JsonObject): Resp[String] = {
-    val address = com.ecfront.ez.framework.service.redis.ServiceAdapter.host + ":" + com.ecfront.ez.framework.service.redis.ServiceAdapter.port
-    DistributedProcessor.init(
-      List(address),
-      com.ecfront.ez.framework.service.redis.ServiceAdapter.db,
-      com.ecfront.ez.framework.service.redis.ServiceAdapter.auth
-    )
+    Resp.success("")
   }
 
   override def destroy(parameter: JsonObject): Resp[String] = {
-    DistributedProcessor.close()
     Resp.success("")
   }
 

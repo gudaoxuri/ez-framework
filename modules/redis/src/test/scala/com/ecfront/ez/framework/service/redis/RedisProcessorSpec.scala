@@ -1,7 +1,12 @@
 package com.ecfront.ez.framework.service.redis
 
+import java.util.concurrent.CountDownLatch
+
 import com.ecfront.common.JsonHelper
 import com.ecfront.ez.framework.core.test.MockStartupSpec
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 class RedisProcessorSpec extends MockStartupSpec {
 
@@ -34,23 +39,41 @@ class RedisProcessorSpec extends MockStartupSpec {
 
     RedisProcessor.del("list_test")
     RedisProcessor.lmset("list_test", List("v1", "v2"))
-    RedisProcessor.lpush("list_test", "v3")
-    RedisProcessor.lset("list_test", "v1_new", 2)
+    RedisProcessor.lpush("list_test", "v0")
+    RedisProcessor.lset("list_test", "v2_new", 2)
     assert(RedisProcessor.llen("list_test").body == 3)
-    assert(RedisProcessor.lpop("list_test").body == "v3")
+    assert(RedisProcessor.lpop("list_test").body == "v0")
     assert(RedisProcessor.llen("list_test").body == 2)
-    assert(RedisProcessor.lindex("list_test", 1).body == "v1_new")
+    assert(RedisProcessor.lindex("list_test", 1).body == "v2_new")
     val listVals = RedisProcessor.lget("list_test").body
-    assert(listVals.size == 2 && listVals == List("v2", "v1_new"))
-
+    assert(listVals.size == 2 && listVals == List("v1", "v2_new"))
 
     RedisProcessor.del("int_test")
     RedisProcessor.incr("int_test", 10)
     RedisProcessor.incr("int_test", 10)
-    assert(RedisProcessor.get("int_test").body.toLong == 20)
+    assert(RedisProcessor.get("int_test").body == 20)
     RedisProcessor.decr("int_test", 4)
     RedisProcessor.decr("int_test", 2)
-    assert(RedisProcessor.get("int_test").body.toLong == 14)
+    assert(RedisProcessor.get("int_test").body == 14)
+
+    Await.result(RedisProcessor.Async.del("async_int"),Duration.Inf)
+    Await.result(RedisProcessor.Async.set("async_int","aaaa"),Duration.Inf)
+    assert(Await.result(RedisProcessor.Async.get("async_int"),Duration.Inf).body=="aaaa")
+
+  }
+
+  test("Compression test") {
+    val counter = new CountDownLatch(1000)
+    val setThreads = for (i <- 0 to 1000) yield
+      new Thread(new Runnable {
+        override def run(): Unit = {
+          RedisProcessor.set(s"test$i", System.nanoTime() + "")
+          counter.countDown()
+        }
+      })
+    setThreads.foreach(_.start())
+    counter.await()
+
   }
 
 }

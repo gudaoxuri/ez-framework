@@ -1,5 +1,6 @@
 package com.ecfront.ez.framework.service.distributed
 
+import com.ecfront.ez.framework.service.redis.RedisProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.redisson.core.RAtomicLong
 
@@ -10,7 +11,7 @@ import org.redisson.core.RAtomicLong
   */
 case class DAtomicLongService(key: String) extends LazyLogging {
 
-  private val atomicLong: RAtomicLong = DistributedProcessor.redis.getAtomicLong(key)
+  private val atomicLong: RAtomicLong = RedisProcessor.redis.getAtomicLong(key)
 
   def set(value: Long): this.type = {
     atomicLong.set(value)

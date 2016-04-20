@@ -1,5 +1,6 @@
 package com.ecfront.ez.framework.service.distributed
 
+import com.ecfront.ez.framework.service.redis.RedisProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.redisson.core.RMap
 
@@ -13,7 +14,7 @@ import scala.collection.JavaConversions._
   */
 case class DMapService[M](key: String) extends LazyLogging {
 
-  private val map: RMap[String, M] = DistributedProcessor.redis.getMap(key)
+  private val map: RMap[String, M] = RedisProcessor.redis.getMap(key)
 
   def put(key: String, value: M): this.type = {
     map.fastPut(key, value)

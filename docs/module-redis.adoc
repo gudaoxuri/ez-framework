@@ -225,18 +225,18 @@
     *
     * @param key       key，key不存在时会自动创建值为0的对象
     * @param incrValue 要增加的值，必须是Long Int Float 或 Double
-    * @return 是否成功
+    * @return 操作后的值
     */
-  def incr(key: String, incrValue: Any): Resp[Void]
+  def incr(key: String, incrValue: Long=1): Resp[Long]
 
   /**
     * 原子减操作
     *
     * @param key       key key，key不存在时会自动创建值为0的对象
     * @param decrValue 要减少的值，必须是Long  或 Int
-    * @return 是否成功
+    * @return 操作后的值
     */
-  def decr(key: String, decrValue: Any): Resp[Void]
+  def decr(key: String, decrValue: Long=1): Resp[Long]
 ----
 
 ===== 异步操作
@@ -404,7 +404,7 @@
       * @param incrValue 要增加的值，必须是Long Int Float 或 Double
       * @return 是否成功
       */
-    def incr(key: String, incrValue: Any): Future[Resp[Void]]
+    def incr(key: String, incrValue: Long=1): Future[Resp[Long]]
 
     /**
       * 原子减操作
@@ -413,5 +413,5 @@
       * @param decrValue 要减少的值，必须是Long  或 Int
       * @return 是否成功
       */
-    def decr(key: String, decrValue: Any): Future[Resp[Void]]
+    def decr(key: String, decrValue: Long=1): Future[Resp[Long]]
 ----

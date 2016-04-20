@@ -1,5 +1,6 @@
 package com.ecfront.ez.framework.service.distributed
 
+import com.ecfront.ez.framework.service.redis.RedisProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.redisson.core.RBlockingQueue
 
@@ -11,7 +12,7 @@ import org.redisson.core.RBlockingQueue
   */
 case class DBlockingQueueService[M](key: String) extends LazyLogging {
 
-  private val queue: RBlockingQueue[M] = DistributedProcessor.redis.getBlockingQueue(key)
+  private val queue: RBlockingQueue[M] = RedisProcessor.redis.getBlockingQueue(key)
 
   def put(value: M): this.type = {
     queue.put(value)
