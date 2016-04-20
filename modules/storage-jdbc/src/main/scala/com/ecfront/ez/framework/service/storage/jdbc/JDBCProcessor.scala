@@ -538,7 +538,7 @@ object JDBCProcessor extends LazyLogging {
 
     private def doCount(sql: String, parameters: List[Any], p: Promise[Resp[Long]], conn: SQLConnection, autoClose: Boolean): Unit = {
       try {
-        val countSql = s"SELECT COUNT(1) FROM ( $sql ) _${System.currentTimeMillis()}"
+        val countSql = s"SELECT COUNT(1) FROM ( $sql ) _tmp"
         logger.trace(s"JDBC count : $countSql [$parameters]")
         conn.queryWithParams(countSql,
           new JsonArray(parameters),
