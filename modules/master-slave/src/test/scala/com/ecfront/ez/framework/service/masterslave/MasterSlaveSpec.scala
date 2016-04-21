@@ -9,7 +9,7 @@ class MasterSlaveSpec extends MockStartupSpec {
 
   test("Master Slave test") {
 
-    val counter = new CountDownLatch(2)
+    val counter = new CountDownLatch(1)
 
     Assigner.Worker.register(List(MockWorkProcessor))
 
@@ -19,7 +19,6 @@ class MasterSlaveSpec extends MockStartupSpec {
         assert(finishDTO.isSuccess)
         assert(finishDTO.hasChange)
         assert(finishDTO.message == "")
-        assert(finishDTO.taskVar == Map("var1" -> 2))
         assert(finishDTO.instanceParameters == Map("inst1" -> "3", "newField" -> "haha..."))
         assert(finishDTO.isSuccess)
         println("finish -> " + finishDTO)
@@ -30,14 +29,20 @@ class MasterSlaveSpec extends MockStartupSpec {
       //  counter.countDown()
     })
 
-    Assigner.Master.prepareTask(TaskPrepareDTO(
-      instanceId = "111",
-      worker = "testModule",
-      category = "m",
-      taskInfo = Map("source" -> "jdbc://xxxx"),
-      taskVar = Map("var1" -> 2),
-      instanceParameters = Map("inst1" -> "3")
-    ))
+    val threads=for(i <- 0 to 1000) yield
+    new Thread(new Runnable {
+      override def run(): Unit = {
+        Assigner.Master.prepareTask(TaskPrepareDTO(
+          instanceId = i+"",
+          worker = "testModule",
+          category = "m",
+          taskInfo = Map("source" -> "jdbc://xxxx"),
+          taskVar = Map("var1" -> i),
+          instanceParameters = Map("inst1" -> "3")
+        ))
+      }
+    })
+    threads.foreach(_.start())
 
     counter.await()
   }
@@ -53,6 +58,7 @@ object MockWorkProcessor extends TaskBaseProcessor[MockTask] {
                                   instanceParameters: Map[String, Any]): Resp[(Map[String, Any], Map[String, Any])] = {
     Thread.sleep(5000)
     assert(task.source == "jdbc://xxxx")
+    println(">>>>>"+taskVar("var1"))
     Resp.success(taskVar, instanceParameters + ("newField" -> "haha..."))
   }
 }
