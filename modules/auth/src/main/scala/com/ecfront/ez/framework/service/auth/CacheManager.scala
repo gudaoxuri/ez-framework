@@ -173,7 +173,7 @@ object CacheManager {
       val newPasswordR = RedisProcessor.get(ACTIVE_NEW_PASSWORD_FLAG + accountCodeR.body)
       RedisProcessor.del(ACTIVE_NEW_PASSWORD_FLAG + accountCodeR.body)
       if (newPasswordR && newPasswordR.body != null) {
-        Resp.success((accountCodeR.body, newPasswordR.body))
+        Resp.success((accountCodeR.body.asInstanceOf[String], newPasswordR.body.asInstanceOf[String]))
       } else {
         newPasswordR
       }
