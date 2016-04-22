@@ -3,6 +3,14 @@
   "ez": {
     "app": "",
     "module": "",
+    "perf": {
+      "eventLoopPoolSize": 2,
+      "workerPoolSize": 20,
+      "internalBlockingPoolSize": 20,
+      "maxEventLoopExecuteTime": 2000,
+      "maxWorkerExecuteTime": 60000,
+      "warningExceptionTime": 5000
+    },
     "services": {
       "test1": {
         "field1": "1",

@@ -17,9 +17,6 @@ import scala.concurrent.{Await, Future, Promise}
   */
 object RespHttpClientProcessor extends LazyLogging {
 
-  var httpClient: HttpClient = _
-  var httpClients: HttpClient = _
-
   /**
     * GET 请求
     *

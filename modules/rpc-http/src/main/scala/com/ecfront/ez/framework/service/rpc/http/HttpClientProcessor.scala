@@ -13,8 +13,8 @@ import io.vertx.core.file.{AsyncFile, FileProps, OpenOptions}
 import io.vertx.core.http._
 import io.vertx.core.streams.Pump
 import io.vertx.core.{AsyncResult, Handler, Vertx}
-import org.w3c.dom.Document
 import org.joox.JOOX._
+import org.w3c.dom.Document
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future, Promise}
@@ -27,13 +27,20 @@ import scala.concurrent.{Await, Future, Promise}
   */
 object HttpClientProcessor extends LazyLogging {
 
+  private val FLAG_PERF_MAX_POOL_SIZE = "maxPoolSize"
 
   private var httpClient: HttpClient = _
   private var httpClients: HttpClient = _
 
   def init(vertx: Vertx): Unit = {
-    httpClient = vertx.createHttpClient()
-    httpClients = vertx.createHttpClient(new HttpClientOptions().setSsl(true).setVerifyHost(false).setTrustAll(true))
+    val httpOpt = new HttpClientOptions()
+    val httpsOpt = new HttpClientOptions().setSsl(true).setVerifyHost(false).setTrustAll(true)
+    if (System.getProperty(FLAG_PERF_MAX_POOL_SIZE) != null) {
+      httpOpt.setMaxPoolSize(System.getProperty(FLAG_PERF_MAX_POOL_SIZE).toInt)
+      httpsOpt.setMaxPoolSize(System.getProperty(FLAG_PERF_MAX_POOL_SIZE).toInt)
+    }
+    httpClient = vertx.createHttpClient(httpOpt)
+    httpClients = vertx.createHttpClient(httpsOpt)
   }
 
   /**

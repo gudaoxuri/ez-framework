@@ -23,6 +23,59 @@ object EZManager extends LazyLogging {
   // EZ服务容器
   private var ezServices: List[EZServiceAdapter[_]] = null
 
+  private val FLAG_PERF_EVENT_LOOP_POOL_SIZE = "eventLoopPoolSize"
+  private val FLAG_PERF_WORKER_POOL_SIZE = "workerPoolSize"
+  private val FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE = "internalBlockingPoolSize"
+  private val FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME = "maxEventLoopExecuteTime"
+  private val FLAG_PERF_WORKER_EXECUTE_TIME = "maxWorkerExecuteTime"
+  private val FLAG_PERF_WARNING_EXCEPTION_TIME = "warningExceptionTime"
+
+  /**
+    * 初始Vertx
+    *
+    * @return vertx实例
+    */
+  private def initVertx(ezConfig: EZConfig): Vertx = {
+    if (System.getProperty(FLAG_PERF_EVENT_LOOP_POOL_SIZE) != null) {
+      ezConfig.ez.perf += FLAG_PERF_EVENT_LOOP_POOL_SIZE -> System.getProperty(FLAG_PERF_EVENT_LOOP_POOL_SIZE).toInt
+    }
+    if (System.getProperty(FLAG_PERF_WORKER_POOL_SIZE) != null) {
+      ezConfig.ez.perf += FLAG_PERF_WORKER_POOL_SIZE -> System.getProperty(FLAG_PERF_WORKER_POOL_SIZE).toInt
+    }
+    if (System.getProperty(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE) != null) {
+      ezConfig.ez.perf += FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE -> System.getProperty(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE).toInt
+    }
+    if (System.getProperty(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME) != null) {
+      ezConfig.ez.perf += FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME -> System.getProperty(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).toInt
+    }
+    if (System.getProperty(FLAG_PERF_WORKER_EXECUTE_TIME) != null) {
+      ezConfig.ez.perf += FLAG_PERF_WORKER_EXECUTE_TIME -> System.getProperty(FLAG_PERF_WORKER_EXECUTE_TIME).toInt
+    }
+    if (System.getProperty(FLAG_PERF_WARNING_EXCEPTION_TIME) != null) {
+      ezConfig.ez.perf += FLAG_PERF_WARNING_EXCEPTION_TIME -> System.getProperty(FLAG_PERF_WARNING_EXCEPTION_TIME).toInt
+    }
+    val opt = new VertxOptions()
+    if (ezConfig.ez.perf.contains(FLAG_PERF_EVENT_LOOP_POOL_SIZE)) {
+      opt.setEventLoopPoolSize(ezConfig.ez.perf(FLAG_PERF_EVENT_LOOP_POOL_SIZE).asInstanceOf[Int])
+    }
+    if (ezConfig.ez.perf.contains(FLAG_PERF_WORKER_POOL_SIZE)) {
+      opt.setWorkerPoolSize(ezConfig.ez.perf(FLAG_PERF_WORKER_POOL_SIZE).asInstanceOf[Int])
+    }
+    if (ezConfig.ez.perf.contains(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE)) {
+      opt.setInternalBlockingPoolSize(ezConfig.ez.perf(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE).asInstanceOf[Int])
+    }
+    if (ezConfig.ez.perf.contains(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME)) {
+      opt.setMaxEventLoopExecuteTime(ezConfig.ez.perf(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).asInstanceOf[Int])
+    }
+    if (ezConfig.ez.perf.contains(FLAG_PERF_WORKER_EXECUTE_TIME)) {
+      opt.setMaxWorkerExecuteTime(ezConfig.ez.perf(FLAG_PERF_WORKER_EXECUTE_TIME).asInstanceOf[Int])
+    }
+    if (ezConfig.ez.perf.contains(FLAG_PERF_WARNING_EXCEPTION_TIME)) {
+      opt.setWarningExceptionTime(ezConfig.ez.perf(FLAG_PERF_WARNING_EXCEPTION_TIME).asInstanceOf[Int])
+    }
+    Vertx.vertx(opt)
+  }
+
   /**
     * 解析服务配置 , 默认情况下加载classpath根路径下的`ez.json`文件
     *
@@ -38,7 +91,11 @@ object EZManager extends LazyLogging {
           configContent
         }
       val jsonConfig = new JsonObject(finalConfigContent)
-      Resp.success(JsonHelper.toObject(jsonConfig.encode(), classOf[EZConfig]))
+      val ezConfig = JsonHelper.toObject(jsonConfig.encode(), classOf[EZConfig])
+      if (ezConfig.ez.perf == null) {
+        ezConfig.ez.perf = collection.mutable.Map[String, Any]()
+      }
+      Resp.success(ezConfig)
     } catch {
       case e: Throwable =>
         Resp.serverError("Config parse error :" + e.getMessage)
@@ -121,12 +178,12 @@ object EZManager extends LazyLogging {
     * @return 启动是否成功
     */
   def start(configContent: String = null): Resp[String] = {
-    EZContext.vertx = Vertx.vertx()
     logEnter("Starting...")
     logger.info("\r\n=== Parse Config ...")
     val ezConfigR = startInParseConfig(configContent)
     if (ezConfigR) {
       val ezConfig = ezConfigR.body
+      EZContext.vertx = initVertx(ezConfig)
       EZContext.app = ezConfig.ez.app
       EZContext.module = ezConfig.ez.module
       EZContext.args = new JsonObject(JsonHelper.toJsonString(ezConfig.args))
