@@ -34,7 +34,7 @@ object CacheManager {
   def addTokenInfo(account: EZ_Account): Resp[Token_Info_VO] = {
     val existTokenIdR = RedisProcessor.get(TOKEN_ID_REL_FLAG + account.login_id)
     if (existTokenIdR.body != null) {
-      removeTokenInfo(existTokenIdR.body)
+      removeTokenInfo(existTokenIdR.body.asInstanceOf[String])
     }
     val newTokenInfo = Token_Info_VO(
       UUID.randomUUID().toString,
@@ -56,7 +56,7 @@ object CacheManager {
     val existTokenIdR = RedisProcessor.get(TOKEN_ID_REL_FLAG + account.login_id)
     if (existTokenIdR.body != null) {
       val newTokenInfo = Token_Info_VO(
-        existTokenIdR.body,
+        existTokenIdR.body.asInstanceOf[String],
         account.login_id,
         account.name,
         account.email,
