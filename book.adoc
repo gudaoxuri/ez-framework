@@ -1,5 +1,5 @@
 = EZ-Framework(EZ.F) Document
-gudaoxuri
+gudaoxuri(i@sunisle.org)
 v3.0.0
 :doctype: book
 :encoding: utf-8
