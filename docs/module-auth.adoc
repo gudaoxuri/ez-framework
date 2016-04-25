@@ -157,7 +157,8 @@ body:
 [source,text]
 {
   "id":String, // 登录Id或email
-  "password":String // 密码
+  "password":String, // 密码
+  "organizationCode":String // 所属组织,不传时使用配置中的`defaultOrganizationCode`
 }
 
 *响应内容主体*

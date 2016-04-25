@@ -10,7 +10,7 @@ import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Role}
 import com.ecfront.ez.framework.service.email.EmailProcessor
 import com.ecfront.ez.framework.service.rpc.foundation._
 import com.ecfront.ez.framework.service.rpc.http.HTTP
-import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHttpService
+import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHTTPService
 import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, Page}
 
 /**
@@ -18,7 +18,7 @@ import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, Page}
   */
 @RPC("/auth/manage/account/")
 @HTTP
-object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
+object AccountService extends SimpleHTTPService[EZ_Account, EZAuthContext] {
 
   override protected val storageObj: BaseStorage[EZ_Account] = EZ_Account
 
@@ -230,6 +230,7 @@ object AccountService extends SimpleHttpService[EZ_Account, EZAuthContext] {
       Resp.notFound("Link illegal")
     }
   }
+
 
   @POST("")
   override def rpcSave(parameter: Map[String, String], body: String, context: EZAuthContext): Resp[EZ_Account] = {

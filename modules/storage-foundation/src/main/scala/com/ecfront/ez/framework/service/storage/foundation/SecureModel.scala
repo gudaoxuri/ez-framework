@@ -31,8 +31,6 @@ trait SecureModel extends BaseModel {
 
 object SecureModel {
 
-  val SYSTEM_USER_FLAG = "system"
-
   val CREATE_USER_FLAG = "create_user"
   val CREATE_ORG_FLAG = "create_org"
   val CREATE_TIME_FLAG = "create_time"

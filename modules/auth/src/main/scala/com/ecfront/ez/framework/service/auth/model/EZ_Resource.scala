@@ -104,7 +104,10 @@ trait EZ_Resource_Base extends SecureStorage[EZ_Resource] with StatusStorage[EZ_
   }
 
   override def postDeleteById(id: Any, context: EZStorageContext): Resp[Void] = {
-    CacheManager.removeResource(super.getById(id).body.code)
+    val resR = doGetById(id, context)
+    if (resR && resR.body != null) {
+      CacheManager.removeResource(resR.body.code)
+    }
     super.postDeleteById(id, context)
   }
 
@@ -114,7 +117,13 @@ trait EZ_Resource_Base extends SecureStorage[EZ_Resource] with StatusStorage[EZ_
 
 
   override def preDeleteByCond(condition: String, parameters: List[Any],
-                               context: EZStorageContext): Resp[(String, List[Any])] = Resp.notImplemented("")
+                               context: EZStorageContext): Resp[(String, List[Any])] = {
+    val resR = doGetByCond(condition, parameters, context)
+    if (resR && resR.body != null) {
+      CacheManager.removeResource(resR.body.code)
+    }
+    super.preDeleteByCond(condition, parameters, context)
+  }
 
   def assembleCode(method: String, uri: String): String = {
     method + BaseModel.SPLIT + uri

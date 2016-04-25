@@ -17,7 +17,7 @@ import com.ecfront.ez.framework.service.storage.foundation._
   * @tparam M 对应的实体类型
   * @tparam C 对应的RPC上下文
   */
-trait SimpleHttpService[M <: BaseModel, C <: EZRPCContext] extends SimpleRPCService[M, C] {
+trait SimpleHTTPService[M <: BaseModel, C <: EZRPCContext] extends SimpleRPCService[M, C] {
 
   protected var baseUri = BeanHelper.getClassAnnotation[RPC](this.getClass).get.baseUri
   baseUri = baseUri.substring(1)

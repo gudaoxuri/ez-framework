@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.service.auth.model
 
 import com.ecfront.common._
-import com.ecfront.ez.framework.service.auth.ServiceAdapter
+import com.ecfront.ez.framework.service.auth.{OrganizationModel, OrganizationStorage, ServiceAdapter}
 import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, _}
 import com.ecfront.ez.framework.service.storage.jdbc.{JDBCProcessor, JDBCSecureStorage, JDBCStatusStorage}
 import com.ecfront.ez.framework.service.storage.mongo.{MongoProcessor, MongoSecureStorage, MongoStatusStorage}
@@ -13,7 +13,7 @@ import scala.beans.BeanProperty
   * 账号实体
   */
 @Entity("Account")
-case class EZ_Account() extends SecureModel with StatusModel {
+case class EZ_Account() extends SecureModel with StatusModel with OrganizationModel {
 
   @Unique
   @Require
@@ -42,19 +42,18 @@ case class EZ_Account() extends SecureModel with StatusModel {
   @BeanProperty var ext_info: Map[String, Any] = _
   @Label("OAuth Info") // key=oauth服务标记，value=openid
   @BeanProperty var oauth: Map[String, String] = _
-  @BeanProperty var organization_code: String = _
   @Ignore var exchange_role_codes: List[String] = _
   @BeanProperty var role_codes: List[String] = _
 
 }
 
 object EZ_Account extends SecureStorageAdapter[EZ_Account, EZ_Account_Base]
-  with StatusStorageAdapter[EZ_Account, EZ_Account_Base] with EZ_Account_Base {
+  with StatusStorageAdapter[EZ_Account, EZ_Account_Base] with OrganizationStorage[EZ_Account] with EZ_Account_Base {
 
   // 角色关联表，在useRelTable=true中启用
   var TABLE_REL_ACCOUNT_ROLE = "ez_rel_account_role"
 
-  val SYSTEM_ACCOUNT_CODE = "sysadmin"
+  val SYSTEM_ACCOUNT_LOGIN_ID = "sysadmin"
 
   val VIRTUAL_EMAIL = "@virtual.is"
 
@@ -122,7 +121,7 @@ object EZ_Account extends SecureStorageAdapter[EZ_Account, EZ_Account_Base]
 
 }
 
-trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Account] {
+trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Account] with OrganizationStorage[EZ_Account] {
 
   override def preSave(model: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
     if (model.login_id == null || model.login_id.trim.isEmpty
@@ -397,7 +396,8 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
 
 }
 
-object EZ_Account_Mongo extends MongoSecureStorage[EZ_Account] with MongoStatusStorage[EZ_Account] with EZ_Account_Base {
+object EZ_Account_Mongo extends MongoSecureStorage[EZ_Account]
+  with MongoStatusStorage[EZ_Account] with OrganizationStorage[EZ_Account] with EZ_Account_Base {
 
   override def findByOrganizationCode(organizationCode: String): Resp[List[EZ_Account]] = {
     find( s"""{"organization_code":"$organizationCode"}""")
@@ -475,7 +475,8 @@ object EZ_Account_Mongo extends MongoSecureStorage[EZ_Account] with MongoStatusS
 
 }
 
-object EZ_Account_JDBC extends JDBCSecureStorage[EZ_Account] with JDBCStatusStorage[EZ_Account] with EZ_Account_Base {
+object EZ_Account_JDBC extends JDBCSecureStorage[EZ_Account]
+  with JDBCStatusStorage[EZ_Account] with OrganizationStorage[EZ_Account] with EZ_Account_Base {
 
   override def findByOrganizationCode(organizationCode: String): Resp[List[EZ_Account]] = {
     find(s"""organization_code = ?""", List(organizationCode))

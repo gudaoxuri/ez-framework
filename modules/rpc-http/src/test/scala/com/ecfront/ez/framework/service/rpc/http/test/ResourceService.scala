@@ -3,14 +3,14 @@ package com.ecfront.ez.framework.service.rpc.http.test
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.service.rpc.foundation.{EZRPCContext, GET, POST, RPC}
 import com.ecfront.ez.framework.service.rpc.http.HTTP
-import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHttpService
+import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHTTPService
 import com.ecfront.ez.framework.service.storage.foundation.BaseStorage
 import org.joox.JOOX._
 import org.w3c.dom.Document
 
 @RPC("/resource/")
 @HTTP
-object ResourceService extends SimpleHttpService[EZ_Resource, EZRPCContext] {
+object ResourceService extends SimpleHTTPService[EZ_Resource, EZRPCContext] {
 
   override protected val storageObj: BaseStorage[EZ_Resource] = EZ_Resource
 

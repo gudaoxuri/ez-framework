@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.service.auth.model
 
 import com.ecfront.common.Resp
-import com.ecfront.ez.framework.service.auth.ServiceAdapter
+import com.ecfront.ez.framework.service.auth.{CacheManager, Initiator, ServiceAdapter}
 import com.ecfront.ez.framework.service.storage.foundation._
 import com.ecfront.ez.framework.service.storage.jdbc.{JDBCSecureStorage, JDBCStatusStorage}
 import com.ecfront.ez.framework.service.storage.mongo.{MongoSecureStorage, MongoStatusStorage}
@@ -69,6 +69,62 @@ trait EZ_Organization_Base extends SecureStorage[EZ_Organization] with StatusSto
       model.code = null
       super.preUpdate(model, context)
     }
+  }
+
+  override def postEnableById(id: Any, context: EZStorageContext): Resp[Void] = {
+    CacheManager.addOrganization(EZ_Organization.getById(id).body.code)
+    super.postEnableById(id, context)
+  }
+
+  override def postDisableById(id: Any, context: EZStorageContext): Resp[Void] = {
+    CacheManager.removeOrganization(EZ_Organization.getById(id).body.code)
+    super.postDisableById(id, context)
+  }
+
+  override def postSave(saveResult: EZ_Organization, preResult: EZ_Organization, context: EZStorageContext): Resp[EZ_Organization] = {
+    if (saveResult.enable) {
+      CacheManager.addOrganization(saveResult.code)
+    }
+    Initiator.initOrganization(saveResult.code)
+    super.postSave(saveResult, preResult, context)
+  }
+
+  override def postUpdate(updateResult: EZ_Organization, preResult: EZ_Organization, context: EZStorageContext): Resp[EZ_Organization] = {
+    if (updateResult.enable) {
+      CacheManager.addOrganization(updateResult.code)
+    } else {
+      CacheManager.removeOrganization(updateResult.code)
+    }
+    super.postUpdate(updateResult, preResult, context)
+  }
+
+  override def postSaveOrUpdate(saveOrUpdateResult: EZ_Organization, preResult: EZ_Organization, context: EZStorageContext): Resp[EZ_Organization] = {
+    if (saveOrUpdateResult.enable) {
+      CacheManager.addOrganization(saveOrUpdateResult.code)
+    } else {
+      CacheManager.removeOrganization(saveOrUpdateResult.code)
+    }
+    super.postSaveOrUpdate(saveOrUpdateResult, preResult, context)
+  }
+
+  override def postDeleteById(id: Any, context: EZStorageContext): Resp[Void] = {
+    val objR = doGetById(id, context)
+    if (objR && objR.body != null) {
+      CacheManager.removeOrganization(objR.body.code)
+    }
+    super.postDeleteById(id, context)
+  }
+
+  override def preUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, String, List[Any])] = {
+    Resp.notImplemented("")
+  }
+
+  override def preDeleteByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] = {
+    val orgR = doGetByCond(condition, parameters, context)
+    if (orgR && orgR.body != null) {
+      CacheManager.removeOrganization(orgR.code)
+    }
+    super.preDeleteByCond(condition, parameters, context)
   }
 
   def getByCode(code: String): Resp[EZ_Organization]

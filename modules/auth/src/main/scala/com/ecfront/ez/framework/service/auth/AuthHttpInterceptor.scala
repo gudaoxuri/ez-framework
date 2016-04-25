@@ -41,16 +41,25 @@ object AuthHttpInterceptor extends HttpInterceptor {
                 case existResR =>
                   if (existResR.body) {
                     // 此资源需要认证
-                    CacheManager.existResourceByRoles(tokenInfo.role_codes, resourceCode).onSuccess {
-                      case existMatchResR =>
-                        if (existMatchResR.body) {
-                          // 登录用户所属角色列表中存在此资源
-                          p.success(authContext)
+                    CacheManager.existOrganizationAsync(tokenInfo.organization_code).onSuccess {
+                      case existOrgR =>
+                        if (existOrgR.body) {
+                          // 用户所属组织状态正常
+                          CacheManager.existResourceByRoles(tokenInfo.role_codes, resourceCode).onSuccess {
+                            case existMatchResR =>
+                              if (existMatchResR.body) {
+                                // 登录用户所属角色列表中存在此资源
+                                p.success(authContext)
+                              } else {
+                                p.unAuthorized(s"Account【${tokenInfo.name}】in【${tokenInfo.organization_code}】" +
+                                  s" no access to ${authContext.method}:${authContext.realUri}】")
+                              }
+                          }
                         } else {
-                          p.unAuthorized(s"Account【${tokenInfo.name}】in 【${tokenInfo.organization_code}】" +
-                            s" no access to ${authContext.method}:${authContext.realUri}】")
+                          p.unAuthorized(s"Organization【${tokenInfo.organization_code}】 not found")
                         }
                     }
+
                   } else {
                     // 所有登录用户都可以访问
                     p.success(authContext)

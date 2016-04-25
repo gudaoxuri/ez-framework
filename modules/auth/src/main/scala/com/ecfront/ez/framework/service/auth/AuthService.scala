@@ -35,25 +35,30 @@ object AuthService extends LazyLogging {
     * 登录
     */
   def doLogin(loginIdOrEmail: String, password: String, organizationCode: String, context: EZAuthContext): Resp[Token_Info_VO] = {
-    val getR = EZ_Account.getByLoginIdOrEmail(loginIdOrEmail, organizationCode)
-    if (getR && getR.body != null) {
-      val account = getR.body
-      if (EZ_Account.packageEncryptPwd(account.login_id, password) == account.password) {
-        if (account.enable) {
-          val tokenInfo = CacheManager.addTokenInfo(account)
-          logger.info(s"[login] success ,token:${tokenInfo.body.token} id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
-          tokenInfo
+    val org = EZ_Organization.getByCode(organizationCode).body
+    if (org != null && org.enable) {
+      val getR = EZ_Account.getByLoginIdOrEmail(loginIdOrEmail, organizationCode)
+      if (getR && getR.body != null) {
+        val account = getR.body
+        if (EZ_Account.packageEncryptPwd(account.login_id, password) == account.password) {
+          if (account.enable) {
+            val tokenInfo = CacheManager.addTokenInfo(account)
+            logger.info(s"[login] success ,token:${tokenInfo.body.token} id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+            tokenInfo
+          } else {
+            logger.warn(s"[login] account disabled by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+            Resp.locked(s"Account disabled")
+          }
         } else {
-          logger.warn(s"[login] account disabled by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
-          Resp.locked(s"Account disabled")
+          logger.warn(s"[login] password not match by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+          Resp.conflict(s"【password】 not match")
         }
       } else {
-        logger.warn(s"[login] password not match by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
-        Resp.conflict(s"【password】 not match")
+        logger.warn(s"[login] account not exist in  by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+        Resp.notFound(s"Account not exist")
       }
     } else {
-      logger.warn(s"[login] account not exist in  by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
-      Resp.notFound(s"Account not exist")
+      Resp.locked(s"Organization disabled")
     }
   }
 

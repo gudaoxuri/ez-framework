@@ -5,7 +5,7 @@ import com.ecfront.ez.framework.service.auth.EZAuthContext
 import com.ecfront.ez.framework.service.auth.model.EZ_Organization
 import com.ecfront.ez.framework.service.rpc.foundation.RPC
 import com.ecfront.ez.framework.service.rpc.http.HTTP
-import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHttpService
+import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHTTPService
 import com.ecfront.ez.framework.service.storage.foundation.BaseStorage
 
 /**
@@ -13,7 +13,7 @@ import com.ecfront.ez.framework.service.storage.foundation.BaseStorage
   */
 @RPC("/auth/manage/organization/")
 @HTTP
-object OrganizationService extends SimpleHttpService[EZ_Organization, EZAuthContext] {
+object OrganizationService extends SimpleHTTPService[EZ_Organization, EZAuthContext] {
 
   override protected val storageObj: BaseStorage[EZ_Organization] = EZ_Organization
 

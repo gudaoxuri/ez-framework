@@ -140,15 +140,13 @@ object Initiator extends LazyLogging {
         s"${Method.POST}${BaseModel.SPLIT}/auth/manage/menu/res/",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/res/:date/:fileName",
         s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/export/"
-      )))
-      EZ_Role.save(EZ_Role(EZ_Role.USER_ROLE_FLAG, "User", List(
-        s"${Method.POST}${BaseModel.SPLIT}/auth/manage/account/res/",
-        s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/res/:date/:fileName"
-      )))
+      ),""))
 
-      val account = EZ_Account(EZ_Account.SYSTEM_ACCOUNT_CODE, "admin" + EZ_Account.VIRTUAL_EMAIL, "Sys Admin", "admin", List(
+      initOrganization(ServiceAdapter.defaultOrganizationCode)
+
+      val account = EZ_Account(EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID, "admin" + EZ_Account.VIRTUAL_EMAIL, "Sys Admin", "admin", List(
         BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_FLAG
-      ))
+      ),"")
       EZ_Account.save(account)
 
       EZ_Menu.save(EZ_Menu("ez.dashboard", "Dashboard", "",
@@ -176,6 +174,48 @@ object Initiator extends LazyLogging {
 
       logger.info("Initialized auth basic data.")
     }
+  }
+
+  def initOrganization(orgCode:String): Unit ={
+    EZ_Role.save(EZ_Role(EZ_Role.ORG_ADMIN_ROLE_FLAG, "Admin", List(
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/page/:pageNumber/:pageSize/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/:id/",
+      s"${Method.POST}${BaseModel.SPLIT}/auth/manage/account/",
+      s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/account/:id/",
+      s"${Method.DELETE}${BaseModel.SPLIT}/auth/manage/account/:id/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/:id/enable/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/:id/disable/",
+      s"${Method.POST}${BaseModel.SPLIT}/auth/manage/account/res/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/res/:date/:fileName",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/export/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/page/:pageNumber/:pageSize/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/:id/",
+      s"${Method.POST}${BaseModel.SPLIT}/auth/manage/role/",
+      s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/role/:id/",
+      s"${Method.DELETE}${BaseModel.SPLIT}/auth/manage/role/:id/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/:id/enable/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/:id/disable/",
+      s"${Method.POST}${BaseModel.SPLIT}/auth/manage/role/res/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/res/:date/:fileName",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/role/export/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/page/:pageNumber/:pageSize/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/:id/",
+      s"${Method.POST}${BaseModel.SPLIT}/auth/manage/menu/",
+      s"${Method.PUT}${BaseModel.SPLIT}/auth/manage/menu/:id/",
+      s"${Method.DELETE}${BaseModel.SPLIT}/auth/manage/menu/:id/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/:id/enable/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/:id/disable/",
+      s"${Method.POST}${BaseModel.SPLIT}/auth/manage/menu/res/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/res/:date/:fileName",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/export/"
+    ),orgCode))
+    EZ_Role.save(EZ_Role(EZ_Role.USER_ROLE_FLAG, "User", List(
+      s"${Method.POST}${BaseModel.SPLIT}/auth/manage/account/res/",
+      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/res/:date/:fileName"
+    ),orgCode))
   }
 
 }

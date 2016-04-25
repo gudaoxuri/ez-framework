@@ -29,11 +29,11 @@ class RedisProcessorSpec extends MockStartupSpec {
     RedisProcessor.hmset("hash_test", Map("f1" -> "v1", "f2" -> "v2"))
     RedisProcessor.hset("hash_test", "f3", "v3")
     assert(RedisProcessor.hget("hash_test", "f3").body == "v3")
-    assert(RedisProcessor.hexists("hash_test", "f3").body)
+    assert(RedisProcessor.hexist("hash_test", "f3").body)
     val hashVals = RedisProcessor.hgetall("hash_test").body
     assert(hashVals.size == 3 && hashVals("f1") == "v1" && hashVals("f2") == "v2" && hashVals("f3") == "v3")
     RedisProcessor.hdel("hash_test", "f3")
-    assert(!RedisProcessor.hexists("hash_test", "f3").body)
+    assert(!RedisProcessor.hexist("hash_test", "f3").body)
     RedisProcessor.del("hash_test")
     assert(!RedisProcessor.exists("hash_test").body)
 

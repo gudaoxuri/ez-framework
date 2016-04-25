@@ -5,7 +5,7 @@ import com.ecfront.ez.framework.service.auth.EZAuthContext
 import com.ecfront.ez.framework.service.auth.model.EZ_Menu
 import com.ecfront.ez.framework.service.rpc.foundation.{GET, RPC}
 import com.ecfront.ez.framework.service.rpc.http.HTTP
-import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHttpService
+import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHTTPService
 import com.ecfront.ez.framework.service.storage.foundation.BaseStorage
 
 /**
@@ -13,7 +13,7 @@ import com.ecfront.ez.framework.service.storage.foundation.BaseStorage
   */
 @RPC("/auth/manage/menu/")
 @HTTP
-object MenuService extends SimpleHttpService[EZ_Menu, EZAuthContext] {
+object MenuService extends SimpleHTTPService[EZ_Menu, EZAuthContext] {
 
   /**
     * 查找所有菜单记录，按 `sort` 字段倒序排

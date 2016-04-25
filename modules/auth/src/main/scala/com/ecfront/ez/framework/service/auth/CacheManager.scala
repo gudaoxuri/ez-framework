@@ -31,6 +31,9 @@ object CacheManager {
   // 找回密码激活 key : ez.active.new-pwd.<account code> value : <new password>
   private val ACTIVE_NEW_PASSWORD_FLAG = "ez.active.new-pwd."
 
+  // 组织信息
+  private val ORGANIZATIONS_FLAG = "ez.organizations"
+
   def addTokenInfo(account: EZ_Account): Resp[Token_Info_VO] = {
     val existTokenIdR = RedisProcessor.get(TOKEN_ID_REL_FLAG + account.login_id)
     if (existTokenIdR.body != null) {
@@ -72,7 +75,17 @@ object CacheManager {
   }
 
   def getTokenInfo(token: String): Resp[Token_Info_VO] = {
-    Await.result(getTokenInfoAsync(token), Duration.Inf)
+    val infoR = Await.result(getTokenInfoAsync(token), Duration.Inf)
+    if (infoR) {
+      if (existOrganization(infoR.body.organization_code)) {
+        infoR
+      } else {
+        removeTokenInfo(token)
+        Resp.notFound("")
+      }
+    } else {
+      infoR
+    }
   }
 
   def getTokenInfoAsync(token: String): Future[Resp[Token_Info_VO]] = {
@@ -180,6 +193,22 @@ object CacheManager {
     } else {
       accountCodeR
     }
+  }
+
+  def addOrganization(organizationCode: String): Resp[Void] = {
+    RedisProcessor.hset(ORGANIZATIONS_FLAG, organizationCode, "")
+  }
+
+  def removeOrganization(organizationCode: String): Resp[Void] = {
+    RedisProcessor.hdel(ORGANIZATIONS_FLAG, organizationCode)
+  }
+
+  def existOrganizationAsync(organizationCode: String): Future[Resp[Boolean]] = {
+    RedisProcessor.Async.hexist(ORGANIZATIONS_FLAG, organizationCode)
+  }
+
+  def existOrganization(organizationCode: String): Resp[Boolean] = {
+    RedisProcessor.hexist(ORGANIZATIONS_FLAG, organizationCode)
   }
 
 }

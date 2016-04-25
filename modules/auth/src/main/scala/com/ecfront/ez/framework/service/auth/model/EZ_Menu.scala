@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.service.auth.model
 
 import com.ecfront.common.{Ignore, Resp}
-import com.ecfront.ez.framework.service.auth.ServiceAdapter
+import com.ecfront.ez.framework.service.auth.{OrganizationModel, OrganizationStorage, ServiceAdapter}
 import com.ecfront.ez.framework.service.storage.foundation._
 import com.ecfront.ez.framework.service.storage.jdbc.{JDBCProcessor, JDBCSecureStorage, JDBCStatusStorage}
 import com.ecfront.ez.framework.service.storage.mongo.{MongoProcessor, MongoSecureStorage, MongoStatusStorage, SortEnum}
@@ -13,7 +13,7 @@ import scala.beans.BeanProperty
   * 菜单实体
   */
 @Entity("Menu")
-case class EZ_Menu() extends SecureModel with StatusModel {
+case class EZ_Menu() extends SecureModel with StatusModel with OrganizationModel {
 
   @Unique
   @Label("Code") // organization_code@uri
@@ -30,12 +30,11 @@ case class EZ_Menu() extends SecureModel with StatusModel {
   @BeanProperty var role_codes: List[String] = _
   @BeanProperty var parent_code: String = _
   @BeanProperty var sort: Int = 0
-  @BeanProperty var organization_code: String =_
 
 }
 
 object EZ_Menu extends SecureStorageAdapter[EZ_Menu, EZ_Menu_Base]
-  with StatusStorageAdapter[EZ_Menu, EZ_Menu_Base] with EZ_Menu_Base {
+  with StatusStorageAdapter[EZ_Menu, EZ_Menu_Base] with OrganizationStorage[EZ_Menu] with EZ_Menu_Base {
 
   // 角色关联表，在useRelTable=true中启用
   var TABLE_REL_MENU_ROLE = "ez_rel_menu_role"
@@ -75,7 +74,7 @@ object EZ_Menu extends SecureStorageAdapter[EZ_Menu, EZ_Menu_Base]
 
 }
 
-trait EZ_Menu_Base extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] {
+trait EZ_Menu_Base extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] with OrganizationStorage[EZ_Menu] {
 
   override def preSave(model: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
     preSaveOrUpdate(model, context)
@@ -255,7 +254,7 @@ trait EZ_Menu_Base extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] {
 
 }
 
-object EZ_Menu_Mongo extends MongoSecureStorage[EZ_Menu] with MongoStatusStorage[EZ_Menu] with EZ_Menu_Base {
+object EZ_Menu_Mongo extends MongoSecureStorage[EZ_Menu] with MongoStatusStorage[EZ_Menu] with OrganizationStorage[EZ_Menu] with EZ_Menu_Base {
 
   override def findWithSort(): Resp[List[EZ_Menu]] = {
     val resp = findWithOpt(s"""{}""", Map("sort" -> SortEnum.DESC))
@@ -309,7 +308,7 @@ object EZ_Menu_Mongo extends MongoSecureStorage[EZ_Menu] with MongoStatusStorage
 
 }
 
-object EZ_Menu_JDBC extends JDBCSecureStorage[EZ_Menu] with JDBCStatusStorage[EZ_Menu] with EZ_Menu_Base {
+object EZ_Menu_JDBC extends JDBCSecureStorage[EZ_Menu] with JDBCStatusStorage[EZ_Menu] with OrganizationStorage[EZ_Menu] with EZ_Menu_Base {
 
   override def findWithSort(): Resp[List[EZ_Menu]] = {
     find(s"1=1 ORDER BY sort DESC")

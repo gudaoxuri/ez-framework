@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.service.auth.model
 
 import com.ecfront.common.{Ignore, Resp}
-import com.ecfront.ez.framework.service.auth.{CacheManager, ServiceAdapter}
+import com.ecfront.ez.framework.service.auth.{CacheManager, OrganizationModel, OrganizationStorage, ServiceAdapter}
 import com.ecfront.ez.framework.service.storage.foundation._
 import com.ecfront.ez.framework.service.storage.jdbc.{JDBCProcessor, JDBCSecureStorage, JDBCStatusStorage}
 import com.ecfront.ez.framework.service.storage.mongo.{MongoProcessor, MongoSecureStorage, MongoStatusStorage}
@@ -13,7 +13,7 @@ import scala.beans.BeanProperty
   * 角色实体
   */
 @Entity("Role")
-case class EZ_Role() extends BaseModel with SecureModel with StatusModel {
+case class EZ_Role() extends BaseModel with SecureModel with StatusModel with OrganizationModel {
 
   @Unique
   @Require
@@ -27,18 +27,19 @@ case class EZ_Role() extends BaseModel with SecureModel with StatusModel {
   @BeanProperty var name: String = _
   @Ignore var exchange_resource_codes: List[String] = _
   @BeanProperty var resource_codes: List[String] = _
-  @BeanProperty var organization_code: String = _
 
 }
 
 object EZ_Role extends SecureStorageAdapter[EZ_Role, EZ_Role_Base]
-  with StatusStorageAdapter[EZ_Role, EZ_Role_Base] with EZ_Role_Base {
+  with StatusStorageAdapter[EZ_Role, EZ_Role_Base] with OrganizationStorage[EZ_Role] with EZ_Role_Base {
 
   // 资源关联表，在useRelTable=true中启用
   var TABLE_REL_ROLE_RESOURCE = "ez_rel_role_resource"
 
   // 默认系统管理员角色
   val SYSTEM_ROLE_FLAG = "system"
+  // 组织管理员角色
+  val ORG_ADMIN_ROLE_FLAG = "org_admin"
   // 默认普通用户角色
   val USER_ROLE_FLAG = "user"
 
@@ -73,7 +74,7 @@ object EZ_Role extends SecureStorageAdapter[EZ_Role, EZ_Role_Base]
 
 }
 
-trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] {
+trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] with OrganizationStorage[EZ_Role] {
 
   override def preSave(model: EZ_Role, context: EZStorageContext): Resp[EZ_Role] = {
     preSaveOrUpdate(model, context)
@@ -222,8 +223,13 @@ trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] {
   }
 
   override def preDeleteByCond(condition: String, parameters: List[Any],
-                               context: EZStorageContext): Resp[(String, List[Any])] =
-    Resp.notImplemented("")
+                               context: EZStorageContext): Resp[(String, List[Any])] = {
+    val roleR = doGetByCond(condition, parameters, context)
+    if (roleR && roleR.body != null) {
+      CacheManager.removeResourceByRole(roleR.code)
+    }
+    super.preDeleteByCond(condition, parameters, context)
+  }
 
   override def preUpdateByCond(newValues: String, condition: String, parameters: List[Any],
                                context: EZStorageContext): Resp[(String, String, List[Any])] =
@@ -251,7 +257,7 @@ trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] {
 
 }
 
-object EZ_Role_Mongo extends MongoSecureStorage[EZ_Role] with MongoStatusStorage[EZ_Role] with EZ_Role_Base {
+object EZ_Role_Mongo extends MongoSecureStorage[EZ_Role] with MongoStatusStorage[EZ_Role] with OrganizationStorage[EZ_Role] with EZ_Role_Base {
 
   override def findByOrganizationCode(organizationCode: String): Resp[List[EZ_Role]] = {
     find(s"""{"organization_code":"$organizationCode"}""")
@@ -306,7 +312,7 @@ object EZ_Role_Mongo extends MongoSecureStorage[EZ_Role] with MongoStatusStorage
 
 }
 
-object EZ_Role_JDBC extends JDBCSecureStorage[EZ_Role] with JDBCStatusStorage[EZ_Role] with EZ_Role_Base {
+object EZ_Role_JDBC extends JDBCSecureStorage[EZ_Role] with JDBCStatusStorage[EZ_Role] with OrganizationStorage[EZ_Role] with EZ_Role_Base {
 
   override def findByOrganizationCode(organizationCode: String): Resp[List[EZ_Role]] = {
     find(s"""organization_code = ?""", List(organizationCode))

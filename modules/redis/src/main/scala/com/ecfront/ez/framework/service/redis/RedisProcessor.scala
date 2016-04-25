@@ -276,10 +276,10 @@ object RedisProcessor extends LazyLogging {
     * @param field field
     * @return 是否存在
     */
-  def hexists(key: String, field: String): Resp[Boolean] = {
+  def hexist(key: String, field: String): Resp[Boolean] = {
     execute[Boolean]({
       redis.getMap[String, String](key).containsKey(field)
-    }, "hexists")
+    }, "hexist")
   }
 
   /**
@@ -537,9 +537,9 @@ object RedisProcessor extends LazyLogging {
       * @param field field
       * @return 是否存在
       */
-    def hexists(key: String, field: String): Future[Resp[Boolean]] = {
+    def hexist(key: String, field: String): Future[Resp[Boolean]] = {
       execute[Boolean]({
-        RedisProcessor.hexists(key, field)
+        RedisProcessor.hexist(key, field)
       })
     }
 

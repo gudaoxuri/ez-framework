@@ -3,17 +3,17 @@ package com.ecfront.ez.framework.service.auth.manage
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.service.auth.EZAuthContext
 import com.ecfront.ez.framework.service.auth.model.EZ_Role
-import com.ecfront.ez.framework.service.rpc.foundation.RPC
+import com.ecfront.ez.framework.service.rpc.foundation._
 import com.ecfront.ez.framework.service.rpc.http.HTTP
-import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHttpService
-import com.ecfront.ez.framework.service.storage.foundation.BaseStorage
+import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHTTPService
+import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, Page}
 
 /**
   * 角色管理
   */
 @RPC("/auth/manage/role/")
 @HTTP
-object RoleService extends SimpleHttpService[EZ_Role, EZAuthContext] {
+object RoleService extends SimpleHTTPService[EZ_Role, EZAuthContext] {
 
   override protected val storageObj: BaseStorage[EZ_Role] = EZ_Role
 
