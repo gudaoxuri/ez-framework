@@ -212,16 +212,10 @@ object Initiator extends LazyLogging {
       s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/res/:date/:fileName",
       s"${Method.GET}${BaseModel.SPLIT}/auth/manage/menu/export/"
     ), orgCode))
-    EZ_Role.save(EZ_Role(EZ_Role.USER_ROLE_FLAG, "User", List(
-      s"${Method.POST}${BaseModel.SPLIT}/auth/manage/account/res/",
-      s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/res/:date/:fileName"
-    ), orgCode))
-
     val account = EZ_Account(EZ_Account.ORG_ADMIN_ACCOUNT_LOGIN_ID, "admin" + EZ_Account.VIRTUAL_EMAIL, "Admin", "admin", List(
       orgCode + BaseModel.SPLIT + EZ_Role.ORG_ADMIN_ROLE_FLAG
     ), orgCode)
     EZ_Account.save(account)
-
   }
 
 }

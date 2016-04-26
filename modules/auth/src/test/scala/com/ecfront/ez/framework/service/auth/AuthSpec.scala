@@ -21,7 +21,7 @@ class AuthSpec extends MockStartupSpec {
 
     val roles = EZ_Role.find("").body
     assert(
-      roles.size == 3
+      roles.size == 2
         && roles.last.code == BaseModel.SPLIT + EZ_Role.SYSTEM_ROLE_FLAG
         && roles.last.flag == EZ_Role.SYSTEM_ROLE_FLAG
         && roles.last.name == "System"

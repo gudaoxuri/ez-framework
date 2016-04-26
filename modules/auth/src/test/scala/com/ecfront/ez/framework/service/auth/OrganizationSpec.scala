@@ -118,7 +118,7 @@ class OrganizationSpec extends MockStartupSpec {
     // 查看org2组织的角色列表
     var roles = RespHttpClientProcessor.get[Page[EZ_Role]](
       s"http://127.0.0.1:8080/auth/manage/role/page/1/10/?__ez_token__=$token").body
-    assert(roles.recordTotal == 2 && roles.objects.head.flag == "org_admin")
+    assert(roles.recordTotal == 1 && roles.objects.head.flag == "org_admin")
     // 尝试用org2管理员编辑org1用户
     assert(RespHttpClientProcessor.put[EZ_Account](
       s"http://127.0.0.1:8080/auth/manage/account/${account1.id}/?__ez_token__=$token", Map(

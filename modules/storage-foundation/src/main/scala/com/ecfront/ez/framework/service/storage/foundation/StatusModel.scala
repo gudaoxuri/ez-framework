@@ -62,7 +62,7 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     * @param context    上下文
     * @return 获取到的记录
     */
-  def getEnabledByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = null): Resp[M] = {
+  def getEnabledByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[M] = {
     if (condition == null) {
       Resp.badRequest("【condition】not null")
     } else {
@@ -132,7 +132,7 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     * @param context    上下文
     * @return 查找到的记录
     */
-  def findEnabled(condition: String, parameters: List[Any] = List(), context: EZStorageContext = null): Resp[List[M]] = {
+  def findEnabled(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[List[M]] = {
     val preR = preFindEnabled(condition, parameters, context)
     if (preR) {
       val filterR = filterByCond(preR.body._1, preR.body._2, context)
@@ -207,7 +207,7 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
   def pageEnabled(
                    condition: String,
                    parameters: List[Any] = List(),
-                   pageNumber: Long = 1, pageSize: Int = 10, context: EZStorageContext = null): Resp[Page[M]] = {
+                   pageNumber: Long = 1, pageSize: Int = 10, context: EZStorageContext = EZStorageContext()): Resp[Page[M]] = {
     val preR = prePageEnabled(condition, parameters, pageNumber, pageSize, context)
     if (preR) {
       val filterR = filterByCond(preR.body._1, preR.body._2, context)
@@ -275,7 +275,7 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     * @param context    上下文
     * @return 是否存在
     */
-  def existEnabledByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = null): Resp[Boolean] = {
+  def existEnabledByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Boolean] = {
     if (condition == null) {
       Resp.badRequest("【condition】not null")
     } else {
@@ -342,7 +342,7 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     * @param context    上下文
     * @return 条数
     */
-  def countEnabled(condition: String, parameters: List[Any] = List(), context: EZStorageContext = null): Resp[Long] = {
+  def countEnabled(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Long] = {
     val preR = preCountEnabled(condition, parameters, context)
     if (preR) {
       val filterR = filterByCond(preR.body._1, preR.body._2, context)
@@ -398,7 +398,7 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     * @param context 上下文
     * @return 启用结果
     */
-  def enableById(id: Any, context: EZStorageContext = null): Resp[Void] = {
+  def enableById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[Void] = {
     if (id == null) {
       Resp.badRequest("【id】not null")
     } else {
@@ -465,7 +465,7 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     * @param context 上下文
     * @return 禁用结果
     */
-  def disableById(id: Any, context: EZStorageContext = null): Resp[Void] = {
+  def disableById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[Void] = {
     if (id == null) {
       Resp.badRequest("【id】not null")
     } else {

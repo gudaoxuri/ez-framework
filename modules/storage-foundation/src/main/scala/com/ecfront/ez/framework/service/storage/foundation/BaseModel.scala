@@ -617,7 +617,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param context 上下文
     * @return 是否存在
     */
-  def doExistById(id: Any, context: EZStorageContext = null): Resp[Boolean]
+  def doExistById(id: Any, context: EZStorageContext): Resp[Boolean]
 
   /**
     * 判断是否存在前处理
