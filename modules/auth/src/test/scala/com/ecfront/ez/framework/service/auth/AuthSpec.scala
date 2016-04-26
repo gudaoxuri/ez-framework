@@ -31,12 +31,12 @@ class AuthSpec extends MockStartupSpec {
 
     val accounts = EZ_Account.find("").body
     assert(
-      accounts.size == 1
-        && accounts.head.login_id == EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID
-        && accounts.head.name == "Sys Admin"
-        && accounts.head.password == EncryptHelper.encrypt(EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID + "admin")
-        && accounts.head.organization_code == ServiceAdapter.defaultOrganizationCode
-        && accounts.head.role_codes.size == 1
+      accounts.size == 2
+        && accounts.last.login_id == EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID
+        && accounts.last.name == "Sys Admin"
+        && accounts.last.password == EncryptHelper.encrypt(EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID + "admin")
+        && accounts.last.organization_code == ServiceAdapter.defaultOrganizationCode
+        && accounts.last.role_codes.size == 1
     )
 
     // login

@@ -42,11 +42,11 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
 
   def customTableName(newName: String): Unit
 
-  def appendByModel(model: M, context: EZStorageContext): M = model
+  def filterByModel(model: M, context: EZStorageContext): Resp[M] = Resp.success(model)
 
-  def appendById(id: Any, context: EZStorageContext): String = null
+  def filterById(id: Any, context: EZStorageContext): Resp[(String, List[Any])] = Resp.success(null)
 
-  def appendByCond(condition: String, context: EZStorageContext): String = condition
+  def filterByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
 
   /**
     * 持久化前检查
@@ -115,11 +115,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   def save(model: M, context: EZStorageContext = EZStorageContext()): Resp[M] = {
     val preR = preSave(model, context)
     if (preR) {
-      val doR = doSave(appendByModel(preR.body, context), context)
-      if (doR) {
-        postSave(doR.body, preR.body, context)
+      val filterR = filterByModel(preR.body, context)
+      if (filterR) {
+        val doR = doSave(filterR.body, context)
+        if (doR) {
+          postSave(doR.body, preR.body, context)
+        } else {
+          doR
+        }
       } else {
-        doR
+        filterR
       }
     } else {
       preR
@@ -166,11 +171,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     model.id = model.id.trim
     val preR = preUpdate(model, context)
     if (preR) {
-      val doR = doUpdate(appendByModel(preR.body, context), context)
-      if (doR) {
-        postUpdate(doR.body, preR.body, context)
+      val filterR = filterByModel(preR.body, context)
+      if (filterR) {
+        val doR = doUpdate(filterR.body, context)
+        if (doR) {
+          postUpdate(doR.body, preR.body, context)
+        } else {
+          doR
+        }
       } else {
-        doR
+        filterR
       }
     } else {
       preR
@@ -218,11 +228,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     }
     val preR = preSaveOrUpdate(model, context)
     if (preR) {
-      val doR = doSaveOrUpdate(appendByModel(preR.body, context), context)
-      if (doR) {
-        postSaveOrUpdate(doR.body, preR.body, context)
+      val filterR = filterByModel(preR.body, context)
+      if (filterR) {
+        val doR = doSaveOrUpdate(filterR.body, context)
+        if (doR) {
+          postSaveOrUpdate(doR.body, preR.body, context)
+        } else {
+          doR
+        }
       } else {
-        doR
+        filterR
       }
     } else {
       preR
@@ -276,11 +291,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   def updateByCond(newValues: String, condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Void] = {
     val preR = preUpdateByCond(newValues, condition, parameters, context)
     if (preR) {
-      val doR = doUpdateByCond(preR.body._1, appendByCond(preR.body._2, context), preR.body._3, context)
-      if (doR) {
-        postUpdateByCond(preR.body._1, preR.body._2, preR.body._3, context)
+      val filterR = filterByCond(preR.body._2, preR.body._3, context)
+      if (filterR) {
+        val doR = doUpdateByCond(preR.body._1, filterR.body._1, filterR.body._2, context)
+        if (doR) {
+          postUpdateByCond(preR.body._1, preR.body._2, preR.body._3, context)
+        } else {
+          doR
+        }
       } else {
-        doR
+        filterR
       }
     } else {
       preR
@@ -329,12 +349,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     } else {
       val preR = preDeleteById(id, context)
       if (preR) {
-        val cond = appendById(preR.body, context)
-        val doR = if (cond == null) doDeleteById(preR.body, context) else doDeleteByCond(cond, List(id), context)
-        if (doR) {
-          postDeleteById(preR.body, context)
+        val filterR = filterById(id, context)
+        if (filterR) {
+          val doR = if (filterR.body == null) doDeleteById(preR.body, context) else doDeleteByCond(filterR.body._1, filterR.body._2, context)
+          if (doR) {
+            postDeleteById(preR.body, context)
+          } else {
+            doR
+          }
         } else {
-          doR
+          filterR
         }
       } else {
         preR
@@ -388,11 +412,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     } else {
       val preR = preDeleteByCond(condition, parameters, context)
       if (preR) {
-        val doR = doDeleteByCond(appendByCond(preR.body._1, context), preR.body._2, context)
-        if (doR) {
-          postDeleteByCond(preR.body._1, preR.body._2, context)
+        val filterR = filterByCond(preR.body._1, preR.body._2, context)
+        if (filterR) {
+          val doR = doDeleteByCond(filterR.body._1, filterR.body._2, context)
+          if (doR) {
+            postDeleteByCond(preR.body._1, preR.body._2, context)
+          } else {
+            doR
+          }
         } else {
-          doR
+          filterR
         }
       } else {
         preR
@@ -442,12 +471,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     } else {
       val preR = preGetById(id, context)
       if (preR) {
-        val cond = appendById(preR.body, context)
-        val doR = if (cond == null) doGetById(preR.body, context) else doGetByCond(cond, List(id), context)
-        if (doR) {
-          postGetById(preR.body, doR.body, context)
+        val filterR = filterById(id, context)
+        if (filterR) {
+          val doR = if (filterR.body == null) doGetById(preR.body, context) else doGetByCond(filterR.body._1, filterR.body._2, context)
+          if (doR) {
+            postGetById(preR.body, doR.body, context)
+          } else {
+            doR
+          }
         } else {
-          doR
+          filterR
         }
       } else {
         preR
@@ -501,11 +534,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     } else {
       val preR = preGetByCond(condition, parameters, context)
       if (preR) {
-        val doR = doGetByCond(appendByCond(preR.body._1, context), preR.body._2, context)
-        if (doR) {
-          postGetByCond(preR.body._1, preR.body._2, doR.body, context)
+        val filterR = filterByCond(preR.body._1, preR.body._2, context)
+        if (filterR) {
+          val doR = doGetByCond(filterR.body._1, filterR.body._2, context)
+          if (doR) {
+            postGetByCond(preR.body._1, preR.body._2, doR.body, context)
+          } else {
+            doR
+          }
         } else {
-          doR
+          filterR
         }
       } else {
         preR
@@ -555,12 +593,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     } else {
       val preR = preExistById(id, context)
       if (preR) {
-        val cond = appendById(preR.body, context)
-        val doR = if (cond == null) doExistById(preR.body, context) else doExistByCond(cond, List(id), context)
-        if (doR) {
-          postExistById(preR.body, doR.body, context)
+        val filterR = filterById(id, context)
+        if (filterR) {
+          val doR = if (filterR.body == null) doExistById(preR.body, context) else doExistByCond(filterR.body._1, filterR.body._2, context)
+          if (doR) {
+            postExistById(preR.body, doR.body, context)
+          } else {
+            doR
+          }
         } else {
-          doR
+          filterR
         }
       } else {
         preR
@@ -616,11 +658,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     } else {
       val preR = preExistByCond(condition, parameters, context)
       if (preR) {
-        val doR = doExistByCond(appendByCond(preR.body._1, context), preR.body._2, context)
-        if (doR) {
-          postExistByCond(preR.body._1, preR.body._2, doR.body, context)
+        val filterR = filterByCond(preR.body._1, preR.body._2, context)
+        if (filterR) {
+          val doR = doExistByCond(filterR.body._1, filterR.body._2, context)
+          if (doR) {
+            postExistByCond(preR.body._1, preR.body._2, doR.body, context)
+          } else {
+            doR
+          }
         } else {
-          doR
+          filterR
         }
       } else {
         preR
@@ -670,11 +717,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   def find(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[List[M]] = {
     val preR = preFind(condition, parameters, context)
     if (preR) {
-      val doR = doFind(appendByCond(preR.body._1, context), preR.body._2, context)
-      if (doR) {
-        postFind(preR.body._1, preR.body._2, doR.body, context)
+      val filterR = filterByCond(preR.body._1, preR.body._2, context)
+      if (filterR) {
+        val doR = doFind(filterR.body._1, filterR.body._2, context)
+        if (doR) {
+          postFind(preR.body._1, preR.body._2, doR.body, context)
+        } else {
+          doR
+        }
       } else {
-        doR
+        filterR
       }
     } else {
       preR
@@ -732,11 +784,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
            context: EZStorageContext = EZStorageContext()): Resp[Page[M]] = {
     val preR = prePage(condition, parameters, pageNumber, pageSize, context)
     if (preR) {
-      val doR = doPage(appendByCond(preR.body._1, context), preR.body._2, pageNumber, pageSize, context)
-      if (doR) {
-        postPage(preR.body._1, preR.body._2, pageNumber, pageSize, doR.body, context)
+      val filterR = filterByCond(preR.body._1, preR.body._2, context)
+      if (filterR) {
+        val doR = doPage(filterR.body._1, filterR.body._2, pageNumber, pageSize, context)
+        if (doR) {
+          postPage(preR.body._1, preR.body._2, pageNumber, pageSize, doR.body, context)
+        } else {
+          doR
+        }
       } else {
-        doR
+        filterR
       }
     } else {
       preR
@@ -787,11 +844,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   def count(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Long] = {
     val preR = preCount(condition, parameters, context)
     if (preR) {
-      val doR = doCount(appendByCond(preR.body._1, context), preR.body._2, context)
-      if (doR) {
-        postCount(preR.body._1, preR.body._2, doR.body, context)
+      val filterR = filterByCond(preR.body._1, preR.body._2, context)
+      if (filterR) {
+        val doR = doCount(filterR.body._1, filterR.body._2, context)
+        if (doR) {
+          postCount(preR.body._1, preR.body._2, doR.body, context)
+        } else {
+          doR
+        }
       } else {
-        doR
+        filterR
       }
     } else {
       preR

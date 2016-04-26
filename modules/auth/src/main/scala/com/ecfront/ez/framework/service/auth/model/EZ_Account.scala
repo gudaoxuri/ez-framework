@@ -55,6 +55,8 @@ object EZ_Account extends SecureStorageAdapter[EZ_Account, EZ_Account_Base]
 
   val SYSTEM_ACCOUNT_LOGIN_ID = "sysadmin"
 
+  val ORG_ADMIN_ACCOUNT_LOGIN_ID = "admin"
+
   val VIRTUAL_EMAIL = "@virtual.is"
 
   var extAccountStorage: BaseStorage[BaseModel] = _
