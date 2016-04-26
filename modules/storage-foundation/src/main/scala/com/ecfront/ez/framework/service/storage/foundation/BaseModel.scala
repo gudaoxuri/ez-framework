@@ -119,7 +119,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
       if (filterR) {
         val doR = doSave(filterR.body, context)
         if (doR) {
-          postSave(doR.body, preR.body, context)
+          postSave(doR.body, filterR.body, context)
         } else {
           doR
         }
@@ -175,7 +175,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
       if (filterR) {
         val doR = doUpdate(filterR.body, context)
         if (doR) {
-          postUpdate(doR.body, preR.body, context)
+          postUpdate(doR.body, filterR.body, context)
         } else {
           doR
         }
@@ -232,7 +232,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
       if (filterR) {
         val doR = doSaveOrUpdate(filterR.body, context)
         if (doR) {
-          postSaveOrUpdate(doR.body, preR.body, context)
+          postSaveOrUpdate(doR.body, filterR.body, context)
         } else {
           doR
         }
@@ -295,7 +295,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
       if (filterR) {
         val doR = doUpdateByCond(preR.body._1, filterR.body._1, filterR.body._2, context)
         if (doR) {
-          postUpdateByCond(preR.body._1, preR.body._2, preR.body._3, context)
+          postUpdateByCond(preR.body._1, filterR.body._1, filterR.body._2, context)
         } else {
           doR
         }
@@ -416,7 +416,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
         if (filterR) {
           val doR = doDeleteByCond(filterR.body._1, filterR.body._2, context)
           if (doR) {
-            postDeleteByCond(preR.body._1, preR.body._2, context)
+            postDeleteByCond(filterR.body._1, filterR.body._2, context)
           } else {
             doR
           }
@@ -538,7 +538,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
         if (filterR) {
           val doR = doGetByCond(filterR.body._1, filterR.body._2, context)
           if (doR) {
-            postGetByCond(preR.body._1, preR.body._2, doR.body, context)
+            postGetByCond(filterR.body._1, filterR.body._2, doR.body, context)
           } else {
             doR
           }
@@ -662,7 +662,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
         if (filterR) {
           val doR = doExistByCond(filterR.body._1, filterR.body._2, context)
           if (doR) {
-            postExistByCond(preR.body._1, preR.body._2, doR.body, context)
+            postExistByCond(filterR.body._1, filterR.body._2, doR.body, context)
           } else {
             doR
           }
@@ -721,7 +721,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
       if (filterR) {
         val doR = doFind(filterR.body._1, filterR.body._2, context)
         if (doR) {
-          postFind(preR.body._1, preR.body._2, doR.body, context)
+          postFind(filterR.body._1, filterR.body._2, doR.body, context)
         } else {
           doR
         }
@@ -788,7 +788,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
       if (filterR) {
         val doR = doPage(filterR.body._1, filterR.body._2, pageNumber, pageSize, context)
         if (doR) {
-          postPage(preR.body._1, preR.body._2, pageNumber, pageSize, doR.body, context)
+          postPage(filterR.body._1, filterR.body._2, pageNumber, pageSize, doR.body, context)
         } else {
           doR
         }
@@ -848,7 +848,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
       if (filterR) {
         val doR = doCount(filterR.body._1, filterR.body._2, context)
         if (doR) {
-          postCount(preR.body._1, preR.body._2, doR.body, context)
+          postCount(filterR.body._1, filterR.body._2, doR.body, context)
         } else {
           doR
         }

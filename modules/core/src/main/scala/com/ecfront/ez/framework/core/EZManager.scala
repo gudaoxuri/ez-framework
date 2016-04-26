@@ -218,6 +218,7 @@ object EZManager extends LazyLogging {
               }
           }
           if (isSuccess) {
+            ezServices.foreach(_.initPost())
             logSuccess("Start Success")
           } else {
             logError(s"Start Fail : $message")

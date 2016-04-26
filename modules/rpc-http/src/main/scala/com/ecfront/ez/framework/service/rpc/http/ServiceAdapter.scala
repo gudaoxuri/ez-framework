@@ -23,6 +23,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   var resourcePath: String = _
   var webUrl: String = _
   var publicUrl: String = _
+  var servicePath: String = _
 
   override def init(parameter: JsonObject): Resp[String] = {
     val useSSL = parameter.containsKey("ssl")
@@ -31,11 +32,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     resourcePath = parameter.getString("resourcePath", "/tmp/")
     publicUrl = parameter.getString("publicUrl", s"http${if (useSSL) "s" else ""}://" + host + ":" + port + "/")
     webUrl = parameter.getString("webUrl", publicUrl)
+    servicePath = parameter.getString("servicePath", null)
 
-    val servicePath = parameter.getString("servicePath", null)
-    if (servicePath != null) {
-      AutoBuildingProcessor.autoBuilding[HTTP](servicePath, classOf[HTTP])
-    }
     val opt = new HttpServerOptions()
     if (useSSL) {
       var keyPath = parameter.getJsonObject("ssl").getString("keyPath")
@@ -80,6 +78,13 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     HttpClientProcessor.init(EZContext.vertx)
     val serviceR = Await.result(p.future, Duration.Inf)
     serviceR
+  }
+
+  // 所有服务都初始化完成后调用
+  override def initPost(): Unit = {
+    if (servicePath != null) {
+      AutoBuildingProcessor.autoBuilding[HTTP](servicePath, classOf[HTTP])
+    }
   }
 
   override def destroy(parameter: JsonObject): Resp[String] = {

@@ -25,6 +25,9 @@ trait EZServiceAdapter[E] extends Serializable with LazyLogging {
   // 服务初始化方法
   def init(parameter: E): Resp[String]
 
+  // 所有服务都初始化完成后调用
+  def initPost(): Unit= {}
+
   // 服务销毁方法
   def destroy(parameter: E): Resp[String]
 

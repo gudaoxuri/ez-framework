@@ -15,7 +15,7 @@ class RPCAuthSpec extends MockStartupSpec {
     assert(
       RespHttpClientProcessor.get[Void]("http://127.0.0.1:8080/auth/logout/?__ez_token__=1122222").code == StandardCode.UNAUTHORIZED)
     var loginInfoResp =
-      RespHttpClientProcessor.post[Token_Info_VO]("http://127.0.0.1:8080/public/auth/login/", Map("id" -> "admin", "password" -> "admin"))
+      RespHttpClientProcessor.post[Token_Info_VO]("http://127.0.0.1:8080/public/auth/login/", Map("id" -> "admin1", "password" -> "admin"))
     assert(!loginInfoResp)
     loginInfoResp =
       RespHttpClientProcessor.post[Token_Info_VO]("http://127.0.0.1:8080/public/auth/login/", Map("id" -> "sysadmin", "password" -> "admin"))

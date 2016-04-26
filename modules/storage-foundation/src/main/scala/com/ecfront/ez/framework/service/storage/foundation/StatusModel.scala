@@ -68,11 +68,16 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     } else {
       val preR = preGetEnabledByCond(condition, parameters, context)
       if (preR) {
-        val doR = doGetEnabledByCond(preR.body._1, preR.body._2, context)
-        if (doR) {
-          postGetEnabledByCond(preR.body._1, preR.body._2, doR.body, context)
+        val filterR = filterByCond(preR.body._1, preR.body._2, context)
+        if (filterR) {
+          val doR = doGetEnabledByCond(filterR.body._1, filterR.body._2, context)
+          if (doR) {
+            postGetEnabledByCond(filterR.body._1, filterR.body._2, doR.body, context)
+          } else {
+            doR
+          }
         } else {
-          doR
+          filterR
         }
       } else {
         preR
@@ -130,11 +135,16 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
   def findEnabled(condition: String, parameters: List[Any] = List(), context: EZStorageContext = null): Resp[List[M]] = {
     val preR = preFindEnabled(condition, parameters, context)
     if (preR) {
-      val doR = doFindEnabled(preR.body._1, preR.body._2, context)
-      if (doR) {
-        postFindEnabled(preR.body._1, preR.body._2, doR.body, context)
+      val filterR = filterByCond(preR.body._1, preR.body._2, context)
+      if (filterR) {
+        val doR = doFindEnabled(filterR.body._1, filterR.body._2, context)
+        if (doR) {
+          postFindEnabled(filterR.body._1, filterR.body._2, doR.body, context)
+        } else {
+          doR
+        }
       } else {
-        doR
+        filterR
       }
     } else {
       preR
@@ -200,11 +210,16 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
                    pageNumber: Long = 1, pageSize: Int = 10, context: EZStorageContext = null): Resp[Page[M]] = {
     val preR = prePageEnabled(condition, parameters, pageNumber, pageSize, context)
     if (preR) {
-      val doR = doPageEnabled(preR.body._1, preR.body._2, pageNumber, pageSize, context)
-      if (doR) {
-        postPageEnabled(preR.body._1, preR.body._2, pageNumber, pageSize, doR.body, context)
+      val filterR = filterByCond(preR.body._1, preR.body._2, context)
+      if (filterR) {
+        val doR = doPageEnabled(filterR.body._1, filterR.body._2, pageNumber, pageSize, context)
+        if (doR) {
+          postPageEnabled(filterR.body._1, filterR.body._2, pageNumber, pageSize, doR.body, context)
+        } else {
+          doR
+        }
       } else {
-        doR
+        filterR
       }
     } else {
       preR
@@ -266,11 +281,16 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     } else {
       val preR = preExistEnabledByCond(condition, parameters, context)
       if (preR) {
-        val doR = doExistEnabledByCond(preR.body._1, preR.body._2, context)
-        if (doR) {
-          postExistEnabledByCond(preR.body._1, preR.body._2, doR.body, context)
+        val filterR = filterByCond(preR.body._1, preR.body._2, context)
+        if (filterR) {
+          val doR = doExistEnabledByCond(filterR.body._1, filterR.body._2, context)
+          if (doR) {
+            postExistEnabledByCond(filterR.body._1, filterR.body._2, doR.body, context)
+          } else {
+            doR
+          }
         } else {
-          doR
+          filterR
         }
       } else {
         preR
@@ -325,11 +345,16 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
   def countEnabled(condition: String, parameters: List[Any] = List(), context: EZStorageContext = null): Resp[Long] = {
     val preR = preCountEnabled(condition, parameters, context)
     if (preR) {
-      val doR = doCountEnabled(preR.body._1, preR.body._2, context)
-      if (doR) {
-        postCountEnabled(preR.body._1, preR.body._2, doR.body, context)
+      val filterR = filterByCond(preR.body._1, preR.body._2, context)
+      if (filterR) {
+        val doR = doCountEnabled(filterR.body._1, filterR.body._2, context)
+        if (doR) {
+          postCountEnabled(filterR.body._1, filterR.body._2, doR.body, context)
+        } else {
+          doR
+        }
       } else {
-        doR
+        filterR
       }
     } else {
       preR
@@ -379,11 +404,26 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     } else {
       val preR = preEnableById(id, context)
       if (preR) {
-        val doR = doEnableById(preR.body, context)
-        if (doR) {
-          postEnableById(preR.body, context)
+        val filterR = filterById(id, context)
+        if (filterR) {
+          val doR =
+            if (filterR.body == null) {
+              doEnableById(preR.body, context)
+            } else {
+              val m = doGetByCond(filterR.body._1, filterR.body._2, context)
+              if (m && m.body != null) {
+                doEnableById(m.body.id, context)
+              } else {
+                Resp.notFound("")
+              }
+            }
+          if (doR) {
+            postEnableById(preR.body, context)
+          } else {
+            doR
+          }
         } else {
-          doR
+          filterR
         }
       } else {
         preR
@@ -431,11 +471,26 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     } else {
       val preR = preDisableById(id, context)
       if (preR) {
-        val doR = doDisableById(preR.body, context)
-        if (doR) {
-          postDisableById(preR.body, context)
+        val filterR = filterById(id, context)
+        if (filterR) {
+          val doR =
+            if (filterR.body == null) {
+              doDisableById(preR.body, context)
+            } else {
+              val m = doGetByCond(filterR.body._1, filterR.body._2, context)
+              if (m && m.body != null) {
+                doDisableById(m.body.id, context)
+              } else {
+                Resp.notFound("")
+              }
+            }
+          if (doR) {
+            postDisableById(preR.body, context)
+          } else {
+            doR
+          }
         } else {
-          doR
+          filterR
         }
       } else {
         preR
