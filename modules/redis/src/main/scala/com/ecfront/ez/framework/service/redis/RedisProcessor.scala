@@ -259,13 +259,14 @@ object RedisProcessor extends LazyLogging {
   /**
     * 获取Hash集合field对应的值
     *
-    * @param key   key
-    * @param field field
+    * @param key          key
+    * @param field        field
+    * @param defaultValue 找不到key时使用的值
     * @return field对应的值
     */
-  def hget(key: String, field: String): Resp[String] = {
+  def hget(key: String, field: String, defaultValue: String = null): Resp[String] = {
     execute[String]({
-      redis.getMap[String, String](key).get(field)
+      redis.getMap[String, String](key).getOrDefault(field, defaultValue)
     }, "hget")
   }
 
@@ -336,11 +337,12 @@ object RedisProcessor extends LazyLogging {
 
   private def execute[T](fun: => T, method: String): Resp[T] = {
     try {
+      logger.trace(s"Redis execute [$method]")
       Resp.success(fun)
     } catch {
       case e: Throwable =>
-        logger.error(s"Redis $method error.", e)
-        Resp.serverError(s"Redis $method error " + e.getMessage)
+        logger.error(s"Redis execute [$method] error.", e)
+        Resp.serverError(s"Redis execute [$method] error " + e.getMessage)
     }
   }
 
@@ -520,13 +522,14 @@ object RedisProcessor extends LazyLogging {
     /**
       * 获取Hash集合field对应的值
       *
-      * @param key   key
-      * @param field field
+      * @param key          key
+      * @param field        field
+      * @param defaultValue 找不到key时使用的值
       * @return field对应的值
       */
-    def hget(key: String, field: String): Future[Resp[String]] = {
+    def hget(key: String, field: String, defaultValue: String = null): Future[Resp[String]] = {
       execute[String]({
-        RedisProcessor.hget(key, field)
+        RedisProcessor.hget(key, field, defaultValue)
       })
     }
 

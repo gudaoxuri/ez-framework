@@ -50,6 +50,11 @@
             <artifactId>ezf-email</artifactId>
             <version>${ezf-version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.cage</groupId>
+            <artifactId>cage</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 
 </project>

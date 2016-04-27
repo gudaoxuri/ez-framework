@@ -6,6 +6,9 @@
       "auth": {
         "allowRegister": true,
         "customLogin": false,
+        "loginLimit": {
+          "showCaptcha":3
+        },
         "selfActive": true,
         "defaultRoleFlag": "user",
         "defaultOrganizationCode": "",

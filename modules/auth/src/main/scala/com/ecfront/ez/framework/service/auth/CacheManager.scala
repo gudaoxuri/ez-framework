@@ -1,5 +1,6 @@
 package com.ecfront.ez.framework.service.auth
 
+import java.io.File
 import java.util.UUID
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 
@@ -33,6 +34,13 @@ object CacheManager {
 
   // 组织信息
   private val ORGANIZATIONS_FLAG = "ez.organizations"
+
+  // 连续登录错误次数
+  private val LOGIN_ERROR_TIMES_FLAG = "ez.login.error.times."
+  // 登录验证码的字符
+  private val LOGIN_CAPTCHA_TEXT_FLAG = "ez.login.captcha.text"
+  // 登录验证码的文件路径
+  private val LOGIN_CAPTCHA_FILE_FLAG = "ez.login.captcha.file"
 
   def addTokenInfo(account: EZ_Account): Resp[Token_Info_VO] = {
     val existTokenIdR = RedisProcessor.get(TOKEN_ID_REL_FLAG + account.login_id)
@@ -195,11 +203,11 @@ object CacheManager {
     }
   }
 
-  def addOrganization(organizationCode: String): Resp[Void] = {
+  def addOrganization(organizationCode: String): Unit = {
     RedisProcessor.hset(ORGANIZATIONS_FLAG, organizationCode, "")
   }
 
-  def removeOrganization(organizationCode: String): Resp[Void] = {
+  def removeOrganization(organizationCode: String): Unit = {
     RedisProcessor.hdel(ORGANIZATIONS_FLAG, organizationCode)
   }
 
@@ -207,8 +215,42 @@ object CacheManager {
     RedisProcessor.Async.hexist(ORGANIZATIONS_FLAG, organizationCode)
   }
 
-  def existOrganization(organizationCode: String): Resp[Boolean] = {
-    RedisProcessor.hexist(ORGANIZATIONS_FLAG, organizationCode)
+  def existOrganization(organizationCode: String): Boolean = {
+    RedisProcessor.hexist(ORGANIZATIONS_FLAG, organizationCode).body
+  }
+
+  def addLoginErrorTimes(accountLoginIdOrEmailAndOrg: String): Long = {
+    RedisProcessor.incr(LOGIN_ERROR_TIMES_FLAG + accountLoginIdOrEmailAndOrg).body
+  }
+
+  def removeLoginErrorTimes(accountLoginIdOrEmailAndOrg: String): Unit = {
+    RedisProcessor.del(LOGIN_ERROR_TIMES_FLAG + accountLoginIdOrEmailAndOrg)
+  }
+
+  def getLoginErrorTimes(accountLoginIdOrEmailAndOrg: String): Long = {
+    RedisProcessor.custom().getAtomicLong(LOGIN_ERROR_TIMES_FLAG + accountLoginIdOrEmailAndOrg).get()
+  }
+
+  def addCaptcha(accountLoginIdOrEmailAndOrg: String, text: String, filePath: String): Unit = {
+    RedisProcessor.hset(LOGIN_CAPTCHA_TEXT_FLAG, accountLoginIdOrEmailAndOrg, text)
+    RedisProcessor.hset(LOGIN_CAPTCHA_FILE_FLAG, accountLoginIdOrEmailAndOrg, filePath)
+  }
+
+  def removeCaptcha(accountLoginIdOrEmailAndOrg: String): Unit = {
+    RedisProcessor.hdel(LOGIN_CAPTCHA_TEXT_FLAG, accountLoginIdOrEmailAndOrg)
+    val file = new File(getCaptchaFile(accountLoginIdOrEmailAndOrg))
+    if (file.exists()) {
+      file.delete()
+    }
+    RedisProcessor.hdel(LOGIN_CAPTCHA_FILE_FLAG, accountLoginIdOrEmailAndOrg)
+  }
+
+  def getCaptchaText(accountLoginIdOrEmailAndOrg: String): String = {
+    RedisProcessor.hget(LOGIN_CAPTCHA_TEXT_FLAG, accountLoginIdOrEmailAndOrg, "").body
+  }
+
+  def getCaptchaFile(accountLoginIdOrEmailAndOrg: String): String = {
+    RedisProcessor.hget(LOGIN_CAPTCHA_FILE_FLAG, accountLoginIdOrEmailAndOrg, "").body
   }
 
 }

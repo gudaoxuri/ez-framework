@@ -75,7 +75,10 @@
     "rel_role_resource": "",  <19>
     "rel_menu_role": ""  <20>
   },
-  "storage":"mongo" <21>
+  "storage":"mongo", <21>
+  "loginLimit": { <22>
+    "showCaptcha":2147483647 <23>
+  },
 }
 ----
 <1> 是否允许注册，注册后账户处于禁用状态，需要激活
@@ -99,6 +102,8 @@
 <19> 自定义角色资源关联表名
 <20> 自定义菜单角色关联表名
 <21> 持久化实现，支持`mongo`或`jdbc`
+<22> 登录限制
+<23> 在连续多次登录失败后显示验证码
 
 NOTE: `storage:jdbc & useRelTable不存在或等于false`时请执行`ez_ddl.sql`以创建基础表，`storage:jdbc & useRelTable=true`时请执行`ez_ddl_with_rel.sql`以创建带关联表的基础表
 
@@ -158,7 +163,8 @@ body:
 {
   "id":String, // 登录Id或email
   "password":String, // 密码
-  "organizationCode":String // 所属组织,不传时使用配置中的`defaultOrganizationCode`
+  "organizationCode":String, // 所属组织,不传时使用配置中的`defaultOrganizationCode`
+  "captcha":String // 验证码
 }
 
 *响应内容主体*
@@ -177,6 +183,18 @@ body:
 }
 
 NOTE: `ext_id`只在使用`extAccountStorage`时有意义
+
+==== 获取验证码
+
+*请求*
+
+----
+GET /public/auth/captcha/<所属组织编码>/<登录Id或email>/
+----
+
+*响应内容主体*
+
+__验证码图片__
 
 ==== 注销
 

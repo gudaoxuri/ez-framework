@@ -23,14 +23,21 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   var mongoStorage: Boolean = _
   var loginKeepSeconds: Long = _
   var activeKeepSeconds: Long = _
+  var loginLimit_showCaptcha: Int = _
 
   override def init(parameter: JsonObject): Resp[String] = {
     publicUriPrefix = parameter.getString("publicUriPrefix", "/public/")
     allowRegister = parameter.getBoolean("allowRegister", false)
     customLogin = parameter.getBoolean("customLogin", false)
+    val loginLimit = parameter.getJsonObject("loginLimit", new JsonObject())
+    if (loginLimit.containsKey("showCaptcha")) {
+      loginLimit_showCaptcha = loginLimit.getInteger("showCaptcha")
+    } else {
+      loginLimit_showCaptcha = Int.MaxValue
+    }
     selfActive = parameter.getBoolean("selfActive", true)
     useRelTable = parameter.getBoolean("useRelTable", false)
-    if(parameter.containsKey("customTables")) {
+    if (parameter.containsKey("customTables")) {
       parameter.getJsonObject("customTables").foreach {
         item =>
           item.getKey match {

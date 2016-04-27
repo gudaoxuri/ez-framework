@@ -26,7 +26,7 @@ class OrganizationSpec extends MockStartupSpec {
 
     EZ_Resource.save(EZ_Resource(Method.GET, "/org/1/foo/", s"Fetch org1 Info"))
 
-    var token = AuthService.doLogin("sysadmin", "admin", "", new EZAuthContext).body.token
+    var token = AuthService.doLogin("sysadmin", "admin", "", "",new EZAuthContext).body.token
 
     // 添加一个组织
     var org = RespHttpClientProcessor.post[EZ_Organization](
@@ -54,7 +54,7 @@ class OrganizationSpec extends MockStartupSpec {
     EZ_Account.save(account1)
 
     // login
-    var loginResp = AuthService.doLogin("u1", "123", "org1", new EZAuthContext)
+    var loginResp = AuthService.doLogin("u1", "123", "org1", "",new EZAuthContext)
     assert(loginResp
       && loginResp.body.token != ""
       && loginResp.body.login_id == "u1"
@@ -75,7 +75,7 @@ class OrganizationSpec extends MockStartupSpec {
       RespHttpClientProcessor.get[Void](s"http://127.0.0.1:8080/org/1/foo/?__ez_token__=$token")
         .code == StandardCode.NOT_IMPLEMENTED)
 
-    token = AuthService.doLogin("sysadmin", "admin", "", new EZAuthContext).body.token
+    token = AuthService.doLogin("sysadmin", "admin", "","", new EZAuthContext).body.token
     // disable
     RespHttpClientProcessor.get[Void](
       s"http://127.0.0.1:8080/auth/manage/organization/${org.id}/disable/?__ez_token__=$token")
@@ -83,7 +83,7 @@ class OrganizationSpec extends MockStartupSpec {
     org = RespHttpClientProcessor.get[EZ_Organization](
       s"http://127.0.0.1:8080/auth/manage/organization/${org.id}/?__ez_token__=$token").body
     assert(!org.enable)
-    loginResp = AuthService.doLogin("u1", "123", "org1", new EZAuthContext)
+    loginResp = AuthService.doLogin("u1", "123", "org1","", new EZAuthContext)
     assert(loginResp.code == StandardCode.LOCKED)
 
     // enable
@@ -93,7 +93,7 @@ class OrganizationSpec extends MockStartupSpec {
     org = RespHttpClientProcessor.get[EZ_Organization](
       s"http://127.0.0.1:8080/auth/manage/organization/${org.id}/?__ez_token__=$token").body
     assert(org.enable)
-    loginResp = AuthService.doLogin("u1", "123", "org1", new EZAuthContext)
+    loginResp = AuthService.doLogin("u1", "123", "org1", "",new EZAuthContext)
     assert(loginResp)
 
     // 再添加一个组织
@@ -108,9 +108,9 @@ class OrganizationSpec extends MockStartupSpec {
     account2 = EZ_Account.save(account2).body
 
     // org2没有u1用户
-    assert(AuthService.doLogin("u2", "123", "org1", new EZAuthContext).code == StandardCode.NOT_FOUND)
+    assert(AuthService.doLogin("u2", "123", "org1","", new EZAuthContext).code == StandardCode.NOT_FOUND)
     // 使用org2的管理员登录
-    token = AuthService.doLogin("admin", "admin", "org2", new EZAuthContext).body.token
+    token = AuthService.doLogin("admin", "admin", "org2","", new EZAuthContext).body.token
     // 查看org2组织的账号列表
     var accounts = RespHttpClientProcessor.get[Page[EZ_Account]](
       s"http://127.0.0.1:8080/auth/manage/account/page/1/10/?__ez_token__=$token").body
