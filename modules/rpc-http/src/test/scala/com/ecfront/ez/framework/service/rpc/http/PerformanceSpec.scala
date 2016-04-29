@@ -29,5 +29,12 @@ class PerformanceSpec extends MockStartupSpec {
 
   }
 
+  test("性能测试2") {
+
+    EZ_Resource.deleteByCond("")
+    new CountDownLatch(1).await()
+
+  }
+
 
 }

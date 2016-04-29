@@ -2,6 +2,11 @@
   "ez": {
     "app": "ez-framework",
     "module": "",
+    "perf": {
+      "eventLoopPoolSize": 2,
+      "workerPoolSize": 200,
+      "internalBlockingPoolSize": 200
+    },
     "services": {
       "auth": {
         "allowRegister": true,

@@ -35,43 +35,25 @@ object EZManager extends LazyLogging {
     *
     * @return vertx实例
     */
-  private def initVertx(ezConfig: EZConfig): Vertx = {
-    if (System.getProperty(FLAG_PERF_EVENT_LOOP_POOL_SIZE) != null) {
-      ezConfig.ez.perf += FLAG_PERF_EVENT_LOOP_POOL_SIZE -> System.getProperty(FLAG_PERF_EVENT_LOOP_POOL_SIZE).toInt
-    }
-    if (System.getProperty(FLAG_PERF_WORKER_POOL_SIZE) != null) {
-      ezConfig.ez.perf += FLAG_PERF_WORKER_POOL_SIZE -> System.getProperty(FLAG_PERF_WORKER_POOL_SIZE).toInt
-    }
-    if (System.getProperty(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE) != null) {
-      ezConfig.ez.perf += FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE -> System.getProperty(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE).toInt
-    }
-    if (System.getProperty(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME) != null) {
-      ezConfig.ez.perf += FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME -> System.getProperty(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).toInt
-    }
-    if (System.getProperty(FLAG_PERF_WORKER_EXECUTE_TIME) != null) {
-      ezConfig.ez.perf += FLAG_PERF_WORKER_EXECUTE_TIME -> System.getProperty(FLAG_PERF_WORKER_EXECUTE_TIME).toInt
-    }
-    if (System.getProperty(FLAG_PERF_WARNING_EXCEPTION_TIME) != null) {
-      ezConfig.ez.perf += FLAG_PERF_WARNING_EXCEPTION_TIME -> System.getProperty(FLAG_PERF_WARNING_EXCEPTION_TIME).toInt
-    }
+  private[ecfront] def initVertx(perf: Map[String, Any]): Vertx = {
     val opt = new VertxOptions()
-    if (ezConfig.ez.perf.contains(FLAG_PERF_EVENT_LOOP_POOL_SIZE)) {
-      opt.setEventLoopPoolSize(ezConfig.ez.perf(FLAG_PERF_EVENT_LOOP_POOL_SIZE).asInstanceOf[Int])
+    if (perf.contains(FLAG_PERF_EVENT_LOOP_POOL_SIZE)) {
+      opt.setEventLoopPoolSize(perf(FLAG_PERF_EVENT_LOOP_POOL_SIZE).asInstanceOf[Int])
     }
-    if (ezConfig.ez.perf.contains(FLAG_PERF_WORKER_POOL_SIZE)) {
-      opt.setWorkerPoolSize(ezConfig.ez.perf(FLAG_PERF_WORKER_POOL_SIZE).asInstanceOf[Int])
+    if (perf.contains(FLAG_PERF_WORKER_POOL_SIZE)) {
+      opt.setWorkerPoolSize(perf(FLAG_PERF_WORKER_POOL_SIZE).asInstanceOf[Int])
     }
-    if (ezConfig.ez.perf.contains(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE)) {
-      opt.setInternalBlockingPoolSize(ezConfig.ez.perf(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE).asInstanceOf[Int])
+    if (perf.contains(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE)) {
+      opt.setInternalBlockingPoolSize(perf(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE).asInstanceOf[Int])
     }
-    if (ezConfig.ez.perf.contains(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME)) {
-      opt.setMaxEventLoopExecuteTime(ezConfig.ez.perf(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).asInstanceOf[Int])
+    if (perf.contains(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME)) {
+      opt.setMaxEventLoopExecuteTime(perf(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).asInstanceOf[Int])
     }
-    if (ezConfig.ez.perf.contains(FLAG_PERF_WORKER_EXECUTE_TIME)) {
-      opt.setMaxWorkerExecuteTime(ezConfig.ez.perf(FLAG_PERF_WORKER_EXECUTE_TIME).asInstanceOf[Int])
+    if (perf.contains(FLAG_PERF_WORKER_EXECUTE_TIME)) {
+      opt.setMaxWorkerExecuteTime(perf(FLAG_PERF_WORKER_EXECUTE_TIME).asInstanceOf[Int])
     }
-    if (ezConfig.ez.perf.contains(FLAG_PERF_WARNING_EXCEPTION_TIME)) {
-      opt.setWarningExceptionTime(ezConfig.ez.perf(FLAG_PERF_WARNING_EXCEPTION_TIME).asInstanceOf[Int])
+    if (perf.contains(FLAG_PERF_WARNING_EXCEPTION_TIME)) {
+      opt.setWarningExceptionTime(perf(FLAG_PERF_WARNING_EXCEPTION_TIME).asInstanceOf[Int])
     }
     Vertx.vertx(opt)
   }
@@ -94,6 +76,24 @@ object EZManager extends LazyLogging {
       val ezConfig = JsonHelper.toObject(jsonConfig.encode(), classOf[EZConfig])
       if (ezConfig.ez.perf == null) {
         ezConfig.ez.perf = collection.mutable.Map[String, Any]()
+      }
+      if (System.getProperty(FLAG_PERF_EVENT_LOOP_POOL_SIZE) != null) {
+        ezConfig.ez.perf += FLAG_PERF_EVENT_LOOP_POOL_SIZE -> System.getProperty(FLAG_PERF_EVENT_LOOP_POOL_SIZE).toInt
+      }
+      if (System.getProperty(FLAG_PERF_WORKER_POOL_SIZE) != null) {
+        ezConfig.ez.perf += FLAG_PERF_WORKER_POOL_SIZE -> System.getProperty(FLAG_PERF_WORKER_POOL_SIZE).toInt
+      }
+      if (System.getProperty(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE) != null) {
+        ezConfig.ez.perf += FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE -> System.getProperty(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE).toInt
+      }
+      if (System.getProperty(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME) != null) {
+        ezConfig.ez.perf += FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME -> System.getProperty(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).toInt
+      }
+      if (System.getProperty(FLAG_PERF_WORKER_EXECUTE_TIME) != null) {
+        ezConfig.ez.perf += FLAG_PERF_WORKER_EXECUTE_TIME -> System.getProperty(FLAG_PERF_WORKER_EXECUTE_TIME).toInt
+      }
+      if (System.getProperty(FLAG_PERF_WARNING_EXCEPTION_TIME) != null) {
+        ezConfig.ez.perf += FLAG_PERF_WARNING_EXCEPTION_TIME -> System.getProperty(FLAG_PERF_WARNING_EXCEPTION_TIME).toInt
       }
       Resp.success(ezConfig)
     } catch {
@@ -183,8 +183,9 @@ object EZManager extends LazyLogging {
     val ezConfigR = startInParseConfig(configContent)
     if (ezConfigR) {
       val ezConfig = ezConfigR.body
-      EZContext.vertx = initVertx(ezConfig)
+      EZContext.vertx = initVertx(ezConfig.ez.perf.toMap)
       EZContext.app = ezConfig.ez.app
+      EZContext.perf = ezConfig.ez.perf.toMap
       EZContext.module = ezConfig.ez.module
       EZContext.args = new JsonObject(JsonHelper.toJsonString(ezConfig.args))
       ezServiceConfig = ezConfig.ez.services

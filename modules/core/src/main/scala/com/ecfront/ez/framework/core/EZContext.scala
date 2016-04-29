@@ -12,6 +12,8 @@ object EZContext {
   var app: String = _
   // 模块名称，来自配置文件
   var module: String = _
+  // 性能配置
+  var perf: Map[String,Any] = _
   // Vertx实例
   var vertx: Vertx = _
   // 配置文件中的APP级参数

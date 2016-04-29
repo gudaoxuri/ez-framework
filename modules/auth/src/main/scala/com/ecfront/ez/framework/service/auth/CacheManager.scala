@@ -3,6 +3,7 @@ package com.ecfront.ez.framework.service.auth
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
+import java.util.concurrent.locks.ReentrantLock
 
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.service.auth.model._
@@ -42,7 +43,11 @@ object CacheManager {
   // 登录验证码的文件路径
   private val LOGIN_CAPTCHA_FILE_FLAG = "ez.login.captcha.file"
 
+  val tokenLock = new ReentrantLock()
+
   def addTokenInfo(account: EZ_Account): Resp[Token_Info_VO] = {
+    // 加锁，避免在多线程下`TOKEN_ID_REL_FLAG + account.login_id`竞争问题
+    tokenLock.lock()
     val existTokenIdR = RedisProcessor.get(TOKEN_ID_REL_FLAG + account.login_id)
     if (existTokenIdR.body != null) {
       removeTokenInfo(existTokenIdR.body.asInstanceOf[String])
@@ -60,6 +65,7 @@ object CacheManager {
     )
     RedisProcessor.set(TOKEN_ID_REL_FLAG + account.login_id, newTokenInfo.token, ServiceAdapter.loginKeepSeconds)
     RedisProcessor.set(TOKEN_INFO_FLAG + newTokenInfo.token, JsonHelper.toJsonString(newTokenInfo), ServiceAdapter.loginKeepSeconds)
+    tokenLock.unlock()
     Resp.success(newTokenInfo)
   }
 
