@@ -179,8 +179,9 @@ _分布式服务本身没有配置项_
 [source,scala]
 .DTopicService[M](key: String) <1>
 ----
-  def publish(message: M)
-  def subscribe(fun: => M => Unit)
+  def publish(message: M) // 发布消息
+  def subscribe(fun: => M => Unit) // 订阅消息
+  def subscribeOneNode(fun: => M => Unit) // 订阅消息，一条消息只由一个节点处理
 ----
 <1> key 消息队列名,M 消息队列项的类型
 

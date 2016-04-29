@@ -123,6 +123,37 @@ EZAuthContext在EZRPCContext基础上添加了两个字段：
 . token 认证的Token值
 . loginInfo 登录信息
 
+=== 事件
+
+==== 初始化新组织事件
+
+[source,scala]
+----
+ServiceAdapter.ezEvent_organizationInt.<subscribe | subscribeOneNode>({
+  orgCode:String =>
+    // your code
+})
+----
+
+==== 登录成功事件
+
+[source,scala]
+----
+ServiceAdapter.ezEvent_loginSuccess.<subscribe | subscribeOneNode>({
+  tokenInfo:Token_Info_VO =>
+    // your code
+})
+----
+
+==== 注销事件
+
+[source,scala]
+----
+ServiceAdapter.ezEvent_logout.<subscribe | subscribeOneNode>({
+  tokenInfo:Token_Info_VO =>
+    // your code
+})
+----
 
 === 预定义认证接口调用
 
