@@ -216,6 +216,8 @@ object Initiator extends LazyLogging {
       orgCode + BaseModel.SPLIT + EZ_Role.ORG_ADMIN_ROLE_FLAG
     ), orgCode)
     EZ_Account.save(account)
+
+    ServiceAdapter.ezEvent_organizationInt.publish(orgCode)
   }
 
 }

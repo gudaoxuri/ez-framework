@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>com.ecfront</groupId>
-            <artifactId>ezf-redis</artifactId>
+            <artifactId>ezf-distributed</artifactId>
             <version>${ezf-version}</version>
         </dependency>
         <dependency>

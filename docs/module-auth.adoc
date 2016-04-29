@@ -29,6 +29,7 @@
    "host": "0.0.0.0",
    "port": 8080
  },
+ "distributed":{},
  "redis": {
    "host": "<服务IP>",
    "port": 6379
@@ -45,7 +46,7 @@
 
 === 依赖
 
-服务依赖：rpc.http、redis、storage.mongo或storage.jdbc、mail（可选，允许注册或开放找回密码功能时必选）
+服务依赖：rpc.http、redis、distributed、storage.mongo或storage.jdbc、mail（可选，允许注册或开放找回密码功能时必选）
 
 环境依赖：redis、mongo或mysql
 

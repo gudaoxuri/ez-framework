@@ -1,5 +1,7 @@
 package com.ecfront.ez.framework.service.auth
 
+import java.util.concurrent.CountDownLatch
+
 import com.ecfront.common.StandardCode
 import com.ecfront.ez.framework.core.test.MockStartupSpec
 import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Organization, EZ_Resource, EZ_Role}
@@ -10,6 +12,12 @@ import com.ecfront.ez.framework.service.storage.foundation.Page
 class OrganizationSpec extends MockStartupSpec {
 
   test("Organization test") {
+    val c=new CountDownLatch(1)
+    ServiceAdapter.ezEvent_organizationInt.subscribeOneNode({
+      orgCode =>
+        println(orgCode)
+        c.countDown()
+    })
 
     EZ_Organization.deleteByCode("org1")
     EZ_Organization.deleteByCode("org2")
@@ -129,6 +137,8 @@ class OrganizationSpec extends MockStartupSpec {
       s"http://127.0.0.1:8080/auth/manage/account/${account2.id}/?__ez_token__=$token", Map(
         "name" -> "u2_new"
       )).body.name == "u2_new")
+
+    c.await()
   }
 
 }

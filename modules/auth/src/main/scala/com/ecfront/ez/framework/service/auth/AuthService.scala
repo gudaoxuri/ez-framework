@@ -55,11 +55,12 @@ object AuthService extends LazyLogging {
           val account = getR.body
           if (EZ_Account.packageEncryptPwd(account.login_id, password) == account.password) {
             if (account.enable) {
-              val tokenInfo = CacheManager.addTokenInfo(account)
+              val tokenInfoR = CacheManager.addTokenInfo(account)
               CacheManager.removeLoginErrorTimes(accountLoginIdOrEmailAndOrg)
               CacheManager.removeCaptcha(accountLoginIdOrEmailAndOrg)
-              logger.info(s"[login] success ,token:${tokenInfo.body.token} id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
-              tokenInfo
+              logger.info(s"[login] success ,token:${tokenInfoR.body.token} id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+              ServiceAdapter.ezEvent_loginSuccess.publish(tokenInfoR.body)
+              tokenInfoR
             } else {
               logger.warn(s"[login] account disabled by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
               Resp.locked(s"Account disabled")
@@ -114,6 +115,10 @@ object AuthService extends LazyLogging {
     *
     */
   def doLogout(token: String): Resp[Void] = {
+    val tokenInfoR = CacheManager.getTokenInfo(token)
+    if (tokenInfoR && tokenInfoR.body != null) {
+      ServiceAdapter.ezEvent_logout.publish(tokenInfoR.body)
+    }
     CacheManager.removeTokenInfo(token)
   }
 
