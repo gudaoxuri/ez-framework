@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.service.auth.model
 
 import com.ecfront.common._
-import com.ecfront.ez.framework.service.auth.{OrganizationModel, OrganizationStorage, ServiceAdapter}
+import com.ecfront.ez.framework.service.auth.{CacheManager, OrganizationModel, OrganizationStorage, ServiceAdapter}
 import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, _}
 import com.ecfront.ez.framework.service.storage.jdbc.{JDBCProcessor, JDBCSecureStorage, JDBCStatusStorage}
 import com.ecfront.ez.framework.service.storage.mongo.{MongoProcessor, MongoSecureStorage, MongoStatusStorage}
@@ -244,8 +244,9 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
         saveOrUpdateRelRoleData(saveOrUpdateResult.code, preResult.exchange_role_codes)
         saveOrUpdateResult.role_codes = preResult.exchange_role_codes
       }
-      super.postUpdate(saveOrUpdateResult, preResult, context)
+      super.postSave(saveOrUpdateResult, preResult, context)
     } else {
+      CacheManager.removeToken(saveOrUpdateResult.code)
       if (EZ_Account.extAccountStorage != null) {
         if (preResult.exchange_ext_info != null && preResult.exchange_ext_info.nonEmpty) {
           EZ_Account.extAccountStorage.update(
@@ -263,7 +264,7 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
           saveOrUpdateResult.role_codes = getRelRoleData(saveOrUpdateResult.code).body
         }
       }
-      super.postSave(saveOrUpdateResult, preResult, context)
+      super.postUpdate(saveOrUpdateResult, preResult, context)
     }
   }
 

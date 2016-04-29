@@ -30,24 +30,26 @@ class RPCAuthSpec extends MockStartupSpec {
     account =
       RespHttpClientProcessor.get[EZ_Account](s"http://127.0.0.1:8080/auth/manage/account/${account.id}/?__ez_token__=$token").body
     assert(account.login_id == "sysadmin")
-    loginInfoResp =
-      RespHttpClientProcessor.post[Token_Info_VO]("http://127.0.0.1:8080/public/auth/login/", Map("id" -> "sysadmin", "password" -> "admin"))
-    assert(
-      RespHttpClientProcessor.get[EZ_Account](s"http://127.0.0.1:8080/auth/manage/account/${account.id}/?__ez_token__=$token")
-        .code == StandardCode.UNAUTHORIZED)
-    assert(
-      RespHttpClientProcessor.get[EZ_Account](s"http://127.0.0.1:8080/auth/manage/account/${account.id}/?__ez_token__=${loginInfoResp.body.token}"))
-    token = loginInfoResp.body.token
 
+    // 改名
     RespHttpClientProcessor.put[EZ_Account](
       s"http://127.0.0.1:8080/auth/manage/account/${account.id}/?__ez_token__=$token",
-      Map("name" -> "system")).body
+      Map("name" -> "system"))
+    // 改密码，已修改过账号，需要重新登录
+    assert(RespHttpClientProcessor.put[EZ_Account](
+      s"http://127.0.0.1:8080/auth/manage/account/${account.id}/?__ez_token__=$token",
+      Map("password" -> "123", "ext_info" -> Map("ext1" -> "aaaa"))).code==StandardCode.UNAUTHORIZED)
+    // 重新登录
+    token = RespHttpClientProcessor.post[Token_Info_VO]("http://127.0.0.1:8080/public/auth/login/", Map("id" -> "sysadmin", "password" -> "admin")).body.token
     RespHttpClientProcessor.put[EZ_Account](
       s"http://127.0.0.1:8080/auth/manage/account/${account.id}/?__ez_token__=$token",
       Map("password" -> "123", "ext_info" -> Map("ext1" -> "aaaa"))).body
+    // 改密成功
     loginInfoResp =
       RespHttpClientProcessor.post[Token_Info_VO]("http://127.0.0.1:8080/public/auth/login/", Map("id" -> "sysadmin", "password" -> "123"))
+    assert(loginInfoResp)
     assert(loginInfoResp.body.name == "system")
+
     token = loginInfoResp.body.token
     RespHttpClientProcessor.put[EZ_Account](
       s"http://127.0.0.1:8080/auth/manage/account/${account.id}/?__ez_token__=$token",

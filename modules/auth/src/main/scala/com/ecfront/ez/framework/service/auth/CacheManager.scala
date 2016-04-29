@@ -46,12 +46,9 @@ object CacheManager {
   val tokenLock = new ReentrantLock()
 
   def addTokenInfo(account: EZ_Account): Resp[Token_Info_VO] = {
-    // 加锁，避免在多线程下`TOKEN_ID_REL_FLAG + account.login_id`竞争问题
+    // 加锁，避免在多线程下`TOKEN_ID_REL_FLAG + account.code`竞争问题
     tokenLock.lock()
-    val existTokenIdR = RedisProcessor.get(TOKEN_ID_REL_FLAG + account.login_id)
-    if (existTokenIdR.body != null) {
-      removeTokenInfo(existTokenIdR.body.asInstanceOf[String])
-    }
+    removeToken(account.code)
     val newTokenInfo = Token_Info_VO(
       UUID.randomUUID().toString,
       account.login_id,
@@ -63,17 +60,33 @@ object CacheManager {
       account.ext_id,
       account.ext_info
     )
-    RedisProcessor.set(TOKEN_ID_REL_FLAG + account.login_id, newTokenInfo.token, ServiceAdapter.loginKeepSeconds)
+    RedisProcessor.set(TOKEN_ID_REL_FLAG + account.code, newTokenInfo.token, ServiceAdapter.loginKeepSeconds)
     RedisProcessor.set(TOKEN_INFO_FLAG + newTokenInfo.token, JsonHelper.toJsonString(newTokenInfo), ServiceAdapter.loginKeepSeconds)
     tokenLock.unlock()
     Resp.success(newTokenInfo)
   }
 
+  def getToken(accountCode: String): String = {
+    val tokenR = RedisProcessor.get(TOKEN_ID_REL_FLAG + accountCode)
+    if (tokenR.body != null) {
+      tokenR.body.asInstanceOf[String]
+    } else {
+      null
+    }
+  }
+
+  def removeToken(accountCode: String): Unit = {
+    val token = getToken(accountCode)
+    if (token != null) {
+      removeTokenInfo(token)
+    }
+  }
+
   def updateTokenInfo(account: EZ_Account): Resp[Void] = {
-    val existTokenIdR = RedisProcessor.get(TOKEN_ID_REL_FLAG + account.login_id)
-    if (existTokenIdR.body != null) {
+    val token = getToken(account.code)
+    if (token != null) {
       val newTokenInfo = Token_Info_VO(
-        existTokenIdR.body.asInstanceOf[String],
+        token,
         account.login_id,
         account.name,
         account.email,

@@ -141,7 +141,7 @@ trait EZ_Menu_Base extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] wi
         saveOrUpdateRelRoleData(saveOrUpdateResult.code, preResult.exchange_role_codes)
         saveOrUpdateResult.role_codes = preResult.exchange_role_codes
       }
-      super.postUpdate(saveOrUpdateResult, preResult, context)
+      super.postSave(saveOrUpdateResult, preResult, context)
     } else {
       if (ServiceAdapter.useRelTable) {
         if (preResult.exchange_role_codes != null && preResult.exchange_role_codes.nonEmpty) {
@@ -151,7 +151,7 @@ trait EZ_Menu_Base extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] wi
           saveOrUpdateResult.role_codes = getRelRoleData(saveOrUpdateResult.code).body
         }
       }
-      super.postSave(saveOrUpdateResult, preResult, context)
+      super.postUpdate(saveOrUpdateResult, preResult, context)
     }
   }
 

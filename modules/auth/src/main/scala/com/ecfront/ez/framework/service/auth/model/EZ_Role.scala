@@ -132,7 +132,7 @@ trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] wi
       if (saveOrUpdateResult.enable) {
         CacheManager.addResourceByRole(saveOrUpdateResult.code, saveOrUpdateResult.resource_codes)
       }
-      super.postUpdate(saveOrUpdateResult, preResult, context)
+      super.postSave(saveOrUpdateResult, preResult, context)
     } else {
       if (ServiceAdapter.useRelTable) {
         if (preResult.exchange_resource_codes != null && preResult.exchange_resource_codes.nonEmpty) {
@@ -145,7 +145,7 @@ trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] wi
       if (saveOrUpdateResult.enable) {
         CacheManager.addResourceByRole(saveOrUpdateResult.code, saveOrUpdateResult.resource_codes)
       }
-      super.postSave(saveOrUpdateResult, preResult, context)
+      super.postUpdate(saveOrUpdateResult, preResult, context)
     }
   }
 
