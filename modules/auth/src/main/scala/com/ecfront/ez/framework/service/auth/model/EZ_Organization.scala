@@ -104,6 +104,9 @@ trait EZ_Organization_Base extends SecureStorage[EZ_Organization] with StatusSto
     } else {
       CacheManager.removeOrganization(saveOrUpdateResult.code)
     }
+    if (preResult.id == null || preResult.id.isEmpty) {
+      Initiator.initOrganization(saveOrUpdateResult.code)
+    }
     super.postSaveOrUpdate(saveOrUpdateResult, preResult, context)
   }
 

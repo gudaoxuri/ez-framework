@@ -1,10 +1,12 @@
 package com.ecfront.ez.framework.service.distributed
 
-import java.util.concurrent.TimeUnit
+import java.lang.Long
 
 import com.ecfront.common.JsonHelper
+import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.service.redis.RedisProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import io.vertx.core.Handler
 import org.redisson.core.{MessageListener, RTopic}
 
 /**
@@ -55,8 +57,8 @@ case class DTopicService[M](key: String) extends LazyLogging {
   def subscribeOneNode(fun: => M => Unit): this.type = {
     topic.addListener(new MessageListener[M]() {
       override def onMessage(s: String, msg: M): Unit = {
-        val lock = RedisProcessor.redis.getAtomicLong(key + "_" + JsonHelper.toJsonString(msg).hashCode)
-        if (lock.incrementAndGet() == 1) {
+        val lock = key + "_" + JsonHelper.toJsonString(msg).hashCode
+        if (RedisProcessor.redis.getAtomicLong(lock).incrementAndGet() == 1) {
           try {
             fun(msg)
           } catch {
@@ -64,8 +66,12 @@ case class DTopicService[M](key: String) extends LazyLogging {
               logger.error(s"Distributed subscribe [$topic] process error.", e)
               throw e
           } finally {
-            // 10天后过期，删除锁
-            lock.expire(10, TimeUnit.DAYS)
+            EZContext.vertx.setTimer(60000, new Handler[Long] {
+              override def handle(e: Long): Unit = {
+                RedisProcessor.del(lock)
+              }
+            })
+
           }
         }
       }

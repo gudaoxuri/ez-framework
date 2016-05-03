@@ -62,13 +62,12 @@
         "ssl": true,
         "authMethods": "LOGIN",
         "username": "test@ecfront.com",
-        "password": "t~!Q`1q"
+        "password": ""
       },
       "distributed":{},
       "redis": {
         "host": "192.168.99.100",
-        "port": 6379,
-        "db": 1
+        "port": 6379
       }
     }
   },

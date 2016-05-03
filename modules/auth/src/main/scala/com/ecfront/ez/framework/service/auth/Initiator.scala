@@ -217,7 +217,7 @@ object Initiator extends LazyLogging {
     ), orgCode)
     EZ_Account.save(account)
 
-    ServiceAdapter.ezEvent_organizationInt.publish(orgCode)
+    ServiceAdapter.ezEvent_organizationInit.publish(orgCode)
   }
 
 }

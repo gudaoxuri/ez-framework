@@ -18,7 +18,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   private val EZ_EVENT_LOGOUT: String = "ez.event.logout"
 
   // 组织初始化事件
-  var ezEvent_organizationInt: DTopicService[String] = _
+  var ezEvent_organizationInit: DTopicService[String] = _
   // 登录成功事件
   var ezEvent_loginSuccess: DTopicService[Token_Info_VO] = _
   // 注销事件
@@ -76,7 +76,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     EZAsyncInterceptorProcessor.register(HttpInterceptor.category, AuthHttpInterceptor)
     AutoBuildingProcessor.autoBuilding[HTTP]("com.ecfront.ez.framework.service.auth", classOf[HTTP])
 
-    ezEvent_organizationInt = DTopicService[String](ServiceAdapter.EZ_EVENT_ORGANIZATION_INIT)
+    ezEvent_organizationInit = DTopicService[String](ServiceAdapter.EZ_EVENT_ORGANIZATION_INIT)
     ezEvent_loginSuccess = DTopicService[Token_Info_VO](ServiceAdapter.EZ_EVENT_LOGIN_SUCCESS)
     ezEvent_logout = DTopicService[Token_Info_VO](ServiceAdapter.EZ_EVENT_LOGOUT)
 

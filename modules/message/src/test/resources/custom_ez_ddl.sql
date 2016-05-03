@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS biz_message
     INDEX idx_to_account(to_account) ,
     INDEX idx_to_role(to_role),
     INDEX idx_category(category)
-)ENGINE=innodb DEFAULT CHARSET=utf8;
+)ENGINE=innodb DEFAULT CHARSET=utf8
+COMMENT '消息表';
 
 CREATE TABLE IF NOT EXISTS biz_message_log
 (
@@ -31,4 +32,5 @@ CREATE TABLE IF NOT EXISTS biz_message_log
     PRIMARY KEY(id) ,
     INDEX idx_message_id(message_id),
     INDEX idx_read_acc_code(read_account_code)
-)ENGINE=innodb DEFAULT CHARSET=utf8;
+)ENGINE=innodb DEFAULT CHARSET=utf8
+COMMENT '消息读取日志表';
