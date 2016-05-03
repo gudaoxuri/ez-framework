@@ -76,8 +76,8 @@ trait EZ_Message_Base extends SecureStorage[EZ_Message] {
     if (model.title == null) {
       model.title = ""
     }
-    if (model.template_id == null) {
-      model.template_id = ""
+    if (model.template_code == null) {
+      model.template_code = ""
     }
     super.preSaveOrUpdate(model, context)
   }
