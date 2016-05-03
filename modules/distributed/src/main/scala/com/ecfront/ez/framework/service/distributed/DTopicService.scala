@@ -71,7 +71,6 @@ case class DTopicService[M](key: String) extends LazyLogging {
                 RedisProcessor.del(lock)
               }
             })
-
           }
         }
       }
