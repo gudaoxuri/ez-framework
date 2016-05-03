@@ -18,6 +18,7 @@ case class EZ_Organization() extends BaseModel with SecureModel with StatusModel
   @Require
   @Label("Code")
   @BeanProperty var code: String = _
+  @Unique
   @Require
   @Label("Name")
   @BeanProperty var name: String = _
