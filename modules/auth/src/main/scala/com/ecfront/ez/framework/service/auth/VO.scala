@@ -4,6 +4,7 @@ package com.ecfront.ez.framework.service.auth
   * Token VO
   *
   * @param token             token
+  * @param account_code      code
   * @param login_id          登录id
   * @param name              姓名
   * @param email             email
@@ -15,6 +16,7 @@ package com.ecfront.ez.framework.service.auth
   */
 case class Token_Info_VO(
                           token: String,
+                          account_code: String,
                           login_id: String,
                           name: String,
                           email: String,

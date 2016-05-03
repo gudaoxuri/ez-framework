@@ -16,6 +16,8 @@ include::docs/module-rpc.adoc[]
 
 include::docs/module-auth.adoc[]
 
+include::docs/module-message.adoc[]
+
 include::docs/module-email.adoc[]
 
 include::docs/module-redis.adoc[]

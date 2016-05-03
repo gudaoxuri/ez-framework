@@ -11,7 +11,6 @@ import scala.concurrent.{Await, Future, Promise}
 class RPCAuthSpec extends MockStartupSpec {
 
   test("RPC auth test") {
-
     assert(
       RespHttpClientProcessor.get[Void]("http://127.0.0.1:8080/auth/logout/?__ez_token__=1122222").code == StandardCode.UNAUTHORIZED)
     var loginInfoResp =

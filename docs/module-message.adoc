@@ -1,0 +1,295 @@
+== 消息服务
+
+=== 功能
+
+. 支持消息模板
+. 支持个人、角色和公共消息
+
+=== 5分钟上手
+
+. 添加依赖
+
+ <dependency>
+   <groupId>com.ecfront</groupId>
+   <artifactId>ezf-message</artifactId>
+   <version>3.0.0-SNAPSHOT</version>
+ <dependency>
+
+. 添加配置
+
+ "message": {
+   "customTables": {
+     "message": "biz_message",
+     "message_log": "biz_message_log"
+   },
+   "storage": "jdbc"
+ },
+ "auth": {
+   "useRelTable": true,
+   "storage": "jdbc"
+ },
+ "redis": {
+   "host": "192.168.99.100",
+   "port": 6379,
+ },
+ "rpc.http": {},
+ "storage.jdbc": {
+   "driver_class": "com.mysql.jdbc.Driver",
+   "url": "jdbc:mysql://192.168.99.100:3306/ez_test?characterEncoding=UTF-8&autoReconnect=true",
+   "user": "root",
+   "password": "123456"
+ }
+ 
+. 启动服务
+
+ EZManager.start()
+ 
+. 添加一条个人消息
+
+ val startTime = TimeHelper.sf.parse("20160503000000")
+ val endTime = TimeHelper.sf.parse("20160504000000")
+ MessageService.sendToAccount("@sysadmin", "cate1", "0", "msgSysAdmin1", "", startTime, endTime, EZStorageContext())
+
+=== 依赖
+
+服务依赖：auth、storage.mongo或storage.jdbc
+
+环境依赖：redis、mongo或mysql
+
+=== 配置
+
+[source,json]
+----
+"auth": {
+  "customTables": {  <1>
+     "message": "", <2>
+     "message_log": "" <3>
+  },
+  "storage":"mongo" <4>
+}
+----
+<1> 是否使用自定义表名
+<2> 自定义消息表名
+<3> 自定义消息日志表名
+<4> 持久化实现，支持`mongo`或`jdbc`
+
+=== HTTP消息接口调用
+
+==== 根据登录信息获取未读消息条数
+
+*请求*
+
+----
+GET /message/unRead/number/?__ez_token__=<token>
+----
+
+*响应内容主体*
+
+__未读消息条数__
+
+==== 根据登录信息获取未读消息
+
+*请求*
+
+----
+GET /message/unRead/?<markRead=true&>__ez_token__=<token>
+----
+
+NOTE: `markRead=true`时表示获取并标记为已读
+
+*响应内容主体*
+
+[source,json]
+----
+[
+  {
+    "to_account": "", // 个人消息
+    "to_role": "", // 角色消息
+    "category": "", // 类型
+    "level": "", // 级别
+    "template_code": "", // 模板Code
+    "content": "", // 内容
+    "title": "", // 标题
+    "start_time": 0, // 开始时间,yyyyMMddHHmmss
+    "end_time": 0 // 结束时间,yyyyMMddHHmmss
+  },
+  // ...
+]
+----
+
+==== 根据登录信息分页获取已读消息
+
+*请求*
+
+----
+GET /message/read/<当前页，从1开始>/<每页显示条数>/?__ez_token__=<token>
+----
+
+*响应内容主体*
+
+[source,json]
+----
+{
+  "pageNumber":0, // 当前页，从1开始
+  "pageSize":0, // 每页显示条数
+  "pageTotal":0, // 总共页数
+  "recordTotal":0, // 总共记录数
+  "objects":[] // 当前页的实体列表,同`根据登录信息获取未读消息`的响应内容主体
+}
+----
+
+==== 标记消息已读
+
+*请求*
+
+----
+GET /message/<消息ID>/markRead/?__ez_token__=<token>
+----
+
+*响应内容主体*
+
+__是否成功__
+
+==== 保存消息
+
+*请求*
+
+----
+POST /message/?__ez_token__=<token>
+----
+
+body
+
+__同`根据登录信息获取未读消息`的响应内容主体__
+
+*响应内容主体*
+
+__是否成功__
+
+==== 更新消息
+
+*请求*
+
+----
+PUT /message/<消息ID>/?__ez_token__=<token>
+----
+
+body
+
+__同`根据登录信息获取未读消息`的响应内容主体__
+
+*响应内容主体*
+
+__是否成功__
+
+==== 删除消息
+
+*请求*
+
+----
+DELETE /message/<消息ID>/?__ez_token__=<token>
+----
+
+*响应内容主体*
+
+__是否成功__
+
+=== 编码消息接口调用
+
+[source,scala]
+.MessageService
+----
+/**
+  * 使用模板发送公共消息
+  *
+  * @param category     类型
+  * @param level        级别
+  * @param templateCode 模板编码
+  * @param variable     模板变量
+  * @param startTime    开始时间
+  * @param endTime      结束时间
+  * @param context      上下文
+  * @return 是否成功
+  */
+def sendToPublic(category: String, level: String, templateCode: String, variable: Map[String, String],
+                 startTime: Date, endTime: Date, context: EZStorageContext): Resp[Void]
+
+/**
+  * 使用模板发送个人消息
+  *
+  * @param accountCode  账号编码
+  * @param category     类型
+  * @param level        级别
+  * @param templateCode 模板编码
+  * @param variable     模板变量
+  * @param startTime    开始时间
+  * @param endTime      结束时间
+  * @param context      上下文
+  * @return 是否成功
+  */
+def sendToAccount(accountCode: String, category: String, level: String, templateCode: String, variable: Map[String, String],
+                  startTime: Date, endTime: Date, context: EZStorageContext): Resp[Void]
+
+/**
+  * 使用模板发送角色消息
+  *
+  * @param roleCode     角色编码
+  * @param category     类型
+  * @param level        级别
+  * @param templateCode 模板编码
+  * @param variable     模板变量
+  * @param startTime    开始时间
+  * @param endTime      结束时间
+  * @param context      上下文
+  * @return 是否成功
+  */
+def sendToRole(roleCode: String, category: String, level: String, templateCode: String, variable: Map[String, String],
+               startTime: Date, endTime: Date, context: EZStorageContext): Resp[Void]
+
+/**
+  * 发送公共消息
+  *
+  * @param category  类型
+  * @param level     级别
+  * @param content   内容
+  * @param title     标题
+  * @param startTime 开始时间
+  * @param endTime   结束时间
+  * @param context   上下文
+  * @return 是否成功
+  */
+def sendToPublic(category: String, level: String, content: String, title: String,
+                 startTime: Date, endTime: Date, context: EZStorageContext): Resp[Void]
+
+/**
+  * 发送个人消息
+  *
+  * @param accountCode 账号编码
+  * @param category    类型
+  * @param level       级别
+  * @param content     内容
+  * @param title       标题
+  * @param startTime   开始时间
+  * @param endTime     结束时间
+  * @param context     上下文
+  * @return 是否成功
+  */
+def sendToAccount(accountCode: String, category: String, level: String, content: String, title: String,
+                  startTime: Date, endTime: Date, context: EZStorageContext): Resp[Void]
+
+/**
+  * 发送角色消息
+  *
+  * @param roleCode  角色编码
+  * @param category  类型
+  * @param level     级别
+  * @param content   内容
+  * @param title     标题
+  * @param startTime 开始时间
+  * @param endTime   结束时间
+  * @param context   上下文
+  * @return 是否成功
+  */
+def sendToRole(roleCode: String, category: String, level: String, content: String, title: String,
+               startTime: Date, endTime: Date, context: EZStorageContext): Resp[Void]
+----

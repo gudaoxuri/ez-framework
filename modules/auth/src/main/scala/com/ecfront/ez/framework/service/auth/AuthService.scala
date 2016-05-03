@@ -42,7 +42,6 @@ object AuthService extends LazyLogging {
   def doLogin(loginIdOrEmail: String, password: String, organizationCode: String, captchaText: String, context: EZAuthContext): Resp[Token_Info_VO] = {
     val accountLoginIdOrEmailAndOrg = loginIdOrEmail + "@" + organizationCode
     val errorTimes = CacheManager.getLoginErrorTimes(accountLoginIdOrEmailAndOrg)
-    //
     if (errorTimes < ServiceAdapter.loginLimit_showCaptcha
       || (captchaText.nonEmpty
       && errorTimes >= ServiceAdapter.loginLimit_showCaptcha

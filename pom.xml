@@ -36,6 +36,7 @@
         <module>modules/auth</module>
         <module>modules/oauth2</module>
         <module>modules/scheduler</module>
+        <module>modules/message</module>
         <module>modules/kafka</module>
         <module>modules/master-slave</module>
         <module>examples</module>

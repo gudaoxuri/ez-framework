@@ -51,6 +51,7 @@ object CacheManager {
     removeToken(account.code)
     val newTokenInfo = Token_Info_VO(
       UUID.randomUUID().toString,
+      EZ_Account.assembleCode(account.login_id,account.organization_code),
       account.login_id,
       account.name,
       account.email,
@@ -87,6 +88,7 @@ object CacheManager {
     if (token != null) {
       val newTokenInfo = Token_Info_VO(
         token,
+        EZ_Account.assembleCode(account.login_id,account.organization_code),
         account.login_id,
         account.name,
         account.email,
