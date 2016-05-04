@@ -28,8 +28,8 @@ object AuthService extends LazyLogging {
       if (id != "" && password != "") {
         doLogin(id, password, organizationCode, captchaText, context)
       } else {
-        logger.warn(s"[login] missing required field : 【id】or 【password】from ${context.remoteIP}")
-        Resp.badRequest(s"Missing required field : 【id】or 【password】")
+        logger.warn(s"[login] missing required field : 【id】or【password】from ${context.remoteIP}")
+        Resp.badRequest(s"Missing required field : 【id】or【password】")
       }
     } else {
       Resp.notImplemented("Custom login enabled")
@@ -80,7 +80,7 @@ object AuthService extends LazyLogging {
     } else {
       createCaptcha(accountLoginIdOrEmailAndOrg)
       logger.warn(s"[login] captcha not match by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
-      Resp.conflict(s"【captcha】 not match")
+      Resp.conflict(s"【captcha】not match")
     }
   }
 

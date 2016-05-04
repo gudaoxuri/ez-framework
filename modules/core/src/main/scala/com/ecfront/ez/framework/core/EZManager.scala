@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.core
 
 import com.ecfront.common.{JsonHelper, Resp}
+import com.ecfront.ez.framework.core.i18n.I18NProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core._
 import io.vertx.core.json.JsonObject
@@ -74,6 +75,9 @@ object EZManager extends LazyLogging {
         }
       val jsonConfig = new JsonObject(finalConfigContent)
       val ezConfig = JsonHelper.toObject(jsonConfig.encode(), classOf[EZConfig])
+      if (ezConfig.ez.language == null) {
+        ezConfig.ez.language = "en"
+      }
       if (ezConfig.ez.perf == null) {
         ezConfig.ez.perf = collection.mutable.Map[String, Any]()
       }
@@ -187,6 +191,7 @@ object EZManager extends LazyLogging {
       EZContext.app = ezConfig.ez.app
       EZContext.perf = ezConfig.ez.perf.toMap
       EZContext.module = ezConfig.ez.module
+      EZContext.language = ezConfig.ez.language
       EZContext.args = new JsonObject(JsonHelper.toJsonString(ezConfig.args))
       ezServiceConfig = ezConfig.ez.services
       logger.info("\r\n=== Discover Services ...")
@@ -220,6 +225,7 @@ object EZManager extends LazyLogging {
           }
           if (isSuccess) {
             ezServices.foreach(_.initPost())
+            I18NProcessor.init()
             logSuccess("Start Success")
           } else {
             logError(s"Start Fail : $message")

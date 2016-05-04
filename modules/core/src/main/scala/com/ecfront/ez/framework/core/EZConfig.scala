@@ -14,6 +14,8 @@ case class EZInfo(
                    app: String,
                    // 模块名称
                    module: String,
+                   // 语言
+                   var language: String,
                    // 性能设置
                    var perf: collection.mutable.Map[String, Any],
                    // 服务配置项

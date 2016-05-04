@@ -52,7 +52,7 @@ object AuthHttpInterceptor extends HttpInterceptor {
                                 p.success(authContext)
                               } else {
                                 p.unAuthorized(s"Account【${tokenInfo.name}】in【${tokenInfo.organization_code}】" +
-                                  s" no access to ${authContext.method}:${authContext.realUri}】")
+                                  s" no access to ${authContext.method}:${authContext.realUri}")
                               }
                           }
                         } else {

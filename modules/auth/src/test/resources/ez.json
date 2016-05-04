@@ -2,6 +2,7 @@
   "ez": {
     "app": "ez-framework",
     "module": "",
+    "language": "zh-CN",
     "perf": {
       "eventLoopPoolSize": 2,
       "workerPoolSize": 200,
