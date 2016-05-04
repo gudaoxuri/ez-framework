@@ -1,12 +1,13 @@
 package com.ecfront.ez.framework.core
 
+import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 
 /**
   * EZ容器，用于放置全局属性
   */
-object EZContext {
+object EZContext extends LazyLogging {
 
   // APP名称，来自配置文件
   var app: String = _
@@ -35,6 +36,7 @@ object EZContext {
         confPath = currentPath + "/config/"
       }
     }
+    logger.info(s"Config path is : $confPath")
     confPath
   }
 

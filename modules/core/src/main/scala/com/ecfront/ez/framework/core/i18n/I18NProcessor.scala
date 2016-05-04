@@ -5,21 +5,25 @@ import java.util.regex.Pattern
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZContext
+import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.io.Source
 
 /**
   * I18N处理器
   */
-object I18NProcessor {
+object I18NProcessor extends LazyLogging{
 
   // 正则信息 -> 语言 -> 翻译后的信息
   private val i18nInfo = collection.mutable.Map[Pattern, Map[String, String]]()
 
   def init(): Unit = {
+    logger.info("Init i18n processor")
     load()
     if (i18nInfo.nonEmpty) {
       Resp.customInit = process
+    }else{
+      logger.info("i18n function disabled")
     }
   }
 
@@ -31,7 +35,7 @@ object I18NProcessor {
     if (i18nPath.exists()) {
       i18nPath.listFiles().foreach {
         file =>
-          val lines = Source.fromFile(file).getLines().toList
+          val lines = Source.fromFile(file,"UTF-8").getLines().toList
           val head = lines.head
           val languages = head.split('\t').toList.tail.zipWithIndex
           lines.tail.filter(!_.startsWith("#")).foreach {
