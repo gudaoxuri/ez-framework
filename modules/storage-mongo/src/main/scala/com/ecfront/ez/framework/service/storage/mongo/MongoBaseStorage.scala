@@ -160,7 +160,12 @@ trait MongoBaseStorage[M <: BaseModel] extends BaseStorage[M] {
     if (condition == null || condition.trim == "") {
       new JsonObject("{}")
     } else {
-      new JsonObject(condition)
+      val cond=new JsonObject(condition)
+      if(cond.containsKey("id")){
+        cond.put("_id",cond.getValue("id"))
+        cond.remove("id")
+      }
+      cond
     }
   }
 

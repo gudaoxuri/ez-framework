@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.service.storage.mongo
 
-import com.ecfront.common.{BeanHelper, FieldAnnotationInfo}
+import com.ecfront.common.{BeanHelper, FieldAnnotationInfo, Ignore}
 import com.ecfront.ez.framework.service.storage.foundation.{BaseEntityContainer, BaseEntityInfo}
 
 import scala.beans.BeanProperty
@@ -8,14 +8,16 @@ import scala.beans.BeanProperty
 private[mongo] object MongoEntityContainer extends BaseEntityContainer[MongoEntityInfo] {
 
   override def buildingEntityInfo(model: MongoEntityInfo, clazz: Class[_], allAnnotations: List[FieldAnnotationInfo]): Unit = {
-    model.persistentFields = (
-      BeanHelper.findFieldAnnotations(
-        clazz,
-        Seq(classOf[BeanProperty])).map(_.fieldName).toSet -- Set("_modelClazz", "tableName")
-      ).toList
+    model.ignoreFieldNames = BeanHelper.findFields(clazz, filterAnnotations = Seq()).filter {
+      field =>
+        allAnnotations.filter(_.fieldName == field._1).exists {
+          ann =>
+            ann.annotation.getClass == classOf[Ignore]
+        }
+    }.keys.toList
   }
 }
 
 case class MongoEntityInfo() extends BaseEntityInfo() {
-  var persistentFields: List[String] = _
+  var ignoreFieldNames: List[String] = _
 }

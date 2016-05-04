@@ -31,7 +31,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
 
   override def handle(request: HttpServerRequest): Unit = {
     if (request.method().name() == "OPTIONS") {
-      returnContent("", request.response(), "text/html", "text/html")
+      returnContent(request.response(), "text/html", "text/html")
     } else if (request.path() != "/favicon.ico") {
       val ip =
         if (request.headers().contains("X-Forwarded-For") && request.getHeader("X-Forwarded-For").nonEmpty) {

@@ -9,6 +9,7 @@ import scala.collection.JavaConversions._
 private[mongo] object MongoExecutor {
 
   def save[M](entityInfo: MongoEntityInfo, collection: String, save: JsonObject, clazz: Class[M]): Resp[M] = {
+    entityInfo.ignoreFieldNames.foreach(save.remove)
     if (entityInfo.uniqueFieldNames.nonEmpty && (entityInfo.uniqueFieldNames.toSet & save.fieldNames().toSet).nonEmpty) {
       val existQuery = new JsonArray()
       entityInfo.uniqueFieldNames.filter(save.containsKey).foreach {
@@ -48,6 +49,7 @@ private[mongo] object MongoExecutor {
   }
 
   def update[M](entityInfo: MongoEntityInfo, collection: String, id: String, update: JsonObject, clazz: Class[M]): Resp[M] = {
+    entityInfo.ignoreFieldNames.foreach(update.remove)
     if (!update.isEmpty) {
       if (update.containsKey(SecureModel.CREATE_TIME_FLAG)) {
         update.remove(SecureModel.CREATE_TIME_FLAG)

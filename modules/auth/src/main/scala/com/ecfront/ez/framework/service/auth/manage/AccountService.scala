@@ -81,9 +81,9 @@ object AccountService extends SimpleHTTPService[EZ_Account, EZAuthContext] {
   @GET("/public/active/account/:encryption/")
   def activeNewAccount(parameter: Map[String, String], context: EZAuthContext): Resp[RespRedirect] = {
     val encryption = parameter("encryption")
-    val codeR = CacheManager.getAndRemoveActiveAccount(encryption)
-    if (codeR && codeR.body != null) {
-      val accountR = EZ_Account.getByCode(codeR.body)
+    val code = CacheManager.getAndRemoveActiveAccount(encryption)
+    if (code != null) {
+      val accountR = EZ_Account.getByCode(code)
       if (accountR && accountR.body != null) {
         accountR.body.exchange_pwd = accountR.body.password
         accountR.body.enable = true

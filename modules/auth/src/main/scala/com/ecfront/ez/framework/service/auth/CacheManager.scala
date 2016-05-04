@@ -51,7 +51,7 @@ object CacheManager {
     removeToken(account.code)
     val newTokenInfo = Token_Info_VO(
       UUID.randomUUID().toString,
-      EZ_Account.assembleCode(account.login_id,account.organization_code),
+      EZ_Account.assembleCode(account.login_id, account.organization_code),
       account.login_id,
       account.name,
       account.email,
@@ -88,7 +88,7 @@ object CacheManager {
     if (token != null) {
       val newTokenInfo = Token_Info_VO(
         token,
-        EZ_Account.assembleCode(account.login_id,account.organization_code),
+        EZ_Account.assembleCode(account.login_id, account.organization_code),
         account.login_id,
         account.name,
         account.email,
@@ -193,24 +193,28 @@ object CacheManager {
     p.future
   }
 
-  def addActiveAccount(encryption: String, accountCode: String): Resp[Void] = {
+  def addActiveAccount(encryption: String, accountCode: String): Unit = {
     RedisProcessor.set(ACTIVE_ACCOUNT_FLAG + encryption.hashCode, accountCode, ServiceAdapter.activeKeepSeconds)
   }
 
-  def getAndRemoveActiveAccount(encryption: String): Resp[String] = {
-    val resp = RedisProcessor.get(ACTIVE_ACCOUNT_FLAG + encryption.hashCode + "")
-    RedisProcessor.del(ACTIVE_ACCOUNT_FLAG + encryption.hashCode + "")
-    resp
+  def getAndRemoveActiveAccount(encryption: String): String = {
+    val resp = RedisProcessor.get(ACTIVE_ACCOUNT_FLAG + encryption.hashCode)
+    RedisProcessor.del(ACTIVE_ACCOUNT_FLAG + encryption.hashCode)
+    if (resp && resp.body != null) {
+      resp.body.asInstanceOf[String]
+    } else {
+      null
+    }
   }
 
-  def addActiveNewPassword(encryption: String, accountCode: String, newPassword: String): Resp[Void] = {
+  def addActiveNewPassword(encryption: String, accountCode: String, newPassword: String): Unit = {
     RedisProcessor.set(ACTIVE_FIND_PASSWORD_FLAG + encryption.hashCode, accountCode, ServiceAdapter.activeKeepSeconds)
     RedisProcessor.set(ACTIVE_NEW_PASSWORD_FLAG + accountCode, newPassword, ServiceAdapter.activeKeepSeconds)
   }
 
   def getAndRemoveNewPassword(encryption: String): Resp[(String, String)] = {
-    val accountCodeR = RedisProcessor.get(ACTIVE_FIND_PASSWORD_FLAG + encryption.hashCode + "")
-    RedisProcessor.del(ACTIVE_FIND_PASSWORD_FLAG + encryption.hashCode + "")
+    val accountCodeR = RedisProcessor.get(ACTIVE_FIND_PASSWORD_FLAG + encryption.hashCode)
+    RedisProcessor.del(ACTIVE_FIND_PASSWORD_FLAG + encryption.hashCode)
     if (accountCodeR && accountCodeR.body != null) {
       val newPasswordR = RedisProcessor.get(ACTIVE_NEW_PASSWORD_FLAG + accountCodeR.body)
       RedisProcessor.del(ACTIVE_NEW_PASSWORD_FLAG + accountCodeR.body)
