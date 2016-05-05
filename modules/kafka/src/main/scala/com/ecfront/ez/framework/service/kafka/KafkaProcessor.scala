@@ -75,7 +75,20 @@ object KafkaProcessor extends LazyLogging {
     def send(message: String): Unit = {
       val id = UUID.randomUUID().toString
       logger.trace(s"Kafka topic [$topic] send a message : $message")
-      producer.send(new ProducerRecord[String, String](topic, id, message))
+      producer.send(new ProducerRecord[String, String](topic, id, message), new Callback {
+        override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {
+          if (exception != null) {
+            logger.warn(s"Kafka topic [$topic] send a warn message : $message , retry once", exception)
+            producer.send(new ProducerRecord[String, String](topic, id, message), new Callback {
+              override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {
+                if (exception != null) {
+                  logger.error(s"Kafka topic [$topic] send a error message : $message", exception)
+                }
+              }
+            })
+          }
+        }
+      })
     }
 
     /**

@@ -103,6 +103,7 @@ NOTE: `markRead=true`时表示获取并标记为已读
 ----
 [
   {
+    "id": "", // 消息Id
     "to_account": "", // 个人消息
     "to_role": "", // 角色消息
     "category": "", // 类型
