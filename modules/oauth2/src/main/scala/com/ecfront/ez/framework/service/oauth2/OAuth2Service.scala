@@ -7,6 +7,7 @@ import com.ecfront.ez.framework.service.auth._
 import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Role}
 import com.ecfront.ez.framework.service.rpc.foundation.{GET, RPC, RespRedirect}
 import com.ecfront.ez.framework.service.rpc.http.HTTP
+import com.ecfront.ez.framework.service.storage.foundation.BaseModel
 import io.vertx.core.json.JsonObject
 
 import scala.collection.JavaConversions._
@@ -49,7 +50,7 @@ object OAuth2Service {
             oauthAccount.email = oauthAccount.oauth(appName) + "." + appName + EZ_Account.VIRTUAL_EMAIL
             oauthAccount.password = UUID.randomUUID().toString
             oauthAccount.organization_code = com.ecfront.ez.framework.service.auth.ServiceAdapter.defaultOrganizationCode
-            oauthAccount.role_codes = List(EZ_Role.USER_ROLE_FLAG)
+            oauthAccount.role_codes = List(oauthAccount.organization_code + BaseModel.SPLIT + EZ_Role.USER_ROLE_FLAG)
             oauthAccount.enable = true
             val loginInfo = CacheManager.addTokenInfo(EZ_Account.save(oauthAccount).body)
             Resp.success(RespRedirect(ServiceAdapter.successUrl + "?" + AuthService.VIEW_TOKEN_FLAG + "=" + loginInfo.body.token))
