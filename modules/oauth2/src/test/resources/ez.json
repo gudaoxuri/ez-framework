@@ -7,7 +7,8 @@
         "weixin_mp": {
           "appId": "wx7b758a31f520f4bb",
           "secret": "097c19f1cc0895a346b6f0de5e347165"
-        }
+        },
+        "successUrl":"http://5604e291.all123.net/"
       },
       "auth": {},
       "rpc.http": {

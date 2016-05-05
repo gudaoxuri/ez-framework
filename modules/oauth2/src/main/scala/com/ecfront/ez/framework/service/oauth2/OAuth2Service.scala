@@ -15,8 +15,6 @@ import scala.collection.JavaConversions._
 @HTTP
 object OAuth2Service {
 
-  private val indexUrl = com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.webUrl
-
   @GET("code/:app/")
   def login(parameter: Map[String, String], context: EZAuthContext): Resp[RespRedirect] = {
     val appName = parameter("app")
@@ -43,7 +41,7 @@ object OAuth2Service {
           if (accountR.body != null) {
             if (accountR.body.enable) {
               val loginInfo = CacheManager.addTokenInfo(accountR.body)
-              Resp.success(RespRedirect(indexUrl + "?" + AuthService.VIEW_TOKEN_FLAG + "=" + loginInfo.body.token))
+              Resp.success(RespRedirect(ServiceAdapter.successUrl + "?" + AuthService.VIEW_TOKEN_FLAG + "=" + loginInfo.body.token))
             } else {
               Resp.badRequest(s"Account 【${accountR.body.name}】disabled")
             }
@@ -55,7 +53,7 @@ object OAuth2Service {
             oauthAccount.role_codes = List(EZ_Role.USER_ROLE_FLAG)
             oauthAccount.enable = true
             val loginInfo = CacheManager.addTokenInfo(EZ_Account.save(oauthAccount).body)
-            Resp.success(RespRedirect(indexUrl + "?" + AuthService.VIEW_TOKEN_FLAG + "=" + loginInfo.body.token))
+            Resp.success(RespRedirect(ServiceAdapter.successUrl + "?" + AuthService.VIEW_TOKEN_FLAG + "=" + loginInfo.body.token))
           }
         } else {
           oauthAccountR

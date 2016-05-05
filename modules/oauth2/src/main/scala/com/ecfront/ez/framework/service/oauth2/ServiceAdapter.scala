@@ -8,7 +8,10 @@ import io.vertx.core.json.JsonObject
 
 object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
+  var successUrl: String = _
+
   override def init(parameter: JsonObject): Resp[String] = {
+    successUrl = parameter.getString("successUrl", com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.webUrl)
     AutoBuildingProcessor.autoBuilding[HTTP]("com.ecfront.ez.framework.service.oauth2", classOf[HTTP])
     OAuth2Service.init(parameter)
     Resp.success("")
