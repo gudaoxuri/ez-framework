@@ -36,7 +36,6 @@ object OAuth2Service {
         val oauthAccountR = processor.fetchAccount(getTokenR.body)
         if (oauthAccountR) {
           val oauthAccount = oauthAccountR.body
-          // TODO 支持其他组织
           val accountR = EZ_Account.getByOAuth(appName, oauthAccount.oauth(appName), "")
           if (accountR.body != null) {
             if (accountR.body.enable) {
@@ -46,10 +45,10 @@ object OAuth2Service {
               Resp.badRequest(s"Account 【${accountR.body.name}】disabled")
             }
           } else {
-            oauthAccount.login_id = oauthAccount.oauth(appName) + "@" + appName
-            oauthAccount.email = oauthAccount.oauth(appName) + "@" + appName + EZ_Account.VIRTUAL_EMAIL
+            oauthAccount.login_id = oauthAccount.oauth(appName) + "." + appName
+            oauthAccount.email = oauthAccount.oauth(appName) + "." + appName + EZ_Account.VIRTUAL_EMAIL
             oauthAccount.password = UUID.randomUUID().toString
-            oauthAccount.organization_code = ""
+            oauthAccount.organization_code = com.ecfront.ez.framework.service.auth.ServiceAdapter.defaultOrganizationCode
             oauthAccount.role_codes = List(EZ_Role.USER_ROLE_FLAG)
             oauthAccount.enable = true
             val loginInfo = CacheManager.addTokenInfo(EZ_Account.save(oauthAccount).body)
@@ -67,7 +66,7 @@ object OAuth2Service {
   }
 
   def init(oauth2Config: JsonObject): Unit = {
-    oauth2Config.iterator().foreach {
+    oauth2Config.getJsonObject("platform").iterator().foreach {
       item =>
         getAppProcessor(item.getKey).init(item.getValue.asInstanceOf[JsonObject])
     }

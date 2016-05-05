@@ -132,8 +132,8 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
       Resp.badRequest("Require【Login_id】【password】【email】")
     } else {
       // 当账号不是oauth类型且登录ld包含@时，拒绝保存
-      if ((model.oauth == null || model.oauth.isEmpty) && model.login_id.contains(BaseModel.SPLIT)) {
-        Resp.badRequest(s"【login id】can't contains ${BaseModel.SPLIT}")
+      if ((model.oauth == null || model.oauth.isEmpty) && (model.login_id.contains(BaseModel.SPLIT) || model.login_id.contains("."))) {
+        Resp.badRequest(s"【login id】can't contains ${BaseModel.SPLIT} .")
       } else {
         if (FormatHelper.validEmail(model.email)) {
           if (model.exchange_pwd != null && model.exchange_pwd.trim.nonEmpty) {
