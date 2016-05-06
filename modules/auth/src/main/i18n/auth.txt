@@ -26,4 +26,4 @@ Organization disabled	Organization disabled	组织已禁用
 【condition】not null	【condition】not null	【条件】不能为空
 【id】not null	【id】not null	【id】不能为空
 \[(?<fields>.*)\] not null	[${fields}] not null	[${fields}] 不能为空
-\[(?<fields>.*)\] must be unique	[${fields}] must be unique	[${fields}] 不能为空
+\[(?<fields>.*)\] must be unique	[${fields}] must be unique	[${fields}] 不能重复
