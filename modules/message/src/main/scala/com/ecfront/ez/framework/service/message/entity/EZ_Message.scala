@@ -112,7 +112,7 @@ object EZ_Message_JDBC extends JDBCSecureStorage[EZ_Message] with EZ_Message_Bas
          | LEFT JOIN ${EZ_Message_Log.tableName} log ON msg.id = log.message_id AND log.read_account_code = ?
          | WHERE
          |  ((msg.to_account = ? OR msg.to_role IN (${roleCodes.map(_ => "?").mkString(",")})) OR (msg.to_account = '' AND msg.to_role =''))
-         |   AND start_time <= ? AND end_time >= ? AND log.id IS NULL
+         |   AND msg.start_time <= ? AND msg.end_time >= ? AND log.id IS NULL ORDER BY msg.update_time DESC
        """.stripMargin, accountCode :: accountCode :: roleCodes ++ List(now, now), classOf[EZ_Message])
     if (markRead) {
       result.body.foreach {
@@ -131,7 +131,7 @@ object EZ_Message_JDBC extends JDBCSecureStorage[EZ_Message] with EZ_Message_Bas
          | LEFT JOIN ${EZ_Message_Log.tableName} log ON msg.id = log.message_id AND log.read_account_code = ?
          | WHERE
          |  ((msg.to_account = ? OR msg.to_role IN (${roleCodes.map(_ => "?").mkString(",")})) OR (msg.to_account = '' AND msg.to_role =''))
-         |   AND start_time <= ? AND end_time >= ? AND log.id IS NULL
+         |   AND msg.start_time <= ? AND msg.end_time >= ? AND log.id IS NULL ORDER BY msg.update_time DESC
        """.stripMargin, accountCode :: accountCode :: roleCodes ++ List(now, now))
   }
 
@@ -144,7 +144,7 @@ object EZ_Message_JDBC extends JDBCSecureStorage[EZ_Message] with EZ_Message_Bas
          | LEFT JOIN ${EZ_Message_Log.tableName} log ON msg.id = log.message_id AND log.read_account_code = ?
          | WHERE
          |  ((msg.to_account = ? OR msg.to_role IN (${roleCodes.map(_ => "?").mkString(",")})) OR (msg.to_account = '' AND msg.to_role =''))
-         |   AND start_time <= ? AND end_time >= ? AND log.id IS NOT NULL
+         |   AND msg.start_time <= ? AND msg.end_time >= ? AND log.id IS NOT NULL ORDER BY msg.update_time DESC
        """.stripMargin, accountCode :: accountCode :: roleCodes ++ List(now, now), pageNumber, pageSize, classOf[EZ_Message])
   }
 
