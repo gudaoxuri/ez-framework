@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.service.rpc.foundation.scaffold
 
 import java.lang.reflect.ParameterizedType
+import java.util.regex.Pattern
 
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.service.rpc.foundation._
@@ -54,7 +55,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
     } else {
       logger.trace(s" RPC simple update : $body")
       val model = JsonHelper.toObject(body, modelClazz)
-      model.id=parameter("id")
+      model.id = parameter("id")
       storageObj.update(model, context.toStorageContext)
     }
   }
@@ -70,8 +71,12 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
   def rpcFindEnable(parameter: Map[String, String], context: C): Resp[List[M]] = {
     logger.trace(s" RPC simple find enable : $parameter")
     if (classOf[StatusModel].isAssignableFrom(modelClazz)) {
-      val condition = if (parameter.contains("condition")) parameter("condition") else ""
-      storageObj.asInstanceOf[StatusStorage[_]].findEnabled(condition, List(), context.toStorageContext)
+      val conditionR = if (parameter.contains("condition")) conditionCheck(parameter("condition")) else Resp.success("")
+      if (conditionR) {
+        storageObj.asInstanceOf[StatusStorage[_]].findEnabled(conditionR.body, List(), context.toStorageContext)
+      } else {
+        conditionR
+      }
     } else {
       Resp.notImplemented("")
     }
@@ -87,8 +92,12 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
   @GET("")
   def rpcFind(parameter: Map[String, String], context: C): Resp[List[M]] = {
     logger.trace(s" RPC simple find : $parameter")
-    val condition = if (parameter.contains("condition")) parameter("condition") else ""
-    storageObj.find(condition, List(), context.toStorageContext)
+    val conditionR = if (parameter.contains("condition")) conditionCheck(parameter("condition")) else Resp.success("")
+    if (conditionR) {
+      storageObj.find(conditionR.body, List(), context.toStorageContext)
+    } else {
+      conditionR
+    }
   }
 
   /**
@@ -104,10 +113,14 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
   @GET("page/:pageNumber/:pageSize/")
   def rpcPage(parameter: Map[String, String], context: C): Resp[Page[M]] = {
     logger.trace(s" RPC simple page : $parameter")
-    val condition = if (parameter.contains("condition")) parameter("condition") else ""
     val pageNumber = if (parameter.contains("pageNumber")) parameter("pageNumber").toLong else 1L
     val pageSize = if (parameter.contains("pageSize")) parameter("pageSize").toInt else DEFAULT_PAGE_SIZE
-    storageObj.page(condition, List(), pageNumber, pageSize, context.toStorageContext)
+    val conditionR = if (parameter.contains("condition")) conditionCheck(parameter("condition")) else Resp.success("")
+    if (conditionR) {
+      storageObj.page(conditionR.body, List(), pageNumber, pageSize, context.toStorageContext)
+    } else {
+      conditionR
+    }
   }
 
   /**
@@ -187,6 +200,17 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
       } else {
         Resp.notImplemented("")
       }
+    }
+  }
+
+  private val reg = "(?:;)|(?:--)|(/\\*(?:.|[\\n\\r])*?\\*/)|(\\b(select|update|or|delete|insert|trancate|char|into|substr|ascii|declare|exec|count|master|into|drop|execute)\\b)"
+  private val sqlPattern = Pattern.compile(reg, Pattern.CASE_INSENSITIVE)
+
+  def conditionCheck(condition: String): Resp[String] = {
+    if (sqlPattern.matcher(condition).find()) {
+      Resp.badRequest("condition illegal")
+    } else {
+      Resp.success(condition)
     }
   }
 

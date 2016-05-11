@@ -124,29 +124,37 @@ trait SimpleHTTPService[M <: BaseModel, C <: EZRPCContext] extends SimpleRPCServ
   def rpcExport(parameter: Map[String, String], context: C): Resp[File] = {
     logger.trace(s" RPC simple export : $parameter")
     if (allowExport) {
-      val condition = if (parameter.contains("condition")) parameter("condition") else ""
-      val res = storageObj.find(condition, List(), context.toStorageContext)
-      var file: File = null
-      var bw: BufferedWriter = null
-      try {
-        file = File.createTempFile("export", ".csv")
-        file.deleteOnExit()
-        bw = new BufferedWriter(new FileWriter(file, true))
-        bw.write(allowExportFields.mkString(",") + "\r\n")
-        val lines = JsonHelper.toJson(res.body).iterator()
-        while (lines.hasNext) {
-          val line = lines.next()
-          bw.write(allowExportFields.map {
-            f =>
-              line.get(f).asText()
-          }.mkString(",") + "\r\n")
-        }
-        bw.close()
-        Resp.success(file)
-      } catch {
-        case e: Throwable =>
+      val conditionR = if (parameter.contains("condition")){
+        conditionCheck(parameter("condition"))
+      } else{
+        Resp.success("")
+      }
+      if (conditionR) {
+        val res = storageObj.find(conditionR.body, List(), context.toStorageContext)
+        var file: File = null
+        var bw: BufferedWriter = null
+        try {
+          file = File.createTempFile("export", ".csv")
+          file.deleteOnExit()
+          bw = new BufferedWriter(new FileWriter(file, true))
+          bw.write(allowExportFields.mkString(",") + "\r\n")
+          val lines = JsonHelper.toJson(res.body).iterator()
+          while (lines.hasNext) {
+            val line = lines.next()
+            bw.write(allowExportFields.map {
+              f =>
+                line.get(f).asText()
+            }.mkString(",") + "\r\n")
+          }
           bw.close()
-          Resp.serverError(s"File create error : ${e.getMessage}")
+          Resp.success(file)
+        } catch {
+          case e: Throwable =>
+            bw.close()
+            Resp.serverError(s"File create error : ${e.getMessage}")
+        }
+      } else {
+        conditionR
       }
     } else {
       Resp.notImplemented("")
