@@ -2,9 +2,11 @@ package com.ecfront.ez.framework.service.rpc.http
 
 import java.io.File
 import java.net.URLDecoder
+import java.nio.file.Files
 
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.EZContext
+import com.ecfront.ez.framework.core.helper.FileType
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
 import com.ecfront.ez.framework.service.rpc.foundation._
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -175,10 +177,16 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
   private def returnContent(result: Any, response: HttpServerResponse, accept: String, contentType: String): Unit = {
     result match {
       case r: Resp[_] if r && r.body.isInstanceOf[File] =>
-        // 资源下载
         val file = r.body.asInstanceOf[File]
+        val fileType = Files.probeContentType(file.toPath)
+        if (FileType.TYPE_IMAGE.contains(fileType)) {
+          // 显示图片
+          response.putHeader("Content-Transfer-Encoding", "binary")
+        } else {
+          // 资源下载
+          response.putHeader("Content-disposition", "attachment; filename=" + file.getName)
+        }
         response.setStatusCode(HTTP_STATUS_200)
-          .putHeader("Content-disposition", "attachment; filename=" + file.getName)
         response.sendFile(file.getPath)
       case r: Resp[_] if r && r.body.isInstanceOf[RespRedirect] =>
         // 重定向
