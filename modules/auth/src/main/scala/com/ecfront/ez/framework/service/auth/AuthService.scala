@@ -80,7 +80,7 @@ object AuthService extends LazyLogging {
     } else {
       createCaptcha(accountLoginIdOrEmailAndOrg)
       logger.warn(s"[login] captcha not match by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
-      Resp.conflict(s"【captcha】not match")
+      Resp.forbidden(s"【captcha】not match")
     }
   }
 
