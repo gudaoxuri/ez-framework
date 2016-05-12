@@ -177,11 +177,12 @@ _分布式服务本身没有配置项_
 ==== 分布式消息队列
 
 [source,scala]
-.DTopicService[M](key: String) <1>
+.DMQService[M](key: String) <1>
 ----
   def publish(message: M) // 发布消息
   def subscribe(fun: => M => Unit) // 订阅消息
   def subscribeOneNode(fun: => M => Unit) // 订阅消息，一条消息只由一个节点处理
+  def send(message: M) // 发送消息(point to point)
+  def receive(fun: => M => Unit) // 接收消息(point to point)
 ----
 <1> key 消息队列名,M 消息队列项的类型
-

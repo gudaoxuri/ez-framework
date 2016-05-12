@@ -4,7 +4,7 @@ import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZServiceAdapter
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
 import com.ecfront.ez.framework.service.auth.model._
-import com.ecfront.ez.framework.service.distributed.DTopicService
+import com.ecfront.ez.framework.service.distributed.DMQService
 import com.ecfront.ez.framework.service.rpc.foundation.AutoBuildingProcessor
 import com.ecfront.ez.framework.service.rpc.http.{HTTP, HttpInterceptor}
 import io.vertx.core.json.JsonObject
@@ -18,11 +18,11 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   private val EZ_EVENT_LOGOUT: String = "ez.event.logout"
 
   // 组织初始化事件
-  var ezEvent_organizationInit: DTopicService[String] = _
+  var ezEvent_organizationInit: DMQService[String] = _
   // 登录成功事件
-  var ezEvent_loginSuccess: DTopicService[Token_Info_VO] = _
+  var ezEvent_loginSuccess: DMQService[Token_Info_VO] = _
   // 注销事件
-  var ezEvent_logout: DTopicService[Token_Info_VO] = _
+  var ezEvent_logout: DMQService[Token_Info_VO] = _
 
   var publicUriPrefix: String = _
   var allowRegister: Boolean = _
@@ -76,9 +76,9 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     EZAsyncInterceptorProcessor.register(HttpInterceptor.category, AuthHttpInterceptor)
     AutoBuildingProcessor.autoBuilding[HTTP]("com.ecfront.ez.framework.service.auth", classOf[HTTP])
 
-    ezEvent_organizationInit = DTopicService[String](ServiceAdapter.EZ_EVENT_ORGANIZATION_INIT)
-    ezEvent_loginSuccess = DTopicService[Token_Info_VO](ServiceAdapter.EZ_EVENT_LOGIN_SUCCESS)
-    ezEvent_logout = DTopicService[Token_Info_VO](ServiceAdapter.EZ_EVENT_LOGOUT)
+    ezEvent_organizationInit = DMQService[String](ServiceAdapter.EZ_EVENT_ORGANIZATION_INIT)
+    ezEvent_loginSuccess = DMQService[Token_Info_VO](ServiceAdapter.EZ_EVENT_LOGIN_SUCCESS)
+    ezEvent_logout = DMQService[Token_Info_VO](ServiceAdapter.EZ_EVENT_LOGOUT)
 
     Initiator.init()
     Resp.success("")

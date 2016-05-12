@@ -1,5 +1,7 @@
 package com.ecfront.ez.framework.service.distributed
 
+import java.util.concurrent.CountDownLatch
+
 import com.ecfront.ez.framework.core.test.MockStartupSpec
 
 
@@ -61,8 +63,9 @@ class DQueueBlockingServiceSpec extends MockStartupSpec {
         }
       })
       t.start()
-      t.join()
     }
+
+    new CountDownLatch(1).await()
 
   }
 

@@ -1,6 +1,9 @@
 package com.ecfront.ez.framework.service.distributed
 
+import java.util.concurrent.TimeUnit
+
 import com.ecfront.ez.framework.core.test.MockStartupSpec
+import com.ecfront.ez.framework.service.redis.RedisProcessor
 
 
 class DCounterServiceSpec extends MockStartupSpec {
@@ -19,6 +22,14 @@ class DCounterServiceSpec extends MockStartupSpec {
     assert(counter.get == 11)
     counter.delete()
     assert(counter.get == 0)
+  }
+
+  test("expire test"){
+    println(RedisProcessor.redis.getAtomicLong("a").incrementAndGet())
+    RedisProcessor.redis.getAtomicLong("a").expire(1,TimeUnit.SECONDS)
+    println(RedisProcessor.redis.getAtomicLong("a").incrementAndGet())
+    Thread.sleep(5000)
+    println(RedisProcessor.redis.getAtomicLong("a").incrementAndGet())
   }
 
 }
