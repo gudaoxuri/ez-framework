@@ -7,6 +7,7 @@ import com.ecfront.ez.framework.service.storage.jdbc.{JDBCSecureStorage, JDBCSta
 import com.ecfront.ez.framework.service.storage.mongo.{MongoSecureStorage, MongoStatusStorage}
 
 import scala.beans.BeanProperty
+import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 
 /**
   * 组织（租户）实体
@@ -39,7 +40,7 @@ object EZ_Organization extends SecureStorageAdapter[EZ_Organization, EZ_Organiza
   def apply(code: String, name: String): EZ_Organization = {
     val org = EZ_Organization()
     org.code = code
-    org.name = name
+    org.name = name.x
     org.enable = true
     org
   }

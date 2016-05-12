@@ -12,7 +12,7 @@ import scala.io.Source
 /**
   * I18N处理器
   */
-object I18NProcessor extends LazyLogging{
+object I18NProcessor extends LazyLogging {
 
   // 正则信息 -> 语言 -> 翻译后的信息
   private val i18nInfo = collection.mutable.Map[Pattern, Map[String, String]]()
@@ -22,7 +22,7 @@ object I18NProcessor extends LazyLogging{
     load()
     if (i18nInfo.nonEmpty) {
       Resp.customInit = process
-    }else{
+    } else {
       logger.info("i18n function disabled")
     }
   }
@@ -35,7 +35,7 @@ object I18NProcessor extends LazyLogging{
     if (i18nPath.exists()) {
       i18nPath.listFiles().foreach {
         file =>
-          val lines = Source.fromFile(file,"UTF-8").getLines().toList
+          val lines = Source.fromFile(file, "UTF-8").getLines().toList
           val head = lines.head
           val languages = head.split('\t').toList.tail.zipWithIndex
           lines.tail.filter(!_.startsWith("#")).foreach {
@@ -63,13 +63,22 @@ object I18NProcessor extends LazyLogging{
 
   def process(resp: Resp[_]): Unit = {
     if (resp.message != null && resp.message.nonEmpty) {
-      resp.message = resp.message.replaceAll(tabR, " ")
-      i18nInfo.find(_._1.matcher(resp.message).matches()).foreach {
-        matchedItem =>
-          val matcher = matchedItem._1.matcher(resp.message)
-          resp.message = matcher.replaceAll(matchedItem._2(EZContext.language))
-      }
+      resp.message = i18n(resp.message.replaceAll(tabR, " "))
     }
+  }
+
+  def i18n(str: String): String = {
+    var newStr = str
+    i18nInfo.find(_._1.matcher(str).matches()).foreach {
+      matchedItem =>
+        val matcher = matchedItem._1.matcher(str)
+        newStr = matcher.replaceAll(matchedItem._2(EZContext.language))
+    }
+    newStr
+  }
+
+  implicit class Impl(val str: String) {
+    def x:String = i18n(str)
   }
 
 }

@@ -8,6 +8,7 @@ import com.ecfront.ez.framework.service.storage.mongo.{MongoProcessor, MongoSecu
 import io.vertx.core.json.JsonObject
 
 import scala.beans.BeanProperty
+import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 
 /**
   * 角色实体
@@ -49,7 +50,7 @@ object EZ_Role extends SecureStorageAdapter[EZ_Role, EZ_Role_Base]
   def apply(flag: String, name: String, resourceCodes: List[String], organizationCode: String = ServiceAdapter.defaultOrganizationCode): EZ_Role = {
     val role = EZ_Role()
     role.flag = flag
-    role.name = name
+    role.name = name.x
     role.resource_codes = resourceCodes
     role.organization_code = organizationCode
     role.enable = true

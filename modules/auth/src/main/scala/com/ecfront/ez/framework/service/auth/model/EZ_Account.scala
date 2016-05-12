@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.service.auth.model
 
 import com.ecfront.common._
+import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 import com.ecfront.ez.framework.service.auth.{CacheManager, OrganizationModel, OrganizationStorage, ServiceAdapter}
 import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, _}
 import com.ecfront.ez.framework.service.storage.jdbc.{JDBCProcessor, JDBCSecureStorage, JDBCStatusStorage}
@@ -77,7 +78,7 @@ object EZ_Account extends SecureStorageAdapter[EZ_Account, EZ_Account_Base]
     val account = EZ_Account()
     account.login_id = loginId
     account.email = email
-    account.name = name
+    account.name = name.x
     account.password = password
     account.organization_code = organizationCode
     account.enable = true

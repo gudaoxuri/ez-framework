@@ -7,6 +7,7 @@ import com.ecfront.ez.framework.service.storage.jdbc.{JDBCSecureStorage, JDBCSta
 import com.ecfront.ez.framework.service.storage.mongo.{MongoSecureStorage, MongoStatusStorage}
 
 import scala.beans.BeanProperty
+import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 
 /**
   * 资源实体
@@ -40,7 +41,7 @@ object EZ_Resource extends SecureStorageAdapter[EZ_Resource, EZ_Resource_Base]
     val res = EZ_Resource()
     res.method = method
     res.uri = uri
-    res.name = name
+    res.name = name.x
     res.enable = true
     res
   }
