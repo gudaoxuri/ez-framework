@@ -44,6 +44,7 @@ case class EZ_Account() extends SecureModel with StatusModel with OrganizationMo
   @Label("OAuth Info") // key=oauth服务标记，value=openid
   @BeanProperty var oauth: Map[String, String] = _
   @Ignore var exchange_role_codes: List[String] = _
+  @Require
   @BeanProperty var role_codes: List[String] = _
 
 }

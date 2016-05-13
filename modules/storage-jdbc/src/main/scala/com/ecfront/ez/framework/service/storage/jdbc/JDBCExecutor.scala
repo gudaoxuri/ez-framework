@@ -13,6 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Promise}
 import scala.util.Success
+import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 
 private[jdbc] object JDBCExecutor extends LazyLogging {
 
@@ -38,9 +39,9 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
           Resp.badRequest(entityInfo.uniqueFieldNames.map {
             field =>
               if (entityInfo.fieldLabel.contains(field)) {
-                entityInfo.fieldLabel(field)
+                entityInfo.fieldLabel(field).x
               } else {
-                field
+                field.x
               }
           }.mkString("[", ",", "]") + " must be unique")
         } else {
@@ -153,9 +154,9 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
             Resp.badRequest(entityInfo.uniqueFieldNames.map {
               field =>
                 if (entityInfo.fieldLabel.contains(field)) {
-                  entityInfo.fieldLabel(field)
+                  entityInfo.fieldLabel(field).x
                 } else {
-                  field
+                  field.x
                 }
             }.mkString("[", ",", "]") + " must be unique")
           } else {

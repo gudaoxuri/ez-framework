@@ -38,7 +38,7 @@ object I18NProcessor extends LazyLogging {
           val lines = Source.fromFile(file, "UTF-8").getLines().toList
           val head = lines.head
           val languages = head.split('\t').toList.tail.zipWithIndex
-          lines.tail.filter(!_.startsWith("#")).foreach {
+          lines.tail.filter(l => !l.startsWith("#") && l.trim.nonEmpty).foreach {
             line =>
               val column = line.split('\t')
               i18nInfo += column(0).r.pattern -> languages.map {
@@ -78,7 +78,7 @@ object I18NProcessor extends LazyLogging {
   }
 
   implicit class Impl(val str: String) {
-    def x:String = i18n(str)
+    def x: String = i18n(str)
   }
 
 }

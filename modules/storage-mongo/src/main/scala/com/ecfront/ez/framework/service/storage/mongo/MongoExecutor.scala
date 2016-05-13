@@ -5,6 +5,7 @@ import com.ecfront.ez.framework.service.storage.foundation.{BaseModel, SecureMod
 import io.vertx.core.json.{JsonArray, JsonObject}
 
 import scala.collection.JavaConversions._
+import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 
 private[mongo] object MongoExecutor {
 
@@ -22,9 +23,9 @@ private[mongo] object MongoExecutor {
           Resp.badRequest(entityInfo.uniqueFieldNames.map {
             field =>
               if (entityInfo.fieldLabel.contains(field)) {
-                entityInfo.fieldLabel(field)
+                entityInfo.fieldLabel(field).x
               } else {
-                field
+                field.x
               }
           }.mkString("[", ",", "]") + " must be unique")
         } else {
@@ -67,9 +68,9 @@ private[mongo] object MongoExecutor {
             Resp.badRequest(entityInfo.uniqueFieldNames.map {
               field =>
                 if (entityInfo.fieldLabel.contains(field)) {
-                  entityInfo.fieldLabel(field)
+                  entityInfo.fieldLabel(field).x
                 } else {
-                  field
+                  field.x
                 }
             }.mkString("[", ",", "]") + " must be unique")
           } else {

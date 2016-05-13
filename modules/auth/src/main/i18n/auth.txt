@@ -1,4 +1,26 @@
 	en	zh-CN
+
+# common.fields
+Code	Code	编码
+Name	Name	名称
+Image	Image	图片
+Password	Password	密码
+Email	Email	邮箱
+URI	URI	路径
+
+# auth.fields
+Login Id	Login Id	登录名
+Ext Info	Ext Info	扩展信息
+OAuth Info	OAuth Info	OAuth信息
+Method	Method	HTTP请求
+
+# auth.data
+System	System	系统管理员
+Admin	Admin	管理员
+Sys Admin	Sys Admin	系统管理员
+Flag	Flag	标识
+
+# auth.message
 Register NOT allow	Register NOT allow	自助注册功能已禁用
 Link illegal	Link illegal	链接非法
 Old Password Error	Old Password Error	原密码错误
@@ -22,10 +44,8 @@ Account disabled	Account disabled	账号已禁用
 Account not exist	Account not exist	账号不存在
 Organization disabled	Organization disabled	组织已禁用
 【captcha】not match	【captcha】not match	验证码错误
-System	System	系统管理员
-Admin	Admin	管理员
-Sys Admin	Sys Admin	系统管理员
-# storage
+
+# storage.message
 【condition】not null	【condition】not null	【条件】不能为空
 【id】not null	【id】not null	【id】不能为空
 \[(?<fields>.*)\] not null	[${fields}] not null	[${fields}] 不能为空

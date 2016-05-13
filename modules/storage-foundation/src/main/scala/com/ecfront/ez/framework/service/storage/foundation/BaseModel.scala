@@ -7,6 +7,7 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.beans.BeanProperty
 import scala.reflect.runtime._
+import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 
 /**
   * 实体基类，所有实体都应继承此类
@@ -64,9 +65,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
         val errorFields = entityInfo.requireFieldNames.filter(BeanHelper.getValue(model, _).get == null).map {
           requireField =>
             if (entityInfo.fieldLabel.contains(requireField)) {
-              entityInfo.fieldLabel(requireField)
+              entityInfo.fieldLabel(requireField).x
             } else {
-              requireField
+              requireField.x
             }
         }
         if (errorFields.nonEmpty) {

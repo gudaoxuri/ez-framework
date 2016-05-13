@@ -12,6 +12,10 @@ image::https://img.shields.io/travis/gudaoxuri/ez-framework.svg[link="https://tr
 
 == 功能列表
 
+. 核心服务
+.. 支持自定义同步或异步的拦截器栈处理
+.. 支持I18N
+
 . RPC服务
 .. 支持HTTP和WebSocket服务
 .. 基于注解服务发现
@@ -58,8 +62,7 @@ image::https://img.shields.io/travis/gudaoxuri/ez-framework.svg[link="https://tr
 .. 分布式Map
 .. 分布式阻塞和非阻塞队列
 .. 分布式消息发布订阅
-
-. 支持自定义同步或异步的拦截器栈处理
+.. 分布式服务监控
 
 == 使用
 
