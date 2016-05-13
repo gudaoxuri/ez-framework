@@ -33,7 +33,7 @@ object JDBCProcessor extends LazyLogging {
     * @return update结果
     */
   def update(sql: String, parameters: List[Any] = null, conn: SQLConnection = null): Resp[Void] = {
-    Await.result(Async.update(sql, parameters, conn), Duration.Inf)
+    Await.result(Async.update(sql, parameters, getConnection(conn)), Duration.Inf)
   }
 
   /**
@@ -45,7 +45,7 @@ object JDBCProcessor extends LazyLogging {
     * @return 处理结果
     */
   def batch(sql: String, parameterList: List[List[Any]] = null, conn: SQLConnection = null): Resp[Void] = {
-    Await.result(Async.batch(sql, parameterList, conn), Duration.Inf)
+    Await.result(Async.batch(sql, parameterList, getConnection(conn)), Duration.Inf)
   }
 
   /**
@@ -59,7 +59,7 @@ object JDBCProcessor extends LazyLogging {
     * @return 获取到的记录
     */
   def get[E](sql: String, parameters: List[Any], resultClass: Class[E], conn: SQLConnection = null): Resp[E] = {
-    Await.result(Async.get[E](sql, parameters, resultClass, conn), Duration.Inf)
+    Await.result(Async.get[E](sql, parameters, resultClass, getConnection(conn)), Duration.Inf)
   }
 
   /**
@@ -73,7 +73,7 @@ object JDBCProcessor extends LazyLogging {
     * @return 获取到的记录
     */
   def find[E](sql: String, parameters: List[Any], resultClass: Class[E], conn: SQLConnection = null): Resp[List[E]] = {
-    Await.result(Async.find[E](sql, parameters, resultClass, conn), Duration.Inf)
+    Await.result(Async.find[E](sql, parameters, resultClass, getConnection(conn)), Duration.Inf)
   }
 
   /**
@@ -89,7 +89,7 @@ object JDBCProcessor extends LazyLogging {
     * @return 获取到的记录
     */
   def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int, resultClass: Class[E], conn: SQLConnection = null): Resp[Page[E]] = {
-    Await.result(Async.page[E](sql, parameters, pageNumber, pageSize, resultClass, conn), Duration.Inf)
+    Await.result(Async.page[E](sql, parameters, pageNumber, pageSize, resultClass, getConnection(conn)), Duration.Inf)
   }
 
   /**
@@ -101,7 +101,7 @@ object JDBCProcessor extends LazyLogging {
     * @return 计数结果
     */
   def count(sql: String, parameters: List[Any], conn: SQLConnection = null): Resp[Long] = {
-    Await.result(Async.count(sql, parameters, conn), Duration.Inf)
+    Await.result(Async.count(sql, parameters, getConnection(conn)), Duration.Inf)
   }
 
   /**
@@ -113,7 +113,7 @@ object JDBCProcessor extends LazyLogging {
     * @return 是否存在
     */
   def exist(sql: String, parameters: List[Any], conn: SQLConnection = null): Resp[Boolean] = {
-    Await.result(Async.exist(sql, parameters, conn), Duration.Inf)
+    Await.result(Async.exist(sql, parameters, getConnection(conn)), Duration.Inf)
   }
 
   /**
@@ -126,12 +126,29 @@ object JDBCProcessor extends LazyLogging {
   }
 
   /**
+    * 开始事务
+    *
+    * @return 当前事务的连接信息
+    */
+  def openTxByThreadLocal(): Unit = {
+    while (threadLocal.get() != null) {
+      logger.trace("ThreadLocal transaction already exists,wait...")
+      Thread.sleep(100)
+    }
+    threadLocal.set(Await.result(Async.openTx(), Duration.Inf))
+  }
+
+  /**
     * 回滚事务
     *
     * @param conn 当前事务的连接信息
     */
-  def rollback(conn: SQLConnection): Unit = {
-    Await.result(Async.rollback(conn), Duration.Inf)
+  def rollback(conn: SQLConnection = null): Unit = {
+    val connection = getConnection(conn)
+    if (connection != null) {
+      Await.result(Async.rollback(connection), Duration.Inf)
+      threadLocal.remove()
+    }
   }
 
   /**
@@ -139,9 +156,35 @@ object JDBCProcessor extends LazyLogging {
     *
     * @param conn 当前事务的连接信息
     */
-  def commit(conn: SQLConnection): Unit = {
-    Await.result(Async.commit(conn), Duration.Inf)
+  def commit(conn: SQLConnection = null): Unit = {
+    val connection = getConnection(conn)
+    if (connection != null) {
+      Await.result(Async.commit(connection), Duration.Inf)
+      threadLocal.remove()
+    }
   }
+
+  private def getConnection(conn: SQLConnection = null): SQLConnection = {
+    if (conn != null) {
+      conn
+    } else {
+      threadLocal.get()
+    }
+  }
+
+  def tx[E](fun: => E): Unit = {
+    openTxByThreadLocal()
+    try {
+      fun
+      commit()
+    } catch {
+      case e: Throwable =>
+        logger.error("Execute error in transaction", e)
+        rollback()
+    }
+  }
+
+  private val threadLocal = new ThreadLocal[SQLConnection]
 
   object Async {
 

@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.service.storage.jdbc
 
 import com.ecfront.common.Resp
+import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 import com.ecfront.ez.framework.service.storage.foundation.{Id, SecureModel}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.json.JsonArray
@@ -13,7 +14,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Promise}
 import scala.util.Success
-import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 
 private[jdbc] object JDBCExecutor extends LazyLogging {
 
@@ -93,7 +93,7 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
           if (!formatR) {
             p.success(formatR)
           } else {
-            conn.updateWithParams(sql,new JsonArray(formatR.body),
+            conn.updateWithParams(sql, new JsonArray(formatR.body),
               new Handler[AsyncResult[UpdateResult]] {
                 override def handle(event: AsyncResult[UpdateResult]): Unit = {
                   if (event.succeeded()) {
