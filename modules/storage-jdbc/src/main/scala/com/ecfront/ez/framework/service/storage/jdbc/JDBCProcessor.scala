@@ -172,15 +172,17 @@ object JDBCProcessor extends LazyLogging {
     }
   }
 
-  def tx[E](fun: => E): Unit = {
+  def tx[E](fun: => E)(implicit m: Manifest[E]): E = {
     openTxByThreadLocal()
     try {
-      fun
+      val result = fun
       commit()
+      result
     } catch {
       case e: Throwable =>
         logger.error("Execute error in transaction", e)
         rollback()
+        throw e
     }
   }
 
