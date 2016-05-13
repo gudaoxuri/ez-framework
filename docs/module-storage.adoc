@@ -1010,3 +1010,12 @@ def aggregate(collection: String, query: JsonArray): Future[Resp[JsonArray]]
       */
     def commit(conn: SQLConnection): Future[Void]
 ----
+
+使用`JDBCProcessor.tx`实现事务快捷操作
+[source,scala]
+----
+JDBCProcessor.tx{
+  // your code <1>
+}
+----
+<1> 业务代码,可以跨类和方法,但**必须在同一线程**中(其它线程的代码不会使用当前事务)
