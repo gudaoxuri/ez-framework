@@ -4,6 +4,10 @@
     "module": "scheduler",
     "services": {
       "scheduler":{
+        /* "customTables": {
+            "scheduler": "sys_scheduler",
+            "scheduler_Log": "sys_scheduler_Log"
+          },*/
         "storage":"mongo" // mongo or jdbc
       },
       "storage.mongo": {

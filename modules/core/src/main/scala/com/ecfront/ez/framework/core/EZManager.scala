@@ -75,6 +75,9 @@ object EZManager extends LazyLogging {
         }
       val jsonConfig = new JsonObject(finalConfigContent)
       val ezConfig = JsonHelper.toObject(jsonConfig.encode(), classOf[EZConfig])
+      if (ezConfig.ez.instance == null) {
+        ezConfig.ez.instance = (EZContext.projectIp + EZContext.projectPath).hashCode + ""
+      }
       if (ezConfig.ez.language == null) {
         ezConfig.ez.language = "en"
       }
@@ -191,6 +194,7 @@ object EZManager extends LazyLogging {
       EZContext.app = ezConfig.ez.app
       EZContext.perf = ezConfig.ez.perf.toMap
       EZContext.module = ezConfig.ez.module
+      EZContext.instance = ezConfig.ez.instance
       EZContext.language = ezConfig.ez.language
       EZContext.args = new JsonObject(JsonHelper.toJsonString(ezConfig.args))
       ezServiceConfig = ezConfig.ez.services

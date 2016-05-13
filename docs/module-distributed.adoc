@@ -186,3 +186,43 @@ _分布式服务本身没有配置项_
   def receive(fun: => M => Unit) // 接收消息(point to point)
 ----
 <1> key 消息队列名,M 消息队列项的类型
+
+==== 分布式服务监控
+
+此功能用监控服务状态,在需要被监控的服务中调用`DMonitorService.start()`即可开启监控
+
+NOTE: 心跳默认时间间隔是`60秒`
+
+服务状态管理:
+
+[source,scala]
+.DMonitorService.Manager
+----
+/**
+  * 获取所有服务
+  *
+  * @return 所有服务
+  */
+def fetchAllServices: Map[String, DService]
+
+/**
+  * 删除一个服务
+  *
+  * @param key 要删除的服务key
+  */
+def removeAService(key: String): Unit
+
+/**
+  * 删除所有服务
+  */
+def removeAllServices(): Unit
+
+/**
+  * 获取服务状态报告
+  *
+  * @return 服务状态报告
+  */
+def fetchLiveReport: Map[String, Long]
+----
+
+

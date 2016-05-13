@@ -4,12 +4,23 @@ import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.{EZContext, EZServiceAdapter}
 import io.vertx.core.json.JsonObject
 
+import scala.collection.JavaConversions._
+
 object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
   var mongoStorage: Boolean = false
 
   override def init(parameter: JsonObject): Resp[String] = {
     mongoStorage = parameter.getString("storage", "mongo") == "mongo"
+    if (parameter.containsKey("customTables")) {
+      parameter.getJsonObject("customTables").foreach {
+        item =>
+          item.getKey match {
+            case "scheduler" => EZ_Scheduler.customTableName(item.getValue.asInstanceOf[String])
+            case "scheduler_Log" => EZ_Scheduler_Log.customTableName(item.getValue.asInstanceOf[String])
+          }
+      }
+    }
     SchedulerProcessor.init(EZContext.module)
     Resp.success("")
   }

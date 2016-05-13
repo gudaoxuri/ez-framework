@@ -56,10 +56,16 @@
 [source,json]
 ----
 "scheduler": {
-  "storage": "" <1>
+  "storage": "", <1>
+  "customTables": {
+     "scheduler": "ez_scheduler", <2>
+     "scheduler_Log": "ez_scheduler_Log" <3>
+  }
 }
 ----
 <1> 持久化实现，支持`mongo`或`jdbc`
+<2> 自定义调度表名
+<3> 自定义调度日志表名
 
 NOTE: `storage:jdbc`时请执行`ez_ddl.sql`以创建基础表
 

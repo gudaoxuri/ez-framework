@@ -14,6 +14,8 @@ case class EZInfo(
                    app: String,
                    // 模块名称
                    module: String,
+                   // 实例名称
+                   var instance: String,
                    // 语言
                    var language: String,
                    // 性能设置

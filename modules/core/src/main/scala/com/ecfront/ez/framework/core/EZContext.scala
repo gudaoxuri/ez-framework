@@ -1,5 +1,7 @@
 package com.ecfront.ez.framework.core
 
+import java.net.InetAddress
+
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
@@ -13,6 +15,8 @@ object EZContext extends LazyLogging {
   var app: String = _
   // 模块名称，来自配置文件
   var module: String = _
+  // 实例名称，来自配置文件,同一app和module下不能重复,不存在时等于(ip+工程路径).hash
+  var instance: String = _
   // 语言
   var language: String = _
   // 性能配置
@@ -24,6 +28,17 @@ object EZContext extends LazyLogging {
   // 配置文件路径
   lazy val confPath: String = findConfPath()
 
+  // 项目主机IP
+  val projectIp = InetAddress.getLocalHost.getHostAddress
+  // 项目主机名
+  val projectHost = InetAddress.getLocalHost.getHostName
+  // 项目路径
+  val projectPath = {
+    var currentPath = this.getClass.getProtectionDomain.getCodeSource.getLocation.toURI.getPath
+    currentPath = currentPath.substring(0, currentPath.lastIndexOf("/"))
+    currentPath
+  }
+
   private def findConfPath(): String = {
     var confPath = System.getProperty("conf")
     if (confPath == null) {
@@ -31,9 +46,7 @@ object EZContext extends LazyLogging {
       if (classPath != null) {
         confPath = classPath.getPath
       } else {
-        var currentPath = this.getClass.getProtectionDomain.getCodeSource.getLocation.toURI.getPath
-        currentPath = currentPath.substring(0, currentPath.lastIndexOf("/"))
-        confPath = currentPath + "/config/"
+        confPath = projectPath + "/config/"
       }
     }
     logger.info(s"Config path is : $confPath")
