@@ -48,34 +48,38 @@ object AuthService extends LazyLogging {
       && CacheManager.getCaptchaText(accountLoginIdOrEmailAndOrg) == captchaText
       )) {
       val org = EZ_Organization.getByCode(organizationCode).body
-      if (org != null && org.enable) {
-        val getR = EZ_Account.getByLoginIdOrEmail(loginIdOrEmail, organizationCode)
-        if (getR && getR.body != null) {
-          val account = getR.body
-          if (EZ_Account.packageEncryptPwd(account.login_id, password) == account.password) {
-            if (account.enable) {
-              val tokenInfoR = CacheManager.addTokenInfo(account)
-              CacheManager.removeLoginErrorTimes(accountLoginIdOrEmailAndOrg)
-              CacheManager.removeCaptcha(accountLoginIdOrEmailAndOrg)
-              logger.info(s"[login] success ,token:${tokenInfoR.body.token} id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
-              ServiceAdapter.ezEvent_loginSuccess.publish(tokenInfoR.body)
-              tokenInfoR
+      if (org != null) {
+        if (org.enable) {
+          val getR = EZ_Account.getByLoginIdOrEmail(loginIdOrEmail, organizationCode)
+          if (getR && getR.body != null) {
+            val account = getR.body
+            if (EZ_Account.packageEncryptPwd(account.login_id, password) == account.password) {
+              if (account.enable) {
+                val tokenInfoR = CacheManager.addTokenInfo(account)
+                CacheManager.removeLoginErrorTimes(accountLoginIdOrEmailAndOrg)
+                CacheManager.removeCaptcha(accountLoginIdOrEmailAndOrg)
+                logger.info(s"[login] success ,token:${tokenInfoR.body.token} id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+                ServiceAdapter.ezEvent_loginSuccess.publish(tokenInfoR.body)
+                tokenInfoR
+              } else {
+                logger.warn(s"[login] account disabled by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+                Resp.locked(s"Account disabled")
+              }
             } else {
-              logger.warn(s"[login] account disabled by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
-              Resp.locked(s"Account disabled")
+              CacheManager.addLoginErrorTimes(accountLoginIdOrEmailAndOrg)
+              createCaptcha(accountLoginIdOrEmailAndOrg)
+              logger.warn(s"[login] password not match by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+              Resp.conflict(s"【password】 not match")
             }
           } else {
-            CacheManager.addLoginErrorTimes(accountLoginIdOrEmailAndOrg)
-            createCaptcha(accountLoginIdOrEmailAndOrg)
-            logger.warn(s"[login] password not match by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
-            Resp.conflict(s"【password】 not match")
+            logger.warn(s"[login] account not exist in  by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+            Resp.notFound(s"Account not exist")
           }
         } else {
-          logger.warn(s"[login] account not exist in  by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
-          Resp.notFound(s"Account not exist")
+          Resp.locked(s"Organization disabled")
         }
       } else {
-        Resp.locked(s"Organization disabled")
+        Resp.notFound(s"Organization not exist")
       }
     } else {
       createCaptcha(accountLoginIdOrEmailAndOrg)
