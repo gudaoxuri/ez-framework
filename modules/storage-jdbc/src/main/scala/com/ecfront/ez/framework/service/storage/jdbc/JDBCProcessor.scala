@@ -147,6 +147,7 @@ object JDBCProcessor extends LazyLogging {
     val connection = getConnection(conn)
     if (connection != null) {
       Await.result(Async.rollback(connection), Duration.Inf)
+      connection.close()
       threadLocal.remove()
     }
   }
@@ -160,11 +161,12 @@ object JDBCProcessor extends LazyLogging {
     val connection = getConnection(conn)
     if (connection != null) {
       Await.result(Async.commit(connection), Duration.Inf)
+      connection.close()
       threadLocal.remove()
     }
   }
 
-  private def getConnection(conn: SQLConnection = null): SQLConnection = {
+  def getConnection(conn: SQLConnection = null): SQLConnection = {
     if (conn != null) {
       conn
     } else {
