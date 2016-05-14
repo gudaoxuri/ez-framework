@@ -247,7 +247,12 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
       }
       super.postSave(saveOrUpdateResult, preResult, context)
     } else {
-      CacheManager.removeToken(saveOrUpdateResult.code)
+      if (preResult.password != null || preResult.email != null) {
+        // 修改密码或邮箱需要重新登录
+        CacheManager.removeToken(saveOrUpdateResult.code)
+      } else {
+        CacheManager.updateTokenInfo(getById(saveOrUpdateResult.id).body)
+      }
       if (EZ_Account.extAccountStorage != null) {
         if (preResult.exchange_ext_info != null && preResult.exchange_ext_info.nonEmpty) {
           EZ_Account.extAccountStorage.update(

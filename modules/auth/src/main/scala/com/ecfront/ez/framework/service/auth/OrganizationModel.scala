@@ -37,7 +37,7 @@ trait OrganizationStorage[M <: OrganizationModel] extends BaseStorage[M] {
           Resp.success(model)
         } else {
           // 不存在此id或不在自己组织下
-          Resp.notFound("")
+          Resp.notFound("Account not exist")
         }
       }
     } else {
