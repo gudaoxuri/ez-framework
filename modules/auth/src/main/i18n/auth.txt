@@ -34,6 +34,7 @@ Require【flag】	Require【flag】	【标识】不能为空
 【flag】can't contains (?<split>.+)	【flag】can't contains ${split}	【标识】不能包含 ${split}
 【email】exist	【email】exist	【邮箱】已存在
 【email】format error	【email】format error	【邮箱】格式错误
+Token NOT exist	Token NOT exist	认证信息不存在
 【token】not exist，Request parameter must include【(?<tokenFlag>.+)】	【token】not exist，Request parameter must include【${tokenFlag}】	【token】不存在,请求参数中必须包含【${tokenFlag}】
 Account【(?<name>.+)】in【(?<orgCode>.+)】no access to (?<method>\w+):(?<uri>.+)	Account【${name}】in【${orgCode}】no access to ${method}:${uri}	账户【${name}】>【${orgCode}】没有权限访问 ${method}:${uri}
 Organization【(?<orgCode>.+)】 not found	Organization【${orgCode}】 not found	组织【${orgCode}】 不存在
