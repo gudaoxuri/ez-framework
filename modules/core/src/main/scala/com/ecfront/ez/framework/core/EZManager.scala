@@ -105,6 +105,7 @@ object EZManager extends LazyLogging {
       Resp.success(ezConfig)
     } catch {
       case e: Throwable =>
+        logger.error("Config parse error :" + e.getMessage, e)
         Resp.serverError("Config parse error :" + e.getMessage)
     }
   }
