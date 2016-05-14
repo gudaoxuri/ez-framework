@@ -1,0 +1,11 @@
+{
+  "ez": {
+    "app": "",
+    "module": "",
+    "services": {
+      "eventbus":{}
+    }
+  },
+  "args": {
+  }
+}
