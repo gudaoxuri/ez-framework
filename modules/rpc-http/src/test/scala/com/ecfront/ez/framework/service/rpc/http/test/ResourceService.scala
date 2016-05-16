@@ -58,4 +58,9 @@ object ResourceService extends SimpleHTTPService[EZ_Resource, EZRPCContext] {
     Resp.badRequest("some error")
   }
 
+  @POST("file/")
+  def uploadFile(parameter: Map[String, String], body: String, context: EZRPCContext): Resp[String] = {
+    Resp.success(body)
+  }
+
 }

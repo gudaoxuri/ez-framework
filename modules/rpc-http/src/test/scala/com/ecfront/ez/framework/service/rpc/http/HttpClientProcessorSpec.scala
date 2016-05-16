@@ -1,12 +1,17 @@
 package com.ecfront.ez.framework.service.rpc.http
 
+import java.io.File
+
 import com.ecfront.common.JsonHelper
 import com.ecfront.ez.framework.core.test.MockStartupSpec
+import com.ecfront.ez.framework.service.rpc.foundation.ReqFile
 
 class HttpClientProcessorSpec extends MockStartupSpec {
 
   test("HttpClient Test") {
-    val result = HttpClientProcessor.get("http://dop.yuanbaopu.com/query/realtime/summary/?time=today&index=pv")
+    val result = HttpClientProcessor.post(
+      "http://127.0.0.1:8080/resource/file/",
+      ReqFile(new File(this.getClass.getResource("/").getPath + "IMG_20160403_195547.jpg"),"photo"))
     println(result)
   }
 
