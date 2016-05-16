@@ -98,7 +98,9 @@ object EventBusProcessor extends LazyLogging {
                   try {
                     callback(message, {
                       reply =>
-                        event.result.reply(JsonHelper.toJsonString(reply))
+                        val replyMessage = JsonHelper.toJsonString(reply)
+                        logger.trace(s"Reply a message [$address] : $replyMessage ")
+                        event.result.reply(replyMessage)
                     })
                     e.complete()
                   } catch {
@@ -138,7 +140,9 @@ object EventBusProcessor extends LazyLogging {
               try {
                 callback(message, {
                   reply =>
-                    event.reply(JsonHelper.toJsonString(reply))
+                    val replyMessage = JsonHelper.toJsonString(reply)
+                    logger.trace(s"Reply a message [$address] : $replyMessage ")
+                    event.reply(replyMessage)
                 })
                 e.complete()
               } catch {
