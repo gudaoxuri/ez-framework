@@ -85,40 +85,44 @@ object EventBusProcessor extends LazyLogging {
     }
 
     def sendAdv[E: Manifest](address: String, message: Any, callback: (E, Any => Unit) => Unit, timeout: Long = 30 * 1000): Unit = {
-      val opt = new DeliveryOptions()
-      opt.setSendTimeout(timeout)
-      eb.send(address, JsonHelper.toJsonString(message), opt, new Handler[AsyncResult[Message[String]]] {
-        override def handle(event: AsyncResult[Message[String]]): Unit = {
-          if (event.succeeded()) {
-            logger.trace(s"Received a reply [$address] : ${event.result.body()} ")
-            val message = JsonHelper.toObject[E](event.result().body())
-            if (callback != null) {
-              EZContext.vertx.executeBlocking(new Handler[io.vertx.core.Future[Void]] {
-                override def handle(e: io.vertx.core.Future[Void]): Unit = {
-                  try {
-                    callback(message, {
-                      reply =>
-                        val replyMessage = JsonHelper.toJsonString(reply)
-                        logger.trace(s"Reply a message [$address] : $replyMessage ")
-                        event.result.reply(replyMessage)
-                    })
-                    e.complete()
-                  } catch {
-                    case ex: Throwable =>
-                      logger.error("EventBus execute error.", ex)
-                      e.fail(ex)
+      if (callback != null) {
+        val opt = new DeliveryOptions()
+        opt.setSendTimeout(timeout)
+        eb.send(address, JsonHelper.toJsonString(message), opt, new Handler[AsyncResult[Message[String]]] {
+          override def handle(event: AsyncResult[Message[String]]): Unit = {
+            if (event.succeeded()) {
+              logger.trace(s"Received a reply [$address] : ${event.result.body()} ")
+              val message = JsonHelper.toObject[E](event.result().body())
+              if (callback != null) {
+                EZContext.vertx.executeBlocking(new Handler[io.vertx.core.Future[Void]] {
+                  override def handle(e: io.vertx.core.Future[Void]): Unit = {
+                    try {
+                      callback(message, {
+                        reply =>
+                          val replyMessage = JsonHelper.toJsonString(reply)
+                          logger.trace(s"Reply a message [$address] : $replyMessage ")
+                          event.result.reply(replyMessage)
+                      })
+                      e.complete()
+                    } catch {
+                      case ex: Throwable =>
+                        logger.error("EventBus execute error.", ex)
+                        e.fail(ex)
+                    }
                   }
-                }
-              }, false, new Handler[AsyncResult[Void]] {
-                override def handle(event: AsyncResult[Void]): Unit = {
-                }
-              })
+                }, false, new Handler[AsyncResult[Void]] {
+                  override def handle(event: AsyncResult[Void]): Unit = {
+                  }
+                })
+              }
+            } else {
+              logger.error(s"Receive reply [$address] error.", event.cause())
             }
-          } else {
-            logger.error(s"Receive reply [$address] error.", event.cause())
           }
-        }
-      })
+        })
+      } else {
+        eb.send(address, JsonHelper.toJsonString(message))
+      }
     }
 
     def consumer[E: Manifest](address: String): Future[(E, Any => Unit)] = {
@@ -155,7 +159,6 @@ object EventBusProcessor extends LazyLogging {
             override def handle(event: AsyncResult[Void]): Unit = {
             }
           })
-
         }
       })
       consumerEB.completionHandler(new Handler[AsyncResult[Void]] {
@@ -165,6 +168,11 @@ object EventBusProcessor extends LazyLogging {
           } else {
             logger.error(s"Register consumer [$address] error.", event.cause())
           }
+        }
+      })
+      consumerEB.exceptionHandler(new Handler[Throwable] {
+        override def handle(event: Throwable): Unit = {
+          logger.error(s"Process consumer [$address] error.", event)
         }
       })
     }
