@@ -8,7 +8,7 @@ class WebSocketServerSpec extends MockStartupSpec {
 
   test("WebSocket test") {
     //Thread.sleep(10000)
-    //WebSocketMessagePushManager.ws(Method.POST, "/resource/", EZ_Resource("2", "GET", "/2s"))
+    //WebSocketMessagePushManager.ws(Method.REQUEST, "/resource/", EZ_Resource("2", "GET", "/2s"))
     new CountDownLatch(1).await()
 
   }

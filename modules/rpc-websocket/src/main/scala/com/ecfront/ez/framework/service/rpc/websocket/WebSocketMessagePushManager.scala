@@ -41,5 +41,15 @@ object WebSocketMessagePushManager extends LazyLogging {
     }
   }
 
+  /**
+    * 移除推送消息
+    *
+    * @param method 连接方法，目前只限于 `REQUEST` 方法
+    * @param path   连接路径
+    */
+  def remove(method: String, path: String): Unit = {
+    webSocketContainer -= method + ":" + path
+  }
+
 }
 

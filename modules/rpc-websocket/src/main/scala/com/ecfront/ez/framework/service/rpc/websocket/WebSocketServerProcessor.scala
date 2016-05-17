@@ -45,7 +45,7 @@ class WebSocketServerProcessor extends Handler[ServerWebSocket] with LazyLogging
     // 目前只限于 `REQUEST` 方法
     val result = Router.getFunction("WebSocket", Method.REQUEST, request.path(), parameters)
     parameters = result._3
-    WebSocketMessagePushManager.createWS(Method.REQUEST, result._4, request)
+    WebSocketMessagePushManager.createWS(Method.REQUEST, request.path(), request)
     if (result._1) {
       request.frameHandler(new Handler[WebSocketFrame] {
         override def handle(event: WebSocketFrame): Unit = {
