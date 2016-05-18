@@ -17,7 +17,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
         item =>
           item.getKey match {
             case "scheduler" => EZ_Scheduler.customTableName(item.getValue.asInstanceOf[String])
-            case "scheduler_Log" => EZ_Scheduler_Log.customTableName(item.getValue.asInstanceOf[String])
+            case "scheduler_log" => EZ_Scheduler_Log.customTableName(item.getValue.asInstanceOf[String])
           }
       }
     }
