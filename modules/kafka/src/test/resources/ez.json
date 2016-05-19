@@ -4,8 +4,7 @@
     "module": "",
     "services": {
       "kafka": {
-        "brokerList": "192.168.4.99:9092",
-        "zkList": "192.168.4.99:2181"
+        "brokerList": "192.168.99.100:9092"
       }
     }
   },

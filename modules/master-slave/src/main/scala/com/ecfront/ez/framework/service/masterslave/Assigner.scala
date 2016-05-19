@@ -2,8 +2,8 @@ package com.ecfront.ez.framework.service.masterslave
 
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.EZContext
+import com.ecfront.ez.framework.service.kafka.KafkaProcessor
 import com.ecfront.ez.framework.service.kafka.KafkaProcessor.Producer
-import com.ecfront.ez.framework.service.kafka.{KafkaProcessor, ReceivedCallback}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 /**
@@ -41,17 +41,15 @@ object Assigner extends LazyLogging {
       */
     def register(finishCallback: => TaskFinishDTO => Unit, startCallback: => TaskStartDTO => Unit): Unit = {
       masterTaskProducer = KafkaProcessor.Producer(clusterId + "_prepare", module)
-      KafkaProcessor.Consumer(module, clusterId + "_start", autoCommit = true).receive(new ReceivedCallback {
-        override def callback(message: String): Resp[Void] = {
+      KafkaProcessor.Consumer(clusterId + "_start", module, autoCommit = true).receive({
+        (message,messageId) =>
           startCallback(JsonHelper.toObject(message, classOf[TaskStartDTO]))
           Resp.success(null)
-        }
       })
-      KafkaProcessor.Consumer(module, clusterId + "_finish", autoCommit = true).receive(new ReceivedCallback {
-        override def callback(message: String): Resp[Void] = {
+      KafkaProcessor.Consumer(clusterId + "_finish", module, autoCommit = true).receive({
+        (message,messageId) =>
           finishCallback(JsonHelper.toObject(message, classOf[TaskFinishDTO]))
           Resp.success(null)
-        }
       })
     }
 
@@ -91,8 +89,8 @@ object Assigner extends LazyLogging {
       if (HAManager.ha) {
         HAManager.loadCacheData()
       }
-      KafkaProcessor.Consumer(module, clusterId + "_prepare").receive(new ReceivedCallback {
-        override def callback(message: String): Resp[Void] = {
+      KafkaProcessor.Consumer(clusterId + "_prepare", module).receive({
+        (message,messageId) =>
           val dto = JsonHelper.toObject(message, classOf[TaskPrepareDTO])
           if (worker == dto.worker) {
             logger.trace(s"Received a message : $message")
@@ -102,7 +100,6 @@ object Assigner extends LazyLogging {
             ExecutorPool.addExecute(Executor(dto))
           }
           Resp.success(null)
-        }
       })
     }
 

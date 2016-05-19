@@ -17,8 +17,7 @@
 . 添加配置
 
  "kafka": {
-   "brokerList": "<broker ip:port>",
-   "zkList": "<zookeeper ip:port>"
+   "brokerList": "<broker ip:port>"
  }
 
 . 测试服务
@@ -59,18 +58,16 @@
 
 === 依赖
 
-环境依赖：kafka 0.8.x
+环境依赖：kafka 0.9.x
 
 === 配置
 
 ----
 "kafka": {
-  "brokerList": "", <1>
-  "zkList": "" <2>
+  "brokerList": "" <1>
 }
 ----
 <1> Kafka broker地址列表，格式为: ip:port,...
-<2> Zookeeper地址列表，格式为: ip:port,...
 
 === 使用
 
@@ -89,54 +86,67 @@
   */
 case class Producer(topic: String, clientId: String) {
 
-  /**
-    * 发送消息
-    *
-    * @param message 消息
-    */
-  def send(message: String): Unit
+    /**
+      * 发送消息
+      *
+      * @param message   消息
+      * @param messageId 消息ID，默认自动生成UUID
+      */
+    def send(message: String, messageId: String = UUID.randomUUID().toString): Unit
 
-  /**
-    * 发送消息
-    *
-    * @param message 消息
-    * @return 是否成功 ,返回对应的消息ID（自动生成）和message
-    */
-  def sendFuture(message: String): Future[Resp[(String, String)]]
+    /**
+      * 发送消息
+      *
+      * @param message   消息
+      * @param messageId 消息ID，默认自动生成UUID
+      * @return 是否成功 ,返回对应的消息ID（自动生成）和message
+      */
+    def sendFuture(message: String, messageId: String = UUID.randomUUID().toString): Future[Resp[(String, String)]]
+
+    /**
+      * 发送需要回复的消息
+      *
+      * @param message  消息
+      * @param ackTopic 回复主题
+      * @param timeout  等待超时时间（ms）
+      * @return 回复的消息
+      */
+    def ack(message: String, ackTopic: String, timeout: Long = 30 * 1000): Resp[String]
 
 	/**
     * 关闭当前生产者
     */
-  def close(): Unit
+    def close(): Unit
 
 }
 
 /**
   * 消费者类
   *
-  * @param groupId            组ID，用于发布-订阅模式
   * @param topic              主题
+  * @param groupId            组ID，用于发布-订阅模式
   * @param autoCommit         是否自动提交
   * @param autoCommitInterval 自动提供间隔
   */
-case class Consumer(groupId: String, topic: String, autoCommit: Boolean = false, autoCommitInterval: Long = DEFAULT_AUTO_COMMIT_INTERVAL) {
+case class Consumer(topic: String,groupId: String, autoCommit: Boolean = false, autoCommitInterval: Long = DEFAULT_AUTO_COMMIT_INTERVAL) {
 
-/**
-    * 接收消息
-    *
-    * @param fun 收到消息后的回调方法
-    */
-  def receive(fun: ReceivedCallback): Unit 
+    /**
+      * 接收消息
+      *
+      * @param fun      收到消息后的回调方法
+      * @param ackTopic 回复主题，如果存在会回复消息
+      */
+    def receive(fun: (String, String) => Resp[String], ackTopic: String = null): Unit
 
-	/**
-    * 关闭当前消费者
-    */
-  def close(): Unit
+    /**
+      * 关闭当前消费者
+      */
+    def close(): Unit
 
 }
 
-  /**
-  * 关闭所有实例
-  */
+/**
+* 关闭所有实例
+*/
 def close(): Unit
 ----

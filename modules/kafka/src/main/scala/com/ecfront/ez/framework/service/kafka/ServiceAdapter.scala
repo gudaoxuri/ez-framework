@@ -7,7 +7,7 @@ import io.vertx.core.json.JsonObject
 object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
   override def init(parameter: JsonObject): Resp[String] = {
-    KafkaProcessor.init(parameter.getString("brokerList"), parameter.getString("zkList"))
+    KafkaProcessor.init(parameter.getString("brokerList"))
     Resp.success("")
   }
 

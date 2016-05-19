@@ -20,8 +20,7 @@
    "clusterId": "ez.test"
  },
  "kafka": {
-   "brokerList": "<broker ip:port>",
-   "zkList": "<zookeeper ip:port>"
+   "brokerList": "<broker ip:port>"
  }
 
 . 测试服务
@@ -32,7 +31,7 @@
 === 依赖
 
 服务依赖：kafka、redis(如果需要HA支持)
-环境依赖：kafka 0.8.x、redis 3.x
+环境依赖：kafka 0.9.x、redis 3.x
 
 === 配置
 

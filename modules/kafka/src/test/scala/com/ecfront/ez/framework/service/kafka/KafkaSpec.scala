@@ -11,17 +11,39 @@ class KafkaSpec extends MockStartupSpec {
 
     val counter = new CountDownLatch(1)
 
-    val consumer = KafkaProcessor.Consumer("group1", "test")
-    consumer.receive(new ReceivedCallback {
-      override def callback(message: String): Resp[Void] = {
+    val consumer = KafkaProcessor.Consumer("test", "group1")
+    consumer.receive({
+      (message, messageId) =>
         println(message)
         counter.countDown()
         Resp.success(null)
-      }
+
     })
     val producer = KafkaProcessor.Producer("test", "client1")
 
     producer.send("haha...")
+
+    Thread.sleep(10000)
+    counter.await()
+  }
+
+  test("Kafka ack test") {
+
+    val counter = new CountDownLatch(1)
+
+    val consumer = KafkaProcessor.Consumer("req1", "group1")
+    consumer.receive({
+      (message, messageId) =>
+        println(message)
+        Thread.sleep(10000)
+        counter.countDown()
+        Resp.success("pong...")
+    }, "resp1")
+    val producer = KafkaProcessor.Producer("req1", "client1")
+
+    assert(producer.ack("ping...", "resp1").body == "pong...")
+
+    assert(producer.ack("ping...", "resp1", 5000).message == "Timeout")
 
     counter.await()
   }
