@@ -51,7 +51,6 @@ case class DMQService[M](key: String) extends LazyLogging {
         } catch {
           case e: Throwable =>
             logger.error(s"Distributed subscribe [$key] process error.", e)
-            throw e
         }
       }
     })
@@ -72,7 +71,6 @@ case class DMQService[M](key: String) extends LazyLogging {
           } catch {
             case e: Throwable =>
               logger.error(s"Distributed receive [$key] process error.", e)
-              throw e
           }
 
         }
@@ -96,7 +94,6 @@ case class DMQService[M](key: String) extends LazyLogging {
           } catch {
             case e: Throwable =>
               logger.error(s"Distributed subscribe [$key] process error.", e)
-              throw e
           } finally {
             RedisProcessor.redis.getAtomicLong(lock).expire(5, TimeUnit.SECONDS)
           }

@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 import com.ecfront.ez.framework.core.test.MockStartupSpec
 import com.ecfront.ez.framework.service.redis.RedisProcessor
+import io.vertx.core.json.JsonObject
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -82,6 +83,18 @@ class DMQServiceSpec extends MockStartupSpec {
 
     new CountDownLatch(1).await()
 
+  }
+
+  test("DTopic point to point 测试2") {
+    val counter = new CountDownLatch(1)
+    val mq = DMQService[JsonObject]("test_topic134")
+    mq.send(new JsonObject().put("1" , "1111"))
+    mq.receive {
+      resp =>
+        assert(resp.getString("1") == "1111")
+        counter.countDown()
+    }
+    counter.await()
   }
 
   test("DTopic point to point 测试") {
