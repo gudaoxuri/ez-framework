@@ -55,7 +55,7 @@ object AuthService extends LazyLogging {
             val account = getR.body
             if (EZ_Account.packageEncryptPwd(account.login_id, password) == account.password) {
               if (account.enable) {
-                val tokenInfoR = CacheManager.addTokenInfo(account)
+                val tokenInfoR = CacheManager.addTokenInfo(account,org)
                 CacheManager.removeLoginErrorTimes(accountLoginIdOrEmailAndOrg)
                 CacheManager.removeCaptcha(accountLoginIdOrEmailAndOrg)
                 logger.info(s"[login] success ,token:${tokenInfoR.body.token} id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")

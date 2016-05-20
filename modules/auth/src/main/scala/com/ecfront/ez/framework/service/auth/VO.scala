@@ -10,6 +10,7 @@ package com.ecfront.ez.framework.service.auth
   * @param email             email
   * @param image             头像
   * @param organization_code 组织编码
+  * @param organization_name 组织名称
   * @param role_codes        角色编码列表
   * @param ext_id            扩展ID
   * @param ext_info          扩展信息
@@ -22,6 +23,7 @@ case class Token_Info_VO(
                           email: String,
                           image: String,
                           organization_code: String,
+                          organization_name: String,
                           role_codes: List[String],
                           ext_id: String,
                           ext_info: Map[String, Any])

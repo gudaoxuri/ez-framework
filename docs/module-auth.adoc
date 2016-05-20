@@ -209,6 +209,7 @@ body:
   "email": String, // email
   "image": String, // 头像URL
   "organization_code": String, // 组织编码
+  "organization_name": String, // 组织名称
   "role_codes": List[String], // 角色编码列表
   "ext_id": String, // 扩展Id
   "ext_info": Map[String, Any] // 扩展信息

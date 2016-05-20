@@ -45,7 +45,7 @@ object CacheManager {
 
   val tokenLock = new ReentrantLock()
 
-  def addTokenInfo(account: EZ_Account): Resp[Token_Info_VO] = {
+  def addTokenInfo(account: EZ_Account, org: EZ_Organization): Resp[Token_Info_VO] = {
     // 加锁，避免在多线程下`TOKEN_ID_REL_FLAG + account.code`竞争问题
     tokenLock.lock()
     removeToken(account.code)
@@ -57,6 +57,7 @@ object CacheManager {
       account.email,
       account.image,
       account.organization_code,
+      org.name,
       account.role_codes,
       account.ext_id,
       account.ext_info
@@ -86,6 +87,7 @@ object CacheManager {
   def updateTokenInfo(account: EZ_Account): Resp[Void] = {
     val token = getToken(account.code)
     if (token != null) {
+      val oldTokenInfo = getTokenInfo(token).body
       val newTokenInfo = Token_Info_VO(
         token,
         EZ_Account.assembleCode(account.login_id, account.organization_code),
@@ -93,7 +95,8 @@ object CacheManager {
         account.name,
         account.email,
         account.image,
-        account.organization_code,
+        oldTokenInfo.organization_code,
+        oldTokenInfo.organization_name,
         account.role_codes,
         account.ext_id,
         account.ext_info
