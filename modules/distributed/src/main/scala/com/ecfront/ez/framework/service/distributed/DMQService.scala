@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.service.distributed
 
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.{Executors, TimeUnit}
 
 import com.ecfront.common.JsonHelper
 import com.ecfront.ez.framework.service.redis.RedisProcessor
@@ -17,6 +17,7 @@ case class DMQService[M](key: String) extends LazyLogging {
 
   private val topic: RTopic[M] = RedisProcessor.redis.getTopic(key)
   private val queue: RBlockingQueue[M] = RedisProcessor.redis.getBlockingQueue(key)
+  private val threads = Executors.newCachedThreadPool()
 
   /**
     * 发布消息
@@ -24,7 +25,9 @@ case class DMQService[M](key: String) extends LazyLogging {
     * @param message 消息内容
     */
   def publish(message: M): this.type = {
-    topic.publish(message)
+    if (!RedisProcessor.redis.isShutdown && !RedisProcessor.redis.isShuttingDown) {
+      topic.publish(message)
+    }
     this
   }
 
@@ -34,7 +37,9 @@ case class DMQService[M](key: String) extends LazyLogging {
     * @param message 消息内容
     */
   def send(message: M): this.type = {
-    queue.put(message)
+    if (!RedisProcessor.redis.isShutdown && !RedisProcessor.redis.isShuttingDown) {
+      queue.put(message)
+    }
     this
   }
 
@@ -63,19 +68,19 @@ case class DMQService[M](key: String) extends LazyLogging {
     * @param fun 处理函数
     */
   def receive(fun: => M => Unit): this.type = {
-    new Thread(new Runnable {
-      override def run(): Unit = {
-        while (true) {
-          try {
-            fun(queue.take())
-          } catch {
-            case e: Throwable =>
-              logger.error(s"Distributed receive [$key] process error.", e)
+    threads.execute(
+      new Runnable {
+        override def run(): Unit = {
+          while (true) {
+            try {
+              fun(queue.take())
+            } catch {
+              case e: Throwable =>
+                logger.error(s"Distributed receive [$key] process error.", e)
+            }
           }
-
         }
-      }
-    }).start()
+      })
     this
   }
 
@@ -104,8 +109,13 @@ case class DMQService[M](key: String) extends LazyLogging {
   }
 
   def delete(): this.type = {
+    threads.shutdown()
     // topic.delete()
     this
   }
+
+  sys.addShutdownHook({
+    this.delete()
+  })
 
 }
