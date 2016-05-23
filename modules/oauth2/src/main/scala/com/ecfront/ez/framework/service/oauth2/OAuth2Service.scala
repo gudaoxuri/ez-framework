@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.service.auth._
-import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Role}
+import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Organization, EZ_Role}
 import com.ecfront.ez.framework.service.rpc.foundation.{GET, RPC, RespRedirect}
 import com.ecfront.ez.framework.service.rpc.http.HTTP
 import com.ecfront.ez.framework.service.storage.foundation.BaseModel
@@ -40,7 +40,7 @@ object OAuth2Service {
           val accountR = EZ_Account.getByOAuth(appName, oauthAccount.oauth(appName), "")
           if (accountR.body != null) {
             if (accountR.body.enable) {
-              val loginInfo = CacheManager.addTokenInfo(accountR.body)
+              val loginInfo = CacheManager.addTokenInfo(accountR.body,EZ_Organization.getByCode("").body)
               Resp.success(RespRedirect(ServiceAdapter.successUrl + "?" + AuthService.VIEW_TOKEN_FLAG + "=" + loginInfo.body.token))
             } else {
               Resp.badRequest(s"Account 【${accountR.body.name}】disabled")
@@ -52,7 +52,7 @@ object OAuth2Service {
             oauthAccount.organization_code = com.ecfront.ez.framework.service.auth.ServiceAdapter.defaultOrganizationCode
             oauthAccount.role_codes = List(oauthAccount.organization_code + BaseModel.SPLIT + EZ_Role.USER_ROLE_FLAG)
             oauthAccount.enable = true
-            val loginInfo = CacheManager.addTokenInfo(EZ_Account.save(oauthAccount).body)
+            val loginInfo = CacheManager.addTokenInfo(EZ_Account.save(oauthAccount).body,EZ_Organization.getByCode("").body)
             Resp.success(RespRedirect(ServiceAdapter.successUrl + "?" + AuthService.VIEW_TOKEN_FLAG + "=" + loginInfo.body.token))
           }
         } else {
