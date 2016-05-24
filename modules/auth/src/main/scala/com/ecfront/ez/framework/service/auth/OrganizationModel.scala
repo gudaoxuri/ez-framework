@@ -72,9 +72,9 @@ trait OrganizationStorage[M <: OrganizationModel] extends BaseStorage[M] {
         }
       } else {
         if (condition != null && condition.nonEmpty) {
-          (s" organization_code = ? AND " + condition, List(orgCode) ++ parameters)
+          (s" organization_code = '$orgCode' AND " + condition, parameters)
         } else {
-          (s" organization_code = ? ", List(orgCode) ++ parameters)
+          (s" organization_code = '$orgCode'", parameters)
         }
       }
     }
