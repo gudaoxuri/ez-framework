@@ -88,7 +88,7 @@ class DMQServiceSpec extends MockStartupSpec {
   test("DTopic point to point 测试2") {
     val counter = new CountDownLatch(1)
     val mq = DMQService[JsonObject]("test_topic134")
-    mq.send(new JsonObject().put("1" , "1111"))
+    mq.send(new JsonObject().put("1", "1111"))
     mq.receive {
       resp =>
         assert(resp.getString("1") == "1111")
@@ -99,14 +99,14 @@ class DMQServiceSpec extends MockStartupSpec {
 
   test("DTopic point to point 测试") {
 
-    val mq = DMQService[TestModel]("test_topic12")
+    val mq = DMQService[TestModel]("test_topic123")
 
     val container = ArrayBuffer[Long]()
 
     for (i <- 1 to 10) {
       new Thread(new Runnable {
         override def run(): Unit = {
-          DMQService[TestModel]("test_topic12").receive({
+          DMQService[TestModel]("test_topic123").receive({
             msg =>
               println(Thread.currentThread().getId + " receive..." + msg.name)
               container += msg.name.toLong
@@ -119,7 +119,7 @@ class DMQServiceSpec extends MockStartupSpec {
     for (i <- 1 to 10) {
       new Thread(new Runnable {
         override def run(): Unit = {
-          while (true) {
+          while (count.get() <= 10000) {
             val model1 = TestModel()
             model1.name = count.incrementAndGet() + ""
             model1.id = "id001"

@@ -71,12 +71,14 @@ case class DMQService[M](key: String) extends LazyLogging {
     threads.execute(
       new Runnable {
         override def run(): Unit = {
-          while (true) {
+          while (!RedisProcessor.redis.isShutdown && !RedisProcessor.redis.isShuttingDown) {
             try {
               fun(queue.take())
             } catch {
               case e: Throwable =>
-                logger.error(s"Distributed receive [$key] process error.", e)
+                if (!RedisProcessor.redis.isShutdown && !RedisProcessor.redis.isShuttingDown) {
+                  logger.error(s"Distributed receive [$key] process error.", e)
+                }
             }
           }
         }
