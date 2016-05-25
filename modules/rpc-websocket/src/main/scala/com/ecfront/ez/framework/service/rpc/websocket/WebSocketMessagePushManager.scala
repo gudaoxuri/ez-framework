@@ -44,11 +44,18 @@ object WebSocketMessagePushManager extends LazyLogging {
   /**
     * 移除推送消息
     *
-    * @param method 连接方法，目前只限于 `REQUEST` 方法
-    * @param path   连接路径
+    * @param method   连接方法，目前只限于 `REQUEST` 方法
+    * @param path     连接路径
+    * @param matchAll 是否匹配全路径，为false时只按前缀匹配
     */
-  def remove(method: String, path: String): Unit = {
-    webSocketContainer -= method + ":" + path
+  def remove(method: String, path: String, matchAll: Boolean = true): Unit = {
+    if (!matchAll) {
+      webSocketContainer.keys.filter(_.startsWith(method + ":" + path)).foreach {
+        webSocketContainer -= _
+      }
+    } else {
+      webSocketContainer -= method + ":" + path
+    }
   }
 
 }

@@ -14,7 +14,6 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
   private val DEFAULT_WEBSOCKET_PORT: Integer = 80
 
-
   override def init(parameter: JsonObject): Resp[String] = {
     val servicePath = parameter.getString("servicePath")
     val port = parameter.getInteger("port", DEFAULT_WEBSOCKET_PORT)

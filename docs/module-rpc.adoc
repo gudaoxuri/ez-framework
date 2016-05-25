@@ -442,4 +442,13 @@ def delete(url: String, contentType: String = "application/json; charset=utf-8")
   * @param data   消息
   */
 def ws(method: String, path: String, data: Any): Unit
+
+/**
+  * 移除推送消息
+  *
+  * @param method   连接方法，目前只限于 `REQUEST` 方法
+  * @param path     连接路径
+  * @param matchAll 是否匹配全路径，为false时只按前缀匹配
+  */
+def remove(method: String, path: String, matchAll: Boolean = true): Unit
 ----
