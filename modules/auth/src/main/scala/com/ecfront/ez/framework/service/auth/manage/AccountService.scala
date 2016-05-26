@@ -156,12 +156,7 @@ object AccountService extends SimpleHTTPService[EZ_Account, EZAuthContext] {
             account.name = body.name
             account.email = body.email
             account.image = body.image
-            val updateR = EZ_Account.update(account, context)
-            if (updateR) {
-              CacheManager.updateTokenInfo(updateR.body)
-            } else {
-              updateR
-            }
+            EZ_Account.update(account, context)
           } else {
             Resp.conflict("Old Password Error")
           }
