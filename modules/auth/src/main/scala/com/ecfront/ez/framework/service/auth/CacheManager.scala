@@ -88,20 +88,25 @@ object CacheManager {
     val token = getToken(account.code)
     if (token != null) {
       val oldTokenInfo = getTokenInfo(token).body
-      val newTokenInfo = Token_Info_VO(
-        token,
-        EZ_Account.assembleCode(account.login_id, account.organization_code),
-        account.login_id,
-        account.name,
-        account.email,
-        account.image,
-        oldTokenInfo.organization_code,
-        oldTokenInfo.organization_name,
-        account.role_codes,
-        account.ext_id,
-        account.ext_info
-      )
-      RedisProcessor.set(TOKEN_INFO_FLAG + newTokenInfo.token, JsonHelper.toJsonString(newTokenInfo), ServiceAdapter.loginKeepSeconds)
+      if (oldTokenInfo == null) {
+        // 在某些情况下（如缓存被清空）可能存在原token信息不存在，此时要求重新登录
+        removeTokenInfo(token)
+      } else {
+        val newTokenInfo = Token_Info_VO(
+          token,
+          EZ_Account.assembleCode(account.login_id, account.organization_code),
+          account.login_id,
+          account.name,
+          account.email,
+          account.image,
+          oldTokenInfo.organization_code,
+          oldTokenInfo.organization_name,
+          account.role_codes,
+          account.ext_id,
+          account.ext_info
+        )
+        RedisProcessor.set(TOKEN_INFO_FLAG + newTokenInfo.token, JsonHelper.toJsonString(newTokenInfo), ServiceAdapter.loginKeepSeconds)
+      }
     }
     Resp.success(null)
   }
