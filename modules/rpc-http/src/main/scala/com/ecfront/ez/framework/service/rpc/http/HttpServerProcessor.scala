@@ -144,11 +144,11 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
                   } else if (fun.requestClass == classOf[String]) {
                     body.asInstanceOf[String]
                   } else {
-                    logger.error(s"Not support return type [${fun.requestClass.getName}] by xml")
+                    logger.warn(s"Not support return type [${fun.requestClass.getName}] by xml")
                     null
                   }
                 case _ =>
-                  logger.error("Not support content type:" + newContext.contentType)
+                  logger.warn("Not support content type:" + newContext.contentType)
                   null
               }
             } else {
@@ -211,7 +211,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
                     $(b).toString
                   case b: String => b
                   case _ =>
-                    logger.error(s"Not support return type [${r.body.getClass.getName}] by xml")
+                    logger.warn(s"Not support return type [${r.body.getClass.getName}] by xml")
                     s"""<?xml version="1.0" encoding="UTF-8"?>
                         |<xml>
                         | <error>
@@ -235,7 +235,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
           case _ => r.toString
         }
         returnContent(response, accept, res)
-      case _ => logger.error(s"The response type [${result.getClass.getName}] not support")
+      case _ => logger.warn(s"The response type [${result.getClass.getName}] not support")
     }
   }
 
