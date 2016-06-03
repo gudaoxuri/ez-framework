@@ -95,7 +95,9 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
           conn = Await.result(JDBCProcessor.Async.db, Duration.Inf)
           autoClose = true
         }
-        conn.updateWithParams(sql, new JsonArray(formatR.body),
+        val parameters = new JsonArray(formatR.body)
+        logger.trace(s"JDBC save : $sql [$parameters]")
+        conn.updateWithParams(sql, parameters,
           new Handler[AsyncResult[UpdateResult]] {
             override def handle(event: AsyncResult[UpdateResult]): Unit = {
               if (event.succeeded()) {
