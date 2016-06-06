@@ -33,6 +33,12 @@
             <artifactId>ezf-auth</artifactId>
             <version>${ezf-version}</version>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

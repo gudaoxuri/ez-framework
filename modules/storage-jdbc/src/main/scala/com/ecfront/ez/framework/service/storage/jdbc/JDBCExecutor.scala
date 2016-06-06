@@ -34,14 +34,16 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
       )
       if (existR) {
         if (existR.body) {
-          Resp.badRequest(entityInfo.uniqueFieldNames.map {
+          val badRequest = entityInfo.uniqueFieldNames.map {
             field =>
               if (entityInfo.fieldLabel.contains(field)) {
                 entityInfo.fieldLabel(field).x
               } else {
                 field.x
               }
-          }.mkString("[", ",", "]") + " must be unique")
+          }.mkString("[", ",", "]") + " must be unique"
+          logger.warn(badRequest)
+          Resp.badRequest(badRequest)
         } else {
           doSave(tableName, idFieldName, richValueInfo, clazz, entityInfo)
         }
@@ -160,14 +162,16 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
         )
         if (existR) {
           if (existR.body) {
-            Resp.badRequest(entityInfo.uniqueFieldNames.map {
+            val badRequest = entityInfo.uniqueFieldNames.map {
               field =>
                 if (entityInfo.fieldLabel.contains(field)) {
                   entityInfo.fieldLabel(field).x
                 } else {
                   field.x
                 }
-            }.mkString("[", ",", "]") + " must be unique")
+            }.mkString("[", ",", "]") + " must be unique"
+            logger.warn(badRequest)
+            Resp.badRequest(badRequest)
           } else {
             doUpdate(tableName, idFieldName, idValue, richValueInfo, clazz, entityInfo)
           }

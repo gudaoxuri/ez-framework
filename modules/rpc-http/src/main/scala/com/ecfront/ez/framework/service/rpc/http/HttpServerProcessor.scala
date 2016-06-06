@@ -9,6 +9,7 @@ import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.core.helper.FileType
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
 import com.ecfront.ez.framework.service.rpc.foundation._
+import com.ecfront.ez.framework.service.rpc.http.interceptor.AntiDDoSInterceptor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpServerFileUpload, HttpServerRequest, HttpServerResponse}
@@ -33,7 +34,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
 
   override def handle(request: HttpServerRequest): Unit = {
     if (request.method().name() == "OPTIONS") {
-      returnContent(request.response(), "text/html", "text/html")
+      returnContent(request.response(), "text/html", "")
     } else if (request.path() != "/favicon.ico") {
       val ip =
         if (request.headers().contains("X-Forwarded-For") && request.getHeader("X-Forwarded-For").nonEmpty) {
@@ -43,7 +44,12 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
         }
       logger.trace(s"Receive a request [${request.uri()}] , from $ip ")
       try {
-        router(request, ip)
+        val ddosFilterR = AntiDDoSInterceptor.limitFilter(ip)
+        if (ddosFilterR) {
+          router(request, ip)
+        } else {
+          returnContent(ddosFilterR, request.response(), "application/json", "application/json; charset=utf-8")
+        }
       } catch {
         case ex: Throwable =>
           logger.error("Http process error.", ex)
@@ -66,7 +72,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
         "application/json; charset=utf-8"
       }
     val result = Router.getFunction("HTTP", request.method().name(), request.path(),
-      request.params().map(entry => entry.getKey -> entry.getValue).toMap)
+      request.params().map(entry => entry.getKey -> entry.getValue).toMap, ip)
     val parameters = result._3
     val context = new EZRPCContext()
     context.remoteIP = ip
@@ -79,6 +85,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
     if (result._1) {
       execute(request, result._2, context)
     } else {
+      AntiDDoSInterceptor.addIllegal(context.remoteIP)
       returnContent(result._1, request.response(), context.accept, context.contentType)
     }
   }
@@ -104,6 +111,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
           val tPath = resourcePath + newName
           upload.exceptionHandler(new Handler[Throwable] {
             override def handle(e: Throwable): Unit = {
+              logger.error(s"Upload error ${context.method}:${context.realUri} from ${context.remoteIP}")
               returnContent(Resp.serverError(e.getMessage), request.response(), context.accept, context.contentType)
             }
           })

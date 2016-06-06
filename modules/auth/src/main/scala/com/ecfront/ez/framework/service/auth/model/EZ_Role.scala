@@ -92,9 +92,11 @@ trait EZ_Role_Base extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] wi
     }
     if (model.id == null || model.id.trim == "") {
       if (model.flag == null || model.flag.trim.isEmpty) {
+        logger.warn(s"Require【flag】")
         Resp.badRequest("Require【flag】")
       } else {
         if (model.flag.contains(BaseModel.SPLIT)) {
+          logger.warn(s"【uri】can't contains ${BaseModel.SPLIT}")
           Resp.badRequest(s"【flag】can't contains ${BaseModel.SPLIT}")
         } else {
           model.code = assembleCode(model.flag, model.organization_code)

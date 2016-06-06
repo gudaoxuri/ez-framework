@@ -51,6 +51,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
   @PUT(":id/")
   def rpcUpdate(parameter: Map[String, String], body: String, context: C): Resp[M] = {
     if (!parameter.contains("id")) {
+      logger.warn(s"【id】not null")
       Resp.badRequest("【id】not null")
     } else {
       logger.trace(s" RPC simple update : $body")
@@ -133,6 +134,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
   @GET(":id/")
   def rpcGet(parameter: Map[String, String], context: C): Resp[M] = {
     if (!parameter.contains("id")) {
+      logger.warn(s"【id】not null")
       Resp.badRequest("【id】not null")
     } else {
       val id = parameter("id")
@@ -151,6 +153,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
   @DELETE(":id/")
   def rpcDelete(parameter: Map[String, String], context: C): Resp[Void] = {
     if (!parameter.contains("id")) {
+      logger.warn(s"【id】not null")
       Resp.badRequest("【id】not null")
     } else {
       val id = parameter("id")
@@ -169,6 +172,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
   @GET(":id/enable/")
   def rpcEnable(parameter: Map[String, String], context: C): Resp[Void] = {
     if (!parameter.contains("id")) {
+      logger.warn(s"【id】not null")
       Resp.badRequest("【id】not null")
     } else {
       if (classOf[StatusModel].isAssignableFrom(modelClazz)) {
@@ -191,6 +195,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
   @GET(":id/disable/")
   def rpcDisable(parameter: Map[String, String], context: C): Resp[Void] = {
     if (!parameter.contains("id")) {
+      logger.warn(s"【id】not null")
       Resp.badRequest("【id】not null")
     } else {
       if (classOf[StatusModel].isAssignableFrom(modelClazz)) {
@@ -208,6 +213,7 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
 
   def conditionCheck(condition: String): Resp[String] = {
     if (sqlPattern.matcher(condition).find()) {
+      logger.warn(s"condition illegal")
       Resp.badRequest("condition illegal")
     } else {
       Resp.success(condition)

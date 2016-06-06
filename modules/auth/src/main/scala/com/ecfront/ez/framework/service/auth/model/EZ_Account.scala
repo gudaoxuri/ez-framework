@@ -2,6 +2,7 @@ package com.ecfront.ez.framework.service.auth.model
 
 import com.ecfront.common._
 import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
+import com.ecfront.ez.framework.service.auth.AuthService._
 import com.ecfront.ez.framework.service.auth.{CacheManager, OrganizationModel, OrganizationStorage, ServiceAdapter}
 import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, _}
 import com.ecfront.ez.framework.service.storage.jdbc.{JDBCProcessor, JDBCSecureStorage, JDBCStatusStorage}
@@ -130,10 +131,12 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
     if (model.login_id == null || model.login_id.trim.isEmpty
       || model.password == null || model.password.trim.isEmpty
       || model.email == null || model.email.trim.isEmpty) {
+      logger.warn(s"Require【Login_id】【password】【email】")
       Resp.badRequest("Require【Login_id】【password】【email】")
     } else {
       // 当账号不是oauth类型且登录ld包含@时，拒绝保存
       if ((model.oauth == null || model.oauth.isEmpty) && (model.login_id.contains(BaseModel.SPLIT) || model.login_id.contains("."))) {
+        logger.warn(s"【login id】can't contains ${BaseModel.SPLIT} .")
         Resp.badRequest(s"【login id】can't contains ${BaseModel.SPLIT} .")
       } else {
         if (FormatHelper.validEmail(model.email)) {
@@ -143,6 +146,7 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
             model.password = packageEncryptPwd(model.login_id, model.password)
           }
           if (existByEmail(model.email, model.organization_code).body) {
+            logger.warn("【email】exist")
             Resp.badRequest("【email】exist")
           } else {
             model.code = assembleCode(model.login_id, model.organization_code)
@@ -172,6 +176,7 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
             super.preSave(model, context)
           }
         } else {
+          logger.warn("【email】format error")
           Resp.badRequest("【email】format error")
         }
       }
@@ -203,11 +208,13 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
         if (FormatHelper.validEmail(model.email)) {
           val existEmail = getByEmail(model.email, oldModel.organization_code).body
           if (existEmail != null && existEmail.code != oldModel.code) {
+            logger.warn("【email】exist")
             Resp.badRequest("【email】exist")
           } else {
             super.preUpdate(model, context)
           }
         } else {
+          logger.warn("【email】format error")
           Resp.badRequest("【email】format error")
         }
       } else {
@@ -251,7 +258,8 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
         // 修改密码或邮箱需要重新登录
         CacheManager.removeToken(saveOrUpdateResult.code)
       } else {
-        CacheManager.updateTokenInfo(saveOrUpdateResult)
+        // 需要重新获取
+        CacheManager.updateTokenInfo(getById(saveOrUpdateResult.id).body)
       }
       if (EZ_Account.extAccountStorage != null) {
         if (preResult.exchange_ext_info != null && preResult.exchange_ext_info.nonEmpty) {

@@ -51,6 +51,7 @@ object RedisProcessor extends LazyLogging {
       redis = Redisson.create(config)
       Resp.success("Distributed started")
     } else {
+      logger.error("Only support [ single ] or [ cluster ] mode")
       Resp.notImplemented("Only support [ single ] or [ cluster ] mode")
     }
   }

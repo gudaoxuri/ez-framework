@@ -32,6 +32,7 @@ object AuthService extends LazyLogging {
         Resp.badRequest(s"Missing required field : 【id】or【password】")
       }
     } else {
+      logger.warn(s"Custom login enabled")
       Resp.notImplemented("Custom login enabled")
     }
   }
@@ -72,13 +73,15 @@ object AuthService extends LazyLogging {
               Resp.conflict(s"【password】 not match")
             }
           } else {
-            logger.warn(s"[login] account not exist in  by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+            logger.warn(s"[login] account not exist by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
             Resp.notFound(s"Account not exist")
           }
         } else {
+          logger.warn(s"Organization disabled by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
           Resp.locked(s"Organization disabled")
         }
       } else {
+        logger.warn(s"Organization not exist by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
         Resp.notFound(s"Organization not exist")
       }
     } else {

@@ -34,12 +34,16 @@ class RPCAuthSpec extends MockStartupSpec {
     RespHttpClientProcessor.put[EZ_Account](
       s"http://127.0.0.1:8080/auth/manage/account/${account.id}/?__ez_token__=$token",
       Map("name" -> "system"))
+    // 改密码
+    RespHttpClientProcessor.put[EZ_Account](
+      s"http://127.0.0.1:8080/auth/manage/account/${account.id}/?__ez_token__=$token",
+      Map("password" -> "456"))
     // 改密码，已修改过账号，需要重新登录
     assert(RespHttpClientProcessor.put[EZ_Account](
       s"http://127.0.0.1:8080/auth/manage/account/${account.id}/?__ez_token__=$token",
-      Map("password" -> "123", "ext_info" -> Map("ext1" -> "aaaa"))).code==StandardCode.UNAUTHORIZED)
+      Map("password" -> "456", "ext_info" -> Map("ext1" -> "aaaa"))).code==StandardCode.UNAUTHORIZED)
     // 重新登录
-    token = RespHttpClientProcessor.post[Token_Info_VO]("http://127.0.0.1:8080/public/auth/login/", Map("id" -> "sysadmin", "password" -> "admin")).body.token
+    token = RespHttpClientProcessor.post[Token_Info_VO]("http://127.0.0.1:8080/public/auth/login/", Map("id" -> "sysadmin", "password" -> "456")).body.token
     RespHttpClientProcessor.put[EZ_Account](
       s"http://127.0.0.1:8080/auth/manage/account/${account.id}/?__ez_token__=$token",
       Map("password" -> "123", "ext_info" -> Map("ext1" -> "aaaa"))).body

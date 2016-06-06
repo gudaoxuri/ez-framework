@@ -5,6 +5,8 @@ import java.util.UUID
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.core.helper.FileType
+import com.ecfront.ez.framework.service.auth.AuthService._
+import com.ecfront.ez.framework.service.auth.CacheManager._
 import com.ecfront.ez.framework.service.auth._
 import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Role}
 import com.ecfront.ez.framework.service.email.EmailProcessor
@@ -67,6 +69,7 @@ object AccountService extends SimpleHTTPService[EZ_Account, EZAuthContext] {
         saveR
       }
     } else {
+      logger.warn("Register NOT allow")
       Resp.notImplemented("Register NOT allow")
     }
   }
@@ -90,9 +93,11 @@ object AccountService extends SimpleHTTPService[EZ_Account, EZAuthContext] {
         EZ_Account.update(accountR.body, context)
         Resp.success(RespRedirect(ServiceAdapter.loginUrl + "?action=active"))
       } else {
+        logger.warn(s"Link illegal : ${context.method}:${context.realUri}")
         Resp.notFound("Link illegal")
       }
     } else {
+      logger.warn(s"Link illegal : ${context.method}:${context.realUri}")
       Resp.notFound("Link illegal")
     }
   }
@@ -158,6 +163,7 @@ object AccountService extends SimpleHTTPService[EZ_Account, EZAuthContext] {
             account.image = body.image
             EZ_Account.update(account, context)
           } else {
+            logger.warn(s"Old Password Error by id:${context.loginInfo.get.login_id} from ${context.remoteIP}")
             Resp.conflict("Old Password Error")
           }
         } else {
@@ -167,6 +173,7 @@ object AccountService extends SimpleHTTPService[EZ_Account, EZAuthContext] {
         accountR
       }
     } else {
+      logger.warn("Login Info not found")
       Resp.unAuthorized("Login Info not found")
     }
   }
@@ -197,6 +204,7 @@ object AccountService extends SimpleHTTPService[EZ_Account, EZAuthContext] {
            | $activeUrl</a>
        """.stripMargin)
     } else {
+      logger.warn(s"Not found this email : ${context.method}:${context.realUri}")
       Resp.notFound("Not found this email")
     }
   }
@@ -219,9 +227,11 @@ object AccountService extends SimpleHTTPService[EZ_Account, EZAuthContext] {
         EZ_Account.update(accountR.body, context)
         Resp.success(RespRedirect(ServiceAdapter.loginUrl + "?action=findpassword"))
       } else {
+        logger.warn(s"Link illegal : ${context.method}:${context.realUri}")
         Resp.notFound("Link illegal")
       }
     } else {
+      logger.warn(s"Link illegal : ${context.method}:${context.realUri}")
       Resp.notFound("Link illegal")
     }
   }

@@ -5,16 +5,18 @@ import java.util.UUID
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.service.auth._
 import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Organization, EZ_Role}
+import com.ecfront.ez.framework.service.email.EmailProcessor._
 import com.ecfront.ez.framework.service.rpc.foundation.{GET, RPC, RespRedirect}
 import com.ecfront.ez.framework.service.rpc.http.HTTP
 import com.ecfront.ez.framework.service.storage.foundation.BaseModel
+import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.json.JsonObject
 
 import scala.collection.JavaConversions._
 
 @RPC("/public/oauth2/")
 @HTTP
-object OAuth2Service {
+object OAuth2Service extends LazyLogging{
 
   @GET("code/:app/")
   def login(parameter: Map[String, String], context: EZAuthContext): Resp[RespRedirect] = {
@@ -23,6 +25,7 @@ object OAuth2Service {
     if (processor != null) {
       Resp.success(RespRedirect(processor.fetchCodeUrl))
     } else {
+      logger.warn(s"App name [$appName] not found.")
       Resp.badRequest(s"App name [$appName] not found.")
     }
   }
@@ -44,6 +47,7 @@ object OAuth2Service {
               val loginInfo = CacheManager.addTokenInfo(accountR.body,org)
               Resp.success(RespRedirect(ServiceAdapter.successUrl + "?" + AuthService.VIEW_TOKEN_FLAG + "=" + loginInfo.body.token))
             } else {
+              logger.warn(s"Account 【${accountR.body.name}】disabled")
               Resp.badRequest(s"Account 【${accountR.body.name}】disabled")
             }
           } else {
@@ -63,6 +67,7 @@ object OAuth2Service {
         getTokenR
       }
     } else {
+      logger.warn(s"App name [$appName] not found.")
       Resp.badRequest(s"App name [$appName] not found.")
     }
   }

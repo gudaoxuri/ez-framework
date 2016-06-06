@@ -92,6 +92,7 @@ trait AppProcessor extends LazyLogging {
       val accessToken = JsonHelper.toObject[AccessToken](resp)
       Resp.success(accessToken)
     } else {
+      logger.error(s"Fetch access token error [${resp("errcode")}] ${resp("errmsg")}")
       Resp.serverError(s"Fetch access token error [${resp("errcode")}] ${resp("errmsg")}")
     }
   }

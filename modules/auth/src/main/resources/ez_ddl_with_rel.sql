@@ -98,7 +98,6 @@ CREATE TABLE IF NOT EXISTS ez_resource
     PRIMARY KEY(id) ,
     INDEX idx_method(method) ,
     INDEX idx_name(name) ,
-    INDEX idx_code(code) ,
     INDEX idx_enable(enable) ,
     INDEX idx_update_user(update_user) ,
     INDEX idx_update_org(update_org) ,
@@ -109,8 +108,8 @@ COMMENT '资源表';
 CREATE TABLE IF NOT EXISTS ez_menu
 (
     id INT NOT NULL AUTO_INCREMENT COMMENT '记录主键' ,
-    code varchar(1000) NOT NULL COMMENT '菜单编码，自动生成：所属组织编码@菜单链接' ,
-    uri varchar(1000) NOT NULL COMMENT '菜单链接' ,
+    code varchar(200) NOT NULL COMMENT '菜单编码，自动生成：所属组织编码@菜单链接' ,
+    uri varchar(100) NOT NULL COMMENT '菜单链接' ,
     name varchar(200) NOT NULL COMMENT '菜单名称' ,
     icon varchar(200) NOT NULL COMMENT '菜单图标' ,
     translate varchar(200) NOT NULL COMMENT '菜单名称翻译标识（i18n用）' ,

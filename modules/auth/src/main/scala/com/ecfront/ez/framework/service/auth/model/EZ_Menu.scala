@@ -87,6 +87,7 @@ trait EZ_Menu_Base extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] wi
   override def preSaveOrUpdate(model: EZ_Menu, context: EZStorageContext): Resp[EZ_Menu] = {
     if (model.id == null || model.id.trim == "") {
       if (model.uri.contains(BaseModel.SPLIT)) {
+        logger.warn(s"【uri】can't contains ${BaseModel.SPLIT}")
         Resp.badRequest(s"【uri】can't contains ${BaseModel.SPLIT}")
       } else {
         model.code = assembleCode(model.uri, model.organization_code)

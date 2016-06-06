@@ -43,7 +43,7 @@ class WebSocketServerProcessor extends Handler[ServerWebSocket] with LazyLogging
         Map[String, String]()
       }
     // 目前只限于 `REQUEST` 方法
-    val result = Router.getFunction("WebSocket", Method.REQUEST, request.path(), parameters)
+    val result = Router.getFunction("WebSocket", Method.REQUEST, request.path(), parameters,ip)
     parameters = result._3
     WebSocketMessagePushManager.createWS(Method.REQUEST, request.path(), request)
     if (result._1) {

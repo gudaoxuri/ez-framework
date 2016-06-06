@@ -4,7 +4,7 @@ import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
 import com.ecfront.ez.framework.core.{EZContext, EZServiceAdapter}
 import com.ecfront.ez.framework.service.rpc.foundation.AutoBuildingProcessor
-import com.ecfront.ez.framework.service.rpc.http.interceptor.SlowMonitorInterceptor
+import com.ecfront.ez.framework.service.rpc.http.interceptor.{AntiDDoSInterceptor, SlowMonitorInterceptor}
 import io.vertx.core.http.{HttpServer, HttpServerOptions}
 import io.vertx.core.json.{JsonArray, JsonObject}
 import io.vertx.core.net.JksOptions
@@ -62,6 +62,12 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
           }
         }
       })
+    if (parameter.containsKey("antiDDoS")) {
+      val antiDDoS=parameter.getJsonObject("antiDDoS")
+      val reqRatePerMinute=antiDDoS.getLong("reqRatePerMinute")
+      val illegalReqRatePerMinute=antiDDoS.getLong("illegalReqRatePerMinute")
+      AntiDDoSInterceptor.init(reqRatePerMinute,illegalReqRatePerMinute)
+    }
     if (parameter.containsKey("monitor")) {
       val monitor = parameter.getJsonObject("monitor")
       if (monitor.containsKey("slow")) {
@@ -74,7 +80,6 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
         EZAsyncInterceptorProcessor.register(HttpInterceptor.category, SlowMonitorInterceptor)
       }
     }
-
     HttpClientProcessor.init(EZContext.vertx)
     val serviceR = Await.result(p.future, Duration.Inf)
     serviceR
@@ -84,6 +89,14 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   override def initPost(): Unit = {
     if (servicePath != null) {
       AutoBuildingProcessor.autoBuilding[HTTP](servicePath, classOf[HTTP])
+    }
+  }
+
+  override def getDynamicDependents(parameter: JsonObject): Set[String] = {
+    if (parameter.containsKey("antiDDoS")) {
+      Set(com.ecfront.ez.framework.service.redis.ServiceAdapter.serviceName)
+    } else {
+      Set()
     }
   }
 

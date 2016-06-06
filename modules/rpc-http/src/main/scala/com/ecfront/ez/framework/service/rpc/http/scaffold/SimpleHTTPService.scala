@@ -83,6 +83,7 @@ trait SimpleHTTPService[M <: BaseModel, C <: EZRPCContext] extends SimpleRPCServ
         Resp.success(baseUri + "res/" + createDate + "/" + fileName)
       } else {
         tmpFile.delete()
+        logger.warn(s"Request Content-type [$contextType] not allow")
         Resp.badRequest(s"Request Content-type [$contextType] not allow")
       }
     } else {
@@ -106,7 +107,8 @@ trait SimpleHTTPService[M <: BaseModel, C <: EZRPCContext] extends SimpleRPCServ
       if (file.exists()) {
         Resp.success(file)
       } else {
-        Resp.notFound(s"Resource：${file.getPath}")
+        logger.error(s"Message Not found : ${file.getPath}")
+        Resp.notFound(s"Resource Not found : ${file.getPath}")
       }
     } else {
       Resp.notImplemented("")
@@ -124,9 +126,9 @@ trait SimpleHTTPService[M <: BaseModel, C <: EZRPCContext] extends SimpleRPCServ
   def rpcExport(parameter: Map[String, String], context: C): Resp[File] = {
     logger.trace(s" RPC simple export : $parameter")
     if (allowExport) {
-      val conditionR = if (parameter.contains("condition")){
+      val conditionR = if (parameter.contains("condition")) {
         conditionCheck(parameter("condition"))
-      } else{
+      } else {
         Resp.success("")
       }
       if (conditionR) {

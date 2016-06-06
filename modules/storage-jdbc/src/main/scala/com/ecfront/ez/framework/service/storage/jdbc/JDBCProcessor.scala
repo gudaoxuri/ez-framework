@@ -213,6 +213,7 @@ object JDBCProcessor extends LazyLogging {
             case Success(connection) =>
               doUpdate(sql, p, finalParameterR.body, connection, autoClose = true)
             case Failure(ex) =>
+              logger.error("service unavailable",ex)
               p.success(Resp.serverUnavailable(ex.getMessage))
           }
         }
@@ -283,6 +284,7 @@ object JDBCProcessor extends LazyLogging {
             case Success(connection) =>
               doBatch(sql, parameterList, p, connection, autoClose = true)
             case Failure(ex) =>
+              logger.error("service unavailable",ex)
               p.success(Resp.serverUnavailable(ex.getMessage))
           }
         }
@@ -346,7 +348,9 @@ object JDBCProcessor extends LazyLogging {
         db.onComplete {
           case Success(connection) =>
             doGet(sql, parameters, resultClass, p, connection, autoClose = true)
-          case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
+          case Failure(ex) =>
+            logger.error("service unavailable",ex)
+            p.success(Resp.serverUnavailable(ex.getMessage))
         }
       }
       p.future
@@ -421,7 +425,9 @@ object JDBCProcessor extends LazyLogging {
         db.onComplete {
           case Success(connection) =>
             doFind(sql, parameters, resultClass, p, connection, autoClose = true)
-          case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
+          case Failure(ex) =>
+            logger.error("service unavailable",ex)
+            p.success(Resp.serverUnavailable(ex.getMessage))
         }
       }
       p.future
@@ -494,7 +500,9 @@ object JDBCProcessor extends LazyLogging {
         db.onComplete {
           case Success(connection) =>
             doPage(sql, parameters, pageNumber, pageSize, resultClass, p, connection, autoClose = true)
-          case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
+          case Failure(ex) =>
+            logger.error("service unavailable",ex)
+            p.success(Resp.serverUnavailable(ex.getMessage))
         }
       }
       p.future
@@ -577,7 +585,9 @@ object JDBCProcessor extends LazyLogging {
         db.onComplete {
           case Success(connection) =>
             doCount(sql, parameters, p, connection, autoClose = true)
-          case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
+          case Failure(ex) =>
+            logger.error("service unavailable",ex)
+            p.success(Resp.serverUnavailable(ex.getMessage))
         }
       }
       p.future
@@ -637,7 +647,9 @@ object JDBCProcessor extends LazyLogging {
         db.onComplete {
           case Success(connection) =>
             doExist(sql, parameters, p, connection, autoClose = true)
-          case Failure(ex) => p.success(Resp.serverUnavailable(ex.getMessage))
+          case Failure(ex) =>
+            logger.error("service unavailable",ex)
+            p.success(Resp.serverUnavailable(ex.getMessage))
         }
       }
       p.future

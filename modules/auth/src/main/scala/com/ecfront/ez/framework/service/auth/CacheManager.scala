@@ -8,36 +8,37 @@ import java.util.concurrent.locks.ReentrantLock
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.service.auth.model._
 import com.ecfront.ez.framework.service.redis.RedisProcessor
+import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future, Promise}
 
-object CacheManager {
+object CacheManager extends LazyLogging{
 
-  // Token信息 key : ez.token.info.<token Id> value : <token info>
-  private val TOKEN_INFO_FLAG = "ez.token.info."
-  // Token Id 关联 key : ez.token.id.rel.<login Id> value : <token Id>
-  private val TOKEN_ID_REL_FLAG = "ez.token.id.rel."
+  // Token信息 key : ez.token.info:<token Id> value : <token info>
+  private val TOKEN_INFO_FLAG = "ez.token.info:"
+  // Token Id 关联 key : ez.token.id.rel:<login Id> value : <token Id>
+  private val TOKEN_ID_REL_FLAG = "ez.token.id.rel:"
 
   // 资源列表 key : ez.resource.<resource code> value : any
   private val RESOURCES_FLAG = "ez.resources"
-  // 资源 关联 key : ez.resource.rel.<role code> value : <resource codes>
-  private val RESOURCES_REL_FLAG = "ez.resource.rel."
+  // 资源 关联 key : ez.resource.rel:<role code> value : <resource codes>
+  private val RESOURCES_REL_FLAG = "ez.resource.rel:"
 
-  // 用户注册激活 key : ez.active.account.<encryption> value : <account code>
-  private val ACTIVE_ACCOUNT_FLAG = "ez.active.account."
+  // 用户注册激活 key : ez.active.account:<encryption> value : <account code>
+  private val ACTIVE_ACCOUNT_FLAG = "ez.active.account:"
 
-  // 找回密码激活 key : ez.active.find-pwd.<encryption> value : <account code>
-  private val ACTIVE_FIND_PASSWORD_FLAG = "ez.active.find-pwd."
-  // 找回密码激活 key : ez.active.new-pwd.<account code> value : <new password>
-  private val ACTIVE_NEW_PASSWORD_FLAG = "ez.active.new-pwd."
+  // 找回密码激活 key : ez.active.find-pwd:<encryption> value : <account code>
+  private val ACTIVE_FIND_PASSWORD_FLAG = "ez.active.find-pwd:"
+  // 找回密码激活 key : ez.active.new-pwd:<account code> value : <new password>
+  private val ACTIVE_NEW_PASSWORD_FLAG = "ez.active.new-pwd:"
 
   // 组织信息
   private val ORGANIZATIONS_FLAG = "ez.organizations"
 
   // 连续登录错误次数
-  private val LOGIN_ERROR_TIMES_FLAG = "ez.login.error.times."
+  private val LOGIN_ERROR_TIMES_FLAG = "ez.login.error.times:"
   // 登录验证码的字符
   private val LOGIN_CAPTCHA_TEXT_FLAG = "ez.login.captcha.text"
   // 登录验证码的文件路径
@@ -132,6 +133,7 @@ object CacheManager {
         if (existTokenInfoR && existTokenInfoR.body != null) {
           p.success(Resp.success(JsonHelper.toObject[Token_Info_VO](existTokenInfoR.body)))
         } else {
+          logger.warn("Token NOT exist")
           p.success(Resp.unAuthorized("Token NOT exist"))
         }
     }

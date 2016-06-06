@@ -64,6 +64,7 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     */
   def getEnabledByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[M] = {
     if (condition == null) {
+      logger.warn("【condition】not null")
       Resp.badRequest("【condition】not null")
     } else {
       val preR = preGetEnabledByCond(condition, parameters, context)
@@ -277,6 +278,7 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     */
   def existEnabledByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Boolean] = {
     if (condition == null) {
+      logger.warn("【condition】not null")
       Resp.badRequest("【condition】not null")
     } else {
       val preR = preExistEnabledByCond(condition, parameters, context)
@@ -400,6 +402,7 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     */
   def enableById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[Void] = {
     if (id == null) {
+      logger.warn("【id】not null")
       Resp.badRequest("【id】not null")
     } else {
       val preR = preEnableById(id, context)
@@ -467,6 +470,7 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     */
   def disableById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[Void] = {
     if (id == null) {
+      logger.warn("【id】not null")
       Resp.badRequest("【id】not null")
     } else {
       val preR = preDisableById(id, context)

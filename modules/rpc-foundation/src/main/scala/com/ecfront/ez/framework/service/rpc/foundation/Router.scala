@@ -82,11 +82,12 @@ object Router extends LazyLogging {
     * @param method     请求方法
     * @param path       请求路径
     * @param parameters 请求参数
+    * @param ip         请求的IP
     * @return 结果 （是否找到，业务方法，解析后的参数，对应的模板URI）
     */
   private[rpc] def getFunction(
                                 channel: String, method: String, path: String,
-                                parameters: Map[String, String]): (Resp[_], Fun[_], Map[String, String], String) = {
+                                parameters: Map[String, String], ip: String): (Resp[_], Fun[_], Map[String, String], String) = {
     val newParameters = collection.mutable.Map[String, String]()
     newParameters ++= parameters
     var urlTemplate = path
@@ -111,14 +112,14 @@ object Router extends LazyLogging {
         // 匹配到路由
         (Resp.success(null), fun, newParameters.toMap, urlTemplate)
       } else {
-        //没有匹配到路由
-        //TODO add alert
-        (Resp.notImplemented("[ %s ] %s".format(method, path)), null, newParameters.toMap, null)
+        // 没有匹配到路由
+        logger.warn(s"$method:$path not implemented from $ip")
+        (Resp.notImplemented(s"$method:$path from $ip"), null, newParameters.toMap, null)
       }
     } else {
-      //没有匹配到路由
-      //TODO add alert
-      (Resp.notImplemented("[ %s ] %s".format(method, path)), null, newParameters.toMap, null)
+      // 没有匹配到路由
+      logger.warn(s"$method:$path not implemented from $ip")
+      (Resp.notImplemented(s"$method:$path from $ip"), null, newParameters.toMap, null)
     }
   }
 

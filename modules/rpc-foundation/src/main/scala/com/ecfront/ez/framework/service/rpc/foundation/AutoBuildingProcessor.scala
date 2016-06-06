@@ -75,8 +75,8 @@ object AutoBuildingProcessor extends LazyLogging {
         }
       } catch {
         case e: Exception =>
-          logger.error("Occurred unchecked exception", e)
-          Resp.serverError(s"Occurred unchecked exception : ${e.getMessage}")
+          logger.error(s"Occurred unchecked exception by ${context.method}:${context.realUri} from ${context.remoteIP}", e)
+          Resp.serverError(s"Occurred unchecked exception by ${context.method}:${context.realUri} from ${context.remoteIP} : ${e.getMessage}")
       }
   }
 

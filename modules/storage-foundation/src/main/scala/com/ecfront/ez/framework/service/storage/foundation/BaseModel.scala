@@ -3,11 +3,11 @@ package com.ecfront.ez.framework.service.storage.foundation
 import java.lang.reflect.ParameterizedType
 
 import com.ecfront.common.{BeanHelper, JsonHelper, Resp}
+import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.beans.BeanProperty
 import scala.reflect.runtime._
-import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 
 /**
   * 实体基类，所有实体都应继承此类
@@ -71,6 +71,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
             }
         }
         if (errorFields.nonEmpty) {
+          logger.warn(errorFields.mkString("[", ",", "]") + " not null")
           Resp.badRequest(errorFields.mkString("[", ",", "]") + " not null")
         } else {
           Resp.success(null)
@@ -346,6 +347,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     */
   def deleteById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[Void] = {
     if (id == null) {
+      logger.warn("【id】not null")
       Resp.badRequest("【id】not null")
     } else {
       val preR = preDeleteById(id, context)
@@ -409,6 +411,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     */
   def deleteByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Void] = {
     if (condition == null) {
+      logger.warn("【condition】not null")
       Resp.badRequest("【condition】not null")
     } else {
       val preR = preDeleteByCond(condition, parameters, context)
@@ -468,6 +471,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     */
   def getById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[M] = {
     if (id == null) {
+      logger.warn("【id】not null")
       Resp.badRequest("【id】not null")
     } else {
       val preR = preGetById(id, context)
@@ -531,6 +535,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     */
   def getByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[M] = {
     if (condition == null) {
+      logger.warn("【condition】not null")
       Resp.badRequest("【condition】not null")
     } else {
       val preR = preGetByCond(condition, parameters, context)
@@ -590,6 +595,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     */
   def existById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[Boolean] = {
     if (id == null) {
+      logger.warn("【id】not null")
       Resp.badRequest("【id】not null")
     } else {
       val preR = preExistById(id, context)
@@ -655,6 +661,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     */
   def existByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Boolean] = {
     if (condition == null) {
+      logger.warn("【condition】not null")
       Resp.badRequest("【condition】not null")
     } else {
       val preR = preExistByCond(condition, parameters, context)

@@ -2,6 +2,8 @@ package com.ecfront.ez.framework.service.message.helper
 
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.EZContext
+import com.ecfront.ez.framework.core.EZManager._
+import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.beans.BeanProperty
 import scala.io.Source
@@ -9,7 +11,7 @@ import scala.io.Source
 /**
   * Mustache模板引擎辅助类
   */
-object TemplateEngineHelper {
+object TemplateEngineHelper extends LazyLogging{
 
   /**
     * 渲染模板，返回结果
@@ -38,7 +40,8 @@ object TemplateEngineHelper {
     }
     if (!messageTemplatesCache.contains(templateCode)) {
       // 重建缓存后还找不到视为错误code
-      Resp.notFound("消息模板不存在")
+      logger.error(s"Message Template Not exist : $templateCode")
+      Resp.notFound(s"Message Template Not exist : $templateCode")
     } else {
       val template = messageTemplatesCache(templateCode)
       val content = TemplateEngineHelper.render(template.content, variable)

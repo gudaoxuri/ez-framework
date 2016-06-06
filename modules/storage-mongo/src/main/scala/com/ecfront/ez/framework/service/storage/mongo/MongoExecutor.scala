@@ -1,13 +1,14 @@
 package com.ecfront.ez.framework.service.storage.mongo
 
 import com.ecfront.common.Resp
+import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 import com.ecfront.ez.framework.service.storage.foundation.{BaseModel, SecureModel}
+import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.json.{JsonArray, JsonObject}
 
 import scala.collection.JavaConversions._
-import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 
-private[mongo] object MongoExecutor {
+private[mongo] object MongoExecutor extends LazyLogging {
 
   def save[M](entityInfo: MongoEntityInfo, collection: String, save: JsonObject, clazz: Class[M]): Resp[M] = {
     entityInfo.ignoreFieldNames.foreach(save.remove)
@@ -20,14 +21,16 @@ private[mongo] object MongoExecutor {
       val existR = MongoProcessor.exist(collection, new JsonObject().put("$or", existQuery))
       if (existR) {
         if (existR.body) {
-          Resp.badRequest(entityInfo.uniqueFieldNames.map {
+          val badRequest = entityInfo.uniqueFieldNames.map {
             field =>
               if (entityInfo.fieldLabel.contains(field)) {
                 entityInfo.fieldLabel(field).x
               } else {
                 field.x
               }
-          }.mkString("[", ",", "]") + " must be unique")
+          }.mkString("[", ",", "]") + " must be unique"
+          logger.warn(badRequest)
+          Resp.badRequest(badRequest)
         } else {
           val saveR = MongoProcessor.save(collection, save)
           if (saveR) {
@@ -65,14 +68,16 @@ private[mongo] object MongoExecutor {
         val existR = MongoProcessor.exist(collection, existQuery)
         if (existR) {
           if (existR.body) {
-            Resp.badRequest(entityInfo.uniqueFieldNames.map {
+            val badRequest = entityInfo.uniqueFieldNames.map {
               field =>
                 if (entityInfo.fieldLabel.contains(field)) {
                   entityInfo.fieldLabel(field).x
                 } else {
                   field.x
                 }
-            }.mkString("[", ",", "]") + " must be unique")
+            }.mkString("[", ",", "]") + " must be unique"
+            logger.warn(badRequest)
+            Resp.badRequest(badRequest)
           } else {
             val updateR = MongoProcessor.update(collection, id, update)
             if (updateR) {

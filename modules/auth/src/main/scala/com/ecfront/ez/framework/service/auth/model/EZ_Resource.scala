@@ -62,9 +62,11 @@ trait EZ_Resource_Base extends SecureStorage[EZ_Resource] with StatusStorage[EZ_
 
   override def preSaveOrUpdate(model: EZ_Resource, context: EZStorageContext): Resp[EZ_Resource] = {
     if (model.method == null || model.method.trim.isEmpty || model.uri == null || model.uri.trim.isEmpty) {
+      logger.warn(s"Require【method】and【uri】")
       Resp.badRequest("Require【method】and【uri】")
     } else {
       if (model.uri.contains(BaseModel.SPLIT)) {
+        logger.warn(s"【uri】can't contains ${BaseModel.SPLIT}")
         Resp.badRequest(s"【uri】can't contains ${BaseModel.SPLIT}")
       } else {
         model.code = assembleCode(model.method, model.uri)

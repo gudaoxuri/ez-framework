@@ -134,12 +134,14 @@ object EZManager extends LazyLogging {
       }.toSet
       val notFindDependents = services.flatMap(_.dependents) -- ezServiceConfig.keys.toSet
       if (notFindDependents.nonEmpty) {
+        logger.error(s"Found unload service(s) : $notFindDependents")
         Resp.notFound(s"Found unload service(s) : $notFindDependents")
       } else {
         Resp.success(services.toList)
       }
     } catch {
       case e: Throwable =>
+        logger.error("start services error.", e)
         Resp.serverError(e.getMessage)
     }
   }

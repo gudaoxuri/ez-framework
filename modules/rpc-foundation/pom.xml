@@ -33,7 +33,7 @@
             <artifactId>ezf-storage-foundation</artifactId>
             <version>${ezf-version}</version>
         </dependency>
-        
+
     </dependencies>
 
 </project>

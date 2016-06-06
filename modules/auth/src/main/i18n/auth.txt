@@ -8,6 +8,9 @@ Password	Password	密码
 Email	Email	邮箱
 URI	URI	路径
 
+# http
+Too frequent requests, please try again later	Too frequent requests, please try again later	请求过于频繁，请稍后再试
+
 # auth.fields
 Login Id	Login Id	登录名
 Ext Info	Ext Info	扩展信息

@@ -183,10 +183,13 @@ object EmailProcessor extends LazyLogging {
              title: String, content: String, attachments: List[(String, String, Buffer)]): Future[Resp[Void]] = {
       val p = Promise[Resp[Void]]()
       if (from == null) {
+        logger.warn("FROM not empty.")
         p.success(Resp.badRequest("FROM not empty."))
       } else if (to == null || to.isEmpty) {
+        logger.warn("TO not empty.")
         p.success(Resp.badRequest("TO not empty."))
       } else if (title == null || title.trim.isEmpty) {
+        logger.warn("TITLE not empty.")
         p.success(Resp.badRequest("TITLE not empty."))
       } else {
         val message = new MailMessage()
