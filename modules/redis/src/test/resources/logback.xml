@@ -53,6 +53,7 @@
     </root>
 
     <logger name="com.mchange.v2" level="WARN"/>
+    <logger name="io.vertx" level="WARN"/>
     <logger name="io.netty" level="WARN"/>
     <logger name="org.mongodb" level="WARN"/>
     <logger name="org.redisson" level="WARN"/>
