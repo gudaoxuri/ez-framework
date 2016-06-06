@@ -1,7 +1,6 @@
 package com.ecfront.ez.framework.service.rpc.http
 
 import java.io.File
-import java.net.URLDecoder
 import java.nio.file.Files
 
 import com.ecfront.common.{JsonHelper, Resp}
@@ -79,7 +78,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
     context.method = request.method().name()
     context.templateUri = result._4
     context.realUri = request.uri()
-    context.parameters = parameters.map { i => i._1 -> URLDecoder.decode(i._2, "UTF-8") }
+    context.parameters = parameters
     context.accept = accept.toLowerCase()
     context.contentType = contentType.toLowerCase()
     if (result._1) {
