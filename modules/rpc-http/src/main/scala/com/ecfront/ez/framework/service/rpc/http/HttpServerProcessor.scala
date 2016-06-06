@@ -52,7 +52,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
       } catch {
         case ex: Throwable =>
           logger.error("Http process error.", ex)
-          returnContent(s"Request process error：${ex.getMessage}", request.response(), "text/html", "text/html")
+          returnContent(request.response(), "text/html", s"Request process error：${ex.getMessage}")
       }
     }
   }
