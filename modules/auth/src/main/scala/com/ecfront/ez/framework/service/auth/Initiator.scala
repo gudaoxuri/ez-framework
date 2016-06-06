@@ -15,6 +15,8 @@ object Initiator extends LazyLogging {
 
   def init(): Unit = {
 
+    updateCache()
+
     val exist = if (ServiceAdapter.mongoStorage) {
       EZ_Resource.existByCond(s"""{"code":"${Method.GET + BaseModel.SPLIT + "/auth/manage/organization/"}"}""")
     } else {
@@ -218,6 +220,24 @@ object Initiator extends LazyLogging {
     EZ_Account.save(account)
 
     ServiceAdapter.ezEvent_organizationInit.publish(orgCode)
+  }
+
+  def updateCache(): Unit = {
+    CacheManager.dropOrganizations()
+    CacheManager.dropResources()
+    CacheManager.dropResourceByRoles()
+    EZ_Organization.findEnabled("").body.foreach {
+      org =>
+        CacheManager.addOrganization(org.code)
+    }
+    EZ_Resource.findEnabled("").body.foreach {
+      res =>
+        CacheManager.addResource(res.code)
+    }
+    EZ_Role.findEnabled("").body.foreach {
+      role =>
+        CacheManager.addResourceByRole(role.code, role.resource_codes)
+    }
   }
 
 }

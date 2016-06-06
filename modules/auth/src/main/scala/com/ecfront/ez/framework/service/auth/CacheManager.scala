@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future, Promise}
 
-object CacheManager extends LazyLogging{
+object CacheManager extends LazyLogging {
 
   // Token信息 key : ez.token.info:<token Id> value : <token info>
   private val TOKEN_INFO_FLAG = "ez.token.info:"
@@ -25,6 +25,7 @@ object CacheManager extends LazyLogging{
   private val RESOURCES_FLAG = "ez.resources"
   // 资源 关联 key : ez.resource.rel:<role code> value : <resource codes>
   private val RESOURCES_REL_FLAG = "ez.resource.rel:"
+  private val RESOURCES_REL_LOG_FLAG = "ez.resource.rel.log"
 
   // 用户注册激活 key : ez.active.account:<encryption> value : <account code>
   private val ACTIVE_ACCOUNT_FLAG = "ez.active.account:"
@@ -171,12 +172,18 @@ object CacheManager extends LazyLogging{
     p.future
   }
 
+  def dropResources(): Resp[Void] = {
+    RedisProcessor.del(RESOURCES_FLAG)
+  }
+
   def addResourceByRole(roleCode: String, resourceCodes: List[String]): Resp[Void] = {
     RedisProcessor.lmset(RESOURCES_REL_FLAG + roleCode, resourceCodes)
+    RedisProcessor.hset(RESOURCES_REL_LOG_FLAG, roleCode, "")
   }
 
   def removeResourceByRole(roleCode: String): Resp[Void] = {
     RedisProcessor.del(RESOURCES_REL_FLAG + roleCode)
+    RedisProcessor.hdel(RESOURCES_REL_LOG_FLAG, roleCode)
   }
 
   def existResourceByRoles(roleCodes: List[String], resourceCode: String): Future[Resp[Boolean]] = {
@@ -201,6 +208,14 @@ object CacheManager extends LazyLogging{
       }
     }
     p.future
+  }
+
+  def dropResourceByRoles(): Unit = {
+    RedisProcessor.hgetall(RESOURCES_REL_LOG_FLAG).body.foreach {
+      roleCode =>
+        removeResourceByRole(roleCode._1)
+    }
+    RedisProcessor.del(RESOURCES_REL_LOG_FLAG)
   }
 
   def addActiveAccount(encryption: String, accountCode: String): Unit = {
@@ -252,6 +267,10 @@ object CacheManager extends LazyLogging{
 
   def existOrganization(organizationCode: String): Boolean = {
     RedisProcessor.hexist(ORGANIZATIONS_FLAG, organizationCode).body
+  }
+
+  def dropOrganizations(): Unit = {
+    RedisProcessor.del(ORGANIZATIONS_FLAG)
   }
 
   def addLoginErrorTimes(accountLoginIdOrEmailAndOrg: String): Long = {
