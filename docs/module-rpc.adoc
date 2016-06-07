@@ -11,6 +11,8 @@
 . 提供同步及异步HTTP客户端
 . 提供CRUD脚手架服务
 . 支持HTML与XML处理
+. 支持HTTP慢请求筛选
+. 支持HTTP DDoS过滤
 
 === 5分钟上手
 
@@ -19,7 +21,7 @@
  <dependency>
    <groupId>com.ecfront</groupId>
    <artifactId>ezf-rpc-<http或websocket></artifactId>
-   <version>3.0.0-SNAPSHOT</version>
+   <version>3.0.0-beta1</version>
  <dependency>
 
 . 添加配置
@@ -112,6 +114,10 @@
       "includes": [], <14>
       "excludes": [] <15>
     }
+  },
+  "antiDDoS":{ <16>
+     "reqRatePerMinute":0, <17>
+     "illegalReqRatePerMinute":0 <18>
   }
 }
 ----
@@ -130,6 +136,9 @@
 <13> 慢请求时间定义，请求大于此时间会记录到日志，单位毫秒
 <14> 包含的请求URI，如果此字段存在，那么只会记录此URI中的请求，格式：method:uri
 <15> 排除的请求URI，如果此字段存在，那么在此URI中的请求都不会记录，格式：method:uri
+<16> DDoS过滤
+<17> 同一IP每分钟最大请求数
+<18> 同一IP每分钟最大非法请求数（如查找不存在的方法）
 
 IMPORTANT: 资源目录(resourcePath），需要禁用此目录及子孙目录的执行权限
 
