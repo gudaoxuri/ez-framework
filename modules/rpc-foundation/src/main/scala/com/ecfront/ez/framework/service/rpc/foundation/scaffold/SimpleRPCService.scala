@@ -125,6 +125,29 @@ trait SimpleRPCService[M <: BaseModel, C <: EZRPCContext] extends LazyLogging {
   }
 
   /**
+    * 启用记录分页操作，对应的实体必须继承[[StatusModel]]
+    *
+    * @param parameter 请求参数，可以包含
+    *                  `condition` 用于筛选条件，
+    *                  `pageNumber` 用于设定当前页码，页码从1开始，
+    *                  `pageSize` 用于设定每页显示记录数
+    * @param context   PRC上下文
+    * @return 查找到的结果
+    */
+  @GET("enable/page/:pageNumber/:pageSize/")
+  def rpcPageEnable(parameter: Map[String, String], context: C): Resp[Page[M]] = {
+    logger.trace(s" RPC simple page : $parameter")
+    val pageNumber = if (parameter.contains("pageNumber")) parameter("pageNumber").toLong else 1L
+    val pageSize = if (parameter.contains("pageSize")) parameter("pageSize").toInt else DEFAULT_PAGE_SIZE
+    val conditionR = if (parameter.contains("condition")) conditionCheck(parameter("condition")) else Resp.success("")
+    if (conditionR) {
+      storageObj.asInstanceOf[StatusStorage[_]].pageEnabled(conditionR.body, List(), pageNumber, pageSize, context.toStorageContext)
+    } else {
+      conditionR
+    }
+  }
+
+  /**
     * 获取单条记录操作
     *
     * @param parameter 请求参数，必须包含`id`
