@@ -14,7 +14,7 @@
  <dependency>
    <groupId>com.ecfront</groupId>
    <artifactId>ezf-auth</artifactId>
-   <version>3.0.0-beta1</version>
+   <version>3.0.0-beta2</version>
  <dependency>
 
 . 添加配置
@@ -584,7 +584,8 @@ body
 {
   "code": String,  // 编码编码
   "name": String, // 组织名称
-  "image": String // 组织图标
+  "image": String, // 组织图标
+  "category": String // 组织类别
 }
 
 *响应内容主体*
@@ -595,6 +596,7 @@ body
   "code": String,  // 编码编码
   "name": String, // 组织名称
   "image": String, // 组织图标
+  "category": String, // 组织类别
   "enable": Boolean, // 是否启用
   "create_user": String, // 创建用户login_id
   "create_org": String, // 创建组织编码
@@ -616,10 +618,11 @@ body
 [source,text]
 {
   "name": String, // 组织名称
-  "image": String // 组织图标
+  "image": String, // 组织图标
+  "category": String // 组织类别
 }
 
-NOTE: 只能修改`name`和`image`
+NOTE: 只能修改`name`、`image`和`category`
 
 *响应内容主体*
 

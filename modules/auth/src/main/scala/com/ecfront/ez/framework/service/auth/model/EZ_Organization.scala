@@ -1,13 +1,13 @@
 package com.ecfront.ez.framework.service.auth.model
 
 import com.ecfront.common.Resp
+import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 import com.ecfront.ez.framework.service.auth.{CacheManager, Initiator, ServiceAdapter}
 import com.ecfront.ez.framework.service.storage.foundation._
 import com.ecfront.ez.framework.service.storage.jdbc.{JDBCSecureStorage, JDBCStatusStorage}
 import com.ecfront.ez.framework.service.storage.mongo.{MongoSecureStorage, MongoStatusStorage}
 
 import scala.beans.BeanProperty
-import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 
 /**
   * 组织（租户）实体
@@ -25,7 +25,8 @@ case class EZ_Organization() extends BaseModel with SecureModel with StatusModel
   @BeanProperty var name: String = _
   @Label("Image")
   @BeanProperty var image: String = _
-
+  @Label("Category")
+  @BeanProperty var category: String = _
 }
 
 object EZ_Organization extends SecureStorageAdapter[EZ_Organization, EZ_Organization_Base]
@@ -37,17 +38,22 @@ object EZ_Organization extends SecureStorageAdapter[EZ_Organization, EZ_Organiza
   override protected val storageObj: EZ_Organization_Base =
     if (ServiceAdapter.mongoStorage) EZ_Organization_Mongo else EZ_Organization_JDBC
 
-  def apply(code: String, name: String): EZ_Organization = {
+  def apply(code: String, name: String, category: String = ""): EZ_Organization = {
     val org = EZ_Organization()
     org.code = code
     org.name = name.x
+    org.category = category
     org.enable = true
     org
   }
 
   override def getByCode(code: String): Resp[EZ_Organization] = storageObj.getByCode(code)
 
+  override def findByCategory(category: String): Resp[List[EZ_Organization]] = storageObj.findByCategory(category)
+
   override def deleteByCode(code: String): Resp[Void] = storageObj.deleteByCode(code)
+
+  override def deleteByCategory(category: String): Resp[Void] = storageObj.deleteByCategory(category)
 
 }
 
@@ -65,6 +71,9 @@ trait EZ_Organization_Base extends SecureStorage[EZ_Organization] with StatusSto
     if (model.id == null || model.id.trim == "") {
       if (model.image == null) {
         model.image = ""
+      }
+      if (model.category == null) {
+        model.category = ""
       }
       super.preSave(model, context)
     } else {
@@ -136,17 +145,30 @@ trait EZ_Organization_Base extends SecureStorage[EZ_Organization] with StatusSto
 
   def deleteByCode(code: String): Resp[Void]
 
+  def findByCategory(category: String): Resp[List[EZ_Organization]]
+
+  def deleteByCategory(category: String): Resp[Void]
+
+
 }
 
 object EZ_Organization_Mongo extends
   MongoSecureStorage[EZ_Organization] with MongoStatusStorage[EZ_Organization] with EZ_Organization_Base {
 
   override def getByCode(code: String): Resp[EZ_Organization] = {
-    getByCond( s"""{"code":"$code"}""")
+    getByCond(s"""{"code":"$code"}""")
   }
 
   override def deleteByCode(code: String): Resp[Void] = {
     deleteByCond(s"""{"code":"$code"}""")
+  }
+
+  override def findByCategory(category: String): Resp[List[EZ_Organization]] = {
+    find(s"""{"category":"$category"}""")
+  }
+
+  override def deleteByCategory(category: String): Resp[Void] = {
+    deleteByCond(s"""{"category":"$category"}""")
   }
 
 }
@@ -155,11 +177,19 @@ object EZ_Organization_JDBC extends
   JDBCSecureStorage[EZ_Organization] with JDBCStatusStorage[EZ_Organization] with EZ_Organization_Base {
 
   override def getByCode(code: String): Resp[EZ_Organization] = {
-    getByCond( s"""code = ?""", List(code))
+    getByCond(s"""code = ?""", List(code))
   }
 
   override def deleteByCode(code: String): Resp[Void] = {
-    deleteByCond( s"""code = ?""", List(code))
+    deleteByCond(s"""code = ?""", List(code))
+  }
+
+  override def findByCategory(category: String): Resp[List[EZ_Organization]] = {
+    find(s"""category = ?""", List(category))
+  }
+
+  override def deleteByCategory(category: String): Resp[Void] = {
+    deleteByCond(s"""category = ?""", List(category))
   }
 
 }
