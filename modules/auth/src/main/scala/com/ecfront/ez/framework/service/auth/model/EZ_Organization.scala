@@ -149,7 +149,6 @@ trait EZ_Organization_Base extends SecureStorage[EZ_Organization] with StatusSto
 
   def deleteByCategory(category: String): Resp[Void]
 
-
 }
 
 object EZ_Organization_Mongo extends
