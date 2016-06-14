@@ -13,6 +13,7 @@ import com.ecfront.ez.framework.service.rpc.http.interceptor.AntiDDoSInterceptor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpServerFileUpload, HttpServerRequest, HttpServerResponse}
+import io.vertx.core.json.{JsonArray, JsonObject}
 import io.vertx.core.{AsyncResult, Future, Handler}
 import org.joox.JOOX._
 import org.w3c.dom.Document
@@ -203,6 +204,9 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
           .end()
       case r: Resp[_] if r && r.body.isInstanceOf[Raw] =>
         returnContent(response, accept, r.body.asInstanceOf[Raw].raw.toString)
+      case r: Resp[_] if r && (r.body.isInstanceOf[JsonObject] || r.body.isInstanceOf[JsonArray]) =>
+        val res = new JsonObject().put("code", r.code).put("message", r.message).put("body", r.body).encodePrettily()
+        returnContent(response, accept, res)
       case r: Resp[_] =>
         val res = contentType match {
           case t if t.contains("json") =>
