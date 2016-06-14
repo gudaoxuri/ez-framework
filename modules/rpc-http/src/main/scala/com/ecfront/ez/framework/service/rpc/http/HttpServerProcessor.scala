@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.service.rpc.http
 
 import java.io.File
+import java.net.URLEncoder
 import java.nio.file.Files
 
 import com.ecfront.common.{JsonHelper, Resp}
@@ -191,7 +192,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
           response.putHeader("Content-Transfer-Encoding", "binary")
         } else {
           // 资源下载
-          response.putHeader("Content-disposition", "attachment; filename=" + file.getName)
+          response.putHeader("Content-disposition", "attachment; filename=" + URLEncoder.encode(file.getName, "UTF-8"))
         }
         response.setStatusCode(HTTP_STATUS_200)
         response.sendFile(file.getPath)
