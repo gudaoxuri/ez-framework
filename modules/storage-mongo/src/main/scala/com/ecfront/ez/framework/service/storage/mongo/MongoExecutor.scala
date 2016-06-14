@@ -103,10 +103,10 @@ private[mongo] object MongoExecutor extends LazyLogging {
   }
 
   def saveOrUpdate[M](entityInfo: MongoEntityInfo, collection: String, id: String, saveOrUpdate: JsonObject, clazz: Class[M]): Resp[M] = {
-    if (saveOrUpdate.getValue(BaseModel.Id_FLAG) == null) {
+    if (saveOrUpdate.getValue("_id") == null) {
       save(entityInfo, collection, saveOrUpdate, clazz)
     } else {
-      update(entityInfo, collection, saveOrUpdate.getString(BaseModel.Id_FLAG), saveOrUpdate, clazz)
+      update(entityInfo, collection, saveOrUpdate.getString("_id"), saveOrUpdate, clazz)
     }
   }
 

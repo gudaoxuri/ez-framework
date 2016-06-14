@@ -45,18 +45,13 @@
         </cyclicBufferTracker>
     </appender>
 
-    <root level="TRACE">
+    <root level="WARN">
         <appender-ref ref="STDOUT"/>
        <!-- <appender-ref ref="rollingFile"/>
         <appender-ref ref="rollingErrorFile"/>
         <appender-ref ref="errorEmail"/>-->
     </root>
 
-    <logger name="com.mchange.v2" level="WARN"/>
-    <logger name="io.vertx" level="WARN"/>
-    <logger name="io.netty" level="WARN"/>
-    <logger name="org.mongodb" level="WARN"/>
-    <logger name="org.redisson" level="WARN"/>
     <logger name="com.ecfront.ez.framework" level="TRACE"/>
     <!--
     <logger name="com.ecfront.ez.framework.service.rpc.http" level="TRACE"/>
