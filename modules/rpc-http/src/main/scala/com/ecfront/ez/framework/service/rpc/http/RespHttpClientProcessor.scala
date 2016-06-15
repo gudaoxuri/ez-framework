@@ -111,7 +111,7 @@ object RespHttpClientProcessor extends LazyLogging {
       request[E](HttpMethod.DELETE, url, null, contentType)
     }
 
-    private def request[E: Manifest](method: HttpMethod, url: String, body: Any, contentType: String): Future[Resp[E]] = {
+    private def request[E](method: HttpMethod, url: String, body: Any, contentType: String)(implicit m: Manifest[E]): Future[Resp[E]] = {
       val p = Promise[Resp[E]]()
       HttpClientProcessor.Async.request(method, url, body, contentType).onSuccess {
         case resp =>
@@ -124,10 +124,20 @@ object RespHttpClientProcessor extends LazyLogging {
                 Resp[E](StandardCode.SUCCESS, "")
               } else {
                 val body = jsonBody match {
-                  case array: JsonArray =>
-                    JsonHelper.toObject[E](array.encode())
-                  case array: JsonObject =>
-                    JsonHelper.toObject[E](jsonBody.asInstanceOf[JsonObject].encode())
+                  case obj: JsonArray =>
+                    m.runtimeClass match {
+                      case mf if mf == classOf[JsonArray] =>
+                        obj.asInstanceOf[E]
+                      case _ =>
+                        JsonHelper.toObject[E](obj.encode())
+                    }
+                  case obj: JsonObject =>
+                    m.runtimeClass match {
+                      case mf if mf == classOf[JsonObject] =>
+                        obj.asInstanceOf[E]
+                      case _ =>
+                        JsonHelper.toObject[E](obj.encode())
+                    }
                   case _ =>
                     jsonBody.asInstanceOf[E]
                 }
