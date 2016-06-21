@@ -1,6 +1,6 @@
 = EZ-Framework(EZ.F) Document
 gudaoxuri(i@sunisle.org)
-v3.0.0
+v3.0.0Beta2
 :doctype: book
 :encoding: utf-8
 :lang: zh-CN
