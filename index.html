@@ -2135,7 +2135,7 @@ p {
 <h1>EZ-Framework(EZ.F) Document</h1>
 <div class="details">
 <span id="author" class="author">gudaoxuri(i@sunisle.org)</span><br>
-<span id="revnumber">version 3.0.0</span>
+<span id="revnumber">version 3.0.0Beta2</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -2335,36 +2335,37 @@ p {
 <li><a href="#true-map-key-string-value">12.5.6. 分布式Map，key为string , value为自定义类型</a></li>
 <li><a href="#true--130">12.5.7. 分布式队列（不阻塞）</a></li>
 <li><a href="#true--131">12.5.8. 分布式消息队列</a></li>
+<li><a href="#true--132">12.5.9. 分布式服务监控</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#true--132">13. 调度服务</a>
+<li><a href="#true--133">13. 调度服务</a>
 <ul class="sectlevel2">
-<li><a href="#true--133">13.1. 功能</a></li>
+<li><a href="#true--134">13.1. 功能</a></li>
 <li><a href="#true5-8">13.2. 5分钟上手</a></li>
-<li><a href="#true--134">13.3. 依赖</a></li>
-<li><a href="#true--135">13.4. 配置</a></li>
-<li><a href="#true--136">13.5. 使用</a></li>
+<li><a href="#true--135">13.3. 依赖</a></li>
+<li><a href="#true--136">13.4. 配置</a></li>
+<li><a href="#true--137">13.5. 使用</a></li>
 </ul>
 </li>
 <li><a href="#truekafka">14. Kafka服务</a>
 <ul class="sectlevel2">
-<li><a href="#true--137">14.1. 功能</a></li>
+<li><a href="#true--138">14.1. 功能</a></li>
 <li><a href="#true5-9">14.2. 5分钟上手</a></li>
-<li><a href="#true--138">14.3. 依赖</a></li>
-<li><a href="#true--139">14.4. 配置</a></li>
-<li><a href="#true--140">14.5. 使用</a></li>
+<li><a href="#true--139">14.3. 依赖</a></li>
+<li><a href="#true--140">14.4. 配置</a></li>
+<li><a href="#true--141">14.5. 使用</a></li>
 <li><a href="#trueapi">14.6. API</a></li>
 </ul>
 </li>
 <li><a href="#truemaster-slave">15. Master-Slave服务</a>
 <ul class="sectlevel2">
-<li><a href="#true--141">15.1. 功能</a></li>
+<li><a href="#true--142">15.1. 功能</a></li>
 <li><a href="#true5-10">15.2. 5分钟上手</a></li>
-<li><a href="#true--142">15.3. 依赖</a></li>
-<li><a href="#true--143">15.4. 配置</a></li>
-<li><a href="#true--144">15.5. 使用</a></li>
+<li><a href="#true--143">15.3. 依赖</a></li>
+<li><a href="#true--144">15.4. 配置</a></li>
+<li><a href="#true--145">15.5. 使用</a></li>
 <li><a href="#trueapi-2">15.6. API</a></li>
 </ul>
 </li>
@@ -2437,6 +2438,19 @@ p {
 <div class="sectionbody">
 <div class="olist arabic">
 <ol class="arabic">
+<li>
+<p>核心服务</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>支持自定义同步或异步的拦截器栈处理</p>
+</li>
+<li>
+<p>支持I18N</p>
+</li>
+</ol>
+</div>
+</li>
 <li>
 <p>RPC服务</p>
 <div class="olist loweralpha">
@@ -2576,11 +2590,11 @@ p {
 <li>
 <p>分布式消息发布订阅</p>
 </li>
+<li>
+<p>分布式服务监控</p>
+</li>
 </ol>
 </div>
-</li>
-<li>
-<p>支持自定义同步或异步的拦截器栈处理</p>
 </li>
 </ol>
 </div>
@@ -2598,13 +2612,13 @@ p {
 &lt;dependency&gt;
     &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
     &lt;artifactId&gt;ezf-core&lt;/artifactId&gt;
-    &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+    &lt;version&gt;3.0.0-beta2&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;!-- 各服务模块包 --&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
     &lt;artifactId&gt;ezf-&lt;服务模块&gt;&lt;/artifactId&gt;
-    &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+    &lt;version&gt;3.0.0-beta2&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2683,7 +2697,7 @@ p {
 <pre>&lt;dependency&gt;
   &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
   &lt;artifactId&gt;ezf-storage-&lt;mongo或jdbc&gt;&lt;/artifactId&gt;
-  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+  &lt;version&gt;3.0.0-beta2&lt;/version&gt;
 &lt;dependency&gt;</pre>
 </div>
 </div>
@@ -3856,6 +3870,24 @@ def aggregate(collection: String, query: JsonArray): Future[Resp[JsonArray]]</co
     def commit(conn: SQLConnection): Future[Void]</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>使用<code>JDBCProcessor.tx</code>实现事务快捷操作</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">JDBCProcessor.tx{
+  // your code <i class="conum" data-value="1"></i><b>(1)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>业务代码,可以跨类和方法,但<strong>必须在同一线程</strong>中(其它线程的代码不会使用当前事务)</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 </div>
@@ -3895,6 +3927,12 @@ def aggregate(collection: String, query: JsonArray): Future[Resp[JsonArray]]</co
 <li>
 <p>支持HTML与XML处理</p>
 </li>
+<li>
+<p>支持HTTP慢请求筛选</p>
+</li>
+<li>
+<p>支持HTTP DDoS过滤</p>
+</li>
 </ol>
 </div>
 </div>
@@ -3909,7 +3947,7 @@ def aggregate(collection: String, query: JsonArray): Future[Resp[JsonArray]]</co
 <pre>&lt;dependency&gt;
   &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
   &lt;artifactId&gt;ezf-rpc-&lt;http或websocket&gt;&lt;/artifactId&gt;
-  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+  &lt;version&gt;3.0.0-beta2&lt;/version&gt;
 &lt;dependency&gt;</pre>
 </div>
 </div>
@@ -4032,6 +4070,10 @@ POST http://127.0.0.1/test/" body: "Hello World"
       "includes": [], <i class="conum" data-value="14"></i><b>(14)</b>
       "excludes": [] <i class="conum" data-value="15"></i><b>(15)</b>
     }
+  },
+  "antiDDoS":{ <i class="conum" data-value="16"></i><b>(16)</b>
+     "reqRatePerMinute":0, <i class="conum" data-value="17"></i><b>(17)</b>
+     "illegalReqRatePerMinute":0 <i class="conum" data-value="18"></i><b>(18)</b>
   }
 }</pre>
 </div>
@@ -4097,6 +4139,18 @@ POST http://127.0.0.1/test/" body: "Hello World"
 <tr>
 <td><i class="conum" data-value="15"></i><b>15</b></td>
 <td>排除的请求URI，如果此字段存在，那么在此URI中的请求都不会记录，格式：method:uri</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="16"></i><b>16</b></td>
+<td>DDoS过滤</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="17"></i><b>17</b></td>
+<td>同一IP每分钟最大请求数</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="18"></i><b>18</b></td>
+<td>同一IP每分钟最大非法请求数（如查找不存在的方法）</td>
 </tr>
 </table>
 </div>
@@ -4589,7 +4643,16 @@ def delete(url: String, contentType: String = "application/json; charset=utf-8")
   * @param path   连接路径
   * @param data   消息
   */
-def ws(method: String, path: String, data: Any): Unit</code></pre>
+def ws(method: String, path: String, data: Any): Unit
+
+/**
+  * 移除推送消息
+  *
+  * @param method   连接方法，目前只限于 `REQUEST` 方法
+  * @param path     连接路径
+  * @param matchAll 是否匹配全路径，为false时只按前缀匹配
+  */
+def remove(method: String, path: String, matchAll: Boolean = true): Unit</code></pre>
 </div>
 </div>
 </div>
@@ -4629,7 +4692,7 @@ def ws(method: String, path: String, data: Any): Unit</code></pre>
 <pre>&lt;dependency&gt;
   &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
   &lt;artifactId&gt;ezf-auth&lt;/artifactId&gt;
-  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+  &lt;version&gt;3.0.0-beta2&lt;/version&gt;
 &lt;dependency&gt;</pre>
 </div>
 </div>
@@ -4858,7 +4921,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 <h4 id="true--27"><a class="anchor" href="#true--27"></a>8.6.1. 初始化新组织事件</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">ServiceAdapter.ezEvent_organizationInt.&lt;subscribe | subscribeOneNode&gt;({
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">ServiceAdapter.ezEvent_organizationInit.&lt;subscribe | subscribeOneNode&gt;({
   orgCode:String =&gt;
     // your code
 })</code></pre>
@@ -4965,6 +5028,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
   "email": String, // email
   "image": String, // 头像URL
   "organization_code": String, // 组织编码
+  "organization_name": String, // 组织名称
   "role_codes": List[String], // 角色编码列表
   "ext_id": String, // 扩展Id
   "ext_info": Map[String, Any] // 扩展信息
@@ -4979,6 +5043,26 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 </td>
 <td class="content">
 <code>ext_id</code>只在使用<code>extAccountStorage</code>时有意义
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="title">状态码</div>
+<div class="paragraph">
+<p>200 成功<br>
+400 传入参数错误<br>
+403 验证码错误<br>
+409 账号或密码错误<br>
+404 账号不存在
+423 账号或所属机构被锁定</p>
+</div>
 </td>
 </tr>
 </table>
@@ -5494,7 +5578,8 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 <pre class="highlightjs highlight"><code class="language-text" data-lang="text">{
   "code": String,  // 编码编码
   "name": String, // 组织名称
-  "image": String // 组织图标
+  "image": String, // 组织图标
+  "category": String // 组织类别
 }</code></pre>
 </div>
 </div>
@@ -5508,6 +5593,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
   "code": String,  // 编码编码
   "name": String, // 组织名称
   "image": String, // 组织图标
+  "category": String, // 组织类别
   "enable": Boolean, // 是否启用
   "create_user": String, // 创建用户login_id
   "create_org": String, // 创建组织编码
@@ -5536,7 +5622,8 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-text" data-lang="text">{
   "name": String, // 组织名称
-  "image": String // 组织图标
+  "image": String, // 组织图标
+  "category": String // 组织类别
 }</code></pre>
 </div>
 </div>
@@ -5547,7 +5634,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-只能修改<code>name</code>和<code>image</code>
+只能修改<code>name</code>、<code>image</code>和<code>category</code>
 </td>
 </tr>
 </table>
@@ -6576,7 +6663,7 @@ def testAuth(parameter: Map[String, String], body: Account_VO, context: EZAuthCo
 <pre>&lt;dependency&gt;
   &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
   &lt;artifactId&gt;ezf-message&lt;/artifactId&gt;
-  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+  &lt;version&gt;3.0.0-beta2&lt;/version&gt;
 &lt;dependency&gt;</pre>
 </div>
 </div>
@@ -6722,6 +6809,7 @@ MessageService.sendToAccount("@sysadmin", "cate1", "0", "msgSysAdmin1", "", star
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json" data-lang="json">[
   {
+    "id": "", // 消息Id
     "to_account": "", // 个人消息
     "to_role": "", // 角色消息
     "category": "", // 类型
@@ -6973,7 +7061,7 @@ def sendToRole(roleCode: String, category: String, level: String, content: Strin
 <pre>&lt;dependency&gt;
   &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
   &lt;artifactId&gt;ezf-email&lt;/artifactId&gt;
-  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+  &lt;version&gt;3.0.0-beta2&lt;/version&gt;
 &lt;dependency&gt;</pre>
 </div>
 </div>
@@ -7270,7 +7358,7 @@ EmailProcessor.send(
 <pre>&lt;dependency&gt;
   &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
   &lt;artifactId&gt;ezf-redis&lt;/artifactId&gt;
-  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+  &lt;version&gt;3.0.0-beta2&lt;/version&gt;
 &lt;dependency&gt;</pre>
 </div>
 </div>
@@ -7748,7 +7836,7 @@ RedisProcessor.get("n_test")</pre>
 <pre>&lt;dependency&gt;
   &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
   &lt;artifactId&gt;ezf-distributed&lt;/artifactId&gt;
-  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+  &lt;version&gt;3.0.0-beta2&lt;/version&gt;
 &lt;dependency&gt;</pre>
 </div>
 </div>
@@ -7984,11 +8072,13 @@ counter.delete()</pre>
 <div class="sect3">
 <h4 id="true--131"><a class="anchor" href="#true--131"></a>12.5.8. 分布式消息队列</h4>
 <div class="listingblock">
-<div class="title">DTopicService[M](key: String) &lt;1&gt;</div>
+<div class="title">DMQService[M](key: String) &lt;1&gt;</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">  def publish(message: M) // 发布消息
   def subscribe(fun: =&gt; M =&gt; Unit) // 订阅消息
-  def subscribeOneNode(fun: =&gt; M =&gt; Unit) // 订阅消息，一条消息只由一个节点处理</code></pre>
+  def subscribeOneNode(fun: =&gt; M =&gt; Unit) // 订阅消息，一条消息只由一个节点处理
+  def send(message: M) // 发送消息(point to point)
+  def receive(fun: =&gt; M =&gt; Unit) // 接收消息(point to point)</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -8000,14 +8090,65 @@ counter.delete()</pre>
 </table>
 </div>
 </div>
+<div class="sect3">
+<h4 id="true--132"><a class="anchor" href="#true--132"></a>12.5.9. 分布式服务监控</h4>
+<div class="paragraph">
+<p>此功能用监控服务状态,在需要被监控的服务中调用<code>DMonitorService.start()</code>即可开启监控</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+心跳默认时间间隔是<code>60秒</code>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>服务状态管理:</p>
+</div>
+<div class="listingblock">
+<div class="title">DMonitorService.Manager</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">/**
+  * 获取所有服务
+  *
+  * @return 所有服务
+  */
+def fetchAllServices: Map[String, DService]
+
+/**
+  * 删除一个服务
+  *
+  * @param key 要删除的服务key
+  */
+def removeAService(key: String): Unit
+
+/**
+  * 删除所有服务
+  */
+def removeAllServices(): Unit
+
+/**
+  * 获取服务状态报告
+  *
+  * @return 服务状态报告
+  */
+def fetchLiveReport: Map[String, Long]</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="true--132"><a class="anchor" href="#true--132"></a>13. 调度服务</h2>
+<h2 id="true--133"><a class="anchor" href="#true--133"></a>13. 调度服务</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="true--133"><a class="anchor" href="#true--133"></a>13.1. 功能</h3>
+<h3 id="true--134"><a class="anchor" href="#true--134"></a>13.1. 功能</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -8033,7 +8174,7 @@ counter.delete()</pre>
 <pre>&lt;dependency&gt;
   &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
   &lt;artifactId&gt;ezf-scheduler&lt;/artifactId&gt;
-  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+  &lt;version&gt;3.0.0-beta2&lt;/version&gt;
 &lt;dependency&gt;</pre>
 </div>
 </div>
@@ -8085,7 +8226,7 @@ SchedulerProcessor.save(scheduler) // 保存</pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--134"><a class="anchor" href="#true--134"></a>13.3. 依赖</h3>
+<h3 id="true--135"><a class="anchor" href="#true--135"></a>13.3. 依赖</h3>
 <div class="paragraph">
 <p>服务依赖：storage.mongo或storage.jdbc</p>
 </div>
@@ -8094,11 +8235,15 @@ SchedulerProcessor.save(scheduler) // 保存</pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--135"><a class="anchor" href="#true--135"></a>13.4. 配置</h3>
+<h3 id="true--136"><a class="anchor" href="#true--136"></a>13.4. 配置</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-json" data-lang="json">"scheduler": {
-  "storage": "" <i class="conum" data-value="1"></i><b>(1)</b>
+  "storage": "", <i class="conum" data-value="1"></i><b>(1)</b>
+  "customTables": {
+     "scheduler": "ez_scheduler", <i class="conum" data-value="2"></i><b>(2)</b>
+     "scheduler_Log": "ez_scheduler_Log" <i class="conum" data-value="3"></i><b>(3)</b>
+  }
 }</code></pre>
 </div>
 </div>
@@ -8107,6 +8252,14 @@ SchedulerProcessor.save(scheduler) // 保存</pre>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
 <td>持久化实现，支持<code>mongo</code>或<code>jdbc</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>自定义调度表名</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>自定义调度日志表名</td>
 </tr>
 </table>
 </div>
@@ -8124,7 +8277,7 @@ SchedulerProcessor.save(scheduler) // 保存</pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--136"><a class="anchor" href="#true--136"></a>13.5. 使用</h3>
+<h3 id="true--137"><a class="anchor" href="#true--137"></a>13.5. 使用</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-scala" data-lang="scala">=== 保存调度任务 ===
@@ -8178,7 +8331,7 @@ trait ScheduleJob {
 <h2 id="truekafka"><a class="anchor" href="#truekafka"></a>14. Kafka服务</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="true--137"><a class="anchor" href="#true--137"></a>14.1. 功能</h3>
+<h3 id="true--138"><a class="anchor" href="#true--138"></a>14.1. 功能</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -8198,7 +8351,7 @@ trait ScheduleJob {
 <pre>&lt;dependency&gt;
   &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
   &lt;artifactId&gt;ezf-kafka&lt;/artifactId&gt;
-  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+  &lt;version&gt;3.0.0-beta2&lt;/version&gt;
 &lt;dependency&gt;</pre>
 </div>
 </div>
@@ -8208,8 +8361,7 @@ trait ScheduleJob {
 <div class="literalblock">
 <div class="content">
 <pre>"kafka": {
-  "brokerList": "&lt;broker ip:port&gt;",
-  "zkList": "&lt;zookeeper ip:port&gt;"
+  "brokerList": "&lt;broker ip:port&gt;"
 }</pre>
 </div>
 </div>
@@ -8258,18 +8410,17 @@ for (i &lt;- 0 to 5) {
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--138"><a class="anchor" href="#true--138"></a>14.3. 依赖</h3>
+<h3 id="true--139"><a class="anchor" href="#true--139"></a>14.3. 依赖</h3>
 <div class="paragraph">
-<p>环境依赖：kafka 0.8.x</p>
+<p>环境依赖：kafka 0.9.x</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--139"><a class="anchor" href="#true--139"></a>14.4. 配置</h3>
+<h3 id="true--140"><a class="anchor" href="#true--140"></a>14.4. 配置</h3>
 <div class="listingblock">
 <div class="content">
 <pre>"kafka": {
-  "brokerList": "", <i class="conum" data-value="1"></i><b>(1)</b>
-  "zkList": "" <i class="conum" data-value="2"></i><b>(2)</b>
+  "brokerList": "" <i class="conum" data-value="1"></i><b>(1)</b>
 }</pre>
 </div>
 </div>
@@ -8279,15 +8430,11 @@ for (i &lt;- 0 to 5) {
 <td><i class="conum" data-value="1"></i><b>1</b></td>
 <td>Kafka broker地址列表，格式为: ip:port,&#8230;&#8203;</td>
 </tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Zookeeper地址列表，格式为: ip:port,&#8230;&#8203;</td>
-</tr>
 </table>
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--140"><a class="anchor" href="#true--140"></a>14.5. 使用</h3>
+<h3 id="true--141"><a class="anchor" href="#true--141"></a>14.5. 使用</h3>
 <div class="paragraph">
 <p>见示例<code>com.ecfront.ez.framework.examples.kafka</code></p>
 </div>
@@ -8305,55 +8452,68 @@ for (i &lt;- 0 to 5) {
   */
 case class Producer(topic: String, clientId: String) {
 
-  /**
-    * 发送消息
-    *
-    * @param message 消息
-    */
-  def send(message: String): Unit
+    /**
+      * 发送消息
+      *
+      * @param message   消息
+      * @param messageId 消息ID，默认自动生成UUID
+      */
+    def send(message: String, messageId: String = UUID.randomUUID().toString): Unit
 
-  /**
-    * 发送消息
-    *
-    * @param message 消息
-    * @return 是否成功 ,返回对应的消息ID（自动生成）和message
-    */
-  def sendFuture(message: String): Future[Resp[(String, String)]]
+    /**
+      * 发送消息
+      *
+      * @param message   消息
+      * @param messageId 消息ID，默认自动生成UUID
+      * @return 是否成功 ,返回对应的消息ID（自动生成）和message
+      */
+    def sendFuture(message: String, messageId: String = UUID.randomUUID().toString): Future[Resp[(String, String)]]
+
+    /**
+      * 发送需要回复的消息
+      *
+      * @param message  消息
+      * @param ackTopic 回复主题
+      * @param timeout  等待超时时间（ms）
+      * @return 回复的消息
+      */
+    def ack(message: String, ackTopic: String, timeout: Long = 30 * 1000): Resp[String]
 
 	/**
     * 关闭当前生产者
     */
-  def close(): Unit
+    def close(): Unit
 
 }
 
 /**
   * 消费者类
   *
-  * @param groupId            组ID，用于发布-订阅模式
   * @param topic              主题
+  * @param groupId            组ID，用于发布-订阅模式
   * @param autoCommit         是否自动提交
   * @param autoCommitInterval 自动提供间隔
   */
-case class Consumer(groupId: String, topic: String, autoCommit: Boolean = false, autoCommitInterval: Long = DEFAULT_AUTO_COMMIT_INTERVAL) {
+case class Consumer(topic: String,groupId: String, autoCommit: Boolean = false, autoCommitInterval: Long = DEFAULT_AUTO_COMMIT_INTERVAL) {
 
-/**
-    * 接收消息
-    *
-    * @param fun 收到消息后的回调方法
-    */
-  def receive(fun: ReceivedCallback): Unit
+    /**
+      * 接收消息
+      *
+      * @param fun      收到消息后的回调方法
+      * @param ackTopic 回复主题，如果存在会回复消息
+      */
+    def receive(fun: (String, String) =&gt; Resp[String], ackTopic: String = null): Unit
 
-	/**
-    * 关闭当前消费者
-    */
-  def close(): Unit
+    /**
+      * 关闭当前消费者
+      */
+    def close(): Unit
 
 }
 
-  /**
-  * 关闭所有实例
-  */
+/**
+* 关闭所有实例
+*/
 def close(): Unit</code></pre>
 </div>
 </div>
@@ -8364,7 +8524,7 @@ def close(): Unit</code></pre>
 <h2 id="truemaster-slave"><a class="anchor" href="#truemaster-slave"></a>15. Master-Slave服务</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="true--141"><a class="anchor" href="#true--141"></a>15.1. 功能</h3>
+<h3 id="true--142"><a class="anchor" href="#true--142"></a>15.1. 功能</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -8384,7 +8544,7 @@ def close(): Unit</code></pre>
 <pre>&lt;dependency&gt;
   &lt;groupId&gt;com.ecfront&lt;/groupId&gt;
   &lt;artifactId&gt;ezf-master-slave&lt;/artifactId&gt;
-  &lt;version&gt;3.0.0-SNAPSHOT&lt;/version&gt;
+  &lt;version&gt;3.0.0-beta2&lt;/version&gt;
 &lt;dependency&gt;</pre>
 </div>
 </div>
@@ -8397,8 +8557,7 @@ def close(): Unit</code></pre>
   "clusterId": "ez.test"
 },
 "kafka": {
-  "brokerList": "&lt;broker ip:port&gt;",
-  "zkList": "&lt;zookeeper ip:port&gt;"
+  "brokerList": "&lt;broker ip:port&gt;"
 }</pre>
 </div>
 </div>
@@ -8415,14 +8574,14 @@ def close(): Unit</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--142"><a class="anchor" href="#true--142"></a>15.3. 依赖</h3>
+<h3 id="true--143"><a class="anchor" href="#true--143"></a>15.3. 依赖</h3>
 <div class="paragraph">
 <p>服务依赖：kafka、redis(如果需要HA支持)
-环境依赖：kafka 0.8.x、redis 3.x</p>
+环境依赖：kafka 0.9.x、redis 3.x</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--143"><a class="anchor" href="#true--143"></a>15.4. 配置</h3>
+<h3 id="true--144"><a class="anchor" href="#true--144"></a>15.4. 配置</h3>
 <div class="listingblock">
 <div class="content">
 <pre>"masterslave": {
@@ -8466,7 +8625,7 @@ def close(): Unit</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="true--144"><a class="anchor" href="#true--144"></a>15.5. 使用</h3>
+<h3 id="true--145"><a class="anchor" href="#true--145"></a>15.5. 使用</h3>
 <div class="paragraph">
 <p>见示例<code>com.ecfront.ez.framework.examples.masterslave</code></p>
 </div>
@@ -8673,8 +8832,8 @@ def close(): Unit</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 3.0.0<br>
-Last updated 2016-05-03 09:58:41
+Version 3.0.0Beta2<br>
+Last updated 2016-06-21 16:34:17
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/github.min.css">
