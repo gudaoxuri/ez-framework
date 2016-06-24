@@ -139,6 +139,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
   }
 
   private def execute(request: HttpServerRequest, body: Any, fun: Fun[_], context: EZRPCContext, response: HttpServerResponse): Unit = {
+    logger.trace(s"Execute a request from ${context.remoteIP} to [${context.method}] ${context.realUri} | $body")
     EZAsyncInterceptorProcessor.process[EZRPCContext](HttpInterceptor.category, context).onSuccess {
       case interResp =>
         if (interResp) {
