@@ -15,11 +15,11 @@
     <description>EZ框架Parent POM</description>
     <url>https://github.com/gudaoxuri/ez-framework</url>
     <packaging>pom</packaging>
-    <version>3.0.0-beta2</version>
+    <version>3.0.0-beta3</version>
 
     <properties>
-        <ezf-version>3.0.0-beta2</ezf-version>
-        <vertx.version>3.2.1</vertx.version>
+        <ezf-version>3.0.0-beta3</ezf-version>
+        <vertx.version>3.3.0</vertx.version>
     </properties>
 
     <modules>

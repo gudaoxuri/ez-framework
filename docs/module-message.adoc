@@ -12,7 +12,7 @@
  <dependency>
    <groupId>com.ecfront</groupId>
    <artifactId>ezf-message</artifactId>
-   <version>3.0.0-beta2</version>
+   <version>3.0.0-beta3</version>
  <dependency>
 
 . 添加配置
