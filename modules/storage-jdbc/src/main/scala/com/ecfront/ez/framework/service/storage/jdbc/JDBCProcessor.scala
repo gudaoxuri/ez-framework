@@ -1,9 +1,9 @@
 package com.ecfront.ez.framework.service.storage.jdbc
 
+import java.util
 import java.util.Date
-import java.util.concurrent.atomic.AtomicLong
 
-import com.ecfront.common.{BeanHelper, JsonHelper, Resp}
+import com.ecfront.common.{BeanHelper, JsonHelper, Resp, StandardCode}
 import com.ecfront.ez.framework.service.storage.foundation.Page
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.json.{JsonArray, JsonObject}
@@ -213,7 +213,7 @@ object JDBCProcessor extends LazyLogging {
             case Success(connection) =>
               doUpdate(sql, p, finalParameterR.body, connection, autoClose = true)
             case Failure(ex) =>
-              logger.error("service unavailable",ex)
+              logger.error("service unavailable", ex)
               p.success(Resp.serverUnavailable(ex.getMessage))
           }
         }
@@ -234,7 +234,7 @@ object JDBCProcessor extends LazyLogging {
                 if (event.succeeded()) {
                   p.success(Resp.success(null))
                 } else {
-                  logger.warn(s"JDBC update error : $sql [$finalParameters]", event.cause())
+                  logger.warn(s"JDBC execute error : $sql [$finalParameters]", event.cause())
                   p.success(Resp.serverError(event.cause().getMessage))
                 }
               }
@@ -251,7 +251,7 @@ object JDBCProcessor extends LazyLogging {
                 if (event.succeeded()) {
                   p.success(Resp.success(null))
                 } else {
-                  logger.warn(s"JDBC update error : $sql [$finalParameters]", event.cause())
+                  logger.warn(s"JDBC execute error : $sql [$finalParameters]", event.cause())
                   p.success(Resp.serverError(event.cause().getMessage))
                 }
               }
@@ -284,7 +284,7 @@ object JDBCProcessor extends LazyLogging {
             case Success(connection) =>
               doBatch(sql, parameterList, p, connection, autoClose = true)
             case Failure(ex) =>
-              logger.error("service unavailable",ex)
+              logger.error("service unavailable", ex)
               p.success(Resp.serverUnavailable(ex.getMessage))
           }
         }
@@ -297,30 +297,22 @@ object JDBCProcessor extends LazyLogging {
     private def doBatch(sql: String, parameterList: List[List[Any]], p: Promise[Resp[Void]], conn: SQLConnection, autoClose: Boolean): Unit = {
       try {
         logger.trace(s"JDBC batch : $sql [$parameterList]")
-        val counter = new AtomicLong(parameterList.length)
-        parameterList.foreach {
-          parameters =>
-            val finalParameterR = formatParameters(parameters)
-            if (!finalParameterR) {
-              p.success(finalParameterR)
-            } else {
-              conn.updateWithParams(sql,
-                new JsonArray(finalParameterR.body),
-                new Handler[AsyncResult[UpdateResult]] {
-                  override def handle(event: AsyncResult[UpdateResult]): Unit = {
-                    if (!event.succeeded()) {
-                      logger.warn(s"JDBC execute error : $sql [${finalParameterR.body}]", event.cause())
-                    }
-                    if (counter.decrementAndGet() == 0) {
-                      if (autoClose) {
-                        conn.close()
-                      }
-                      p.success(Resp.success(null))
-                    }
-                  }
-                }
-              )
+        val finalParameterR = parameterList.map(formatParameters)
+        val errorR = finalParameterR.find(_.code != StandardCode.SUCCESS)
+        if (errorR.isDefined) {
+          p.success(errorR.get)
+        } else {
+          conn.batchWithParams(sql, finalParameterR.map(i => new JsonArray(i.body)), new Handler[AsyncResult[util.List[Integer]]] {
+            override def handle(event: AsyncResult[util.List[Integer]]): Unit = {
+              if (!event.succeeded()) {
+                logger.warn(s"JDBC execute error : $sql [$parameterList]", event.cause())
+              }
+              if (autoClose) {
+                conn.close()
+              }
+              p.success(Resp.success(null))
             }
+          })
         }
       } catch {
         case ex: Throwable =>
@@ -349,7 +341,7 @@ object JDBCProcessor extends LazyLogging {
           case Success(connection) =>
             doGet(sql, parameters, resultClass, p, connection, autoClose = true)
           case Failure(ex) =>
-            logger.error("service unavailable",ex)
+            logger.error("service unavailable", ex)
             p.success(Resp.serverUnavailable(ex.getMessage))
         }
       }
@@ -426,7 +418,7 @@ object JDBCProcessor extends LazyLogging {
           case Success(connection) =>
             doFind(sql, parameters, resultClass, p, connection, autoClose = true)
           case Failure(ex) =>
-            logger.error("service unavailable",ex)
+            logger.error("service unavailable", ex)
             p.success(Resp.serverUnavailable(ex.getMessage))
         }
       }
@@ -501,7 +493,7 @@ object JDBCProcessor extends LazyLogging {
           case Success(connection) =>
             doPage(sql, parameters, pageNumber, pageSize, resultClass, p, connection, autoClose = true)
           case Failure(ex) =>
-            logger.error("service unavailable",ex)
+            logger.error("service unavailable", ex)
             p.success(Resp.serverUnavailable(ex.getMessage))
         }
       }
@@ -586,7 +578,7 @@ object JDBCProcessor extends LazyLogging {
           case Success(connection) =>
             doCount(sql, parameters, p, connection, autoClose = true)
           case Failure(ex) =>
-            logger.error("service unavailable",ex)
+            logger.error("service unavailable", ex)
             p.success(Resp.serverUnavailable(ex.getMessage))
         }
       }
@@ -648,7 +640,7 @@ object JDBCProcessor extends LazyLogging {
           case Success(connection) =>
             doExist(sql, parameters, p, connection, autoClose = true)
           case Failure(ex) =>
-            logger.error("service unavailable",ex)
+            logger.error("service unavailable", ex)
             p.success(Resp.serverUnavailable(ex.getMessage))
         }
       }
