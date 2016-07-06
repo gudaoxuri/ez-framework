@@ -60,6 +60,7 @@ object CacheManager extends LazyLogging {
       account.image,
       account.organization_code,
       org.name,
+      org.category,
       account.role_codes,
       account.ext_id,
       account.ext_info
@@ -103,6 +104,7 @@ object CacheManager extends LazyLogging {
           account.image,
           oldTokenInfo.organization_code,
           oldTokenInfo.organization_name,
+          oldTokenInfo.organization_category,
           account.role_codes,
           account.ext_id,
           account.ext_info
