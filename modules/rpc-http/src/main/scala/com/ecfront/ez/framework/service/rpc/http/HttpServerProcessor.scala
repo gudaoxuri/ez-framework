@@ -49,7 +49,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
         if (ddosFilterR) {
           router(request, ip)
         } else {
-          returnContent(ddosFilterR, request.response(), "application/json", "application/json; charset=utf-8")
+          returnContent(ddosFilterR, request, "application/json", "application/json; charset=utf-8")
         }
       } catch {
         case ex: Throwable =>
@@ -87,7 +87,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
       execute(request, result._2, context)
     } else {
       AntiDDoSInterceptor.addIllegal(context.remoteIP)
-      returnContent(result._1, request.response(), context.accept, context.contentType)
+      returnContent(result._1, request, context.accept, context.contentType)
     }
   }
 
@@ -113,13 +113,13 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
           upload.exceptionHandler(new Handler[Throwable] {
             override def handle(e: Throwable): Unit = {
               logger.error(s"Upload error ${context.method}:${context.realUri} from ${context.remoteIP}")
-              returnContent(Resp.serverError(e.getMessage), request.response(), context.accept, context.contentType)
+              returnContent(Resp.serverError(e.getMessage), request, context.accept, context.contentType)
             }
           })
           upload.endHandler(new Handler[Void] {
             override def handle(e: Void): Unit = {
               context.contentType = "application/json; charset=utf-8"
-              execute(request, newName, fun, context, request.response())
+              execute(request, newName, fun, context)
             }
           })
           upload.streamToFileSystem(tPath)
@@ -129,16 +129,16 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
       // Post或Put请求，需要处理Body
       request.bodyHandler(new Handler[Buffer] {
         override def handle(data: Buffer): Unit = {
-          execute(request, data.getString(0, data.length), fun, context, request.response())
+          execute(request, data.getString(0, data.length), fun, context)
         }
       })
     } else {
       // Get或Delete请求
-      execute(request, null, fun, context, request.response())
+      execute(request, null, fun, context)
     }
   }
 
-  private def execute(request: HttpServerRequest, body: Any, fun: Fun[_], context: EZRPCContext, response: HttpServerResponse): Unit = {
+  private def execute(request: HttpServerRequest, body: Any, fun: Fun[_], context: EZRPCContext): Unit = {
     logger.trace(s"Execute a request from ${context.remoteIP} to [${context.method}] ${context.realUri} | $body")
     EZAsyncInterceptorProcessor.process[EZRPCContext](HttpInterceptor.category, context).onSuccess {
       case interResp =>
@@ -170,21 +170,22 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
               }
             }, false, new Handler[AsyncResult[Resp[Any]]] {
               override def handle(e: AsyncResult[Resp[Any]]): Unit = {
-                returnContent(e.result(), response, newContext.accept, newContext.contentType)
+                returnContent(e.result(), request, newContext.accept, newContext.contentType)
               }
             })
           } catch {
             case e: Exception =>
               logger.error("Request content error.", e)
-              returnContent(Resp.unsupportedMediaType(e.getMessage), response, newContext.accept, newContext.contentType)
+              returnContent(Resp.unsupportedMediaType(e.getMessage), request, newContext.accept, newContext.contentType)
           }
         } else {
-          returnContent(interResp, request.response(), context.accept, context.contentType)
+          returnContent(interResp, request, context.accept, context.contentType)
         }
     }
   }
 
-  private def returnContent(result: Any, response: HttpServerResponse, accept: String, contentType: String): Unit = {
+  private def returnContent(result: Any, request: HttpServerRequest, accept: String, contentType: String): Unit = {
+    val response = request.response()
     result match {
       case r: Resp[_] if r && r.body.isInstanceOf[File] =>
         val file = r.body.asInstanceOf[File]
@@ -194,7 +195,13 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
           response.putHeader("Content-Transfer-Encoding", "binary")
         } else {
           // 资源下载
-          response.putHeader("Content-disposition", "attachment; filename=" + URLEncoder.encode(file.getName, "UTF-8"))
+          val ua = if (request.headers().contains("User-Agent")) request.getHeader("User-Agent") else ""
+          val fileName = ua match {
+            case u if u.toLowerCase().contains("firefox") =>
+              response.putHeader("Content-disposition", "attachment; filename*=UTF-8''" + URLEncoder.encode(file.getName, "UTF-8"))
+            case _ =>
+              response.putHeader("Content-disposition", "attachment; filename=" + URLEncoder.encode(file.getName, "UTF-8"))
+          }
         }
         response.setStatusCode(HTTP_STATUS_200)
         response.sendFile(file.getPath)
