@@ -32,6 +32,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
 
   private val HTTP_STATUS_200: Int = 200
   private val HTTP_STATUS_302: Int = 302
+  val FLAG_FILE_NAME = "filename"
 
   override def handle(request: HttpServerRequest): Unit = {
     if (request.method().name() == "OPTIONS") {
@@ -195,16 +196,28 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
           response.putHeader("Content-Transfer-Encoding", "binary")
         } else {
           // 资源下载
+          val fileName = if (request.params().contains(FLAG_FILE_NAME)) request.getParam(FLAG_FILE_NAME) else file.getName
           val ua = if (request.headers().contains("User-Agent")) request.getHeader("User-Agent") else ""
-          val fileName = ua match {
+          ua match {
             case u if u.toLowerCase().contains("firefox") =>
-              response.putHeader("Content-disposition", "attachment; filename*=UTF-8''" + URLEncoder.encode(file.getName, "UTF-8"))
+              response.putHeader("Content-disposition", "attachment; filename*=UTF-8''" + URLEncoder.encode(fileName, "UTF-8"))
             case _ =>
-              response.putHeader("Content-disposition", "attachment; filename=" + URLEncoder.encode(file.getName, "UTF-8"))
+              response.putHeader("Content-disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8"))
           }
         }
         response.setStatusCode(HTTP_STATUS_200)
         response.sendFile(file.getPath)
+      case r: Resp[_] if r && r.body.isInstanceOf[DownloadFile] =>
+        val fileInfo = r.body.asInstanceOf[DownloadFile]
+        val ua = if (request.headers().contains("User-Agent")) request.getHeader("User-Agent") else ""
+        ua match {
+          case u if u.toLowerCase().contains("firefox") =>
+            response.putHeader("Content-disposition", "attachment; filename*=UTF-8''" + URLEncoder.encode(fileInfo.fileName, "UTF-8"))
+          case _ =>
+            response.putHeader("Content-disposition", "attachment; filename=" + URLEncoder.encode(fileInfo.fileName, "UTF-8"))
+        }
+        response.setStatusCode(HTTP_STATUS_200)
+        response.sendFile(fileInfo.file.getPath)
       case r: Resp[_] if r && r.body.isInstanceOf[RespRedirect] =>
         // 重定向
         response.putHeader("Location", r.body.asInstanceOf[RespRedirect].url)

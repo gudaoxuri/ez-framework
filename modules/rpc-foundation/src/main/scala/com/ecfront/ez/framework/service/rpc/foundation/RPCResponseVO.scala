@@ -24,3 +24,11 @@ case class Raw(raw: Any)
   * @param fileName  生成的文件名称
   */
 case class ReqFile(file: File, fieldName: String, fileName: String=null)
+
+/**
+  * 指定特殊文件名的下载文件VO
+  *
+  * @param file      要下载的文件
+  * @param fileName  文件名称
+  */
+case class DownloadFile(file: File, fileName: String)
