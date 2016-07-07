@@ -15,12 +15,12 @@ class HttpServerSpec extends MockStartupSpec {
     EZ_Resource.deleteByCond("")
 
     assert(JsonHelper.toObject[Resp[EZ_Resource]](HttpClientProcessor.get("http://127.0.0.1:8080/resource/1/")).body == null)
-    assert(JsonHelper.toObject[Resp[List[EZ_Resource]]](HttpClientProcessor.get("http://127.0.0.1:8080/resource/")).body.isEmpty)
+    assert(JsonHelper.toObject[Resp[List[EZ_Resource]]](HttpClientProcessor.get("http://127.0.0.1:8080/resource")).body.isEmpty)
 
     val res = EZ_Resource()
     assert(JsonHelper.toObject[Resp[EZ_Resource]](HttpClientProcessor.post("http://127.0.0.1:8080/resource/", res)).code == StandardCode.BAD_REQUEST)
 
-    assert(JsonHelper.toObject[Resp[EZ_Resource]](HttpClientProcessor.post("http://127.0.0.1:8080/resource/", EZ_Resource("1", "GET", "/ss"))).body.id != null)
+    assert(JsonHelper.toObject[Resp[EZ_Resource]](HttpClientProcessor.post("http://127.0.0.1:8080/resource", EZ_Resource("1", "GET", "/ss"))).body.id != null)
     assert(JsonHelper.toObject[Resp[EZ_Resource]](
       HttpClientProcessor.post("http://127.0.0.1:8080/resource/", EZ_Resource("1", "GET", "/ss"))).code == StandardCode.BAD_REQUEST)
 

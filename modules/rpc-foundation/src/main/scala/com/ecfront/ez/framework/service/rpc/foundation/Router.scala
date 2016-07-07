@@ -90,14 +90,16 @@ object Router extends LazyLogging {
                                 parameters: Map[String, String], ip: String): (Resp[_], Fun[_], Map[String, String], String) = {
     val newParameters = collection.mutable.Map[String, String]()
     newParameters ++= parameters
-    var urlTemplate = path
+    // 格式化path
+    val formatPath = if (path.endsWith("/")) path else path + "/"
+    var urlTemplate = formatPath
     if (ROUTERS(channel).funContainer.contains(method.toUpperCase)) {
-      var fun: Fun[_] = ROUTERS(channel).funContainer(method.toUpperCase).get(path).orNull
+      var fun: Fun[_] = ROUTERS(channel).funContainer(method.toUpperCase).get(formatPath).orNull
       if (fun == null) {
         // 使用正则路由
         ROUTERS(channel).funContainerR(method).foreach {
           item =>
-            val matcher = item.pattern.matcher(path)
+            val matcher = item.pattern.matcher(formatPath)
             if (matcher.matches()) {
               // 匹配到正则路由
               // 获取原始（注册时的）Path
@@ -138,16 +140,17 @@ object Router extends LazyLogging {
     if (!ROUTERS.contains(channel)) {
       ROUTERS += channel -> new Router
     }
-    // 格式化URL
-    logger.info(s"Register [${channel.toString}] method [$method] path : $path.")
-    if (path.contains(":")) {
+    // 格式化path
+    val formatPath = if (path.endsWith("/")) path else path + "/"
+    logger.info(s"Register [${channel.toString}] method [$method] path : $formatPath.")
+    if (formatPath.contains(":")) {
       // regular
-      val r = Router.getRegex(path)
+      val r = Router.getRegex(formatPath)
       // 注册到正则路由表
-      ROUTERS(channel).funContainerR(method) += RouterRContent(path, r._1, r._2, Fun[E](requestClass, fun))
+      ROUTERS(channel).funContainerR(method) += RouterRContent(formatPath, r._1, r._2, Fun[E](requestClass, fun))
     } else {
       // 注册到非正则路由表
-      ROUTERS(channel).funContainer(method) += (path -> Fun[E](requestClass, fun))
+      ROUTERS(channel).funContainer(method) += (formatPath -> Fun[E](requestClass, fun))
     }
   }
 
