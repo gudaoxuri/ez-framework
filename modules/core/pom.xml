@@ -25,7 +25,7 @@
     </scm>
 
     <properties>
-        <ez-common.version>0.6.9</ez-common.version>
+        <ez-common.version>1.0.0</ez-common.version>
     </properties>
 
     <dependencies>

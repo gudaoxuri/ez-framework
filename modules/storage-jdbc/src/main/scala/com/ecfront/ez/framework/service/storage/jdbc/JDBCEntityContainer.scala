@@ -9,7 +9,7 @@ private[jdbc] object JDBCEntityContainer extends BaseEntityContainer[JDBCEntityI
     val idFieldInfo = allAnnotations.find(_.annotation.isInstanceOf[Id]).orNull
     model.idFieldName = if (idFieldInfo != null) idFieldInfo.fieldName else BaseModel.Id_FLAG
     model.idStrategy = if (idFieldInfo != null) idFieldInfo.annotation.asInstanceOf[Id].strategy else "seq"
-    model.allFields = BeanHelper.findFields(clazz, filterAnnotations = Seq()).map {
+    model.allFields = BeanHelper.findFields(clazz, excludeAnnotations = Seq()).map {
       item =>
         val ttype = item._1 match {
           case name if idFieldInfo != null && idFieldInfo.fieldName == name && idFieldInfo.annotation.asInstanceOf[Id].strategy != "" =>

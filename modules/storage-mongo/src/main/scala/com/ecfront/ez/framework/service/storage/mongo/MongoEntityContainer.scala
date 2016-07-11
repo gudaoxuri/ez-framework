@@ -8,7 +8,7 @@ import scala.beans.BeanProperty
 private[mongo] object MongoEntityContainer extends BaseEntityContainer[MongoEntityInfo] {
 
   override def buildingEntityInfo(model: MongoEntityInfo, clazz: Class[_], allAnnotations: List[FieldAnnotationInfo]): Unit = {
-    model.ignoreFieldNames = BeanHelper.findFields(clazz, filterAnnotations = Seq()).filter {
+    model.ignoreFieldNames = BeanHelper.findFields(clazz, excludeAnnotations = Seq()).filter {
       field =>
         allAnnotations.filter(_.fieldName == field._1).exists {
           ann =>
