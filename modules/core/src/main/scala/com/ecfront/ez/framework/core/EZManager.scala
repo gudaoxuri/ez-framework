@@ -1,5 +1,7 @@
 package com.ecfront.ez.framework.core
 
+import java.util.TimeZone
+
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.i18n.I18NProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -193,6 +195,8 @@ object EZManager extends LazyLogging {
     val ezConfigR = startInParseConfig(configContent)
     if (ezConfigR) {
       val ezConfig = ezConfigR.body
+      val timezone = if (ezConfig.ez.timezone != null && ezConfig.ez.timezone.nonEmpty) ezConfig.ez.timezone else "Asia/Shanghai"
+      JsonHelper.setTimeZone(TimeZone.getTimeZone(timezone))
       EZContext.vertx = initVertx(ezConfig.ez.perf.toMap)
       EZContext.app = ezConfig.ez.app
       EZContext.perf = ezConfig.ez.perf.toMap

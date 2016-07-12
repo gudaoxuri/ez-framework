@@ -3,6 +3,7 @@
   "ez": {
     "app": "",
     "module": "",
+    "timezone": "Asia/Shanghai",
     "perf": {
       "eventLoopPoolSize": 2,
       "workerPoolSize": 20,
