@@ -2,7 +2,6 @@ package com.ecfront.ez.framework.service.auth.model
 
 import com.ecfront.common._
 import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
-import com.ecfront.ez.framework.service.auth.AuthService._
 import com.ecfront.ez.framework.service.auth.{CacheManager, OrganizationModel, OrganizationStorage, ServiceAdapter}
 import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, _}
 import com.ecfront.ez.framework.service.storage.jdbc.{JDBCProcessor, JDBCSecureStorage, JDBCStatusStorage}
