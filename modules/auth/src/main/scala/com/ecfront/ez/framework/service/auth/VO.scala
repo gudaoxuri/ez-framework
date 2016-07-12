@@ -1,5 +1,7 @@
 package com.ecfront.ez.framework.service.auth
 
+import java.util.Date
+
 /**
   * Token VO
   *
@@ -27,6 +29,7 @@ case class Token_Info_VO(
                           organization_name: String,
                           organization_category: String,
                           role_codes: List[String],
+                          lastLoginTime:Date,
                           ext_id: String,
                           ext_info: Map[String, Any])
 

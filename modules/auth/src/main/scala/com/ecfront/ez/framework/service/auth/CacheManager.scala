@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.service.auth
 
 import java.io.File
-import java.util.UUID
+import java.util.{Date, UUID}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import java.util.concurrent.locks.ReentrantLock
 
@@ -62,6 +62,7 @@ object CacheManager extends LazyLogging {
       org.name,
       org.category,
       account.role_codes,
+      new Date(),
       account.ext_id,
       account.ext_info
     )
@@ -106,6 +107,7 @@ object CacheManager extends LazyLogging {
           oldTokenInfo.organization_name,
           oldTokenInfo.organization_category,
           account.role_codes,
+          oldTokenInfo.lastLoginTime,
           account.ext_id,
           account.ext_info
         )
