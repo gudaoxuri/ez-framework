@@ -177,8 +177,8 @@ final class JDBCStatementHelper {
     }
 
     // temporal values
-    /*if (value instanceof Time) {
-      return ((Time) value).toLocalTime().atOffset(ZoneOffset.UTC).format(ISO_LOCAL_TIME);
+    if (value instanceof Time) {
+      return ((Time) value).toLocalTime().format(ISO_LOCAL_TIME);
     }
 
     if (value instanceof Date) {
@@ -186,8 +186,8 @@ final class JDBCStatementHelper {
     }
 
     if (value instanceof Timestamp) {
-      return OffsetDateTime.ofInstant(Instant.ofEpochMilli(((java.util.Date) value).getTime()), ZoneOffset.UTC).format(ISO_OFFSET_DATE_TIME);
-    }*/
+      return ((Timestamp) value).toLocalDateTime().format(ISO_LOCAL_DATE_TIME);
+    }
 
     // large objects
     if (value instanceof Clob) {
@@ -237,7 +237,7 @@ final class JDBCStatementHelper {
     }
 
     try {
-      /*// sql time
+      // sql time
       if (TIME.matcher(value).matches()) {
         // convert from local time to instant
         Instant instant = LocalTime.parse(value).atDate(LocalDate.of(1970, 1, 1)).toInstant(ZoneOffset.UTC);
@@ -261,7 +261,7 @@ final class JDBCStatementHelper {
       if (DATETIME.matcher(value).matches()) {
         Instant instant = Instant.from(ISO_INSTANT.parse(value));
         return new Timestamp(instant.toEpochMilli());
-      }*/
+      }
 
       /*// sql uuid
       if (UUID.matcher(value).matches()) {
