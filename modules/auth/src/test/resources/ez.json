@@ -4,7 +4,7 @@
     "module": "",
     "language": "zh-CN",
     "perf": {
-      "eventLoopPoolSize": 2,
+      "eventLoopPoolSize": 20,
       "workerPoolSize": 200,
       "internalBlockingPoolSize": 200
     },
@@ -43,12 +43,12 @@
       },
       "storage.jdbc": {
         "driver_class": "com.mysql.jdbc.Driver",
-        "url": "jdbc:mysql://192.168.4.99:3306/ez_test?characterEncoding=UTF-8&autoReconnect=true",
+        "url": "jdbc:mysql://10.0.75.1:3306/ez_test?characterEncoding=UTF-8&autoReconnect=true",
         "user": "root",
         "password": "123456"
       },
       "rpc.http": {
-        "servicePath": "com.ecfront.ez.framework.service.rpc.http.test",
+        "servicePath": "com.ecfront.ez.framework.service.auth.test",
         "webUrl": "http://localhost:63342/shtzsr/ui/index.html",
         "publicUrl": "http://127.0.0.1:8080/",
         "host": "0.0.0.0",
@@ -67,7 +67,7 @@
       },
       "distributed":{},
       "redis": {
-        "host": "192.168.4.99",
+        "host": "10.0.75.1",
         "port": 6379
       }
     }

@@ -42,26 +42,32 @@ object AutoBuildingProcessor extends LazyLogging {
     // 存在指定通道的方法，当存在指定通道时默认无效
     val specialChannels = BeanHelper.findMethodAnnotations(instance.getClass, Seq(annClazz))
 
-    BeanHelper.findMethodAnnotations(instance.getClass, Seq(classOf[GET], classOf[POST], classOf[PUT], classOf[DELETE], classOf[REQUEST])).foreach {
-      methodInfo =>
-        val methodName = methodInfo.method.name
-        val methodMirror = BeanHelper.invoke(instance, methodInfo.method)
-        val annInfo = methodInfo.annotation match {
-          case ann: GET =>
-            (Method.GET, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, null)
-          case ann: POST =>
-            (Method.POST, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
-          case ann: PUT =>
-            (Method.PUT, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
-          case ann: DELETE =>
-            (Method.DELETE, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, null)
-          case ann: REQUEST =>
-            (Method.REQUEST, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
+    try {
+      BeanHelper.findMethodAnnotations(instance.getClass, Seq(classOf[GET], classOf[POST], classOf[PUT], classOf[DELETE], classOf[REQUEST])).foreach {
+        methodInfo =>
+          val methodName = methodInfo.method.name
+          val methodMirror = BeanHelper.invoke(instance, methodInfo.method)
+          val annInfo = methodInfo.annotation match {
+            case ann: GET =>
+              (Method.GET, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, null)
+            case ann: POST =>
+              (Method.POST, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
+            case ann: PUT =>
+              (Method.PUT, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
+            case ann: DELETE =>
+              (Method.DELETE, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, null)
+            case ann: REQUEST =>
+              (Method.REQUEST, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
 
-        }
-        if (specialChannels.contains(methodName) || defaultChannel.isDefined) {
-          Router.add(annClazz.getSimpleName, annInfo._1, annInfo._2, annInfo._3, fun(annInfo._1, methodMirror))
-        }
+          }
+          if (specialChannels.contains(methodName) || defaultChannel.isDefined) {
+            Router.add(annClazz.getSimpleName, annInfo._1, annInfo._2, annInfo._3, fun(annInfo._1, methodMirror))
+          }
+      }
+    }catch {
+      case e:Throwable =>
+        logger.error(s"${instance.getClass} Method reflect error")
+        throw e
     }
   }
 

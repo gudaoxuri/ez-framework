@@ -18,7 +18,7 @@ IMPORTANT: 数据字段应避免使用null值，字符用""、数字用0（或�
  <dependency>
    <groupId>com.ecfront</groupId>
    <artifactId>ezf-storage-<mongo或jdbc></artifactId>
-   <version>3.0.0-beta3</version>
+   <version>3.0.0-beta4</version>
  <dependency>
 
 . 添加配置
