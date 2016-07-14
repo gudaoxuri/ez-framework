@@ -20,6 +20,7 @@ import org.w3c.dom.Document
 
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Promise
 
 /**
   * HTTP 服务操作
@@ -28,7 +29,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
   * @param accessControlAllowOrigin 允许跨域的域名
   */
 class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String = "*") extends Handler[HttpServerRequest] with LazyLogging {
-
 
   private val HTTP_STATUS_200: Int = 200
   private val HTTP_STATUS_302: Int = 302
@@ -141,46 +141,52 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
 
   private def execute(request: HttpServerRequest, body: Any, fun: Fun[_], context: EZRPCContext): Unit = {
     logger.trace(s"Execute a request from ${context.remoteIP} to [${context.method}] ${context.realUri} | $body")
-    EZAsyncInterceptorProcessor.process[EZRPCContext](HttpInterceptor.category, context).onSuccess {
-      case interResp =>
-        if (interResp) {
-          val newContext = interResp.body._1
-          try {
-            val b = if (body != null) {
-              newContext.contentType match {
-                case t if t.contains("json") => JsonHelper.toObject(body, fun.requestClass)
-                case t if t.contains("xml") =>
-                  if (fun.requestClass == classOf[Document]) {
-                    $(body.asInstanceOf[String]).document()
-                  } else if (fun.requestClass == classOf[String]) {
-                    body.asInstanceOf[String]
-                  } else {
-                    logger.warn(s"Not support return type [${fun.requestClass.getName}] by xml")
-                    null
-                  }
-                case _ =>
-                  logger.warn("Not support content type:" + newContext.contentType)
+    EZAsyncInterceptorProcessor.process[EZRPCContext](HttpInterceptor.category, context, {
+      (context, param) =>
+        val p = Promise[Resp[EZRPCContext]]()
+        try {
+          val b = if (body != null) {
+            context.contentType match {
+              case t if t.contains("json") => JsonHelper.toObject(body, fun.requestClass)
+              case t if t.contains("xml") =>
+                if (fun.requestClass == classOf[Document]) {
+                  $(body.asInstanceOf[String]).document()
+                } else if (fun.requestClass == classOf[String]) {
+                  body.asInstanceOf[String]
+                } else {
+                  logger.warn(s"Not support return type [${fun.requestClass.getName}] by xml")
                   null
-              }
-            } else {
-              null
+                }
+              case _ =>
+                logger.warn("Not support content type:" + context.contentType)
+                null
             }
-            EZContext.vertx.executeBlocking(new Handler[Future[Resp[Any]]] {
-              override def handle(e: Future[Resp[Any]]): Unit = {
-                e.complete(fun.execute(newContext.parameters, b, newContext))
-              }
-            }, false, new Handler[AsyncResult[Resp[Any]]] {
-              override def handle(e: AsyncResult[Resp[Any]]): Unit = {
-                returnContent(e.result(), request, newContext.accept, newContext.contentType)
-              }
-            })
-          } catch {
-            case e: Exception =>
-              logger.error("Request content error.", e)
-              returnContent(Resp.unsupportedMediaType(e.getMessage), request, newContext.accept, newContext.contentType)
+          } else {
+            null
           }
+          EZContext.vertx.executeBlocking(new Handler[Future[Resp[Any]]] {
+            override def handle(e: Future[Resp[Any]]): Unit = {
+              e.complete(fun.execute(context.parameters, b, context))
+            }
+          }, false, new Handler[AsyncResult[Resp[Any]]] {
+            override def handle(e: AsyncResult[Resp[Any]]): Unit = {
+              context.executeResult = e.result()
+              p.success(Resp.success(context))
+            }
+          })
+        } catch {
+          case e: Exception =>
+            logger.error("Request content error.", e)
+            p.success(Resp.unsupportedMediaType(e.getMessage))
+        }
+        p.future
+    }).onSuccess {
+      case resp =>
+        if (resp) {
+          val context = resp.body._1
+          returnContent(context.executeResult, request, context.accept, context.contentType)
         } else {
-          returnContent(interResp, request, context.accept, context.contentType)
+          returnContent(resp, request, context.accept, context.contentType)
         }
     }
   }

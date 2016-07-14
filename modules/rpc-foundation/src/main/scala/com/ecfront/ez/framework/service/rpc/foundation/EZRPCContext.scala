@@ -1,5 +1,6 @@
 package com.ecfront.ez.framework.service.rpc.foundation
 
+import com.ecfront.common.Resp
 import com.ecfront.ez.framework.service.storage.foundation.EZStorageContext
 
 import scala.beans.BeanProperty
@@ -24,6 +25,8 @@ class EZRPCContext {
   @BeanProperty var accept: String = _
   // 请求的ContentType
   @BeanProperty var contentType: String = _
+  // 处理结果
+  @BeanProperty var executeResult: Any = _
 
   /**
     * 在某些情况下（如Simple Service中）必须使用显示方法来转换
