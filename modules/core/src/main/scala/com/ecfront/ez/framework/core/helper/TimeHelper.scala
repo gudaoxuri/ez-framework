@@ -1,7 +1,8 @@
 package com.ecfront.ez.framework.core.helper
 
 import java.text.SimpleDateFormat
-import java.util.{Calendar, Date}
+import java.time.ZonedDateTime
+import java.util.{Calendar, Date, TimeZone}
 
 /**
   * 时间辅助类
@@ -35,6 +36,13 @@ object TimeHelper {
     calendar.setTime(currentDate)
     calendar.add(offsetUnit, offsetValue)
     calendar.getTime
+  }
+
+  def utc2Local(utcTime: String, localTimePatten: String = "yyyy-MM-dd'T'HH:mm:ss"): String = {
+    val utcDate = Date.from(ZonedDateTime.parse(utcTime).toInstant)
+    val localF = new SimpleDateFormat(localTimePatten)
+    localF.setTimeZone(TimeZone.getDefault)
+    localF.format(utcDate.getTime)
   }
 
 }

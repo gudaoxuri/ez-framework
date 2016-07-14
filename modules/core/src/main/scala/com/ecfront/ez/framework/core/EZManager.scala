@@ -22,9 +22,9 @@ object EZManager extends LazyLogging {
   System.setProperty("vertx.disableFileCPResolving", "true")
 
   // EZ服务配置项容器
-  private var ezServiceConfig: Map[String, Any] = null
+  private var ezServiceConfig: Map[String, Any] = _
   // EZ服务容器
-  private var ezServices: List[EZServiceAdapter[_]] = null
+  private var ezServices: List[EZServiceAdapter[_]] = _
 
   private val FLAG_PERF_EVENT_LOOP_POOL_SIZE = "eventLoopPoolSize"
   private val FLAG_PERF_WORKER_POOL_SIZE = "workerPoolSize"
@@ -195,12 +195,11 @@ object EZManager extends LazyLogging {
     val ezConfigR = startInParseConfig(configContent)
     if (ezConfigR) {
       val ezConfig = ezConfigR.body
-      val timezone = if (ezConfig.ez.timezone != null && ezConfig.ez.timezone.nonEmpty) ezConfig.ez.timezone else "Asia/Shanghai"
-      JsonHelper.setTimeZone(TimeZone.getTimeZone(timezone))
       EZContext.vertx = initVertx(ezConfig.ez.perf.toMap)
       EZContext.app = ezConfig.ez.app
       EZContext.perf = ezConfig.ez.perf.toMap
       EZContext.module = ezConfig.ez.module
+      EZContext.timezone = ezConfig.ez.timezone
       EZContext.instance = ezConfig.ez.instance
       EZContext.language = ezConfig.ez.language
       EZContext.args = new JsonObject(JsonHelper.toJsonString(ezConfig.args))

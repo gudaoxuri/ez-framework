@@ -15,6 +15,8 @@ object EZContext extends LazyLogging {
   var app: String = _
   // 模块名称，来自配置文件
   var module: String = _
+  // 时区，来自配置文件
+  var timezone: String = _
   // 实例名称，来自配置文件,同一app和module下不能重复,不存在时等于(ip+工程路径).hash
   var instance: String = _
   // 语言
