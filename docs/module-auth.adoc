@@ -80,6 +80,10 @@
   "loginLimit": { <22>
     "showCaptcha":2147483647 <23>
   },
+  "encrypt": { <24>
+    "algorithm": "SHA-256|MD5|bcrypt", <25>
+    "salt": "" <26>
+  }
 }
 ----
 <1> 是否允许注册，注册后账户处于禁用状态，需要激活
@@ -105,6 +109,9 @@
 <21> 持久化实现，支持`mongo`或`jdbc`
 <22> 登录限制
 <23> 在连续多次登录失败后显示验证码
+<24> 加密规则
+<25> 加密算法，支持MD5、SHA、BCrypt
+<26> 自定义盐值，默认只使用loginId做盐值
 
 NOTE: `storage:jdbc & useRelTable不存在或等于false`时请执行`ez_ddl.sql`以创建基础表，`storage:jdbc & useRelTable=true`时请执行`ez_ddl_with_rel.sql`以创建带关联表的基础表
 

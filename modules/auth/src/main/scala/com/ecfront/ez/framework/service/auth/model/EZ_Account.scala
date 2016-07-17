@@ -377,7 +377,12 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
   }
 
   def packageEncryptPwd(loginId: String, password: String): String = {
-    EncryptHelper.encrypt(loginId + password)
+    EncryptHelper.encrypt(ServiceAdapter.encrypt_salt + loginId + password, ServiceAdapter.encrypt_algorithm)
+  }
+
+  def validateEncryptPwd(loginId: String, password: String, encryptPassword: String): Boolean = {
+    EncryptHelper.validate(
+      ServiceAdapter.encrypt_salt + loginId + password, encryptPassword, ServiceAdapter.encrypt_algorithm)
   }
 
   def findByOrganizationCode(organizationCode: String): Resp[List[EZ_Account]]

@@ -13,7 +13,7 @@
         "allowRegister": true,
         "customLogin": false,
         "loginLimit": {
-          "showCaptcha":3
+          "showCaptcha": 3
         },
         "selfActive": true,
         "defaultRoleFlag": "user",
@@ -22,8 +22,8 @@
         "loginUrl": "#/auth/login",
         "loginKeepSeconds": 0,
         "activeKeepSeconds": 86400,
-         "extAccountStorage": "com.ecfront.ez.framework.service.auth.Ext_Test_Account",
-          "useRelTable": true,
+        "extAccountStorage": "com.ecfront.ez.framework.service.auth.Ext_Test_Account",
+        "useRelTable": true,
         /* "customTables": {
             "organization": "soa_organization",
             "account": "soa_account",
@@ -34,6 +34,10 @@
             "rel_role_resource": "soa_rel_role_resource",
             "rel_menu_role": "soa_rel_menu_role"
           },*/
+       /* "encrypt": {
+          "algorithm": "bcrypt",
+          "salt": "vsefuj3iee3m3"
+        },*/
         "storage": "jdbc"
       },
       "storage.mongo": {
@@ -65,7 +69,7 @@
         "username": "test@ecfront.com",
         "password": ""
       },
-      "distributed":{},
+      "distributed": {},
       "redis": {
         "host": "10.0.75.1",
         "port": 6379

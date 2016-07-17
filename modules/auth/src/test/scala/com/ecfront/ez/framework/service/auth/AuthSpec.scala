@@ -1,6 +1,5 @@
 package com.ecfront.ez.framework.service.auth
 
-import com.ecfront.common.EncryptHelper
 import com.ecfront.ez.framework.core.test.MockStartupSpec
 import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Resource, EZ_Role}
 import com.ecfront.ez.framework.service.rpc.foundation.Method
@@ -34,14 +33,14 @@ class AuthSpec extends MockStartupSpec {
       accounts.size == 2
         && accounts.last.login_id == EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID
         && accounts.last.name == "Sys Admin"
-        && accounts.last.password == EncryptHelper.encrypt(EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID + "admin")
+        && EZ_Account.validateEncryptPwd(EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID, "admin", accounts.last.password)
         && accounts.last.organization_code == ServiceAdapter.defaultOrganizationCode
         && accounts.last.role_codes.size == 1
     )
 
     // login
-    assert(!AuthService.doLogin(EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID, "errorpwd", "","",new EZAuthContext))
-    val loginResp = AuthService.doLogin(EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID, "admin", "","",new EZAuthContext)
+    assert(!AuthService.doLogin(EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID, "errorpwd", "", "", new EZAuthContext))
+    val loginResp = AuthService.doLogin(EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID, "admin", "", "", new EZAuthContext)
     assert(loginResp
       && loginResp.body.token != ""
       && loginResp.body.login_id == EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID

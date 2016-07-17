@@ -5,8 +5,6 @@ import java.util.UUID
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.core.helper.FileType
-import com.ecfront.ez.framework.service.auth.AuthService._
-import com.ecfront.ez.framework.service.auth.CacheManager._
 import com.ecfront.ez.framework.service.auth._
 import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Role}
 import com.ecfront.ez.framework.service.email.EmailProcessor
@@ -152,7 +150,7 @@ object AccountService extends SimpleHTTPService[EZ_Account, EZAuthContext] {
         if (accountR.body != null) {
           val account = accountR.body
           // 验证密码
-          if (EZ_Account.packageEncryptPwd(account.login_id, body.current_password) == account.password) {
+          if (EZ_Account.validateEncryptPwd(account.login_id, body.current_password,account.password)) {
             if (body.new_password != null && body.new_password.nonEmpty) {
               account.password = body.new_password
             } else {

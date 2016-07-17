@@ -36,6 +36,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   var loginKeepSeconds: Long = _
   var activeKeepSeconds: Long = _
   var loginLimit_showCaptcha: Int = _
+  var encrypt_algorithm: String = _
+  var encrypt_salt: String = _
 
   override def init(parameter: JsonObject): Resp[String] = {
     publicUriPrefix = parameter.getString("publicUriPrefix", "/public/")
@@ -69,6 +71,18 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     loginUrl = parameter.getString("loginUrl", "#/auth/login")
     loginKeepSeconds = parameter.getLong("loginKeepSeconds", 0L)
     activeKeepSeconds = parameter.getLong("activeKeepSeconds", 24L * 60 * 60)
+    encrypt_algorithm =
+      if (parameter.containsKey("encrypt") && parameter.getJsonObject("encrypt").containsKey("algorithm")) {
+        parameter.getJsonObject("encrypt").getString("algorithm")
+      } else {
+        "SHA-256"
+      }
+    encrypt_salt =
+      if (parameter.containsKey("encrypt") && parameter.getJsonObject("encrypt").containsKey("salt")) {
+        parameter.getJsonObject("encrypt").getString("salt")
+      } else {
+        ""
+      }
     EZ_Account.init(parameter.getString("extAccountStorage", null))
     if (!loginUrl.toLowerCase().startsWith("http")) {
       loginUrl = com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.webUrl + loginUrl
