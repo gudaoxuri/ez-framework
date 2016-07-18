@@ -21,7 +21,7 @@
  <dependency>
    <groupId>com.ecfront</groupId>
    <artifactId>ezf-rpc-<http或websocket></artifactId>
-   <version>3.0.0-beta4</version>
+   <version>3.0.0</version>
  <dependency>
 
 . 添加配置
