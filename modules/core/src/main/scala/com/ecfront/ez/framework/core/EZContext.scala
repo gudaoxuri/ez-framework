@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.core
 
 import java.net.InetAddress
+import java.util.UUID
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.Vertx
@@ -54,5 +55,7 @@ object EZContext extends LazyLogging {
     logger.info(s"Config path is : $confPath")
     confPath
   }
+
+  def createUUID(): String = UUID.randomUUID().toString.replace("-", "")
 
 }

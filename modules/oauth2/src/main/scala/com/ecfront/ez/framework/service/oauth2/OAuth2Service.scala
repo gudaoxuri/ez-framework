@@ -1,11 +1,9 @@
 package com.ecfront.ez.framework.service.oauth2
 
-import java.util.UUID
-
 import com.ecfront.common.Resp
+import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.service.auth._
 import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Organization, EZ_Role}
-import com.ecfront.ez.framework.service.email.EmailProcessor._
 import com.ecfront.ez.framework.service.rpc.foundation.{GET, RPC, RespRedirect}
 import com.ecfront.ez.framework.service.rpc.http.HTTP
 import com.ecfront.ez.framework.service.storage.foundation.BaseModel
@@ -53,7 +51,7 @@ object OAuth2Service extends LazyLogging{
           } else {
             oauthAccount.login_id = oauthAccount.oauth(appName) + "." + appName
             oauthAccount.email = oauthAccount.oauth(appName) + "." + appName + EZ_Account.VIRTUAL_EMAIL
-            oauthAccount.password = UUID.randomUUID().toString
+            oauthAccount.password = EZContext.createUUID()
             oauthAccount.organization_code = org.code
             oauthAccount.role_codes = List(oauthAccount.organization_code + BaseModel.SPLIT + EZ_Role.USER_ROLE_FLAG)
             oauthAccount.enable = true

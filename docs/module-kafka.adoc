@@ -92,7 +92,7 @@ case class Producer(topic: String, clientId: String) {
       * @param message   消息
       * @param messageId 消息ID，默认自动生成UUID
       */
-    def send(message: String, messageId: String = UUID.randomUUID().toString): Unit
+    def send(message: String, messageId: String = EZContext.createUUID()): Unit
 
     /**
       * 发送消息
@@ -101,7 +101,7 @@ case class Producer(topic: String, clientId: String) {
       * @param messageId 消息ID，默认自动生成UUID
       * @return 是否成功 ,返回对应的消息ID（自动生成）和message
       */
-    def sendFuture(message: String, messageId: String = UUID.randomUUID().toString): Future[Resp[(String, String)]]
+    def sendFuture(message: String, messageId: String = EZContext.createUUID()): Future[Resp[(String, String)]]
 
     /**
       * 发送需要回复的消息

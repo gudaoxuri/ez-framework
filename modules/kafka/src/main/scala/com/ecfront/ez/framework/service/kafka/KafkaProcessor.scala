@@ -1,10 +1,11 @@
 package com.ecfront.ez.framework.service.kafka
 
 import java.util
+import java.util.Properties
 import java.util.concurrent.{ConcurrentHashMap, Executors}
-import java.util.{Properties, UUID}
 
 import com.ecfront.common.Resp
+import com.ecfront.ez.framework.core.EZContext
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer, OffsetAndMetadata, OffsetCommitCallback}
 import org.apache.kafka.clients.producer._
@@ -70,7 +71,7 @@ object KafkaProcessor extends LazyLogging {
       * @param message   消息
       * @param messageId 消息ID，默认自动生成UUID
       */
-    def send(message: String, messageId: String = UUID.randomUUID().toString): Unit = {
+    def send(message: String, messageId: String = EZContext.createUUID()): Unit = {
       logger.trace(s"Kafka topic [$topic] send a message[$messageId] : $message")
       producer.send(new ProducerRecord[String, String](topic, messageId, message), new Callback {
         override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {
@@ -88,7 +89,7 @@ object KafkaProcessor extends LazyLogging {
       * @param messageId 消息ID，默认自动生成UUID
       * @return 是否成功 ,返回对应的消息ID（自动生成）和message
       */
-    def sendFuture(message: String, messageId: String = UUID.randomUUID().toString): Future[Resp[(String, String)]] = {
+    def sendFuture(message: String, messageId: String = EZContext.createUUID()): Future[Resp[(String, String)]] = {
       val p = Promise[Resp[(String, String)]]()
       logger.trace(s"Kafka topic [$topic] send a message[$messageId] : $message")
       producer.send(new ProducerRecord[String, String](topic, messageId, message), new Callback {
@@ -125,7 +126,7 @@ object KafkaProcessor extends LazyLogging {
             Resp.success(null)
         })
       }
-      val messageId = UUID.randomUUID().toString
+      val messageId = EZContext.createUUID()
       send(message, messageId)
       val expireTime = System.currentTimeMillis() + timeout
       val ackMessageQueue = localQueues(ackTopic)

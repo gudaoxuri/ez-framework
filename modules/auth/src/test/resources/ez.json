@@ -22,7 +22,7 @@
         "loginUrl": "#/auth/login",
         "loginKeepSeconds": 0,
         "activeKeepSeconds": 86400,
-        "extAccountStorage": "com.ecfront.ez.framework.service.auth.Ext_Test_Account",
+        // "extAccountStorage": "com.ecfront.ez.framework.service.auth.Ext_Test_Account",
         "useRelTable": true,
         /* "customTables": {
             "organization": "soa_organization",

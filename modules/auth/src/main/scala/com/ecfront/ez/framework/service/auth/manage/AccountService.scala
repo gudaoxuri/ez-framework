@@ -1,7 +1,5 @@
 package com.ecfront.ez.framework.service.auth.manage
 
-import java.util.UUID
-
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.core.helper.FileType
@@ -50,7 +48,7 @@ object AccountService extends SimpleHTTPService[EZ_Account, EZAuthContext] {
       val saveR = EZ_Account.save(account, context)
       if (saveR) {
         if (ServiceAdapter.selfActive) {
-          val encryption = UUID.randomUUID().toString + System.nanoTime()
+          val encryption = EZContext.createUUID() + System.nanoTime()
           CacheManager.addActiveAccount(encryption, saveR.body.code)
           val activeUrl = com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.publicUrl +
             s"public/active/account/$encryption/"
@@ -150,7 +148,7 @@ object AccountService extends SimpleHTTPService[EZ_Account, EZAuthContext] {
         if (accountR.body != null) {
           val account = accountR.body
           // 验证密码
-          if (EZ_Account.validateEncryptPwd(account.login_id, body.current_password,account.password)) {
+          if (EZ_Account.validateEncryptPwd(account.login_id, body.current_password, account.password)) {
             if (body.new_password != null && body.new_password.nonEmpty) {
               account.password = body.new_password
             } else {
@@ -191,7 +189,7 @@ object AccountService extends SimpleHTTPService[EZ_Account, EZAuthContext] {
     // 找回密码只针对默认组织
     val accountR = EZ_Account.getByEmail(email, ServiceAdapter.defaultOrganizationCode)
     if (accountR && accountR.body != null) {
-      val encryption = UUID.randomUUID().toString + System.nanoTime()
+      val encryption = EZContext.createUUID() + System.nanoTime()
       CacheManager.addActiveNewPassword(encryption, accountR.body.code, newPassword)
       val activeUrl = com.ecfront.ez.framework.service.rpc.http.ServiceAdapter.publicUrl +
         s"public/active/password/$encryption/"

@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.service.auth.model
 
 import com.ecfront.common._
+import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 import com.ecfront.ez.framework.service.auth.{CacheManager, OrganizationModel, OrganizationStorage, ServiceAdapter}
 import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, _}
@@ -21,7 +22,7 @@ case class EZ_Account() extends SecureModel with StatusModel with OrganizationMo
   @Label("Code") // organization_code@login_id
   @BeanProperty var code: String = _
   @Require
-  @Label("Login Id") // 不能包含@
+  @Label("Login Id")
   @BeanProperty var login_id: String = _
   @Require
   @Label("Name")
@@ -133,51 +134,45 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
       logger.warn(s"Require【Login_id】【password】【email】")
       Resp.badRequest("Require【Login_id】【password】【email】")
     } else {
-      // 当账号不是oauth类型且登录ld包含@时，拒绝保存
-      if ((model.oauth == null || model.oauth.isEmpty) && (model.login_id.contains(BaseModel.SPLIT) || model.login_id.contains("."))) {
-        logger.warn(s"【login id】can't contains ${BaseModel.SPLIT} .")
-        Resp.badRequest(s"【login id】can't contains ${BaseModel.SPLIT} .")
-      } else {
-        if (FormatHelper.validEmail(model.email)) {
-          if (model.exchange_pwd != null && model.exchange_pwd.trim.nonEmpty) {
-            model.password = model.exchange_pwd
-          } else {
-            model.password = packageEncryptPwd(model.login_id, model.password)
-          }
-          if (existByEmail(model.email, model.organization_code).body) {
-            logger.warn("【email】exist")
-            Resp.badRequest("【email】exist")
-          } else {
-            model.code = assembleCode(model.login_id, model.organization_code)
-            if (model.image == null) {
-              model.image = ""
-            }
-            if (model.organization_code == null) {
-              model.organization_code = ServiceAdapter.defaultOrganizationCode
-            }
-            if (model.oauth == null) {
-              model.oauth = Map()
-            }
-            if (model.ext_id == null) {
-              model.ext_id = ""
-            }
-            if (model.ext_info == null) {
-              model.ext_info = Map()
-            }
-            if (ServiceAdapter.useRelTable) {
-              model.exchange_role_codes = model.role_codes
-              model.role_codes = null
-            }
-            if (EZ_Account.extAccountStorage != null) {
-              model.exchange_ext_info = model.ext_info
-              model.ext_info = Map()
-            }
-            super.preSave(model, context)
-          }
+      if (FormatHelper.validEmail(model.email)) {
+        if (model.exchange_pwd != null && model.exchange_pwd.trim.nonEmpty) {
+          model.password = model.exchange_pwd
         } else {
-          logger.warn("【email】format error")
-          Resp.badRequest("【email】format error")
+          model.password = packageEncryptPwd(model.login_id, model.password)
         }
+        if (existByEmail(model.email, model.organization_code).body) {
+          logger.warn("【email】exist")
+          Resp.badRequest("【email】exist")
+        } else {
+          model.code = EZContext.createUUID()
+          if (model.image == null) {
+            model.image = ""
+          }
+          if (model.organization_code == null) {
+            model.organization_code = ServiceAdapter.defaultOrganizationCode
+          }
+          if (model.oauth == null) {
+            model.oauth = Map()
+          }
+          if (model.ext_id == null) {
+            model.ext_id = ""
+          }
+          if (model.ext_info == null) {
+            model.ext_info = Map()
+          }
+          if (ServiceAdapter.useRelTable) {
+            model.exchange_role_codes = model.role_codes
+            model.role_codes = null
+          }
+          if (EZ_Account.extAccountStorage != null) {
+            model.exchange_ext_info = model.ext_info
+            model.ext_info = Map()
+          }
+          super.preSave(model, context)
+        }
+      } else {
+        logger.warn("【email】format error")
+        Resp.badRequest("【email】format error")
       }
     }
   }
@@ -371,10 +366,6 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
 
   override def preUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, String, List[Any])] =
     Resp.notImplemented("")
-
-  def assembleCode(loginId: String, organization_code: String): String = {
-    organization_code + BaseModel.SPLIT + loginId
-  }
 
   def packageEncryptPwd(loginId: String, password: String): String = {
     EncryptHelper.encrypt(ServiceAdapter.encrypt_salt + loginId + password, ServiceAdapter.encrypt_algorithm)

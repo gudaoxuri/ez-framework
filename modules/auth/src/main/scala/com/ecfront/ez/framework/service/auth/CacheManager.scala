@@ -1,11 +1,12 @@
 package com.ecfront.ez.framework.service.auth
 
 import java.io.File
-import java.util.{Date, UUID}
+import java.util.Date
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import java.util.concurrent.locks.ReentrantLock
 
 import com.ecfront.common.{JsonHelper, Resp}
+import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.service.auth.model._
 import com.ecfront.ez.framework.service.redis.RedisProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -52,8 +53,8 @@ object CacheManager extends LazyLogging {
     tokenLock.lock()
     removeToken(account.code)
     val newTokenInfo = Token_Info_VO(
-      UUID.randomUUID().toString,
-      EZ_Account.assembleCode(account.login_id, account.organization_code),
+      EZContext.createUUID(),
+      account.code,
       account.login_id,
       account.name,
       account.email,
@@ -98,7 +99,7 @@ object CacheManager extends LazyLogging {
       } else {
         val newTokenInfo = Token_Info_VO(
           token,
-          EZ_Account.assembleCode(account.login_id, account.organization_code),
+          account.code,
           account.login_id,
           account.name,
           account.email,
