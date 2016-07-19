@@ -3,6 +3,7 @@ package com.ecfront.ez.framework.service.distributed
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicLong
 
+import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.test.MockStartupSpec
 import com.ecfront.ez.framework.service.redis.RedisProcessor
 import io.vertx.core.json.JsonObject
@@ -25,6 +26,7 @@ class DMQServiceSpec extends MockStartupSpec {
         println("Subscribe1..." + msg.name)
         result += msg.name
         c.countDown()
+        Resp.success(null)
     })
 
     mq.subscribe({
@@ -32,6 +34,7 @@ class DMQServiceSpec extends MockStartupSpec {
         println("Subscribe2..." + msg.name)
         result += msg.name
         c.countDown()
+        Resp.success(null)
     })
 
     val model1 = TestModel()
@@ -63,6 +66,7 @@ class DMQServiceSpec extends MockStartupSpec {
     mq.subscribeOneNode({
       msg =>
         println(Thread.currentThread().getId + " subscribe..." + msg.name)
+        Resp.success(null)
     })
 
     new CountDownLatch(1).await()
@@ -93,6 +97,7 @@ class DMQServiceSpec extends MockStartupSpec {
       resp =>
         assert(resp.getString("1") == "1111")
         counter.countDown()
+        Resp.success(null)
     }
     counter.await()
   }
@@ -110,6 +115,7 @@ class DMQServiceSpec extends MockStartupSpec {
             msg =>
               println(Thread.currentThread().getId + " receive..." + msg.name)
               container += msg.name.toLong
+              Resp.success(null)
           })
         }
       }).start()
@@ -137,6 +143,41 @@ class DMQServiceSpec extends MockStartupSpec {
     assert(container.length == container.distinct.length)
 
     RedisProcessor.redis.shutdown()
+  }
+
+  test("DTopic point to point 错误测试——part1") {
+    val counter = new CountDownLatch(2)
+    val mq = DMQService[JsonObject]("test_topic1111")
+    mq.send(new JsonObject().put("1", "1111"))
+    mq.send(new JsonObject().put("2", "2222"))
+    mq.receive {
+      resp =>
+        counter.countDown()
+        Resp.badRequest(null)
+    }
+    counter.await()
+  }
+
+  test("DTopic point to point 错误测试——part2") {
+    val counter = new CountDownLatch(2)
+    val mq = DMQService[JsonObject]("test_topic1111")
+    mq.receive {
+      resp =>
+        counter.countDown()
+        Resp.badRequest(null)
+    }
+    counter.await()
+  }
+
+  test("DTopic point to point 错误测试——part3") {
+    val counter = new CountDownLatch(2)
+    val mq = DMQService[JsonObject]("test_topic1111")
+    mq.receive {
+      resp =>
+        counter.countDown()
+        Resp.success(null)
+    }
+    counter.await()
   }
 
 }

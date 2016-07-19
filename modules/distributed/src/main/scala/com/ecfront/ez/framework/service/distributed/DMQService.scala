@@ -2,10 +2,12 @@ package com.ecfront.ez.framework.service.distributed
 
 import java.util.concurrent.{Executors, TimeUnit}
 
-import com.ecfront.common.JsonHelper
+import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.service.redis.RedisProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import org.redisson.core.{MessageListener, RBlockingQueue, RTopic}
+import org.redisson.core._
+
+import scala.collection.JavaConversions._
 
 /**
   * 分布式消息队列
@@ -17,6 +19,7 @@ case class DMQService[M](key: String) extends LazyLogging {
 
   private val topic: RTopic[M] = RedisProcessor.redis.getTopic(key)
   private val queue: RBlockingQueue[M] = RedisProcessor.redis.getBlockingQueue(key)
+  private val executingItems: RMap[Int, M] = RedisProcessor.redis.getMap[Int, M](key + ":executing")
   private val threads = Executors.newCachedThreadPool()
 
   /**
@@ -48,11 +51,27 @@ case class DMQService[M](key: String) extends LazyLogging {
     *
     * @param fun 处理函数
     */
-  def subscribe(fun: => M => Unit): this.type = {
+  def subscribe(fun: => M => Resp[Void]): this.type = {
+    // TODO lock
+    executingItems.foreach {
+      i =>
+        publish(i._2)
+        executingItems.remove(i._1)
+    }
     topic.addListener(new MessageListener[M]() {
       override def onMessage(s: String, msg: M): Unit = {
         try {
-          fun(msg)
+          val strMsg = JsonHelper.toJsonString(msg)
+          val id = strMsg.hashCode
+          executingItems.put(id, msg)
+          logger.trace(s"Distributed subscribe [$key] message in $strMsg")
+          val result = fun(msg)
+          if (result) {
+            executingItems.remove(id)
+            logger.trace(s"Distributed subscribe [$key] execute success in $strMsg")
+          } else {
+            logger.warn(s"Distributed subscribe [$key] execute error [${result.code}][${result.message}] in $strMsg")
+          }
         } catch {
           case e: Throwable =>
             logger.error(s"Distributed subscribe [$key] process error.", e)
@@ -67,13 +86,30 @@ case class DMQService[M](key: String) extends LazyLogging {
     *
     * @param fun 处理函数
     */
-  def receive(fun: => M => Unit): this.type = {
+  def receive(fun: => M => Resp[Void]): this.type = {
+    // TODO lock
+    executingItems.foreach {
+      i =>
+        send(i._2)
+        executingItems.remove(i._1)
+    }
     threads.execute(
       new Runnable {
         override def run(): Unit = {
           while (!RedisProcessor.redis.isShutdown && !RedisProcessor.redis.isShuttingDown) {
             try {
-              fun(queue.take())
+              val msg = queue.take()
+              val strMsg = JsonHelper.toJsonString(msg)
+              val id = strMsg.hashCode
+              executingItems.put(id, msg)
+              logger.trace(s"Distributed receive [$key] message in $strMsg")
+              val result = fun(msg)
+              if (result) {
+                executingItems.remove(id)
+                logger.trace(s"Distributed receive [$key] execute success in $strMsg")
+              } else {
+                logger.warn(s"Distributed receive [$key] execute error [${result.code}][${result.message}] in $strMsg")
+              }
             } catch {
               case e: Throwable =>
                 if (!RedisProcessor.redis.isShutdown && !RedisProcessor.redis.isShuttingDown) {
@@ -91,13 +127,29 @@ case class DMQService[M](key: String) extends LazyLogging {
     *
     * @param fun 处理函数
     */
-  def subscribeOneNode(fun: => M => Unit): this.type = {
+  def subscribeOneNode(fun: => M => Resp[Void]): this.type = {
+    // TODO lock
+    executingItems.foreach {
+      i =>
+        publish(i._2)
+        executingItems.remove(i._1)
+    }
     topic.addListener(new MessageListener[M]() {
       override def onMessage(s: String, msg: M): Unit = {
-        val lock = key + "_" + JsonHelper.toJsonString(msg).hashCode
+        val strMsg = JsonHelper.toJsonString(msg)
+        val id = strMsg.hashCode
+        val lock = key + "_" + id
         if (RedisProcessor.redis.getAtomicLong(lock).incrementAndGet() == 1) {
           try {
-            fun(msg)
+            executingItems.put(id, msg)
+            logger.trace(s"Distributed subscribe [$key] message in $strMsg")
+            val result = fun(msg)
+            if (result) {
+              executingItems.remove(id)
+              logger.trace(s"Distributed subscribe [$key] execute success in $strMsg")
+            } else {
+              logger.warn(s"Distributed subscribe [$key] execute error [${result.code}][${result.message}] in $strMsg")
+            }
           } catch {
             case e: Throwable =>
               logger.error(s"Distributed subscribe [$key] process error.", e)
