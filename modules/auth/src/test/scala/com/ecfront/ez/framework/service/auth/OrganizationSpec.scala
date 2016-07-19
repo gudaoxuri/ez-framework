@@ -2,7 +2,7 @@ package com.ecfront.ez.framework.service.auth
 
 import java.util.concurrent.CountDownLatch
 
-import com.ecfront.common.StandardCode
+import com.ecfront.common.{Resp, StandardCode}
 import com.ecfront.ez.framework.core.test.MockStartupSpec
 import com.ecfront.ez.framework.service.auth.model.{EZ_Account, EZ_Organization, EZ_Resource, EZ_Role}
 import com.ecfront.ez.framework.service.rpc.foundation.Method
@@ -17,6 +17,7 @@ class OrganizationSpec extends MockStartupSpec {
       orgCode =>
         println(orgCode)
         c.countDown()
+        Resp.success(null)
     })
 
     EZ_Organization.deleteByCode("org1")
