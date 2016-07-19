@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.service.rpc.http
 
 import java.io.File
+import java.net.URLEncoder
 import java.nio.file.Files
 import java.util.Date
 
@@ -138,13 +139,7 @@ object HttpClientProcessor extends LazyLogging {
     }
 
     private[http] def request(method: HttpMethod, url: String, body: Any, contentType: String): Future[String] = {
-      val realContextType = if (body != null && body.isInstanceOf[File]) {
-        "multipart/form-data"
-      } else if (body != null && body.isInstanceOf[ReqFile]) {
-        "multipart/form-data; boundary=ez_boundary"
-      } else {
-        contentType
-      }
+      val realContextType = getRealContextType(body, contentType)
       val p = Promise[String]()
       val clientChannel =
         if (url.trim.toLowerCase().startsWith("https")) {
@@ -168,8 +163,8 @@ object HttpClientProcessor extends LazyLogging {
       }).putHeader("content-type", realContextType)
       if (body != null) {
         realContextType.toLowerCase match {
-          case t if t.toLowerCase == "application/x-www-form-urlencoded" && body.isInstanceOf[Map[_, _]] =>
-            client.end(body.asInstanceOf[Map[String, String]].map(i => i._1 + "=" + i._2).mkString("&"))
+          case t if t.toLowerCase.contains("application/x-www-form-urlencoded") && body.isInstanceOf[Map[_, _]] =>
+            client.end(body.asInstanceOf[Map[String, String]].map(i => i._1 + "=" + URLEncoder.encode(i._2, "utf-8")).mkString("&"))
           case t if t.toLowerCase.contains("xml") =>
             body match {
               case b: Document =>
@@ -228,6 +223,16 @@ object HttpClientProcessor extends LazyLogging {
       p.future
     }
 
+  }
+
+  private def getRealContextType(body: Any, contentType: String): String = {
+    if (body != null && body.isInstanceOf[File]) {
+      "multipart/form-data"
+    } else if (body != null && body.isInstanceOf[ReqFile]) {
+      "multipart/form-data; boundary=ez_boundary"
+    } else {
+      contentType
+    }
   }
 
   private def getBufferBody(file: File, fieldName: String, fileName: String = null): Buffer = {
