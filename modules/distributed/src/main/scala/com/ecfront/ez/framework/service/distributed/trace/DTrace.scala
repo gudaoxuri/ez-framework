@@ -126,20 +126,21 @@ object DTrace extends LazyLogging {
       rMap.put(flowCode, flowInst)
       // 写日志
       val logStr = new StringBuffer()
+      val instCode = (flowCode + "|" + clueId).hashCode
       if (realCurrNode.parentNodeCodes.isEmpty) {
-        logStr.append(s"\r\n======================== START [$flowCode] ========================")
+        logStr.append(s"\r\n=|$instCode|======================= START [$flowCode] ========================")
       } else {
-        logStr.append(s"\r\n--------------------------------------------------------------------")
+        logStr.append(s"\r\n=|$instCode|-------------------------------------------------------------------")
       }
-      logStr.append(s"\r\n===== Trace [$flowCode] for [$clueId] at [$module]-[$stage] : $message")
-      logStr.append(s"\r\n===== Flow [${flowInst.flow}]")
+      logStr.append(s"\r\n=|$instCode|= Trace [$flowCode] for [$clueId] at [$module]-[$stage] : $message")
+      logStr.append(s"\r\n=|$instCode|= Flow [${flowInst.flow}]")
       if (!expectNodeCodes.contains(realCurrNode.code)) {
-        logStr.append(s"\r\n===== Expect current in [${expectNodeCodes.mkString("/")}] But real current is ${realCurrNode.code}")
+        logStr.append(s"\r\n=|$instCode|= Expect current in [${expectNodeCodes.mkString("/")}] But real current is ${realCurrNode.code}")
         flowInst.success = false
       }
       if (realCurrNode.childrenNodeCodes.isEmpty) {
-        logStr.append(s"\r\n===== Result [${if (flowInst.success) "SUCCESS" else "FAIL"}] , Use Time [${new Date().getTime - flowInst.startTime.getTime}ms]")
-        logStr.append(s"\r\n======================== FINISH [$flowCode] ========================")
+        logStr.append(s"\r\n=|$instCode|= Result [${if (flowInst.success) "SUCCESS" else "FAIL"}] , Use Time [${new Date().getTime - flowInst.startTime.getTime}ms]")
+        logStr.append(s"\r\n=|$instCode|======================= FINISH [$flowCode] ========================")
       }
       if (flowInst.success) {
         logger.info(logStr.toString)
