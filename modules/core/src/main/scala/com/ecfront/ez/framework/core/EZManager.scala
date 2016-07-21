@@ -1,7 +1,5 @@
 package com.ecfront.ez.framework.core
 
-import java.util.TimeZone
-
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.i18n.I18NProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -50,13 +48,13 @@ object EZManager extends LazyLogging {
       opt.setInternalBlockingPoolSize(perf(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE).asInstanceOf[Int])
     }
     if (perf.contains(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME)) {
-      opt.setMaxEventLoopExecuteTime(perf(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).asInstanceOf[Int])
+      opt.setMaxEventLoopExecuteTime(perf(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).asInstanceOf[Long] * 1000000)
     }
     if (perf.contains(FLAG_PERF_WORKER_EXECUTE_TIME)) {
-      opt.setMaxWorkerExecuteTime(perf(FLAG_PERF_WORKER_EXECUTE_TIME).asInstanceOf[Int])
+      opt.setMaxWorkerExecuteTime(perf(FLAG_PERF_WORKER_EXECUTE_TIME).asInstanceOf[Long] * 1000000)
     }
     if (perf.contains(FLAG_PERF_WARNING_EXCEPTION_TIME)) {
-      opt.setWarningExceptionTime(perf(FLAG_PERF_WARNING_EXCEPTION_TIME).asInstanceOf[Int])
+      opt.setWarningExceptionTime(perf(FLAG_PERF_WARNING_EXCEPTION_TIME).asInstanceOf[Long] * 1000000)
     }
     Vertx.vertx(opt)
   }
@@ -96,13 +94,13 @@ object EZManager extends LazyLogging {
         ezConfig.ez.perf += FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE -> System.getProperty(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE).toInt
       }
       if (System.getProperty(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME) != null) {
-        ezConfig.ez.perf += FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME -> System.getProperty(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).toInt
+        ezConfig.ez.perf += FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME -> System.getProperty(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).toLong
       }
       if (System.getProperty(FLAG_PERF_WORKER_EXECUTE_TIME) != null) {
-        ezConfig.ez.perf += FLAG_PERF_WORKER_EXECUTE_TIME -> System.getProperty(FLAG_PERF_WORKER_EXECUTE_TIME).toInt
+        ezConfig.ez.perf += FLAG_PERF_WORKER_EXECUTE_TIME -> System.getProperty(FLAG_PERF_WORKER_EXECUTE_TIME).toLong
       }
       if (System.getProperty(FLAG_PERF_WARNING_EXCEPTION_TIME) != null) {
-        ezConfig.ez.perf += FLAG_PERF_WARNING_EXCEPTION_TIME -> System.getProperty(FLAG_PERF_WARNING_EXCEPTION_TIME).toInt
+        ezConfig.ez.perf += FLAG_PERF_WARNING_EXCEPTION_TIME -> System.getProperty(FLAG_PERF_WARNING_EXCEPTION_TIME).toLong
       }
       Resp.success(ezConfig)
     } catch {
