@@ -188,6 +188,43 @@ class JDBCSpec extends MockStartupSpec {
 
   }
 
+  test("INT(1) Test") {
+
+    JDBCProcessor.update(
+      """
+        |CREATE TABLE IF NOT EXISTS jdbc_test_int
+        |(
+        | id INT NOT NULL AUTO_INCREMENT ,
+        | status INT(1) NOT NULL ,
+        | enabled INT(1) NOT NULL ,
+        | gender INT(1),
+        | age INT ,
+        | PRIMARY KEY(id)
+        |)ENGINE=innodb DEFAULT CHARSET=utf8
+      """.stripMargin
+    )
+
+    var obj=JDBC_Test_Int()
+    obj.status=1
+    obj.enabled=true
+    obj.gender=1
+    obj.age=11
+    obj= JDBC_Test_Int.save(obj).body
+    assert(obj.status==1&&obj.enabled&&obj.gender==1&&obj.age==11)
+    obj.status=0
+    obj.enabled=false
+    obj.gender=0
+    obj.age=11
+    obj= JDBC_Test_Int.update(obj).body
+    assert(obj.status==0&& !obj.enabled&&obj.gender==0&&obj.age==11)
+    obj.status=8
+    obj.enabled=true
+    obj.gender= -1
+    obj.age=11
+    obj= JDBC_Test_Int.update(obj).body
+    assert(obj.status==8&&obj.enabled&&obj.gender== -1&&obj.age==11)
+  }
+
 }
 
 @Entity("")
@@ -212,6 +249,16 @@ case class JDBC_Test_Entity() extends SecureModel with StatusModel {
   @BeanProperty var rel4: Rel_Model = _
 
 }
+object JDBC_Test_Entity extends JDBCSecureStorage[JDBC_Test_Entity] with JDBCStatusStorage[JDBC_Test_Entity]
+
+@Entity("")
+case class JDBC_Test_Int() extends BaseModel {
+  @BeanProperty var status: Int = _
+  @BeanProperty var enabled: Boolean = _
+  @BeanProperty var gender: Int = _
+  @BeanProperty var age: Int = _
+}
+object JDBC_Test_Int extends JDBCBaseStorage[JDBC_Test_Int]
 
 class Rel_Model extends Serializable {
 
@@ -219,4 +266,3 @@ class Rel_Model extends Serializable {
 
 }
 
-object JDBC_Test_Entity extends JDBCSecureStorage[JDBC_Test_Entity] with JDBCStatusStorage[JDBC_Test_Entity]

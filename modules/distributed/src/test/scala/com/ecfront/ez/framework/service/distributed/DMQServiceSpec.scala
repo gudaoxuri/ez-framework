@@ -8,6 +8,7 @@ import com.ecfront.ez.framework.core.test.MockStartupSpec
 import com.ecfront.ez.framework.service.redis.RedisProcessor
 import io.vertx.core.json.JsonObject
 
+import scala.beans.BeanProperty
 import scala.collection.mutable.ArrayBuffer
 
 
@@ -180,7 +181,33 @@ class DMQServiceSpec extends MockStartupSpec {
     counter.await()
   }
 
+  test("DTopic point to point vo 测试") {
+    val counter = new CountDownLatch(1)
+    val mq = DMQService[ReqVO]("test_topic464")
+    mq.send(ReqVO("1234"))
+    mq.receive {
+      vo =>
+        assert(vo.phoneNumber == "1234")
+        counter.countDown()
+        Resp.success(null)
+    }
+    counter.await()
+  }
+
 }
+
+class ReqVO {
+  @BeanProperty var phoneNumber: String = _
+}
+
+object ReqVO {
+  def apply(phoneNumber: String): ReqVO = {
+    val vo = new ReqVO
+    vo.phoneNumber = phoneNumber
+    vo
+  }
+}
+
 
 
 

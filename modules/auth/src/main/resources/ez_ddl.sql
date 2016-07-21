@@ -26,8 +26,8 @@ COMMENT '组织表，用于租户管理';
 CREATE TABLE IF NOT EXISTS ez_account
 (
     id INT NOT NULL AUTO_INCREMENT COMMENT '记录主键' ,
-    code varchar(200) NOT NULL COMMENT '用户编码，自动生成：所属组织编码@登录Id' ,
-    login_id varchar(200) NOT NULL COMMENT '登录Id，不能包含@' ,
+    code varchar(200) NOT NULL COMMENT '用户编码，自动生成' ,
+    login_id varchar(200) NOT NULL COMMENT '登录Id' ,
     name varchar(200) NOT NULL COMMENT '用户名' ,
     image varchar(200) NOT NULL COMMENT '头像' ,
     password varchar(200) NOT NULL COMMENT '密码' ,

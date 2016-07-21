@@ -63,6 +63,7 @@ image::https://img.shields.io/travis/gudaoxuri/ez-framework.svg[link="https://tr
 .. 分布式阻塞和非阻塞队列
 .. 分布式消息发布订阅
 .. 分布式服务监控
+.. 分布式追踪日志
 
 == 使用
 
