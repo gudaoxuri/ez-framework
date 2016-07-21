@@ -14,7 +14,7 @@ class I18NSpec extends MockStartupSpec {
     I18NProcessor.setLanguage("zh-CN")
     assert(Resp.badRequest("Code Not found").message == "编码不能为空")
     assert(Resp.badRequest("[aadfs] Not Found").message == "[aadfs] 不能为空")
-    assert(Resp.badRequest("[sss,3re_w,不] must be unique").message == "[sss,3re_w,不] 不能为空")
+    assert(Resp.badRequest("[sss,3re_w,不] must be unique").message == "[sss,3re_w,不] 必须唯一")
     // 带tab
     assert(Resp.badRequest("[aadfs]	Not Found").message == "[aadfs] 不能为空")
 

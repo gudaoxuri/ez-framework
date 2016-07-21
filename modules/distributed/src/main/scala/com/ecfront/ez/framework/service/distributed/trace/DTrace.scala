@@ -67,6 +67,31 @@ object DTrace extends LazyLogging {
     *
     * @param clueId   追踪线索，每个流程实例唯一，如贷款流程追踪可用身份证号做为clueId
     * @param flowCode 日志流程定义code
+    * @param nodeCode 当前节点code，由模块#阶段 组成
+    * @param message  消息
+    */
+  def simpleLog(flowCode: String)(clueId: String, nodeCode: String, message: String): Unit = {
+    log(clueId, flowCode, nodeCode.split("#")(0), nodeCode.split("#")(1), message)
+  }
+
+  /**
+    * 写日志
+    *
+    * @param clueId   追踪线索，每个流程实例唯一，如贷款流程追踪可用身份证号做为clueId
+    * @param flowCode 日志流程定义code
+    * @param module   当前模块
+    * @param stage    当前阶段
+    * @param message  消息
+    */
+  def flowLog(flowCode: String)(clueId: String, module: String, stage: String, message: String): Unit = {
+    log(clueId, flowCode, module, stage, message)
+  }
+
+  /**
+    * 写日志
+    *
+    * @param clueId   追踪线索，每个流程实例唯一，如贷款流程追踪可用身份证号做为clueId
+    * @param flowCode 日志流程定义code
     * @param module   当前模块
     * @param stage    当前阶段
     * @param message  消息

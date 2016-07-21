@@ -1,4 +1,4 @@
 	en	zh-CN
 Code Not found	Code Not found	编码不能为空
 \[(?<code>\w+)\] Not Found	[${code}] Not Found	[${code}] 不能为空
-\[(?<fields>.*)\] must be unique	[${fields}] must be unique	[${fields}] 不能为空
+\[(?<fields>.*)\] must be unique	[${fields}] must be unique	[${fields}] 必须唯一
