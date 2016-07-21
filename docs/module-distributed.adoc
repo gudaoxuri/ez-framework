@@ -323,87 +323,75 @@ DTrace.log("jzy4","testFlow","m1","s5","step5")
 
 ======================== START [testFlow] ========================
 ===== Trace [testFlow] for [jzy1] at [m1]-[s1] : step1
-===== Flow []
---------------------------------------------------------------------
-09:57:50.497 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
+===== Flow [ > m1#s1]
+14:18:11.922 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
 --------------------------------------------------------------------
 ===== Trace [testFlow] for [jzy1] at [m1]-[s2] : step2
-===== Flow [m1#s1 > ]
---------------------------------------------------------------------
-09:57:50.511 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
+===== Flow [ > m1#s1 > m1#s2]
+14:18:11.938 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
 --------------------------------------------------------------------
 ===== Trace [testFlow] for [jzy1] at [m2]-[s3-1] : step3
-===== Flow [m1#s1 > m1#s2 > ]
---------------------------------------------------------------------
-09:57:50.523 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
+===== Flow [ > m1#s1 > m1#s2 > m2#s3-1]
+14:18:11.989 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
 --------------------------------------------------------------------
 ===== Trace [testFlow] for [jzy1] at [m2]-[s4-1] : step4
-===== Flow [m1#s1 > m1#s2 > m2#s3-1 > ]
---------------------------------------------------------------------
-09:57:50.530 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
+===== Flow [ > m1#s1 > m1#s2 > m2#s3-1 > m2#s4-1]
+14:18:11.989 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
 --------------------------------------------------------------------
 ===== Trace [testFlow] for [jzy1] at [m1]-[s5] : step5
-===== Flow [m1#s1 > m1#s2 > m2#s3-1 > m2#s4-1 > ]
-===== Result [SUCCESS] , Use Time [366ms]
+===== Flow [ > m1#s1 > m1#s2 > m2#s3-1 > m2#s4-1 > m1#s5]
+===== Result [SUCCESS] , Use Time [305ms]
 ======================== FINISH [testFlow] ========================
-09:57:50.534 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
+14:18:12.005 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
 ======================== START [testFlow] ========================
 ===== Trace [testFlow] for [jzy2] at [m1]-[s1] : step1
-===== Flow []
---------------------------------------------------------------------
-09:57:50.559 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
+===== Flow [ > m1#s1]
+14:18:12.022 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
 --------------------------------------------------------------------
 ===== Trace [testFlow] for [jzy2] at [m1]-[s2] : step2
-===== Flow [m1#s1 > ]
---------------------------------------------------------------------
-09:57:50.573 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
+===== Flow [ > m1#s1 > m1#s2]
+14:18:12.053 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
 --------------------------------------------------------------------
 ===== Trace [testFlow] for [jzy2] at [m3]-[s3-2] : step3
-===== Flow [m1#s1 > m1#s2 > ]
---------------------------------------------------------------------
-09:57:50.587 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
+===== Flow [ > m1#s1 > m1#s2 > m3#s3-2]
+14:18:12.085 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
 --------------------------------------------------------------------
 ===== Trace [testFlow] for [jzy2] at [m1]-[s5] : step4
-===== Flow [m1#s1 > m1#s2 > m3#s3-2 > ]
-===== Result [SUCCESS] , Use Time [54ms]
+===== Flow [ > m1#s1 > m1#s2 > m3#s3-2 > m1#s5]
+===== Result [SUCCESS] , Use Time [96ms]
 ======================== FINISH [testFlow] ========================
-09:57:50.589 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
+14:18:12.100 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
 ======================== START [testFlow] ========================
 ===== Trace [testFlow] for [jzy3] at [m1]-[s1] : step1
-===== Flow []
---------------------------------------------------------------------
-09:57:50.603 [ScalaTest-run-running-TraceSpec] WARN  c.e.e.f.s.distributed.trace.DTrace$ -
+===== Flow [ > m1#s1]
+14:18:12.123 [ScalaTest-run-running-TraceSpec] WARN  c.e.e.f.s.distributed.trace.DTrace$ -
 --------------------------------------------------------------------
 ===== Trace [testFlow] for [jzy3] at [m3]-[s3-2] : step3
-===== Flow [m1#s1 > ]
+===== Flow [ > m1#s1 > m3#s3-2]
 ===== Expect current in [m1#s2] But real current is m3#s3-2
---------------------------------------------------------------------
-09:57:50.611 [ScalaTest-run-running-TraceSpec] WARN  c.e.e.f.s.distributed.trace.DTrace$ -
+14:18:12.123 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
 --------------------------------------------------------------------
 ===== Trace [testFlow] for [jzy3] at [m1]-[s5] : step4
-===== Flow [m1#s1 > m3#s3-2 > ]
-===== Result [FAIL] , Use Time [22ms]
+===== Flow [ > m1#s1 > m3#s3-2 > m1#s5]
+===== Result [SUCCESS] , Use Time [38ms]
 ======================== FINISH [testFlow] ========================
-09:57:50.615 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
+14:18:12.123 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
 ======================== START [testFlow] ========================
 ===== Trace [testFlow] for [jzy4] at [m1]-[s1] : step1
-===== Flow []
---------------------------------------------------------------------
-09:57:50.629 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
+===== Flow [ > m1#s1]
+14:18:12.170 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
 --------------------------------------------------------------------
 ===== Trace [testFlow] for [jzy4] at [m1]-[s2] : step2
-===== Flow [m1#s1 > ]
---------------------------------------------------------------------
-09:57:50.645 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
+===== Flow [ > m1#s1 > m1#s2]
+14:18:12.170 [ScalaTest-run-running-TraceSpec] INFO  c.e.e.f.s.distributed.trace.DTrace$ -
 --------------------------------------------------------------------
 ===== Trace [testFlow] for [jzy4] at [m2]-[s3-1] : step3
-===== Flow [m1#s1 > m1#s2 > ]
---------------------------------------------------------------------
-09:57:50.657 [ScalaTest-run-running-TraceSpec] WARN  c.e.e.f.s.distributed.trace.DTrace$ -
+===== Flow [ > m1#s1 > m1#s2 > m2#s3-1]
+14:18:12.208 [ScalaTest-run-running-TraceSpec] WARN  c.e.e.f.s.distributed.trace.DTrace$ -
 --------------------------------------------------------------------
 ===== Trace [testFlow] for [jzy4] at [m1]-[s5] : step5
-===== Flow [m1#s1 > m1#s2 > m2#s3-1 > ]
+===== Flow [ > m1#s1 > m1#s2 > m2#s3-1 > m1#s5]
 ===== Expect current in [m2#s4-1] But real current is m1#s5
-===== Result [FAIL] , Use Time [42ms]
+===== Result [FAIL] , Use Time [83ms]
 ======================== FINISH [testFlow] ========================
 ----

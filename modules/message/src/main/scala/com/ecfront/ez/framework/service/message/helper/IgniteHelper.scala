@@ -9,6 +9,7 @@ import org.apache.ignite.{Ignite, Ignition}
 
 import scala.collection.JavaConversions._
 
+/*
 object IgniteHelper {
 
   var ignite: Ignite = _
@@ -36,4 +37,4 @@ object IgniteHelper {
     ignite = Ignition.start(cfg)
   }
 
-}
+}*/

@@ -120,6 +120,10 @@ object DTrace extends LazyLogging {
       } else {
         traceNodeDefs(flowCode)(flowInst.parentNodeCode).childrenNodeCodes
       }
+      // 更新流程实例状态
+      flowInst.parentNodeCode = realCurrNode.code
+      flowInst.flow = flowInst.flow + " > " + realCurrNode.code
+      rMap.put(flowCode, flowInst)
       // 写日志
       val logStr = new StringBuffer()
       if (realCurrNode.parentNodeCodes.isEmpty) {
@@ -136,18 +140,12 @@ object DTrace extends LazyLogging {
       if (realCurrNode.childrenNodeCodes.isEmpty) {
         logStr.append(s"\r\n===== Result [${if (flowInst.success) "SUCCESS" else "FAIL"}] , Use Time [${new Date().getTime - flowInst.startTime.getTime}ms]")
         logStr.append(s"\r\n======================== FINISH [$flowCode] ========================")
-      } else {
-        logStr.append(s"\r\n--------------------------------------------------------------------")
       }
       if (flowInst.success) {
         logger.info(logStr.toString)
       } else {
         logger.warn(logStr.toString)
       }
-      // 更新流程实例状态
-      flowInst.parentNodeCode = realCurrNode.code
-      flowInst.flow = flowInst.flow + realCurrNode.code + " > "
-      rMap.put(flowCode, flowInst)
     } catch {
       case e: Throwable =>
         logger.error("Trace log write error.", e)

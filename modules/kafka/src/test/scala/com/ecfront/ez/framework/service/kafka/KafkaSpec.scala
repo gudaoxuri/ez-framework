@@ -23,7 +23,6 @@ class KafkaSpec extends MockStartupSpec {
     val producer = KafkaProcessor.Producer("test", "client1")
     producer.send("haha...")
 
-    Thread.sleep(10000)
     counter.await()
   }
 
