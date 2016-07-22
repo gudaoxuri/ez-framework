@@ -149,7 +149,7 @@ object DTrace extends LazyLogging {
       }
     } catch {
       case e: Throwable =>
-        logger.error("Trace log write error.", e)
+        logger.error(s"Trace log write error | [$flowCode] for [$clueId] at [$module]-[$stage] : $message", e)
     }
   }
 }
