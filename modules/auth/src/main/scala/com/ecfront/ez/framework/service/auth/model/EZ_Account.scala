@@ -356,6 +356,7 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
   }
 
   protected def preDeleteX(obj: EZ_Account): Any = {
+    CacheManager.removeToken(obj.code)
     if (EZ_Account.extAccountStorage != null && obj.ext_id != null && obj.ext_id.trim.nonEmpty) {
       EZ_Account.extAccountStorage.deleteById(obj.ext_id.trim)
     }
@@ -366,6 +367,14 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
 
   override def preUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, String, List[Any])] =
     Resp.notImplemented("")
+
+  override def postDisableById(id: Any, context: EZStorageContext): Resp[Void] = {
+    val accountR=EZ_Account.doGetById(id,context)
+    if(accountR&&accountR.body!=null){
+      CacheManager.removeToken(accountR.body.code)
+    }
+    super.postDisableById(id, context)
+  }
 
   def packageEncryptPwd(loginId: String, password: String): String = {
     EncryptHelper.encrypt(ServiceAdapter.encrypt_salt + loginId + password, ServiceAdapter.encrypt_algorithm)

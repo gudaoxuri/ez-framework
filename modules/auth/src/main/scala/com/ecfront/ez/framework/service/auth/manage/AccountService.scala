@@ -9,7 +9,7 @@ import com.ecfront.ez.framework.service.email.EmailProcessor
 import com.ecfront.ez.framework.service.rpc.foundation._
 import com.ecfront.ez.framework.service.rpc.http.HTTP
 import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHTTPService
-import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, Page}
+import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, Page, StatusModel, StatusStorage}
 
 /**
   * 账号管理

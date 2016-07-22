@@ -47,7 +47,7 @@
       },
       "storage.jdbc": {
         "driver_class": "com.mysql.jdbc.Driver",
-        "url": "jdbc:mysql://10.0.75.1:3306/ez_test?characterEncoding=UTF-8&autoReconnect=true",
+        "url": "jdbc:mysql://192.168.4.99:3306/ez_test?characterEncoding=UTF-8&autoReconnect=true",
         "user": "root",
         "password": "123456"
       },
@@ -71,7 +71,7 @@
       },
       "distributed": {},
       "redis": {
-        "host": "10.0.75.1",
+        "host": "192.168.4.99",
         "port": 6379
       }
     }
