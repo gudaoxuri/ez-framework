@@ -2,6 +2,7 @@ package com.ecfront.ez.framework.service.distributed.trace
 
 import java.util.Date
 
+import com.ecfront.ez.framework.core.helper.TimeHelper
 import com.ecfront.ez.framework.service.redis.RedisProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
@@ -113,39 +114,44 @@ object DTrace extends LazyLogging {
       } else {
         rMap.get(instCode)
       }
-      // 根据流程实例状态对照流程定义获取期望的节点codes
-      val expectNodeCodes =
-      if (realCurrNode.parentNodeCodes.isEmpty) {
-        // 初始节点，期望节点肯定等于实际节点
-        ArrayBuffer(realCurrNode.code)
-      } else {
-        traceNodeDefs(flowCode)(flowInst.parentNodeCode).childrenNodeCodes
-      }
-      // 更新流程实例状态
-      flowInst.parentNodeCode = realCurrNode.code
-      flowInst.flow = flowInst.flow + " > " + realCurrNode.code
-      rMap.put(instCode, flowInst)
-      // 写日志
-      val logStr = new StringBuffer()
-      if (realCurrNode.parentNodeCodes.isEmpty) {
-        logStr.append(s"\r\n=|$instCode|======================= START [$flowCode] ========================")
-      } else {
-        logStr.append(s"\r\n=|$instCode|-------------------------------------------------------------------")
-      }
-      logStr.append(s"\r\n=|$instCode|= Trace [$flowCode] for [$clueId] at [$module]-[$stage] : $message")
-      logStr.append(s"\r\n=|$instCode|= Flow [${flowInst.flow}]")
-      if (!expectNodeCodes.contains(realCurrNode.code)) {
-        logStr.append(s"\r\n=|$instCode|= Expect current in [${expectNodeCodes.mkString("/")}] But real current is ${realCurrNode.code}")
-        flowInst.success = false
-      }
-      if (realCurrNode.childrenNodeCodes.isEmpty) {
-        logStr.append(s"\r\n=|$instCode|= Result [${if (flowInst.success) "SUCCESS" else "FAIL"}] , Use Time [${new Date().getTime - flowInst.startTime.getTime}ms]")
-        logStr.append(s"\r\n=|$instCode|======================= FINISH [$flowCode] ========================")
-      }
-      if (flowInst.success) {
-        logger.info(logStr.toString)
-      } else {
-        logger.warn(logStr.toString)
+      if(flowInst!=null) {
+        // 根据流程实例状态对照流程定义获取期望的节点codes
+        val expectNodeCodes =
+        if (realCurrNode.parentNodeCodes.isEmpty) {
+          // 初始节点，期望节点肯定等于实际节点
+          ArrayBuffer(realCurrNode.code)
+        } else {
+          traceNodeDefs(flowCode)(flowInst.parentNodeCode).childrenNodeCodes
+        }
+        // 更新流程实例状态
+        flowInst.parentNodeCode = realCurrNode.code
+        flowInst.flow = flowInst.flow + " > " + realCurrNode.code
+        rMap.put(instCode, flowInst)
+        // 写日志
+        val logStr = new StringBuffer()
+        if (realCurrNode.parentNodeCodes.isEmpty) {
+          logStr.append(s"\r\n=|$instCode|======================= START [$flowCode] ========================")
+        } else {
+          logStr.append(s"\r\n=|$instCode|-------------------------------------------------------------------")
+        }
+        logStr.append(s"\r\n=|$instCode|= ${TimeHelper.yyyy_MM_dd_HH_mm_ss_SSS.format(new Date())} [$flowCode] for [$clueId] at [$module]-[$stage] : $message")
+        logStr.append(s"\r\n=|$instCode|= Flow [${flowInst.flow}]")
+        if (!expectNodeCodes.contains(realCurrNode.code)) {
+          logStr.append(s"\r\n=|$instCode|= Expect current in [${expectNodeCodes.mkString("/")}] But real current is ${realCurrNode.code}")
+          flowInst.success = false
+        }
+        if (realCurrNode.childrenNodeCodes.isEmpty) {
+          logStr.append(s"\r\n=|$instCode|= Result [${if (flowInst.success) "SUCCESS" else "FAIL"}] , Use Time [${new Date().getTime - flowInst.startTime.getTime}ms]")
+          logStr.append(s"\r\n=|$instCode|======================= FINISH [$flowCode] ========================")
+          rMap.remove(instCode)
+        }
+        if (flowInst.success) {
+          logger.info(logStr.toString)
+        } else {
+          logger.warn(logStr.toString)
+        }
+      }else{
+        logger.warn(s"\r\n=|$instCode|= Not found start node [$flowCode] for [$clueId] at [$module]-[$stage] : $message")
       }
     } catch {
       case e: Throwable =>
