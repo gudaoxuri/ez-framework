@@ -91,11 +91,6 @@ object AuthService extends LazyLogging {
     }
   }
 
-  @GET("logout/")
-  def logout(parameter: Map[String, String], context: EZAuthContext): Resp[Void] = {
-    doLogout(parameter(VIEW_TOKEN_FLAG))
-  }
-
   @GET("/public/auth/captcha/:organizationCode/:id/")
   def getCaptcha(parameter: Map[String, String], context: EZAuthContext): Resp[File] = {
     val id = parameter.getOrElse("id", "")
@@ -114,6 +109,11 @@ object AuthService extends LazyLogging {
     } else {
       null
     }
+  }
+
+  @GET("logout/")
+  def logout(parameter: Map[String, String], context: EZAuthContext): Resp[Void] = {
+    doLogout(parameter(VIEW_TOKEN_FLAG))
   }
 
   /**
