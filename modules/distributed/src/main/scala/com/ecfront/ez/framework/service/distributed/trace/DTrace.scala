@@ -97,6 +97,7 @@ object DTrace extends LazyLogging {
     * @param message  消息
     */
   def log(clueId: String, flowCode: String, module: String, stage: String, message: String): Unit = {
+    val instCode = flowCode + clueId
     try {
       // 根据传入参数获取实际的节点
       val realCurrNode = traceNodeDefs(flowCode)(module + "#" + stage)
@@ -110,7 +111,7 @@ object DTrace extends LazyLogging {
         inst.success = true
         inst
       } else {
-        rMap.get(flowCode)
+        rMap.get(instCode)
       }
       // 根据流程实例状态对照流程定义获取期望的节点codes
       val expectNodeCodes =
@@ -123,10 +124,9 @@ object DTrace extends LazyLogging {
       // 更新流程实例状态
       flowInst.parentNodeCode = realCurrNode.code
       flowInst.flow = flowInst.flow + " > " + realCurrNode.code
-      rMap.put(flowCode, flowInst)
+      rMap.put(instCode, flowInst)
       // 写日志
       val logStr = new StringBuffer()
-      val instCode = (flowCode + "|" + clueId).hashCode
       if (realCurrNode.parentNodeCodes.isEmpty) {
         logStr.append(s"\r\n=|$instCode|======================= START [$flowCode] ========================")
       } else {

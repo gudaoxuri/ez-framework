@@ -1,5 +1,7 @@
 #!/bin/bash
 
+log_path=./logs
+
 start(){
     app_code=$1
     start_app=''
@@ -15,8 +17,8 @@ start(){
         do
             app=`echo $file|cut -d "." -f1`
             if [ $1 = 'all' ] || [ "$1" = $app ]; then
-                mkdir -p  ./logs/$app/
-                nohup java -Dlog4j.configuration=file:"./app/$app/config/log4j.properties" -Dez.flag=ez_sh -jar ./app/$app/$app.jar  > ./logs/$app/out.log &
+                mkdir -p  $log_path/$app/
+                nohup java -Dlog4j.configuration=file:"./app/$app/config/log4j.properties" -Dez.flag=ez_sh -jar ./app/$app/$app.jar  > $log_path/$app/out.log &
                 echo "Started $app"
             fi
         done
@@ -70,7 +72,12 @@ restart(){
 
 tailf(){
     app_code=$1
-	exec tailf -n 100 ./logs/$app_code/out.log
+	exec tailf -n 100 $log_path/$app_code/out.log
+}
+
+trace(){
+    inst_code=$1
+	exec grep "=|$instCode" $log_path/*/out.log
 }
 
 deploy(){
@@ -104,6 +111,7 @@ tip(){
     echo ">>  stop <app code | all >"
     echo ">>  restart <app code | all >"
     echo ">>  tailf <app code>"
+    echo ">>  trace <instance code>"
     echo "=============="
     echo ">>  deploy <app code>"
     echo ">>  show"
@@ -142,6 +150,8 @@ case $command in
      tip
     fi
 	tailf $args ;;
+	"trace")
+    trace $args ;;
 	"deploy")
 	if [ "$args" = "" ] ; then 
      tip
