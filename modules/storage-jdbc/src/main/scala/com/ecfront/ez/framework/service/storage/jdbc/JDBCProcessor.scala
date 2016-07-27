@@ -780,7 +780,7 @@ object JDBCProcessor extends LazyLogging {
           val result = parameters.map {
             case p if
             p.isInstanceOf[String] || p.isInstanceOf[Int] || p.isInstanceOf[Long] || p.isInstanceOf[Boolean] ||
-              p.isInstanceOf[Double] || p.isInstanceOf[Float] || p.isInstanceOf[BigDecimal] ||
+              p.isInstanceOf[Double] || p.isInstanceOf[Float] ||
               p.isInstanceOf[Char] || p.isInstanceOf[Short] || p.isInstanceOf[Byte] || p.isInstanceOf[Date]
             => p
             case p =>
