@@ -13,9 +13,9 @@ import scala.collection.JavaConversions._
 
 object ServiceAdapter extends EZServiceAdapter[JsonObject] {
 
-  private val EZ_EVENT_ORGANIZATION_INIT: String = "ez.event.organization_init"
-  private val EZ_EVENT_LOGIN_SUCCESS: String = "ez.event.loginSuccess"
-  private val EZ_EVENT_LOGOUT: String = "ez.event.logout"
+  private val EZ_EVENT_ORGANIZATION_INIT: String = "ez:event:organization_init"
+  private val EZ_EVENT_LOGIN_SUCCESS: String = "ez:event:loginSuccess"
+  private val EZ_EVENT_LOGOUT: String = "ez:event:logout"
 
   // 组织初始化事件
   var ezEvent_organizationInit: DMQService[String] = _
