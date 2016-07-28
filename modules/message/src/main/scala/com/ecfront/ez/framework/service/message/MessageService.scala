@@ -240,8 +240,8 @@ object MessageService extends LazyLogging {
     message.level = level
     message.content = content
     message.title = title
-    message.start_time = TimeHelper.sf.format(startTime).toLong
-    message.end_time = TimeHelper.sf.format(endTime).toLong
+    message.start_time = if (startTime != null) TimeHelper.sf.format(startTime).toLong else 19700101000000L
+    message.end_time = if (endTime != null) TimeHelper.sf.format(endTime).toLong else 30000101000000L
     EZ_Message.save(message, context)
     Resp.success(null)
   }
