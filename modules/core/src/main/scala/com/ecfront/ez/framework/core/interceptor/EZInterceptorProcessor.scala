@@ -38,7 +38,7 @@ object EZInterceptorProcessor extends LazyLogging {
     * 拦截器栈处理方法
     *
     * @param category   拦截类型
-    * @param parameter        初始入栈参数
+    * @param parameter  初始入栈参数
     * @param executeFun 入栈成功后执行的方法
     * @tparam E 初始入栈参数的类型
     * @return 最终输出结果
@@ -63,8 +63,15 @@ object EZInterceptorProcessor extends LazyLogging {
         beforeR
       }
     } else {
-      logger.warn(s"EZ Interceptor [$category] not found ")
-      Resp.notFound(s"EZ Interceptor [$category] not found ")
+      if (executeFun != null) {
+        val execR = executeFun(parameter, context.toMap)
+        if (!execR) {
+          logger.warn(s"EZ Interceptor [$category] execute error : ${execR.code} - ${execR.message} ")
+        }
+        execR
+      } else {
+        Resp.success(parameter, context.toMap)
+      }
     }
   }
 

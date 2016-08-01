@@ -93,7 +93,19 @@ object EZAsyncInterceptorProcessor extends LazyLogging {
           }
       }
     } else {
-      finishP.success(Resp.success((parameter, context.toMap)))
+      if (executeFun != null) {
+        executeFun(parameter, context.toMap).onSuccess {
+          case executeResp =>
+            if (executeResp) {
+              finishP.success(Resp.success(executeResp.body,context.toMap))
+            } else {
+              logger.warn(s"Execute interceptor error : ${executeResp.message}")
+              finishP.success(executeResp)
+            }
+        }
+      } else {
+        finishP.success(Resp.success((parameter, context.toMap)))
+      }
     }
     finishP.future
   }
