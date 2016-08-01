@@ -182,10 +182,7 @@ object EmailProcessor extends LazyLogging {
     def send(from: String, to: List[String], cc: List[String], bcc: List[String],
              title: String, content: String, attachments: List[(String, String, Buffer)]): Future[Resp[Void]] = {
       val p = Promise[Resp[Void]]()
-      if (from == null) {
-        logger.warn("FROM not empty.")
-        p.success(Resp.badRequest("FROM not empty."))
-      } else if (to == null || to.isEmpty) {
+      if (to == null || to.isEmpty) {
         logger.warn("TO not empty.")
         p.success(Resp.badRequest("TO not empty."))
       } else if (title == null || title.trim.isEmpty) {
@@ -193,7 +190,7 @@ object EmailProcessor extends LazyLogging {
         p.success(Resp.badRequest("TITLE not empty."))
       } else {
         val message = new MailMessage()
-        message.setFrom(from)
+        message.setFrom(if(from==null) mailConfig.getUsername else from)
         message.setTo(to)
         if (cc != null) message.setCc(cc)
         if (bcc != null) message.setBcc(bcc)
