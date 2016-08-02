@@ -140,8 +140,11 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
   }
 
   private def execute(request: HttpServerRequest, body: Any, fun: Fun[_], context: EZRPCContext): Unit = {
-    logger.info(s"Execute a request from ${context.remoteIP} to [${context.method}] ${context.realUri}")
-    // logger.trace(s"Execute a request from ${context.remoteIP} to [${context.method}] ${context.realUri} | $body")
+    if (!EZContext.isDebug) {
+      logger.info(s"Execute a request from ${context.remoteIP} to [${context.method}] ${context.realUri}")
+    } else {
+      logger.trace(s"Execute a request from ${context.remoteIP} to [${context.method}] ${context.realUri} | $body")
+    }
     EZAsyncInterceptorProcessor.process[EZRPCContext](HttpInterceptor.category, context, {
       (context, param) =>
         val p = Promise[Resp[EZRPCContext]]()

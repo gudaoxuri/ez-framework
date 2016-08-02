@@ -30,6 +30,8 @@ object EZContext extends LazyLogging {
   var args: JsonObject = _
   // 配置文件路径
   lazy val confPath: String = findConfPath()
+  // 是否调试模式
+  var isDebug: Boolean = _
 
   // 项目主机IP
   val projectIp = InetAddress.getLocalHost.getHostAddress

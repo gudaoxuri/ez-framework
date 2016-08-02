@@ -20,6 +20,7 @@ case class EZInfo(
                    var instance: String,
                    // 语言
                    var language: String,
+                   var isDebug: Boolean,
                    // 性能设置
                    var perf: collection.mutable.Map[String, Any],
                    // 服务配置项

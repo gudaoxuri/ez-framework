@@ -63,10 +63,10 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
         }
       })
     if (parameter.containsKey("antiDDoS")) {
-      val antiDDoS=parameter.getJsonObject("antiDDoS")
-      val reqRatePerMinute=antiDDoS.getLong("reqRatePerMinute")
-      val illegalReqRatePerMinute=antiDDoS.getLong("illegalReqRatePerMinute")
-      AntiDDoSInterceptor.init(reqRatePerMinute,illegalReqRatePerMinute)
+      val antiDDoS = parameter.getJsonObject("antiDDoS")
+      val reqRatePerMinute = antiDDoS.getLong("reqRatePerMinute")
+      val illegalReqRatePerMinute = antiDDoS.getLong("illegalReqRatePerMinute")
+      AntiDDoSInterceptor.init(reqRatePerMinute, illegalReqRatePerMinute)
     }
     if (parameter.containsKey("monitor")) {
       val monitor = parameter.getJsonObject("monitor")

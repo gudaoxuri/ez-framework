@@ -201,6 +201,8 @@ object EZManager extends LazyLogging {
       EZContext.instance = ezConfig.ez.instance
       EZContext.language = ezConfig.ez.language
       EZContext.args = new JsonObject(JsonHelper.toJsonString(ezConfig.args))
+      EZContext.isDebug = ezConfig.ez.isDebug
+
       ezServiceConfig = ezConfig.ez.services
       logger.info("\r\n=== Discover Services ...")
       val ezServicesR = startInDiscoverServices()
