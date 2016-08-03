@@ -4,7 +4,7 @@ import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.core.helper.EFileType
 import com.ecfront.ez.framework.core.test.MockStartupSpec
 
-class EmailSpec extends MockStartupSpec {
+class EMailSpec extends MockStartupSpec {
 
 
   test("Email Test") {
