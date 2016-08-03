@@ -196,15 +196,16 @@ object EmailProcessor extends LazyLogging {
         if (bcc != null) message.setBcc(bcc)
         message.setSubject(title)
         message.setHtml(content)
-        if (attachments != null) {
-          attachments.foreach {
+        if (attachments != null && attachments.nonEmpty) {
+          val attachment=attachments.map {
             attach =>
               val attachment = new MailAttachment()
               attachment.setName(attach._1)
               attachment.setContentType(attach._2)
               attachment.setData(attach._3)
-              message.setAttachment(attachment)
+              attachment
           }
+          message.setAttachment(attachment)
         }
         logger.trace(s"Send mail [$title]")
         mailClient.sendMail(message, new Handler[AsyncResult[MailResult]] {
