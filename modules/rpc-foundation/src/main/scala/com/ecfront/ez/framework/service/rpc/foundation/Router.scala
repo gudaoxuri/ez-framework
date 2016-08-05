@@ -2,7 +2,9 @@ package com.ecfront.ez.framework.service.rpc.foundation
 
 import java.util.regex.Pattern
 
-import com.ecfront.common.Resp
+import com.ecfront.common.{BeanHelper, Resp}
+import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
+import com.ecfront.ez.framework.service.storage.foundation.{Label, Require}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.collection.mutable
@@ -17,6 +19,21 @@ import scala.collection.mutable.ArrayBuffer
   */
 case class Fun[E](requestClass: Class[E], private val fun: (Map[String, String], E, EZRPCContext) => Resp[Any]) {
 
+  private val allAnnotations =
+    if(requestClass!=null){
+    BeanHelper.findFieldAnnotations(requestClass).toList
+  }else{
+    List()
+  }
+  private val fieldLabel = allAnnotations.filter(_.annotation.isInstanceOf[Label]).map {
+    field =>
+      field.fieldName -> field.annotation.asInstanceOf[Label].label
+  }.toMap
+  private val requireFieldNames = allAnnotations.filter(_.annotation.isInstanceOf[Require]).map {
+    field =>
+      field.fieldName
+  }
+
   /**
     * 执行业务方法
     *
@@ -26,7 +43,24 @@ case class Fun[E](requestClass: Class[E], private val fun: (Map[String, String],
     * @return 执行结果
     */
   private[rpc] def execute(parameters: Map[String, String], body: Any, context: EZRPCContext): Resp[Any] = {
-    fun(parameters, body.asInstanceOf[E], context)
+    body match {
+      case bean: AnyRef =>
+        val errorFields = requireFieldNames.filter(BeanHelper.getValue(bean, _).get == null).map {
+          requireField =>
+            if (fieldLabel.contains(requireField)) {
+              fieldLabel(requireField).x
+            } else {
+              requireField.x
+            }
+        }
+        if (errorFields.nonEmpty) {
+          Resp.badRequest(errorFields.mkString("[", ",", "]") + " not null")
+        } else {
+          fun(parameters, body.asInstanceOf[E], context)
+        }
+      case _ =>
+        fun(parameters, body.asInstanceOf[E], context)
+    }
   }
 
 }

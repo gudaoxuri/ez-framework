@@ -29,6 +29,7 @@ case class DMQService[M](key: String) extends LazyLogging {
     */
   def publish(message: M): this.type = {
     if (!RedisProcessor.redis.isShutdown && !RedisProcessor.redis.isShuttingDown) {
+      logger.trace(s"Distributed public [$key] message : ${JsonHelper.toJsonString(message)}")
       topic.publish(message)
     }
     this
@@ -41,6 +42,7 @@ case class DMQService[M](key: String) extends LazyLogging {
     */
   def send(message: M): this.type = {
     if (!RedisProcessor.redis.isShutdown && !RedisProcessor.redis.isShuttingDown) {
+      logger.trace(s"Distributed send [$key] message : ${JsonHelper.toJsonString(message)}")
       queue.put(message)
     }
     this
@@ -64,13 +66,13 @@ case class DMQService[M](key: String) extends LazyLogging {
           val strMsg = JsonHelper.toJsonString(msg)
           val id = strMsg.hashCode
           executingItems.put(id, msg)
-          logger.trace(s"Distributed subscribe [$key] message in $strMsg")
+          logger.trace(s"Distributed subscribe [$key] message : $strMsg")
           val result = fun(msg)
           if (result) {
             executingItems.remove(id)
-            logger.trace(s"Distributed subscribe [$key] execute success in $strMsg")
+            logger.trace(s"Distributed subscribe [$key] execute success : $strMsg")
           } else {
-            logger.warn(s"Distributed subscribe [$key] execute error [${result.code}][${result.message}] in $strMsg")
+            logger.warn(s"Distributed subscribe [$key] execute error [${result.code}][${result.message}] : $strMsg")
           }
         } catch {
           case e: Throwable =>
@@ -102,13 +104,13 @@ case class DMQService[M](key: String) extends LazyLogging {
               val strMsg = JsonHelper.toJsonString(msg)
               val id = strMsg.hashCode
               executingItems.put(id, msg)
-              logger.trace(s"Distributed receive [$key] message in $strMsg")
+              logger.trace(s"Distributed receive [$key] message : $strMsg")
               val result = fun(msg)
               if (result) {
                 executingItems.remove(id)
-                logger.trace(s"Distributed receive [$key] execute success in $strMsg")
+                logger.trace(s"Distributed receive [$key] execute success : $strMsg")
               } else {
-                logger.warn(s"Distributed receive [$key] execute error [${result.code}][${result.message}] in $strMsg")
+                logger.warn(s"Distributed receive [$key] execute error [${result.code}][${result.message}] : $strMsg")
               }
             } catch {
               case e: Throwable =>
