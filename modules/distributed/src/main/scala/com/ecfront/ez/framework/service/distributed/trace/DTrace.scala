@@ -109,12 +109,13 @@ object DTrace extends LazyLogging {
         inst.startTime = new Date()
         inst.parentNodeCode = ""
         inst.flow = ""
+        inst.stepNumber = 0
         inst.success = true
         inst
       } else {
         rMap.get(instCode)
       }
-      if(flowInst!=null) {
+      if (flowInst != null) {
         // 根据流程实例状态对照流程定义获取期望的节点codes
         val expectNodeCodes =
         if (realCurrNode.parentNodeCodes.isEmpty) {
@@ -123,26 +124,23 @@ object DTrace extends LazyLogging {
         } else {
           traceNodeDefs(flowCode)(flowInst.parentNodeCode).childrenNodeCodes
         }
-        // 更新流程实例状态
-        flowInst.parentNodeCode = realCurrNode.code
         flowInst.flow = flowInst.flow + " > " + realCurrNode.code
-        rMap.put(instCode, flowInst)
         // 写日志
         val logStr = new StringBuffer()
         if (realCurrNode.parentNodeCodes.isEmpty) {
-          logStr.append(s"\r\n=|$instCode|======================= START [$flowCode] ========================")
+          logStr.append(s"\r\n=|$instCode|${flowInst.stepNumber}|======================= START [$flowCode] ========================")
         } else {
-          logStr.append(s"\r\n=|$instCode|-------------------------------------------------------------------")
+          logStr.append(s"\r\n=|$instCode|${flowInst.stepNumber}|-------------------------------------------------------------------")
         }
-        logStr.append(s"\r\n=|$instCode|= ${TimeHelper.yyyy_MM_dd_HH_mm_ss_SSS.format(new Date())} [$flowCode] for [$clueId] at [$module]-[$stage] : $message")
-        logStr.append(s"\r\n=|$instCode|= Flow [${flowInst.flow}]")
+        logStr.append(s"\r\n=|$instCode|${flowInst.stepNumber}|= ${TimeHelper.yyyy_MM_dd_HH_mm_ss_SSS.format(new Date())} [$flowCode] for [$clueId] at [$module]-[$stage] : $message")
+        logStr.append(s"\r\n=|$instCode|${flowInst.stepNumber}|= Flow [${flowInst.flow}]")
         if (!expectNodeCodes.contains(realCurrNode.code)) {
-          logStr.append(s"\r\n=|$instCode|= Expect current in [${expectNodeCodes.mkString("/")}] But real current is ${realCurrNode.code}")
+          logStr.append(s"\r\n=|$instCode|${flowInst.stepNumber}|= Expect current in [${expectNodeCodes.mkString("/")}] But real current is ${realCurrNode.code}")
           flowInst.success = false
         }
         if (realCurrNode.childrenNodeCodes.isEmpty) {
-          logStr.append(s"\r\n=|$instCode|= Result [${if (flowInst.success) "SUCCESS" else "FAIL"}] , Use Time [${new Date().getTime - flowInst.startTime.getTime}ms]")
-          logStr.append(s"\r\n=|$instCode|======================= FINISH [$flowCode] ========================")
+          logStr.append(s"\r\n=|$instCode|${flowInst.stepNumber}|= Result [${if (flowInst.success) "SUCCESS" else "FAIL"}] , Use Time [${new Date().getTime - flowInst.startTime.getTime}ms]")
+          logStr.append(s"\r\n=|$instCode|${flowInst.stepNumber}|======================= FINISH [$flowCode] ========================")
           rMap.remove(instCode)
         }
         if (flowInst.success) {
@@ -150,8 +148,12 @@ object DTrace extends LazyLogging {
         } else {
           logger.warn(logStr.toString)
         }
-      }else{
-        logger.warn(s"\r\n=|$instCode|= Not found start node [$flowCode] for [$clueId] at [$module]-[$stage] : $message")
+        // 更新流程实例状态
+        flowInst.parentNodeCode = realCurrNode.code
+        flowInst.stepNumber = flowInst.stepNumber + 1
+        rMap.put(instCode, flowInst)
+      } else {
+        logger.warn(s"\r\n=|$instCode|${flowInst.stepNumber}|= Not found start node [$flowCode] for [$clueId] at [$module]-[$stage] : $message")
       }
     } catch {
       case e: Throwable =>
@@ -168,6 +170,8 @@ class TraceFlowInst {
   @BeanProperty var startTime: Date = _
   // 父节点code，上次执行的节点code
   @BeanProperty var parentNodeCode: String = _
+  // 当前时序
+  @BeanProperty var stepNumber: Int = _
   // 流程描述
   @BeanProperty var flow: String = _
   // 是否成功

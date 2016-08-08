@@ -77,7 +77,7 @@ tailf(){
 
 trace(){
     inst_code=$1
-	exec grep "=|$instCode" $log_path/*/out.log
+    cat $log_path/*/out.log | grep "=|$instCode|" | sort -k 3 -t \|
 }
 
 deploy(){
