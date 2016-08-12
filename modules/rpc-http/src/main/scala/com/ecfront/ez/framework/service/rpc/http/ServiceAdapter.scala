@@ -47,7 +47,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     }
     val p = Promise[Resp[String]]()
     EZContext.vertx
-      .createHttpServer(opt.setReuseAddress().setCompressionSupported(true))
+      .createHttpServer(opt.setCompressionSupported(true))
       .requestHandler(new HttpServerProcessor(resourcePath, parameter.getString("accessControlAllowOrigin", "*")))
       .listen(port, host, new Handler[AsyncResult[HttpServer]] {
         override def handle(event: AsyncResult[HttpServer]): Unit = {
