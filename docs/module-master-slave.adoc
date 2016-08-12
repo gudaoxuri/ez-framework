@@ -11,7 +11,7 @@
  <dependency>
    <groupId>com.ecfront</groupId>
    <artifactId>ezf-master-slave</artifactId>
-   <version>3.0.1</version>
+   <version>3.1.1</version>
  <dependency>
 
 . 添加配置

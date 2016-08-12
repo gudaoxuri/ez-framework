@@ -31,7 +31,10 @@ object RedisProcessor extends LazyLogging {
     val config = new Config()
     val matchMode = mode.toUpperCase match {
       case "SINGLE" =>
-        val conf = config.useSingleServer().setAddress(address.head).setDatabase(db)
+        val conf = config.useSingleServer()
+          .setAddress(address.head)
+          .setTimeout(10000)
+          .setDatabase(db)
         if (auth != null && auth.nonEmpty) {
           conf.setPassword(auth)
         }
@@ -43,6 +46,7 @@ object RedisProcessor extends LazyLogging {
           cluster.setPassword(auth)
         }
         address.foreach(cluster.addNodeAddress(_))
+        cluster.setTimeout(10000)
         true
       case _ =>
         false

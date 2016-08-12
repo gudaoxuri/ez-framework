@@ -75,13 +75,13 @@ image::https://img.shields.io/travis/gudaoxuri/ez-framework.svg[link="https://tr
 <dependency>
     <groupId>com.ecfront</groupId>
     <artifactId>ezf-core</artifactId>
-    <version>3.0.1</version>
+    <version>3.1.1</version>
 </dependency>
 <!-- 各服务模块包 -->
 <dependency>
     <groupId>com.ecfront</groupId>
     <artifactId>ezf-<服务模块></artifactId>
-    <version>3.0.1</version>
+    <version>3.1.1</version>
 </dependency>
 ----
 
