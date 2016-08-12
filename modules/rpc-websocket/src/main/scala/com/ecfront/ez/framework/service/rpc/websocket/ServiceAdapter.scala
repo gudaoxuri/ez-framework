@@ -41,7 +41,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     Resp.success("")
   }
 
-  override var serviceName: String = "websocket"
+  override var serviceName: String = "rpc.websocket"
 }
 
 

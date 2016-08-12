@@ -65,7 +65,7 @@ object EZManager extends LazyLogging {
     * @param configContent 使用自定义配置内容（json格式）
     * @return 服务配置
     */
-  private def startInParseConfig(configContent: String = null): Resp[EZConfig] = {
+  private[ez] def startInParseConfig(configContent: String = null): Resp[EZConfig] = {
     try {
       val finalConfigContent =
         if (configContent == null) {

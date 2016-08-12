@@ -44,7 +44,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
         } else {
           request.remoteAddress().host()
         }
-      logger.trace(s"Receive a request [${request.uri()}] , from $ip ")
+      logger.trace(s"Receive a request [${request.method().name()}][${request.uri()}] , from $ip ")
       try {
         val ddosFilterR = AntiDDoSInterceptor.limitFilter(ip)
         if (ddosFilterR) {
