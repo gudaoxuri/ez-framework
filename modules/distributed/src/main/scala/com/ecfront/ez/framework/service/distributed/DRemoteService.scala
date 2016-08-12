@@ -11,7 +11,7 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
   */
 case class DRemoteService[T]() extends LazyLogging {
 
-  private val remoteService = RedisProcessor.redis.getRemoteSerivce
+  private val remoteService = RedisProcessor.redis.getRemoteSerivce("ez:remote")
 
   def register(interfaceClass: Class[T], implClass: T): Unit = {
     remoteService.register(interfaceClass, implClass)
