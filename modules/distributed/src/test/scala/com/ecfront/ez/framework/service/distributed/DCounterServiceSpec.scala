@@ -25,11 +25,11 @@ class DCounterServiceSpec extends MockStartupSpec {
   }
 
   test("expire test"){
-    println(RedisProcessor.redis.getAtomicLong("a").incrementAndGet())
-    RedisProcessor.redis.getAtomicLong("a").expire(1,TimeUnit.SECONDS)
-    println(RedisProcessor.redis.getAtomicLong("a").incrementAndGet())
+    println(RedisProcessor.custom().getAtomicLong("a").incrementAndGet())
+    RedisProcessor.custom().getAtomicLong("a").expire(1,TimeUnit.SECONDS)
+    println(RedisProcessor.custom().getAtomicLong("a").incrementAndGet())
     Thread.sleep(5000)
-    println(RedisProcessor.redis.getAtomicLong("a").incrementAndGet())
+    println(RedisProcessor.custom().getAtomicLong("a").incrementAndGet())
   }
 
 }

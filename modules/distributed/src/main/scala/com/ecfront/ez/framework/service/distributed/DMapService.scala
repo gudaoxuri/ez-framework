@@ -14,7 +14,7 @@ import scala.collection.JavaConversions._
   */
 case class DMapService[M](key: String) extends LazyLogging {
 
-  private val map: RMap[String, M] = RedisProcessor.redis.getMap(key)
+  private val map: RMap[String, M] = RedisProcessor.custom().getMap(key)
 
   def put(key: String, value: M): this.type = {
     map.fastPut(key, value)

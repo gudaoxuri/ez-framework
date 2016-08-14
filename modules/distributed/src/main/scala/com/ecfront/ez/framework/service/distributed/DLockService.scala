@@ -12,7 +12,7 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
   */
 case class DLockService(key: String) extends LazyLogging {
 
-  private val lock = RedisProcessor.redis.getLock(key)
+  private val lock = RedisProcessor.custom().getLock(key)
 
   def lock(leaseTime: Long = -1, unit: TimeUnit = null): this.type = {
     this.synchronized {

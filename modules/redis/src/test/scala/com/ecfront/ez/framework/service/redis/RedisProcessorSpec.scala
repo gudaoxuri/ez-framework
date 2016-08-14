@@ -51,14 +51,14 @@ class RedisProcessorSpec extends MockStartupSpec {
     RedisProcessor.del("int_test")
     RedisProcessor.incr("int_test", 10)
     RedisProcessor.incr("int_test", 10)
-    assert(RedisProcessor.get("int_test").body == 20)
+    assert(RedisProcessor.get("int_test").body == "20")
     RedisProcessor.decr("int_test", 4)
     RedisProcessor.decr("int_test", 2)
-    assert(RedisProcessor.get("int_test").body == 14)
+    assert(RedisProcessor.get("int_test").body == "14")
 
-    Await.result(RedisProcessor.Async.del("async_int"),Duration.Inf)
-    Await.result(RedisProcessor.Async.set("async_int","aaaa"),Duration.Inf)
-    assert(Await.result(RedisProcessor.Async.get("async_int"),Duration.Inf).body=="aaaa")
+    Await.result(RedisProcessor.Async.del("async_int"), Duration.Inf)
+    Await.result(RedisProcessor.Async.set("async_int", "aaaa"), Duration.Inf)
+    assert(Await.result(RedisProcessor.Async.get("async_int"), Duration.Inf).body == "aaaa")
 
   }
 
@@ -68,10 +68,21 @@ class RedisProcessorSpec extends MockStartupSpec {
       new Thread(new Runnable {
         override def run(): Unit = {
           RedisProcessor.set(s"test$i", System.nanoTime() + "")
-          counter.countDown()
         }
       })
     setThreads.foreach(_.start())
+    val getThreads = for (i <- 0 to 1000) yield
+      new Thread(new Runnable {
+        override def run(): Unit = {
+          while (RedisProcessor.exists(s"test$i").body) {
+            RedisProcessor.get(s"test$i")
+            RedisProcessor.del(s"test$i")
+            val counter = RedisProcessor.incr(s"incr$i")
+          }
+          counter.countDown()
+        }
+      })
+    getThreads.foreach(_.start())
     counter.await()
 
   }

@@ -12,10 +12,10 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
   */
 case class DCountDownLatchService(key: String) extends LazyLogging {
 
-  private val countDownLatch = RedisProcessor.redis.getCountDownLatch(key)
+  private val countDownLatch = RedisProcessor.custom().getCountDownLatch(key)
 
   def set(value: Long): this.type = {
-    RedisProcessor.redis.getAtomicLong(key).set(value)
+    RedisProcessor.custom().getAtomicLong(key).set(value)
     this
   }
 

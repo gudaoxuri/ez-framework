@@ -143,7 +143,7 @@ class DMQServiceSpec extends MockStartupSpec {
 
     assert(container.length == container.distinct.length)
 
-    RedisProcessor.redis.shutdown()
+    RedisProcessor.custom().shutdown()
   }
 
   test("DTopic point to point 错误测试——part1") {

@@ -17,9 +17,9 @@ import scala.collection.JavaConversions._
   */
 case class DMQService[M](key: String) extends LazyLogging {
 
-  private val topic: RTopic[M] = RedisProcessor.redis.getTopic(key)
-  private val queue: RBlockingQueue[M] = RedisProcessor.redis.getBlockingQueue(key)
-  private val executingItems: RMap[Int, M] = RedisProcessor.redis.getMap[Int, M](key + ":executing")
+  private val topic: RTopic[M] = RedisProcessor.custom().getTopic(key)
+  private val queue: RBlockingQueue[M] = RedisProcessor.custom().getBlockingQueue(key)
+  private val executingItems: RMap[Int, M] = RedisProcessor.custom().getMap[Int, M](key + ":executing")
   private val threads = Executors.newCachedThreadPool()
 
   /**
@@ -28,7 +28,7 @@ case class DMQService[M](key: String) extends LazyLogging {
     * @param message 消息内容
     */
   def publish(message: M): this.type = {
-    if (!RedisProcessor.redis.isShutdown && !RedisProcessor.redis.isShuttingDown) {
+    if (!RedisProcessor.custom().isShutdown && !RedisProcessor.custom().isShuttingDown) {
       logger.trace(s"Distributed public [$key] message : ${JsonHelper.toJsonString(message)}")
       topic.publish(message)
     }
@@ -41,7 +41,7 @@ case class DMQService[M](key: String) extends LazyLogging {
     * @param message 消息内容
     */
   def send(message: M): this.type = {
-    if (!RedisProcessor.redis.isShutdown && !RedisProcessor.redis.isShuttingDown) {
+    if (!RedisProcessor.custom().isShutdown && !RedisProcessor.custom().isShuttingDown) {
       logger.trace(s"Distributed send [$key] message : ${JsonHelper.toJsonString(message)}")
       queue.put(message)
     }
@@ -98,7 +98,7 @@ case class DMQService[M](key: String) extends LazyLogging {
     threads.execute(
       new Runnable {
         override def run(): Unit = {
-          while (!RedisProcessor.redis.isShutdown && !RedisProcessor.redis.isShuttingDown) {
+          while (!RedisProcessor.custom().isShutdown && !RedisProcessor.custom().isShuttingDown) {
             try {
               val msg = queue.take()
               val strMsg = JsonHelper.toJsonString(msg)
@@ -114,7 +114,7 @@ case class DMQService[M](key: String) extends LazyLogging {
               }
             } catch {
               case e: Throwable =>
-                if (!RedisProcessor.redis.isShutdown && !RedisProcessor.redis.isShuttingDown) {
+                if (!RedisProcessor.custom().isShutdown && !RedisProcessor.custom().isShuttingDown) {
                   logger.error(s"Distributed receive [$key] process error.", e)
                 }
             }
@@ -141,7 +141,7 @@ case class DMQService[M](key: String) extends LazyLogging {
         val strMsg = JsonHelper.toJsonString(msg)
         val id = strMsg.hashCode
         val lock = key + "_" + id
-        if (RedisProcessor.redis.getAtomicLong(lock).incrementAndGet() == 1) {
+        if (RedisProcessor.custom().getAtomicLong(lock).incrementAndGet() == 1) {
           try {
             executingItems.put(id, msg)
             logger.trace(s"Distributed subscribe [$key] message in $strMsg")
@@ -156,7 +156,7 @@ case class DMQService[M](key: String) extends LazyLogging {
             case e: Throwable =>
               logger.error(s"Distributed subscribe [$key] process error.", e)
           } finally {
-            RedisProcessor.redis.getAtomicLong(lock).expire(5, TimeUnit.SECONDS)
+            RedisProcessor.custom().getAtomicLong(lock).expire(5, TimeUnit.SECONDS)
           }
         }
       }

@@ -19,8 +19,8 @@ object DMonitorService extends LazyLogging {
 
   private val HEARTBEAT_DELAY: Long = 60000L
 
-  private val services: RMap[String, DService] = RedisProcessor.redis.getMap("__ez_service_list__")
-  private val liveReport: RMap[String, Long] = RedisProcessor.redis.getMap("__ez_service_live_report__")
+  private val services: RMap[String, DService] = RedisProcessor.custom.getMap("__ez_service_list__")
+  private val liveReport: RMap[String, Long] = RedisProcessor.custom.getMap("__ez_service_live_report__")
 
   /**
     * 启动当前服务监控

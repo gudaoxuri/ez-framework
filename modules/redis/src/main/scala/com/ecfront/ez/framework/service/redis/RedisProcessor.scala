@@ -1,22 +1,27 @@
 package com.ecfront.ez.framework.service.redis
 
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.CountDownLatch
 
-import com.ecfront.common.Resp
+import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.EZContext
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import io.vertx.core.json.{JsonArray, JsonObject}
 import io.vertx.core.{AsyncResult, Handler}
+import io.vertx.redis.op.SetOptions
+import io.vertx.redis.{RedisClient, RedisOptions}
 import org.redisson.{Config, Redisson, RedissonClient}
 
 import scala.collection.JavaConversions._
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future, Promise}
 
 /**
   * Redis处理类
   */
 object RedisProcessor extends LazyLogging {
 
-  private[ecfront] var redis: RedissonClient = _
+  private var simpleRedis: RedisClient = _
+  private var advRedis: RedissonClient = _
 
   /**
     * 初始化
@@ -28,6 +33,48 @@ object RedisProcessor extends LazyLogging {
     * @return 结果
     */
   def init(address: List[String], db: Integer, auth: String = null, mode: String = "single"): Resp[String] = {
+    val c = new CountDownLatch(1)
+    var resp: Resp[String] = null
+    val addr = address.map(_.split(":"))
+    val config = new RedisOptions()
+      .setHost(addr.head(0))
+    simpleRedis = RedisClient.create(EZContext.vertx, config)
+    simpleRedis.select(db, new Handler[AsyncResult[String]] {
+      override def handle(event: AsyncResult[String]): Unit = {
+        if (event.succeeded()) {
+          if (auth != null && auth.nonEmpty) {
+            simpleRedis.auth(auth, new Handler[AsyncResult[String]] {
+              override def handle(event: AsyncResult[String]): Unit = {
+                if (event.succeeded()) {
+                  c.countDown()
+                  resp = Resp.success("Redis client started")
+                } else {
+                  logger.error("Redis client start fail.", event.cause())
+                  c.countDown()
+                  resp = Resp.serverError(event.cause().getMessage)
+                }
+              }
+            })
+          } else {
+            c.countDown()
+            resp = Resp.success("Redis client started")
+          }
+        } else {
+          logger.error("Redis client start fail.", event.cause())
+          c.countDown()
+          resp = Resp.serverError(event.cause().getMessage)
+        }
+      }
+    })
+    c.await()
+    if (resp) {
+      initAdvClient(address, db, auth, mode)
+    } else {
+      resp
+    }
+  }
+
+  private def initAdvClient(address: List[String], db: Integer, auth: String = null, mode: String = "single"): Resp[String] = {
     val config = new Config()
     val matchMode = mode.toUpperCase match {
       case "SINGLE" =>
@@ -52,7 +99,7 @@ object RedisProcessor extends LazyLogging {
         false
     }
     if (matchMode) {
-      redis = Redisson.create(config)
+      advRedis = Redisson.create(config)
       Resp.success("Distributed started")
     } else {
       logger.error("Only support [ single ] or [ cluster ] mode")
@@ -61,10 +108,15 @@ object RedisProcessor extends LazyLogging {
   }
 
   def close(): Unit = {
-    if (redis != null) {
-      redis.shutdown()
+    if (simpleRedis != null) {
+      simpleRedis.close(new Handler[AsyncResult[Void]] {
+        override def handle(event: AsyncResult[Void]): Unit = {
+        }
+      })
     }
-
+    if (advRedis != null) {
+      advRedis.shutdown()
+    }
   }
 
   /**
@@ -72,7 +124,14 @@ object RedisProcessor extends LazyLogging {
     *
     * @return redis client
     */
-  def custom(): RedissonClient = redis
+  def client(): RedisClient = simpleRedis
+
+  /**
+    * 暴露redis client ，用于自定义操作
+    *
+    * @return redis client
+    */
+  def custom(): RedissonClient = advRedis
 
   /**
     * key是否存在
@@ -81,9 +140,7 @@ object RedisProcessor extends LazyLogging {
     * @return 是否存在
     */
   def exists(key: String): Resp[Boolean] = {
-    execute[Boolean]({
-      redis.getBucket[String](key).isExists
-    }, "exists")
+    Await.result(Async.exists(key), Duration.Inf)
   }
 
   /**
@@ -92,10 +149,8 @@ object RedisProcessor extends LazyLogging {
     * @param key key
     * @return 值
     */
-  def get(key: String): Resp[Any] = {
-    execute[Any]({
-      redis.getBucket(key).get().asInstanceOf[Any]
-    }, "get")
+  def get(key: String): Resp[String] = {
+    Await.result(Async.get(key), Duration.Inf)
   }
 
   /**
@@ -106,15 +161,8 @@ object RedisProcessor extends LazyLogging {
     * @param expire 过期时间(seconds)，0表示永不过期
     * @return 是否成功
     */
-  def set(key: String, value: String, expire: Long = 0): Resp[Void] = {
-    execute[Void]({
-      if (expire == 0) {
-        redis.getBucket[String](key).set(value)
-      } else {
-        redis.getBucket[String](key).set(value, expire, TimeUnit.SECONDS)
-      }
-      null
-    }, "del")
+  def set(key: String, value: String, expire: Int = 0): Resp[Void] = {
+    Await.result(Async.set(key, value, expire), Duration.Inf)
   }
 
   /**
@@ -124,11 +172,9 @@ object RedisProcessor extends LazyLogging {
     * @return 是否成功
     */
   def del(key: String): Resp[Void] = {
-    execute[Void]({
-      redis.getBucket[String](key).delete()
-      null
-    }, "del")
+    Await.result(Async.del(key), Duration.Inf)
   }
+
 
   /**
     * 设置列表
@@ -138,14 +184,8 @@ object RedisProcessor extends LazyLogging {
     * @param expire 过期时间(seconds)，0表示永不过期
     * @return 是否成功
     */
-  def lmset(key: String, values: List[String], expire: Long = 0): Resp[Void] = {
-    execute[Void]({
-      redis.getList[String](key).addAll(values)
-      if (expire != 0) {
-        redis.getList[String](key).expire(expire, TimeUnit.SECONDS)
-      }
-      null
-    }, "lmset")
+  def lmset(key: String, values: List[String], expire: Int = 0): Resp[Void] = {
+    Await.result(Async.lmset(key, values, expire), Duration.Inf)
   }
 
   /**
@@ -156,10 +196,7 @@ object RedisProcessor extends LazyLogging {
     * @return 是否成功
     */
   def lpush(key: String, value: String): Resp[Void] = {
-    execute[Void]({
-      redis.getDeque[String](key).addFirst(value)
-      null
-    }, "lpush")
+    Await.result(Async.lpush(key, value), Duration.Inf)
   }
 
   /**
@@ -171,10 +208,7 @@ object RedisProcessor extends LazyLogging {
     * @return 是否成功
     */
   def lset(key: String, value: String, index: Int): Resp[Void] = {
-    execute[Void]({
-      redis.getList[String](key).fastSet(index, value)
-      null
-    }, "lset")
+    Await.result(Async.lset(key, value, index), Duration.Inf)
   }
 
   /**
@@ -185,9 +219,7 @@ object RedisProcessor extends LazyLogging {
     * @return 栈顶的列表值
     */
   def lpop(key: String): Resp[String] = {
-    execute[String]({
-      redis.getQueue[String](key).poll()
-    }, "lpop")
+    Await.result(Async.lpop(key), Duration.Inf)
   }
 
   /**
@@ -199,9 +231,7 @@ object RedisProcessor extends LazyLogging {
     * @return 索引对应的值
     */
   def lindex(key: String, index: Int): Resp[String] = {
-    execute[String]({
-      redis.getList[String](key).get(index)
-    }, "lindex")
+    Await.result(Async.lindex(key, index), Duration.Inf)
   }
 
   /**
@@ -211,9 +241,7 @@ object RedisProcessor extends LazyLogging {
     * @return 长度
     */
   def llen(key: String): Resp[Long] = {
-    execute[Long]({
-      redis.getList[String](key).size()
-    }, "llen")
+    Await.result(Async.llen(key), Duration.Inf)
   }
 
   /**
@@ -223,9 +251,7 @@ object RedisProcessor extends LazyLogging {
     * @return 值列表
     */
   def lget(key: String): Resp[List[String]] = {
-    execute[List[String]]({
-      redis.getList[String](key).readAll().toList
-    }, "lget")
+    Await.result(Async.lget(key), Duration.Inf)
   }
 
   /**
@@ -236,14 +262,8 @@ object RedisProcessor extends LazyLogging {
     * @param expire 过期时间(seconds)，0表示永不过期
     * @return 是否成功
     */
-  def hmset(key: String, values: Map[String, String], expire: Long = 0): Resp[Void] = {
-    execute[Void]({
-      redis.getMap[String, String](key).putAll(values)
-      if (expire != 0) {
-        redis.getMap[String, String](key).expire(expire, TimeUnit.SECONDS)
-      }
-      null
-    }, "hmset")
+  def hmset(key: String, values: Map[String, String], expire: Int = 0): Resp[Void] = {
+    Await.result(Async.hmset(key, values, expire), Duration.Inf)
   }
 
   /**
@@ -255,10 +275,7 @@ object RedisProcessor extends LazyLogging {
     * @return 是否成功
     */
   def hset(key: String, field: String, value: String): Resp[Void] = {
-    execute[Void]({
-      redis.getMap[String, String](key).put(field, value)
-      null
-    }, "hset")
+    Await.result(Async.hset(key, field, value), Duration.Inf)
   }
 
   /**
@@ -270,9 +287,7 @@ object RedisProcessor extends LazyLogging {
     * @return field对应的值
     */
   def hget(key: String, field: String, defaultValue: String = null): Resp[String] = {
-    execute[String]({
-      redis.getMap[String, String](key).getOrDefault(field, defaultValue)
-    }, "hget")
+    Await.result(Async.hget(key, field, defaultValue), Duration.Inf)
   }
 
   /**
@@ -283,9 +298,7 @@ object RedisProcessor extends LazyLogging {
     * @return 是否存在
     */
   def hexist(key: String, field: String): Resp[Boolean] = {
-    execute[Boolean]({
-      redis.getMap[String, String](key).containsKey(field)
-    }, "hexist")
+    Await.result(Async.hexist(key, field), Duration.Inf)
   }
 
   /**
@@ -295,9 +308,7 @@ object RedisProcessor extends LazyLogging {
     * @return 所有值
     */
   def hgetall(key: String): Resp[Map[String, String]] = {
-    execute[Map[String, String]]({
-      redis.getMap[String, String](key).readAllEntrySet().map(i => i.getKey -> i.getValue).toMap
-    }, "hgetall")
+    Await.result(Async.hgetall(key), Duration.Inf)
   }
 
   /**
@@ -308,10 +319,7 @@ object RedisProcessor extends LazyLogging {
     * @return 是否成功
     */
   def hdel(key: String, field: String): Resp[Void] = {
-    execute[Void]({
-      redis.getMap[String, String](key).remove(field)
-      null
-    }, "hdel")
+    Await.result(Async.hdel(key, field), Duration.Inf)
   }
 
   /**
@@ -322,9 +330,7 @@ object RedisProcessor extends LazyLogging {
     * @return 操作后的值
     */
   def incr(key: String, incrValue: Long = 1): Resp[Long] = {
-    execute[Long]({
-      redis.getAtomicLong(key).addAndGet(incrValue)
-    }, "incr")
+    Await.result(Async.incr(key, incrValue), Duration.Inf)
   }
 
   /**
@@ -335,22 +341,8 @@ object RedisProcessor extends LazyLogging {
     * @return 操作后的值
     */
   def decr(key: String, decrValue: Long = 1): Resp[Long] = {
-    execute[Long]({
-      redis.getAtomicLong(key).addAndGet(-decrValue)
-    }, "decr")
+    Await.result(Async.decr(key, decrValue), Duration.Inf)
   }
-
-  private def execute[T](fun: => T, method: String): Resp[T] = {
-    try {
-      logger.trace(s"Redis execute [$method]")
-      Resp.success(fun)
-    } catch {
-      case e: Throwable =>
-        logger.error(s"Redis execute [$method] error.", e)
-        Resp.serverError(s"Redis execute [$method] error " + e.getMessage)
-    }
-  }
-
 
   object Async {
 
@@ -361,9 +353,19 @@ object RedisProcessor extends LazyLogging {
       * @return 是否存在
       */
     def exists(key: String): Future[Resp[Boolean]] = {
-      execute[Boolean]({
-        RedisProcessor.exists(key)
+      val p = Promise[Resp[Boolean]]()
+      logger.trace(s"Redis [exists] $key")
+      simpleRedis.exists(key, new Handler[AsyncResult[java.lang.Long]] {
+        override def handle(event: AsyncResult[java.lang.Long]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(event.result() != 0))
+          } else {
+            logger.error(s"Redis [exists] error. $key", event.cause())
+            p.success(Resp.serverError(s"Redis [exists] error. $key"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -372,10 +374,20 @@ object RedisProcessor extends LazyLogging {
       * @param key key
       * @return 值
       */
-    def get(key: String): Future[Resp[Any]] = {
-      execute[Any]({
-        RedisProcessor.get(key)
+    def get(key: String): Future[Resp[String]] = {
+      val p = Promise[Resp[String]]()
+      logger.trace(s"Redis [get] $key")
+      simpleRedis.get(key, new Handler[AsyncResult[String]] {
+        override def handle(event: AsyncResult[String]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(event.result()))
+          } else {
+            logger.error(s"Redis [get] error. $key", event.cause())
+            p.success(Resp.serverError(s"Redis [get] error. $key"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -386,10 +398,24 @@ object RedisProcessor extends LazyLogging {
       * @param expire 过期时间(seconds)，0表示永不过期
       * @return 是否成功
       */
-    def set(key: String, value: String, expire: Long = 0): Future[Resp[Void]] = {
-      execute[Void]({
-        RedisProcessor.set(key, value, expire)
+    def set(key: String, value: String, expire: Int = 0): Future[Resp[Void]] = {
+      val p = Promise[Resp[Void]]()
+      logger.trace(s"Redis [set] $key,$value")
+      val opt = new SetOptions()
+      if (expire != 0) {
+        opt.setEX(expire)
+      }
+      simpleRedis.setWithOptions(key, value, opt, new Handler[AsyncResult[String]] {
+        override def handle(event: AsyncResult[String]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(null))
+          } else {
+            logger.error(s"Redis [set] error. $key,$value", event.cause())
+            p.success(Resp.serverError(s"Redis [set] error. $key,$value"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -399,9 +425,19 @@ object RedisProcessor extends LazyLogging {
       * @return 是否成功
       */
     def del(key: String): Future[Resp[Void]] = {
-      execute[Void]({
-        RedisProcessor.del(key)
+      val p = Promise[Resp[Void]]()
+      logger.trace(s"Redis [del] $key")
+      simpleRedis.del(key, new Handler[AsyncResult[java.lang.Long]] {
+        override def handle(event: AsyncResult[java.lang.Long]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(null))
+          } else {
+            logger.error(s"Redis [del] error. $key", event.cause())
+            p.success(Resp.serverError(s"Redis [del] error. $key"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -412,10 +448,25 @@ object RedisProcessor extends LazyLogging {
       * @param expire 过期时间(seconds)，0表示永不过期
       * @return 是否成功
       */
-    def lmset(key: String, values: List[String], expire: Long = 0): Future[Resp[Void]] = {
-      execute[Void]({
-        RedisProcessor.lmset(key, values, expire)
+    def lmset(key: String, values: List[String], expire: Int = 0): Future[Resp[Void]] = {
+      val p = Promise[Resp[Void]]()
+      logger.trace(s"Redis [lmset] $key,$values")
+      simpleRedis.rpushMany(key, values, new Handler[AsyncResult[java.lang.Long]] {
+        override def handle(event: AsyncResult[java.lang.Long]): Unit = {
+          if (event.succeeded()) {
+            if (expire != 0) {
+              simpleRedis.expire(key, expire, new Handler[AsyncResult[java.lang.Long]] {
+                override def handle(event: AsyncResult[java.lang.Long]): Unit = {}
+              })
+            }
+            p.success(Resp.success(null))
+          } else {
+            logger.error(s"Redis [lmset] error. $key,$values", event.cause())
+            p.success(Resp.serverError(s"Redis [lmset] error. $key,$values"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -426,9 +477,19 @@ object RedisProcessor extends LazyLogging {
       * @return 是否成功
       */
     def lpush(key: String, value: String): Future[Resp[Void]] = {
-      execute[Void]({
-        RedisProcessor.lpush(key, value)
+      val p = Promise[Resp[Void]]()
+      logger.trace(s"Redis [lpush] $key,$value")
+      simpleRedis.lpush(key, value, new Handler[AsyncResult[java.lang.Long]] {
+        override def handle(event: AsyncResult[java.lang.Long]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(null))
+          } else {
+            logger.error(s"Redis [lpush] error. $key,$value", event.cause())
+            p.success(Resp.serverError(s"Redis [lpush] error. $key,$value"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -440,9 +501,19 @@ object RedisProcessor extends LazyLogging {
       * @return 是否成功
       */
     def lset(key: String, value: String, index: Int): Future[Resp[Void]] = {
-      execute[Void]({
-        RedisProcessor.lset(key, value, index)
+      val p = Promise[Resp[Void]]()
+      logger.trace(s"Redis [lset] $key,$value")
+      simpleRedis.lset(key, index, value, new Handler[AsyncResult[String]] {
+        override def handle(event: AsyncResult[String]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(null))
+          } else {
+            logger.error(s"Redis [lset] error. $key,$value", event.cause())
+            p.success(Resp.serverError(s"Redis [lset] error. $key,$value"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -453,9 +524,19 @@ object RedisProcessor extends LazyLogging {
       * @return 栈顶的列表值
       */
     def lpop(key: String): Future[Resp[String]] = {
-      execute[String]({
-        RedisProcessor.lpop(key)
+      val p = Promise[Resp[String]]()
+      logger.trace(s"Redis [lpop] $key")
+      simpleRedis.lpop(key, new Handler[AsyncResult[String]] {
+        override def handle(event: AsyncResult[String]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(event.result()))
+          } else {
+            logger.error(s"Redis [lpop] error. $key", event.cause())
+            p.success(Resp.serverError(s"Redis [lpop] error. $key"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -467,9 +548,19 @@ object RedisProcessor extends LazyLogging {
       * @return 索引对应的值
       */
     def lindex(key: String, index: Int): Future[Resp[String]] = {
-      execute[String]({
-        RedisProcessor.lindex(key, index)
+      val p = Promise[Resp[String]]()
+      logger.trace(s"Redis [lindex] $key")
+      simpleRedis.lindex(key, index, new Handler[AsyncResult[String]] {
+        override def handle(event: AsyncResult[String]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(event.result()))
+          } else {
+            logger.error(s"Redis [lindex] error. $key", event.cause())
+            p.success(Resp.serverError(s"Redis [lindex] error. $key"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -479,9 +570,19 @@ object RedisProcessor extends LazyLogging {
       * @return 长度
       */
     def llen(key: String): Future[Resp[Long]] = {
-      execute[Long]({
-        RedisProcessor.llen(key)
+      val p = Promise[Resp[Long]]()
+      logger.trace(s"Redis [llen] $key")
+      simpleRedis.llen(key, new Handler[AsyncResult[java.lang.Long]] {
+        override def handle(event: AsyncResult[java.lang.Long]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(event.result()))
+          } else {
+            logger.error(s"Redis [llen] error. $key", event.cause())
+            p.success(Resp.serverError(s"Redis [llen] error. $key"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -491,9 +592,28 @@ object RedisProcessor extends LazyLogging {
       * @return 值列表
       */
     def lget(key: String): Future[Resp[List[String]]] = {
-      execute[List[String]]({
-        RedisProcessor.lget(key)
+      val p = Promise[Resp[List[String]]]()
+      logger.trace(s"Redis [lget] $key")
+      simpleRedis.llen(key, new Handler[AsyncResult[java.lang.Long]] {
+        override def handle(event: AsyncResult[java.lang.Long]): Unit = {
+          if (event.succeeded()) {
+            simpleRedis.lrange(key, 0, event.result(), new Handler[AsyncResult[JsonArray]] {
+              override def handle(event: AsyncResult[JsonArray]): Unit = {
+                if (event.succeeded()) {
+                  p.success(Resp.success(JsonHelper.toObject[List[String]](event.result().encode())))
+                } else {
+                  logger.error(s"Redis [lget] error. $key", event.cause())
+                  p.success(Resp.serverError(s"Redis [lget] error. $key"))
+                }
+              }
+            })
+          } else {
+            logger.error(s"Redis [lget] error. $key", event.cause())
+            p.success(Resp.serverError(s"Redis [lget] error. $key"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -504,10 +624,20 @@ object RedisProcessor extends LazyLogging {
       * @param expire 过期时间(seconds)，0表示永不过期
       * @return 是否成功
       */
-    def hmset(key: String, values: Map[String, String], expire: Long = 0): Future[Resp[Void]] = {
-      execute[Void]({
-        RedisProcessor.hmset(key, values, expire)
+    def hmset(key: String, values: Map[String, String], expire: Int = 0): Future[Resp[Void]] = {
+      val p = Promise[Resp[Void]]()
+      logger.trace(s"Redis [hmset] $key,$values")
+      simpleRedis.hmset(key, new JsonObject(JsonHelper.toJsonString(values)), new Handler[AsyncResult[String]] {
+        override def handle(event: AsyncResult[String]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(null))
+          } else {
+            logger.error(s"Redis [hmset] error. $key,$values", event.cause())
+            p.success(Resp.serverError(s"Redis [hmset] error. $key,$values"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -519,9 +649,19 @@ object RedisProcessor extends LazyLogging {
       * @return 是否成功
       */
     def hset(key: String, field: String, value: String): Future[Resp[Void]] = {
-      execute[Void]({
-        RedisProcessor.hset(key, field, value)
+      val p = Promise[Resp[Void]]()
+      logger.trace(s"Redis [hset] $key,$field,$value")
+      simpleRedis.hset(key, field, value, new Handler[AsyncResult[java.lang.Long]] {
+        override def handle(event: AsyncResult[java.lang.Long]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(null))
+          } else {
+            logger.error(s"Redis [hset] error. $key,$field,$value", event.cause())
+            p.success(Resp.serverError(s"Redis [hset] error. $key,$field,$value"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -533,9 +673,19 @@ object RedisProcessor extends LazyLogging {
       * @return field对应的值
       */
     def hget(key: String, field: String, defaultValue: String = null): Future[Resp[String]] = {
-      execute[String]({
-        RedisProcessor.hget(key, field, defaultValue)
+      val p = Promise[Resp[String]]()
+      logger.trace(s"Redis [hget] $key,$field")
+      simpleRedis.hget(key, field, new Handler[AsyncResult[String]] {
+        override def handle(event: AsyncResult[String]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(event.result()))
+          } else {
+            logger.error(s"Redis [hget] error. $key,$field", event.cause())
+            p.success(Resp.serverError(s"Redis [hget] error. $key,$field"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -546,9 +696,19 @@ object RedisProcessor extends LazyLogging {
       * @return 是否存在
       */
     def hexist(key: String, field: String): Future[Resp[Boolean]] = {
-      execute[Boolean]({
-        RedisProcessor.hexist(key, field)
+      val p = Promise[Resp[Boolean]]()
+      logger.trace(s"Redis [hexist] $key,$field")
+      simpleRedis.hexists(key, field, new Handler[AsyncResult[java.lang.Long]] {
+        override def handle(event: AsyncResult[java.lang.Long]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(event.result() != 0))
+          } else {
+            logger.error(s"Redis [hexist] error. $key,$field", event.cause())
+            p.success(Resp.serverError(s"Redis [hexist] error. $key,$field"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -558,9 +718,19 @@ object RedisProcessor extends LazyLogging {
       * @return 所有值
       */
     def hgetall(key: String): Future[Resp[Map[String, String]]] = {
-      execute[Map[String, String]]({
-        RedisProcessor.hgetall(key)
+      val p = Promise[Resp[Map[String, String]]]()
+      logger.trace(s"Redis [hgetall] $key")
+      simpleRedis.hgetall(key, new Handler[AsyncResult[JsonObject]] {
+        override def handle(event: AsyncResult[JsonObject]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(JsonHelper.toObject[Map[String, String]](event.result().encode())))
+          } else {
+            logger.error(s"Redis [hgetall] error. $key", event.cause())
+            p.success(Resp.serverError(s"Redis [hgetall] error. $key"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -571,9 +741,19 @@ object RedisProcessor extends LazyLogging {
       * @return 是否成功
       */
     def hdel(key: String, field: String): Future[Resp[Void]] = {
-      execute[Void]({
-        RedisProcessor.hdel(key, field)
+      val p = Promise[Resp[Void]]()
+      logger.trace(s"Redis [hdel] $key,$field")
+      simpleRedis.hdel(key, field, new Handler[AsyncResult[java.lang.Long]] {
+        override def handle(event: AsyncResult[java.lang.Long]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(null))
+          } else {
+            logger.error(s"Redis [hdel] error. $key,$field", event.cause())
+            p.success(Resp.serverError(s"Redis [hdel] error. $key,$field"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -584,9 +764,19 @@ object RedisProcessor extends LazyLogging {
       * @return 操作后的值
       */
     def incr(key: String, incrValue: Long = 1): Future[Resp[Long]] = {
-      execute[Long]({
-        RedisProcessor.decr(key, incrValue)
+      val p = Promise[Resp[Long]]()
+      logger.trace(s"Redis [incr] $key,$incrValue")
+      simpleRedis.incrby(key, incrValue, new Handler[AsyncResult[java.lang.Long]] {
+        override def handle(event: AsyncResult[java.lang.Long]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(event.result()))
+          } else {
+            logger.error(s"Redis [incr] error. $key,$incrValue", event.cause())
+            p.success(Resp.serverError(s"Redis [incr] error. $key,$incrValue"))
+          }
+        }
       })
+      p.future
     }
 
     /**
@@ -597,20 +787,16 @@ object RedisProcessor extends LazyLogging {
       * @return 操作后的值
       */
     def decr(key: String, decrValue: Long = 1): Future[Resp[Long]] = {
-      execute[Long]({
-        RedisProcessor.decr(key, decrValue)
-      })
-    }
-
-    private def execute[T](fun: => Resp[T]): Future[Resp[T]] = {
-      val p = Promise[Resp[T]]()
-      EZContext.vertx.executeBlocking(new Handler[io.vertx.core.Future[Resp[T]]] {
-        override def handle(event: io.vertx.core.Future[Resp[T]]): Unit = {
-          event.complete(fun)
-        }
-      }, false, new Handler[AsyncResult[Resp[T]]] {
-        override def handle(event: AsyncResult[Resp[T]]): Unit = {
-          p.success(event.result())
+      val p = Promise[Resp[Long]]()
+      logger.trace(s"Redis [decr] $key,$decrValue")
+      simpleRedis.decrby(key, decrValue, new Handler[AsyncResult[java.lang.Long]] {
+        override def handle(event: AsyncResult[java.lang.Long]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(event.result()))
+          } else {
+            logger.error(s"Redis [decr] error. $key,$decrValue", event.cause())
+            p.success(Resp.serverError(s"Redis [decr] error. $key,$decrValue"))
+          }
         }
       })
       p.future

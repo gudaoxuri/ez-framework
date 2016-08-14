@@ -22,7 +22,7 @@ object DTrace extends LazyLogging {
   /**
     * 追踪日志状态持久化到Redis
     */
-  private val rMap = RedisProcessor.redis.getMap[String, TraceFlowInst]("ez:trace")
+  private val rMap = RedisProcessor.custom().getMap[String, TraceFlowInst]("ez:trace")
 
   /**
     * 追踪日志流程定义

@@ -10,7 +10,7 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
   */
 case class DCounterService(key: String) extends LazyLogging {
 
-  private val counter = RedisProcessor.redis.getAtomicLong(key)
+  private val counter = RedisProcessor.custom().getAtomicLong(key)
 
   def set(value: Long): this.type = {
     counter.set(value)

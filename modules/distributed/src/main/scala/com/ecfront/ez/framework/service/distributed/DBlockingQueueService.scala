@@ -12,7 +12,7 @@ import org.redisson.core.RBlockingQueue
   */
 case class DBlockingQueueService[M](key: String) extends LazyLogging {
 
-  private val queue: RBlockingQueue[M] = RedisProcessor.redis.getBlockingQueue(key)
+  private val queue: RBlockingQueue[M] = RedisProcessor.custom().getBlockingQueue(key)
 
   def put(value: M): this.type = {
     queue.put(value)

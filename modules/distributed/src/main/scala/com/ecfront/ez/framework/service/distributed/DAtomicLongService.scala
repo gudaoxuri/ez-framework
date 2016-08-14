@@ -11,7 +11,7 @@ import org.redisson.core.RAtomicLong
   */
 case class DAtomicLongService(key: String) extends LazyLogging {
 
-  private val atomicLong: RAtomicLong = RedisProcessor.redis.getAtomicLong(key)
+  private val atomicLong: RAtomicLong = RedisProcessor.custom().getAtomicLong(key)
 
   def set(value: Long): this.type = {
     atomicLong.set(value)
