@@ -13,7 +13,7 @@ class OrganizationSpec extends MockStartupSpec {
 
   test("Organization test") {
     val c=new CountDownLatch(1)
-    ServiceAdapter.ezEvent_organizationInit.subscribeOneNode({
+    ServiceAdapter.ezEvent_organizationInit.subscribe({
       orgCode =>
         println(orgCode)
         c.countDown()
