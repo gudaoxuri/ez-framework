@@ -12,18 +12,41 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
   */
 case class DLockService(key: String) extends LazyLogging {
 
-  private val lock = RedisProcessor.custom().getLock(key)
+  private val redis = RedisProcessor.custom()
+  private val lock = redis.getLock(key)
 
-  def lock(leaseTime: Long = -1, unit: TimeUnit = null): this.type = {
+  def lockWithFun(leaseTime: Long = -1, unit: TimeUnit = TimeUnit.MILLISECONDS)(fun: => Any): Any = {
+    try {
+      lock(leaseTime, unit)
+      fun
+    } catch {
+      case e: Throwable =>
+        logger.error("execute fun error with lock", e)
+        throw e
+    } finally {
+      unLock()
+    }
+  }
+
+  def tryLockWithFun(waitTime: Long = 0, leaseTime: Long = -1, unit: TimeUnit = TimeUnit.MILLISECONDS)(fun: => Any): Any = {
+    if (tryLock(waitTime, leaseTime, unit)) {
+      try {
+        fun
+      } catch {
+        case e: Throwable =>
+          logger.error("execute fun error with tryLock", e)
+          throw e
+      } finally {
+        unLock()
+      }
+    }
+  }
+
+  def lock(leaseTime: Long = -1, unit: TimeUnit = TimeUnit.MILLISECONDS): this.type = {
     this.synchronized {
       try {
-        if (!lock.isLocked) {
+        if (!redis.isShutdown && !lock.isLocked) {
           lock.lock(leaseTime, unit)
-          //  RedisService.currentLockedNode.fastPut(key, RedisService.nodeId)
-          /* } else if (!RedisService.nodeHeartbeat.containsKey(RedisService.currentLockedNode.get(key))) {
-             lock.delete()
-             lock.lock(leaseTime, unit)
-             RedisService.currentLockedNode.fastPut(key, RedisService.nodeId)*/
         }
       } catch {
         case e: Exception => logger.warn(s"lock [$key] error.", e)
@@ -35,21 +58,18 @@ case class DLockService(key: String) extends LazyLogging {
   def tryLock(waitTime: Long = 0, leaseTime: Long = -1, unit: TimeUnit = TimeUnit.MILLISECONDS): Boolean = {
     this.synchronized {
       try {
-        val isLock = if (waitTime == 0) {
-          lock.tryLock()
+        if (waitTime == 0) {
+          if (!redis.isShutdown) {
+            lock.tryLock()
+          } else {
+            false
+          }
         } else {
-          lock.tryLock(waitTime, leaseTime, unit)
-        }
-        if (isLock) {
-          // RedisService.currentLockedNode.fastPut(key, RedisService.nodeId)
-          true
-          /*  } else if (!RedisService.nodeHeartbeat.containsKey(RedisService.currentLockedNode.get(key))) {
-              lock.delete()
-              lock.lock(leaseTime, unit)
-              RedisService.currentLockedNode.fastPut(key, RedisService.nodeId)
-              true*/
-        } else {
-          false
+          if (!redis.isShutdown) {
+            lock.tryLock(waitTime, leaseTime, unit)
+          } else {
+            false
+          }
         }
       } catch {
         case e: Exception =>
@@ -61,15 +81,12 @@ case class DLockService(key: String) extends LazyLogging {
 
   def unLock(): Boolean = {
     this.synchronized {
-      if (lock.isLocked && lock.isHeldByCurrentThread) {
+      if (!redis.isShutdown && lock.isLocked && lock.isHeldByCurrentThread) {
         try {
           lock.unlock()
-          // RedisService.currentLockedNode.remove(key)
           true
         } catch {
           case e: Exception =>
-            lock.delete()
-            //   RedisService.currentLockedNode.remove(key)
             logger.error("Unlock error.", e)
             true
         }
@@ -80,13 +97,14 @@ case class DLockService(key: String) extends LazyLogging {
   }
 
   def isLock: Boolean = {
-    lock.isLocked
+    !redis.isShutdown && lock.isLocked
   }
 
   def delete(): this.type = {
     this.synchronized {
-      lock.delete()
-      // RedisService.currentLockedNode.remove(key)
+      if (!redis.isShutdown) {
+        lock.delete()
+      }
       this
     }
   }

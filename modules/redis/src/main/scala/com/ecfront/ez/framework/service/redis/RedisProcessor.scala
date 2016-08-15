@@ -166,6 +166,16 @@ object RedisProcessor extends LazyLogging {
   }
 
   /**
+    * 设置过期时间
+    *
+    * @param key    key
+    * @param expire 过期时间(seconds)，0表示永不过期
+    */
+  def expire(key: String, expire: Int = 0): Resp[Void] = {
+    Await.result(Async.expire(key, expire), Duration.Inf)
+  }
+
+  /**
     * 删除key
     *
     * @param key key
@@ -412,6 +422,28 @@ object RedisProcessor extends LazyLogging {
           } else {
             logger.error(s"Redis [set] error. $key,$value", event.cause())
             p.success(Resp.serverError(s"Redis [set] error. $key,$value"))
+          }
+        }
+      })
+      p.future
+    }
+
+    /**
+      * 设置过期时间
+      *
+      * @param key    key
+      * @param expire 过期时间(seconds)，0表示永不过期
+      */
+    def expire(key: String, expire: Int = 0): Future[Resp[Void]] = {
+      val p = Promise[Resp[Void]]()
+      logger.trace(s"Redis [expire] $key")
+      simpleRedis.expire(key, expire, new Handler[AsyncResult[java.lang.Long]] {
+        override def handle(event: AsyncResult[java.lang.Long]): Unit = {
+          if (event.succeeded()) {
+            p.success(Resp.success(null))
+          } else {
+            logger.error(s"Redis [expire] error. $key", event.cause())
+            p.success(Resp.serverError(s"Redis [expire] error. $key"))
           }
         }
       })
@@ -675,10 +707,23 @@ object RedisProcessor extends LazyLogging {
     def hget(key: String, field: String, defaultValue: String = null): Future[Resp[String]] = {
       val p = Promise[Resp[String]]()
       logger.trace(s"Redis [hget] $key,$field")
-      simpleRedis.hget(key, field, new Handler[AsyncResult[String]] {
-        override def handle(event: AsyncResult[String]): Unit = {
+      simpleRedis.hexists(key, field, new Handler[AsyncResult[java.lang.Long]] {
+        override def handle(event: AsyncResult[java.lang.Long]): Unit = {
           if (event.succeeded()) {
-            p.success(Resp.success(event.result()))
+            if (event.result() != 0) {
+              simpleRedis.hget(key, field, new Handler[AsyncResult[String]] {
+                override def handle(event: AsyncResult[String]): Unit = {
+                  if (event.succeeded()) {
+                    p.success(Resp.success(event.result()))
+                  } else {
+                    logger.error(s"Redis [hget] error. $key,$field", event.cause())
+                    p.success(Resp.serverError(s"Redis [hget] error. $key,$field"))
+                  }
+                }
+              })
+            } else {
+              p.success(Resp.success(defaultValue))
+            }
           } else {
             logger.error(s"Redis [hget] error. $key,$field", event.cause())
             p.success(Resp.serverError(s"Redis [hget] error. $key,$field"))

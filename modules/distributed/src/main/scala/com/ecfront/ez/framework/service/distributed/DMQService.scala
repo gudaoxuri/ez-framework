@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.service.distributed
 
-import java.util.concurrent.{Executors, TimeUnit}
+import java.util.concurrent.Executors
 
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.service.redis.RedisProcessor
@@ -19,8 +19,9 @@ case class DMQService[M](key: String) extends LazyLogging {
 
   private val topic: RTopic[M] = RedisProcessor.custom().getTopic(key)
   private val queue: RBlockingQueue[M] = RedisProcessor.custom().getBlockingQueue(key)
-  private val executingItems: RMap[Int, M] = RedisProcessor.custom().getMap[Int, M](key + ":executing")
+  private val executingItems: RMap[Int, M] = RedisProcessor.custom().getMap[Int, M](key + ":executing:items")
   private val threads = Executors.newCachedThreadPool()
+  private val executingLock = DLockService(key + ":executing:lock")
 
   /**
     * 发布消息
@@ -54,11 +55,12 @@ case class DMQService[M](key: String) extends LazyLogging {
     * @param fun 处理函数
     */
   def subscribe(fun: => M => Resp[Void]): this.type = {
-    // TODO lock
-    executingItems.foreach {
-      i =>
-        publish(i._2)
-        executingItems.remove(i._1)
+    executingLock.tryLockWithFun() {
+      executingItems.foreach {
+        i =>
+          publish(i._2)
+          executingItems.remove(i._1)
+      }
     }
     topic.addListener(new MessageListener[M]() {
       override def onMessage(s: String, msg: M): Unit = {
@@ -89,11 +91,12 @@ case class DMQService[M](key: String) extends LazyLogging {
     * @param fun 处理函数
     */
   def receive(fun: => M => Resp[Void]): this.type = {
-    // TODO lock
-    executingItems.foreach {
-      i =>
-        send(i._2)
-        executingItems.remove(i._1)
+    executingLock.tryLockWithFun() {
+      executingItems.foreach {
+        i =>
+          send(i._2)
+          executingItems.remove(i._1)
+      }
     }
     threads.execute(
       new Runnable {
@@ -121,46 +124,6 @@ case class DMQService[M](key: String) extends LazyLogging {
           }
         }
       })
-    this
-  }
-
-  /**
-    * 接收消息，一条消息只由一个节点处理
-    *
-    * @param fun 处理函数
-    */
-  def subscribeOneNode(fun: => M => Resp[Void]): this.type = {
-    // TODO lock
-    executingItems.foreach {
-      i =>
-        publish(i._2)
-        executingItems.remove(i._1)
-    }
-    topic.addListener(new MessageListener[M]() {
-      override def onMessage(s: String, msg: M): Unit = {
-        val strMsg = JsonHelper.toJsonString(msg)
-        val id = strMsg.hashCode
-        val lock = key + "_" + id
-        if (RedisProcessor.custom().getAtomicLong(lock).incrementAndGet() == 1) {
-          try {
-            executingItems.put(id, msg)
-            logger.trace(s"Distributed subscribe [$key] message in $strMsg")
-            val result = fun(msg)
-            if (result) {
-              executingItems.remove(id)
-              logger.trace(s"Distributed subscribe [$key] execute success in $strMsg")
-            } else {
-              logger.warn(s"Distributed subscribe [$key] execute error [${result.code}][${result.message}] in $strMsg")
-            }
-          } catch {
-            case e: Throwable =>
-              logger.error(s"Distributed subscribe [$key] process error.", e)
-          } finally {
-            RedisProcessor.custom().getAtomicLong(lock).expire(5, TimeUnit.SECONDS)
-          }
-        }
-      }
-    })
     this
   }
 

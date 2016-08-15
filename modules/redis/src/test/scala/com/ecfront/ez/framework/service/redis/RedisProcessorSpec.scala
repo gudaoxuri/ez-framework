@@ -29,6 +29,7 @@ class RedisProcessorSpec extends MockStartupSpec {
     RedisProcessor.hmset("hash_test", Map("f1" -> "v1", "f2" -> "v2"))
     RedisProcessor.hset("hash_test", "f3", "v3")
     assert(RedisProcessor.hget("hash_test", "f3").body == "v3")
+    assert(RedisProcessor.hget("hash_test", "notexist","xxx").body == "xxx")
     assert(RedisProcessor.hexist("hash_test", "f3").body)
     val hashVals = RedisProcessor.hgetall("hash_test").body
     assert(hashVals.size == 3 && hashVals("f1") == "v1" && hashVals("f2") == "v2" && hashVals("f3") == "v3")
@@ -49,12 +50,20 @@ class RedisProcessorSpec extends MockStartupSpec {
     assert(listVals.size == 2 && listVals == List("v1", "v2_new"))
 
     RedisProcessor.del("int_test")
+    assert(RedisProcessor.incr("int_test", 0).body==0)
     RedisProcessor.incr("int_test", 10)
+    assert(RedisProcessor.get("int_test").body == "10")
+    RedisProcessor.incr("int_test", 0)
+    assert(RedisProcessor.get("int_test").body == "10")
     RedisProcessor.incr("int_test", 10)
     assert(RedisProcessor.get("int_test").body == "20")
     RedisProcessor.decr("int_test", 4)
     RedisProcessor.decr("int_test", 2)
     assert(RedisProcessor.get("int_test").body == "14")
+    RedisProcessor.expire("int_test",1)
+    assert(RedisProcessor.get("int_test").body == "14")
+    Thread.sleep(1100)
+    assert(RedisProcessor.get("int_test").body == null)
 
     Await.result(RedisProcessor.Async.del("async_int"), Duration.Inf)
     Await.result(RedisProcessor.Async.set("async_int", "aaaa"), Duration.Inf)

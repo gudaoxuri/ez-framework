@@ -60,7 +60,7 @@ class DMQServiceSpec extends MockStartupSpec {
 
   }
 
-  test("DTopic subscribeOneNode 测试") {
+  /*test("DTopic subscribeOneNode 测试") {
 
     val mq = DMQService[TestModel]("test_topic24")
 
@@ -73,7 +73,7 @@ class DMQServiceSpec extends MockStartupSpec {
     new CountDownLatch(1).await()
 
   }
-
+*/
   test("DTopic publish 测试") {
 
     val mq = DMQService[TestModel]("test_topic24")

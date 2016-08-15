@@ -33,8 +33,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   var defaultOrganizationCode: String = _
   var loginUrl: String = _
   var mongoStorage: Boolean = _
-  var loginKeepSeconds: Long = _
-  var activeKeepSeconds: Long = _
+  var loginKeepSeconds: Int = _
+  var activeKeepSeconds: Int = _
   var loginLimit_showCaptcha: Int = _
   var encrypt_algorithm: String = _
   var encrypt_salt: String = _
@@ -69,8 +69,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     defaultOrganizationCode = parameter.getString("defaultOrganizationCode", EZ_Organization.DEFAULT_ORGANIZATION_CODE)
     defaultRoleFlag = parameter.getString("defaultRoleFlag", EZ_Role.USER_ROLE_FLAG)
     loginUrl = parameter.getString("loginUrl", "#/auth/login")
-    loginKeepSeconds = parameter.getLong("loginKeepSeconds", 0L)
-    activeKeepSeconds = parameter.getLong("activeKeepSeconds", 24L * 60 * 60)
+    loginKeepSeconds = parameter.getInteger("loginKeepSeconds", 0)
+    activeKeepSeconds = parameter.getInteger("activeKeepSeconds", 24 * 60 * 60)
     encrypt_algorithm =
       if (parameter.containsKey("encrypt") && parameter.getJsonObject("encrypt").containsKey("algorithm")) {
         parameter.getJsonObject("encrypt").getString("algorithm")
