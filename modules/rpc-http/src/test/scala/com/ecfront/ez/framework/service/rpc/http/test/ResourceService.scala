@@ -63,4 +63,10 @@ object ResourceService extends SimpleHTTPService[EZ_Resource, EZRPCContext] {
     Resp.success(body)
   }
 
+  @GET("longtime/")
+  def longTime(parameter: Map[String, String], context: EZRPCContext): Resp[String] = {
+    Thread.sleep(10000000)
+    Resp.success("ok")
+  }
+
 }
