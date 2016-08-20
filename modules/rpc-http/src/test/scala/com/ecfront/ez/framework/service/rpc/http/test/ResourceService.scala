@@ -1,7 +1,9 @@
 package com.ecfront.ez.framework.service.rpc.http.test
 
+import java.io.File
+
 import com.ecfront.common.Resp
-import com.ecfront.ez.framework.service.rpc.foundation.{EZRPCContext, GET, POST, RPC}
+import com.ecfront.ez.framework.service.rpc.foundation._
 import com.ecfront.ez.framework.service.rpc.http.HTTP
 import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHTTPService
 import com.ecfront.ez.framework.service.storage.foundation.BaseStorage
@@ -67,6 +69,12 @@ object ResourceService extends SimpleHTTPService[EZ_Resource, EZRPCContext] {
   def longTime(parameter: Map[String, String], context: EZRPCContext): Resp[String] = {
     Thread.sleep(10000000)
     Resp.success("ok")
+  }
+
+  @GET("downfile/")
+  def downFile(parameter: Map[String, String], context: EZRPCContext): Resp[DownloadFile] = {
+    val file=new File(this.getClass.getResource("/").getPath+"logback.xml")
+    Resp.success(DownloadFile(file,"logback.xml"))
   }
 
 }
