@@ -46,23 +46,23 @@ object RedisProcessor extends LazyLogging {
             simpleRedis.auth(auth, new Handler[AsyncResult[String]] {
               override def handle(event: AsyncResult[String]): Unit = {
                 if (event.succeeded()) {
-                  c.countDown()
                   resp = Resp.success("Redis client started")
+                  c.countDown()
                 } else {
                   logger.error("Redis client start fail.", event.cause())
-                  c.countDown()
                   resp = Resp.serverError(event.cause().getMessage)
+                  c.countDown()
                 }
               }
             })
           } else {
-            c.countDown()
             resp = Resp.success("Redis client started")
+            c.countDown()
           }
         } else {
           logger.error("Redis client start fail.", event.cause())
-          c.countDown()
           resp = Resp.serverError(event.cause().getMessage)
+          c.countDown()
         }
       }
     })
