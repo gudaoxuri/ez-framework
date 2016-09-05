@@ -1,5 +1,6 @@
 package com.ecfront.ez.framework.service.storage.jdbc
 
+import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.test.MockStartupSpec
 
 class TxSpec extends MockStartupSpec {
@@ -101,33 +102,18 @@ class TxSpec extends MockStartupSpec {
   }
 
   test("Tx Test3") {
-    JDBCProcessor.tx {
-      JDBCProcessor.update(
-        """
-          |CREATE TABLE IF NOT EXISTS jdbc_test_entity
-          |(
-          | id INT NOT NULL AUTO_INCREMENT ,
-          | name varchar(100) NOT NULL ,
-          | age INT NOT NULL ,
-          | rel1 JSON ,
-          | rel2 JSON ,
-          | rel3 JSON ,
-          | rel4 JSON ,
-          | create_user varchar(100)  COMMENT '创建用户' ,
-          | create_org varchar(100)  COMMENT '创建组织' ,
-          | create_time BIGINT COMMENT  '创建时间(yyyyMMddHHmmssSSS)' ,
-          | update_user varchar(100) COMMENT '更新用户' ,
-          | update_org varchar(100) COMMENT '更新组织' ,
-          | update_time BIGINT COMMENT '更新时间(yyyyMMddHHmmssSSS)' ,
-          | enable BOOLEAN COMMENT '是否启用' ,
-          | PRIMARY KEY(id)
-          |)ENGINE=innodb DEFAULT CHARSET=utf8
-        """.stripMargin
-      )
-      JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("张三", 23))
-      JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("李四", 111))
-      test2()
-    }
+    JDBCProcessor.update(
+      """
+        |CREATE TABLE IF NOT EXISTS jdbc_test_entity
+        |(
+        | id INT NOT NULL AUTO_INCREMENT ,
+        | name varchar(100) NOT NULL ,
+        | age INT NOT NULL ,
+        | PRIMARY KEY(id)
+        |)ENGINE=innodb DEFAULT CHARSET=utf8
+      """.stripMargin
+    )
+    testTxFail()
     assert(!JDBCProcessor.exist("SELECT * FROM  jdbc_test_entity WHERE name =?", List("张三")).body)
 
     JDBCProcessor.tx {
@@ -138,12 +124,18 @@ class TxSpec extends MockStartupSpec {
     assert(JDBCProcessor.exist("SELECT * FROM  jdbc_test_entity WHERE name =?", List("王五")).body)
   }
 
-  def test2(): Unit = {
-    JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("王五", 234))
-    throw new Exception("xxx")
+  def testTxFail() = JDBCProcessor.tx {
+    JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("张三", 23))
+    JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("李四", 111))
+    test2()
   }
 
-  def test3(): Unit = {
+  def test2(): Resp[Void] = {
+    JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("王五", 234))
+   Resp.forbidden("")
+  }
+
+  def test3(): Resp[Void] = {
     JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("王五", 234))
   }
 

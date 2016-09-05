@@ -131,11 +131,11 @@ object JDBCProcessor extends LazyLogging {
     * @return 当前事务的连接信息
     */
   def openTxByThreadLocal(): Unit = {
-    while (threadLocal.get() != null) {
-      logger.trace("ThreadLocal transaction already exists,wait...")
-      Thread.sleep(100)
+    if (threadLocal.get() != null) {
+      logger.trace("ThreadLocal transaction already exists,reuse it.")
+    }else {
+      threadLocal.set(Await.result(Async.openTx(), Duration.Inf))
     }
-    threadLocal.set(Await.result(Async.openTx(), Duration.Inf))
   }
 
   /**
@@ -174,11 +174,16 @@ object JDBCProcessor extends LazyLogging {
     }
   }
 
-  def tx[E](fun: => E)(implicit m: Manifest[E]): E = {
+  def tx[E](fun: => Resp[E])(implicit m: Manifest[E]): Resp[E] = {
     openTxByThreadLocal()
     try {
       val result = fun
-      commit()
+      if(result) {
+        commit()
+      }else{
+        logger.error(s"Execute error in transaction:[${result.code}] ${result.message}")
+        rollback()
+      }
       result
     } catch {
       case e: Throwable =>
