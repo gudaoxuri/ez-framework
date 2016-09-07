@@ -7,6 +7,7 @@ import com.ecfront.ez.framework.service.auth.helper.CaptchaHelper
 import com.ecfront.ez.framework.service.auth.model._
 import com.ecfront.ez.framework.service.rpc.foundation.{GET, POST, RPC}
 import com.ecfront.ez.framework.service.rpc.http.HTTP
+import com.ecfront.ez.framework.service.storage.foundation.BaseModel
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 @RPC("/auth/")
@@ -40,7 +41,21 @@ object AuthService extends LazyLogging {
   /**
     * 登录
     */
-  def doLogin(loginIdOrEmail: String, password: String, organizationCode: String, captchaText: String, context: EZAuthContext): Resp[Token_Info_VO] = {
+  def doLogin(loginIdOrEmail: String, password: String, organizationCode: String,
+              captchaText: String, context: EZAuthContext): Resp[Token_Info_VO] = {
+    executeLogin(loginIdOrEmail, password, organizationCode, null, captchaText, context)
+  }
+
+  /**
+    * 登录
+    */
+  def doLoginWithRoleFlags(loginIdOrEmail: String, password: String, organizationCode: String, roleFlags: Seq[String],
+                           captchaText: String, context: EZAuthContext): Resp[Token_Info_VO] = {
+    executeLogin(loginIdOrEmail, password, organizationCode, roleFlags, captchaText, context)
+  }
+
+  private def executeLogin(loginIdOrEmail: String, password: String, organizationCode: String, roleFlags: Seq[String],
+                           captchaText: String, context: EZAuthContext): Resp[Token_Info_VO] = {
     val accountLoginIdOrEmailAndOrg = loginIdOrEmail + "@" + organizationCode
     val errorTimes = CacheManager.getLoginErrorTimes(accountLoginIdOrEmailAndOrg)
     if (errorTimes < ServiceAdapter.loginLimit_showCaptcha
@@ -56,12 +71,17 @@ object AuthService extends LazyLogging {
             val account = getR.body
             if (EZ_Account.validateEncryptPwd(account.login_id, password, account.password)) {
               if (account.enable) {
-                val tokenInfoR = CacheManager.addTokenInfo(account, org)
-                CacheManager.removeLoginErrorTimes(accountLoginIdOrEmailAndOrg)
-                CacheManager.removeCaptcha(accountLoginIdOrEmailAndOrg)
-                logger.info(s"[login] success ,token:${tokenInfoR.body.token} id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
-                ServiceAdapter.ezEvent_loginSuccess.publish(tokenInfoR.body)
-                tokenInfoR
+                if (roleFlags == null || (roleFlags.toSet & account.role_codes.map(_.split(BaseModel.SPLIT)(1)).toSet).nonEmpty) {
+                  val tokenInfoR = CacheManager.addTokenInfo(account, org)
+                  CacheManager.removeLoginErrorTimes(accountLoginIdOrEmailAndOrg)
+                  CacheManager.removeCaptcha(accountLoginIdOrEmailAndOrg)
+                  logger.info(s"[login] success ,token:${tokenInfoR.body.token} id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+                  ServiceAdapter.ezEvent_loginSuccess.publish(tokenInfoR.body)
+                  tokenInfoR
+                } else {
+                  logger.warn(s"[login] account role not contains [${roleFlags.mkString(",")}] by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
+                  Resp.conflict(s"Account role not contains [${roleFlags.mkString(",")}]")
+                }
               } else {
                 logger.warn(s"[login] account disabled by id:$loginIdOrEmail , organization:$organizationCode from ${context.remoteIP}")
                 Resp.locked(s"Account disabled")
