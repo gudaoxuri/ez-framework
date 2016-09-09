@@ -139,7 +139,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
     }
   }
 
-  private def execute(request: HttpServerRequest, body: Any, fun: Fun[_], context: EZRPCContext): Unit = {
+  private def execute(request: HttpServerRequest, body: String, fun: Fun[_], context: EZRPCContext): Unit = {
     if (!EZContext.isDebug) {
       logger.info(s"Execute a request from ${context.remoteIP} to [${context.method}] ${context.realUri}")
     } else {
@@ -149,35 +149,55 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
       (context, param) =>
         val p = Promise[Resp[EZRPCContext]]()
         try {
-          val b = if (body != null) {
-            context.contentType match {
-              case t if t.contains("json") => JsonHelper.toObject(body, fun.requestClass)
-              case t if t.contains("xml") =>
-                if (fun.requestClass == classOf[Document]) {
-                  $(body.asInstanceOf[String]).document()
-                } else if (fun.requestClass == classOf[String]) {
-                  body.asInstanceOf[String]
-                } else {
-                  logger.warn(s"Not support return type [${fun.requestClass.getName}] by xml")
-                  null
-                }
-              case _ =>
-                logger.warn("Not support content type:" + context.contentType)
-                null
+          val (finalBody, bodyParseSuccess) =
+            if (body != null) {
+              context.contentType match {
+                case t if t.contains("json") =>
+                  try {
+                    (JsonHelper.toObject(body, fun.requestClass), true)
+                  } catch {
+                    case e: Throwable =>
+                      logger.warn(s"Body $body parse to ${fun.requestClass.getName} error", e)
+                      p.success(Resp.badRequest(s"Body parse to ${fun.requestClass.getName} error"))
+                      (_, false)
+                  }
+                case t if t.contains("xml") =>
+                  if (fun.requestClass == classOf[Document]) {
+                    try {
+                      ($(body).document(), true)
+                    } catch {
+                      case e: Throwable =>
+                        logger.warn(s"Body $body parse to xml error", e)
+                        p.success(Resp.badRequest(s"Body parse to xml error"))
+                        (_, false)
+                    }
+                  } else if (fun.requestClass == classOf[String]) {
+                    (body, true)
+                  } else {
+                    logger.warn(s"Not support return type [${fun.requestClass.getName}] by xml")
+                    p.success(Resp.badRequest(s"Not support return type [${fun.requestClass.getName}] by xml"))
+                    (_, false)
+                  }
+                case _ =>
+                  logger.warn("Not support content type:" + context.contentType)
+                  p.success(Resp.badRequest("Not support content type:" + context.contentType))
+                  (_, false)
+              }
+            } else {
+              (null, true)
             }
-          } else {
-            null
+          if (bodyParseSuccess) {
+            EZContext.vertx.executeBlocking(new Handler[Future[Resp[Any]]] {
+              override def handle(e: Future[Resp[Any]]): Unit = {
+                e.complete(fun.execute(context.parameters, finalBody, context))
+              }
+            }, false, new Handler[AsyncResult[Resp[Any]]] {
+              override def handle(e: AsyncResult[Resp[Any]]): Unit = {
+                context.executeResult = e.result()
+                p.success(Resp.success(context))
+              }
+            })
           }
-          EZContext.vertx.executeBlocking(new Handler[Future[Resp[Any]]] {
-            override def handle(e: Future[Resp[Any]]): Unit = {
-              e.complete(fun.execute(context.parameters, b, context))
-            }
-          }, false, new Handler[AsyncResult[Resp[Any]]] {
-            override def handle(e: AsyncResult[Resp[Any]]): Unit = {
-              context.executeResult = e.result()
-              p.success(Resp.success(context))
-            }
-          })
         } catch {
           case e: Exception =>
             logger.error("Request content error.", e)
