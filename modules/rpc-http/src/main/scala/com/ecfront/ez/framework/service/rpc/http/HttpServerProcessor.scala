@@ -159,7 +159,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
                     case e: Throwable =>
                       logger.warn(s"Body $body parse to ${fun.requestClass.getName} error", e)
                       p.success(Resp.badRequest(s"Body parse to ${fun.requestClass.getName} error"))
-                      (_, false)
+                      (null, false)
                   }
                 case t if t.contains("xml") =>
                   if (fun.requestClass == classOf[Document]) {
@@ -169,19 +169,19 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
                       case e: Throwable =>
                         logger.warn(s"Body $body parse to xml error", e)
                         p.success(Resp.badRequest(s"Body parse to xml error"))
-                        (_, false)
+                        (null, false)
                     }
                   } else if (fun.requestClass == classOf[String]) {
                     (body, true)
                   } else {
                     logger.warn(s"Not support return type [${fun.requestClass.getName}] by xml")
                     p.success(Resp.badRequest(s"Not support return type [${fun.requestClass.getName}] by xml"))
-                    (_, false)
+                    (null, false)
                   }
                 case _ =>
                   logger.warn("Not support content type:" + context.contentType)
                   p.success(Resp.badRequest("Not support content type:" + context.contentType))
-                  (_, false)
+                  (null, false)
               }
             } else {
               (null, true)
