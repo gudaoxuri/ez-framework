@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZContext
+import com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeUtility
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.{AsyncResult, Handler}
@@ -200,7 +201,7 @@ object EmailProcessor extends LazyLogging {
           val attachment=attachments.map {
             attach =>
               val attachment = new MailAttachment()
-              attachment.setName(attach._1)
+              attachment.setName(MimeUtility.encodeText(attach._1))
               attachment.setContentType(attach._2)
               attachment.setData(attach._3)
               attachment
