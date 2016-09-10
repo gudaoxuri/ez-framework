@@ -181,13 +181,13 @@ object JDBCProcessor extends LazyLogging {
       if(result) {
         commit()
       }else{
-        logger.error(s"Execute error in transaction:[${result.code}] ${result.message}")
+        logger.warn(s"Execute error in transaction:[${result.code}] ${result.message}")
         rollback()
       }
       result
     } catch {
       case e: Throwable =>
-        logger.error("Execute error in transaction", e)
+        logger.warn("Execute error in transaction", e)
         rollback()
         throw e
     }
