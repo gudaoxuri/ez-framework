@@ -35,6 +35,7 @@ Require【flag】	Require【flag】	【标识】不能为空
 【login id】can't contains (?<split>.+)	【login id】can't contains ${split}	【登录Id】不能包含 ${split}
 【uri】can't contains (?<split>.+)	【uri】can't contains ${split}	【uri】不能包含 ${split}
 【flag】can't contains (?<split>.+)	【flag】can't contains ${split}	【标识】不能包含 ${split}
+【login_id】exist	【login id】exist	【登录Id】已存在
 【email】exist	【email】exist	【邮箱】已存在
 【email】format error	【email】format error	【邮箱】格式错误
 Token NOT exist	Token NOT exist	认证信息不存在

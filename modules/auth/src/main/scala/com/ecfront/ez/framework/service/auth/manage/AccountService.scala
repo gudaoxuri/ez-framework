@@ -9,7 +9,7 @@ import com.ecfront.ez.framework.service.email.EmailProcessor
 import com.ecfront.ez.framework.service.rpc.foundation._
 import com.ecfront.ez.framework.service.rpc.http.HTTP
 import com.ecfront.ez.framework.service.rpc.http.scaffold.SimpleHTTPService
-import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, Page, StatusModel, StatusStorage}
+import com.ecfront.ez.framework.service.storage.foundation.{BaseStorage, Page}
 
 /**
   * 账号管理
@@ -148,7 +148,7 @@ object AccountService extends SimpleHTTPService[EZ_Account, EZAuthContext] {
         if (accountR.body != null) {
           val account = accountR.body
           // 验证密码
-          if (EZ_Account.validateEncryptPwd(account.login_id, body.current_password, account.password)) {
+          if (EZ_Account.validateEncryptPwd(account.code, body.current_password, account.password)) {
             if (body.new_password != null && body.new_password.nonEmpty) {
               account.password = body.new_password
             } else {

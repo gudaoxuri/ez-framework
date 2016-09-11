@@ -19,7 +19,7 @@ case class EZ_Account() extends SecureModel with StatusModel with OrganizationMo
 
   @Unique
   @Require
-  @Label("Code") // organization_code@login_id
+  @Label("Code")
   @BeanProperty var code: String = _
   @Require
   @Label("Login Id")
@@ -108,6 +108,8 @@ object EZ_Account extends SecureStorageAdapter[EZ_Account, EZ_Account_Base]
 
   override def existByEmail(email: String, organizationCode: String): Resp[Boolean] = storageObj.existByEmail(email, organizationCode)
 
+  override def existByLoginId(loginId: String, organizationCode: String): Resp[Boolean] = storageObj.existByLoginId(loginId, organizationCode)
+
   override def deleteByCode(code: String): Resp[Void] = storageObj.deleteByCode(code)
 
   override def deleteByLoginId(loginId: String, organizationCode: String): Resp[Void] = storageObj.deleteByLoginId(loginId, organizationCode)
@@ -132,89 +134,87 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
       || model.password == null || model.password.trim.isEmpty
       || model.email == null || model.email.trim.isEmpty) {
       logger.warn(s"Require【Login_id】【password】【email】")
-      Resp.badRequest("Require【Login_id】【password】【email】")
-    } else {
-      if (FormatHelper.validEmail(model.email)) {
-        if (model.exchange_pwd != null && model.exchange_pwd.trim.nonEmpty) {
-          model.password = model.exchange_pwd
-        } else {
-          model.password = packageEncryptPwd(model.login_id, model.password)
-        }
-        if (existByEmail(model.email, model.organization_code).body) {
-          logger.warn("【email】exist")
-          Resp.badRequest("【email】exist")
-        } else {
-          model.code = EZContext.createUUID()
-          if (model.image == null) {
-            model.image = ""
-          }
-          if (model.organization_code == null) {
-            model.organization_code = ServiceAdapter.defaultOrganizationCode
-          }
-          if (model.oauth == null) {
-            model.oauth = Map()
-          }
-          if (model.ext_id == null) {
-            model.ext_id = ""
-          }
-          if (model.ext_info == null) {
-            model.ext_info = Map()
-          }
-          if (ServiceAdapter.useRelTable) {
-            model.exchange_role_codes = model.role_codes
-            model.role_codes = null
-          }
-          if (EZ_Account.extAccountStorage != null) {
-            model.exchange_ext_info = model.ext_info
-            model.ext_info = Map()
-          }
-          super.preSave(model, context)
-        }
-      } else {
-        logger.warn("【email】format error")
-        Resp.badRequest("【email】format error")
-      }
+      return Resp.badRequest("Require【Login_id】【password】【email】")
     }
+    if (!FormatHelper.validEmail(model.email)) {
+      logger.warn("【email】format error")
+      return Resp.badRequest("【email】format error")
+    }
+    if (existByEmail(model.email, model.organization_code).body) {
+      logger.warn("【email】exist")
+      return Resp.badRequest("【email】exist")
+    }
+    if (existByLoginId(model.login_id, model.organization_code).body) {
+      logger.warn("【login_id】exist")
+      return Resp.badRequest("【login_id】exist")
+    }
+    model.code = EZContext.createUUID()
+    model.password = packageEncryptPwd(model.code, model.password)
+    if (model.image == null) {
+      model.image = ""
+    }
+    if (model.organization_code == null) {
+      model.organization_code = ServiceAdapter.defaultOrganizationCode
+    }
+    if (model.oauth == null) {
+      model.oauth = Map()
+    }
+    if (model.ext_id == null) {
+      model.ext_id = ""
+    }
+    if (model.ext_info == null) {
+      model.ext_info = Map()
+    }
+    if (ServiceAdapter.useRelTable) {
+      model.exchange_role_codes = model.role_codes
+      model.role_codes = null
+    }
+    if (EZ_Account.extAccountStorage != null) {
+      model.exchange_ext_info = model.ext_info
+      model.ext_info = Map()
+    }
+    super.preSave(model, context)
   }
 
   override def preUpdate(model: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
     val oldModel = EZ_Account.getById(model.id).body
     if (oldModel == null) {
-      Resp.notFound("")
-    } else {
-      model.code = null
-      model.login_id = null
-      model.organization_code = null
-      if (EZ_Account.extAccountStorage != null) {
-        model.exchange_ext_info = model.ext_info
-        model.ext_info = Map()
-      }
-      if (ServiceAdapter.useRelTable) {
-        model.exchange_role_codes = model.role_codes
-        model.role_codes = null
-      }
-      if (model.exchange_pwd != null && model.exchange_pwd.trim.nonEmpty) {
-        model.password = model.exchange_pwd
-      } else if (model.password != null && model.password.trim.nonEmpty) {
-        model.password = packageEncryptPwd(oldModel.login_id, model.password)
-      }
-      if (model.email != null && model.email != "") {
-        if (FormatHelper.validEmail(model.email)) {
-          val existEmail = getByEmail(model.email, oldModel.organization_code).body
-          if (existEmail != null && existEmail.code != oldModel.code) {
-            logger.warn("【email】exist")
-            Resp.badRequest("【email】exist")
-          } else {
-            super.preUpdate(model, context)
-          }
-        } else {
-          logger.warn("【email】format error")
-          Resp.badRequest("【email】format error")
-        }
-      } else {
-        super.preUpdate(model, context)
+      return Resp.notFound("")
+    }
+    if (model.login_id != null && model.login_id != "") {
+      val existLoginId = getByLoginId(model.login_id, oldModel.organization_code).body
+      if (existLoginId != null && existLoginId.code != oldModel.code) {
+        logger.warn("【login_id】exist")
+        return Resp.badRequest("【login_id】exist")
       }
     }
+    if (model.email != null && model.email != "") {
+      if (!FormatHelper.validEmail(model.email)) {
+        logger.warn("【email】format error")
+        return Resp.badRequest("【email】format error")
+      }
+      val existEmail = getByEmail(model.email, oldModel.organization_code).body
+      if (existEmail != null && existEmail.code != oldModel.code) {
+        logger.warn("【email】exist")
+        return Resp.badRequest("【email】exist")
+      }
+    }
+    model.code = null
+    model.organization_code = null
+    if (EZ_Account.extAccountStorage != null) {
+      model.exchange_ext_info = model.ext_info
+      model.ext_info = Map()
+    }
+    if (ServiceAdapter.useRelTable) {
+      model.exchange_role_codes = model.role_codes
+      model.role_codes = null
+    }
+    if (model.exchange_pwd != null && model.exchange_pwd.trim.nonEmpty) {
+      model.password = model.exchange_pwd
+    } else if (model.password != null && model.password.trim.nonEmpty) {
+      model.password = packageEncryptPwd(oldModel.code, model.password)
+    }
+    super.preUpdate(model, context)
   }
 
   override def preSaveOrUpdate(model: EZ_Account, context: EZStorageContext): Resp[EZ_Account] = {
@@ -248,8 +248,8 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
       }
       super.postSave(saveOrUpdateResult, preResult, context)
     } else {
-      if (preResult.password != null || preResult.email != null) {
-        // 修改密码或邮箱需要重新登录
+      if (preResult.login_id != null || preResult.password != null || preResult.email != null) {
+        // 修改登录Id、密码或邮箱需要重新登录
         CacheManager.removeToken(saveOrUpdateResult.code)
       } else {
         // 需要重新获取
@@ -369,8 +369,8 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
     Resp.notImplemented("")
 
   override def postDisableById(id: Any, context: EZStorageContext): Resp[Void] = {
-    val accountR=EZ_Account.doGetById(id,context)
-    if(accountR&&accountR.body!=null){
+    val accountR = EZ_Account.doGetById(id, context)
+    if (accountR && accountR.body != null) {
       CacheManager.removeToken(accountR.body.code)
     }
     super.postDisableById(id, context)
@@ -380,9 +380,9 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
     EncryptHelper.encrypt(ServiceAdapter.encrypt_salt + loginId + password, ServiceAdapter.encrypt_algorithm)
   }
 
-  def validateEncryptPwd(loginId: String, password: String, encryptPassword: String): Boolean = {
+  def validateEncryptPwd(code: String, password: String, encryptPassword: String): Boolean = {
     EncryptHelper.validate(
-      ServiceAdapter.encrypt_salt + loginId + password, encryptPassword, ServiceAdapter.encrypt_algorithm)
+      ServiceAdapter.encrypt_salt + code + password, encryptPassword, ServiceAdapter.encrypt_algorithm)
   }
 
   def findByOrganizationCode(organizationCode: String): Resp[List[EZ_Account]]
@@ -400,6 +400,8 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
   def getByOAuth(appName: String, authId: String, organizationCode: String): Resp[EZ_Account]
 
   def existByEmail(email: String, organizationCode: String): Resp[Boolean]
+
+  def existByLoginId(loginId: String, organizationCode: String): Resp[Boolean]
 
   def deleteByCode(code: String): Resp[Void]
 
@@ -450,6 +452,10 @@ object EZ_Account_Mongo extends MongoSecureStorage[EZ_Account]
 
   override def existByEmail(email: String, organizationCode: String): Resp[Boolean] = {
     existByCond(s"""{"email":"$email","organization_code":"$organizationCode"}""")
+  }
+
+  override def existByLoginId(loginId: String, organizationCode: String): Resp[Boolean] = {
+    existByCond(s"""{"login_id":"$loginId","organization_code":"$organizationCode"}""")
   }
 
   override def deleteByLoginId(loginId: String, organizationCode: String): Resp[Void] = {
@@ -529,6 +535,10 @@ object EZ_Account_JDBC extends JDBCSecureStorage[EZ_Account]
 
   override def existByEmail(email: String, organizationCode: String): Resp[Boolean] = {
     existByCond(s"""email = ? AND organization_code  = ?""", List(email, organizationCode))
+  }
+
+  override def existByLoginId(loginId: String, organizationCode: String): Resp[Boolean] = {
+    existByCond(s"""login_id = ? AND organization_code  = ?""", List(loginId, organizationCode))
   }
 
   override def deleteByCode(code: String): Resp[Void] = {

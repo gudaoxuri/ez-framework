@@ -69,7 +69,7 @@ object AuthService extends LazyLogging {
           val getR = EZ_Account.getByLoginIdOrEmail(loginIdOrEmail, organizationCode)
           if (getR && getR.body != null) {
             val account = getR.body
-            if (EZ_Account.validateEncryptPwd(account.login_id, password, account.password)) {
+            if (EZ_Account.validateEncryptPwd(account.code, password, account.password)) {
               if (account.enable) {
                 if (roleFlags == null || (roleFlags.toSet & account.role_codes.map(_.split(BaseModel.SPLIT)(1)).toSet).nonEmpty) {
                   val tokenInfoR = CacheManager.addTokenInfo(account, org)

@@ -33,7 +33,7 @@ class AuthSpec extends MockStartupSpec {
       accounts.size == 2
         && accounts.last.login_id == EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID
         && accounts.last.name == "Sys Admin"
-        && EZ_Account.validateEncryptPwd(EZ_Account.SYSTEM_ACCOUNT_LOGIN_ID, "admin", accounts.last.password)
+        && EZ_Account.validateEncryptPwd(accounts.last.code, "admin", accounts.last.password)
         && accounts.last.organization_code == ServiceAdapter.defaultOrganizationCode
         && accounts.last.role_codes.size == 1
     )
