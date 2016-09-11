@@ -19,7 +19,7 @@ object CacheManager extends LazyLogging {
 
   // Token信息 key : ez.token.info:<token Id> value : <token info>
   private val TOKEN_INFO_FLAG = "ez:token:info:"
-  // Token Id 关联 key : ez.token.id.rel:<login Id> value : <token Id>
+  // Token Id 关联 key : ez.token.id.rel:<code> value : <token Id>
   private val TOKEN_ID_REL_FLAG = "ez:token:id:rel:"
 
   // 资源列表 key : ez.resource.<resource code> value : any
@@ -76,7 +76,7 @@ object CacheManager extends LazyLogging {
   def getToken(accountCode: String): String = {
     val tokenR = RedisProcessor.get(TOKEN_ID_REL_FLAG + accountCode)
     if (tokenR.body != null) {
-      tokenR.body.asInstanceOf[String]
+      tokenR.body
     } else {
       null
     }
@@ -231,7 +231,7 @@ object CacheManager extends LazyLogging {
     val resp = RedisProcessor.get(ACTIVE_ACCOUNT_FLAG + encryption.hashCode)
     RedisProcessor.del(ACTIVE_ACCOUNT_FLAG + encryption.hashCode)
     if (resp && resp.body != null) {
-      resp.body.asInstanceOf[String]
+      resp.body
     } else {
       null
     }
@@ -249,7 +249,7 @@ object CacheManager extends LazyLogging {
       val newPasswordR = RedisProcessor.get(ACTIVE_NEW_PASSWORD_FLAG + accountCodeR.body)
       RedisProcessor.del(ACTIVE_NEW_PASSWORD_FLAG + accountCodeR.body)
       if (newPasswordR && newPasswordR.body != null) {
-        Resp.success((accountCodeR.body.asInstanceOf[String], newPasswordR.body.asInstanceOf[String]))
+        Resp.success((accountCodeR.body, newPasswordR.body))
       } else {
         newPasswordR
       }
