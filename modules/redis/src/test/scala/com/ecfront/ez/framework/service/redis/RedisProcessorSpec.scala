@@ -11,6 +11,7 @@ import scala.concurrent.duration.Duration
 class RedisProcessorSpec extends MockStartupSpec {
 
   test("Redis Test") {
+    RedisProcessor.custom().getKeys.flushdb()
     RedisProcessor.del("n_test")
     val exists1Resp = RedisProcessor.exists("n_test")
     assert(!exists1Resp.body)

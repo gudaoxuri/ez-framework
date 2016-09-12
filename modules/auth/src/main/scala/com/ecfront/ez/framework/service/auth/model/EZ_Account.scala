@@ -376,8 +376,8 @@ trait EZ_Account_Base extends SecureStorage[EZ_Account] with StatusStorage[EZ_Ac
     super.postDisableById(id, context)
   }
 
-  def packageEncryptPwd(loginId: String, password: String): String = {
-    EncryptHelper.encrypt(ServiceAdapter.encrypt_salt + loginId + password, ServiceAdapter.encrypt_algorithm)
+  def packageEncryptPwd(code: String, password: String): String = {
+    EncryptHelper.encrypt(ServiceAdapter.encrypt_salt + code + password, ServiceAdapter.encrypt_algorithm)
   }
 
   def validateEncryptPwd(code: String, password: String, encryptPassword: String): Boolean = {
