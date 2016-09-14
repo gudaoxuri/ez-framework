@@ -1,5 +1,6 @@
 package com.ecfront.ez.framework.service.storage.jdbc
 
+import java.sql.BatchUpdateException
 import java.util
 import java.util.Date
 
@@ -133,7 +134,7 @@ object JDBCProcessor extends LazyLogging {
   def openTxByThreadLocal(): Unit = {
     if (threadLocal.get() != null) {
       logger.trace("ThreadLocal transaction already exists,reuse it.")
-    }else {
+    } else {
       threadLocal.set(Await.result(Async.openTx(), Duration.Inf))
     }
   }
@@ -178,9 +179,9 @@ object JDBCProcessor extends LazyLogging {
     openTxByThreadLocal()
     try {
       val result = fun
-      if(result) {
+      if (result) {
         commit()
-      }else{
+      } else {
         logger.warn(s"Execute error in transaction:[${result.code}] ${result.message}")
         rollback()
       }
@@ -239,7 +240,7 @@ object JDBCProcessor extends LazyLogging {
                 if (event.succeeded()) {
                   p.success(Resp.success(null))
                 } else {
-                  logger.warn(s"JDBC execute error : $sql [$finalParameters]", event.cause())
+                  logger.error(s"JDBC execute error : $sql [$finalParameters]", event.cause())
                   p.success(Resp.serverError(event.cause().getMessage))
                 }
               }
@@ -256,7 +257,7 @@ object JDBCProcessor extends LazyLogging {
                 if (event.succeeded()) {
                   p.success(Resp.success(null))
                 } else {
-                  logger.warn(s"JDBC execute error : $sql [$finalParameters]", event.cause())
+                  logger.error(s"JDBC execute error : $sql [$finalParameters]", event.cause())
                   p.success(Resp.serverError(event.cause().getMessage))
                 }
               }
@@ -299,7 +300,8 @@ object JDBCProcessor extends LazyLogging {
       p.future
     }
 
-    private def doBatch(sql: String, parameterList: List[List[Any]], p: Promise[Resp[Void]], conn: SQLConnection, autoClose: Boolean): Unit = {
+    private def doBatch(sql: String, parameterList: List[List[Any]], p: Promise[Resp[Void]], conn: SQLConnection,
+                        autoClose: Boolean, tryTimes: Int = 0): Unit = {
       try {
         logger.trace(s"JDBC batch : $sql [$parameterList]")
         val finalParameterR = parameterList.map(formatParameters)
@@ -310,12 +312,32 @@ object JDBCProcessor extends LazyLogging {
           conn.batchWithParams(sql, finalParameterR.map(i => new JsonArray(i.body)), new Handler[AsyncResult[util.List[Integer]]] {
             override def handle(event: AsyncResult[util.List[Integer]]): Unit = {
               if (!event.succeeded()) {
-                logger.warn(s"JDBC execute error : $sql [$parameterList]", event.cause())
+                event.cause() match {
+                  case e: BatchUpdateException =>
+                    if (tryTimes < 5) {
+                      Thread.sleep(100 * tryTimes)
+                      logger.warn(s"JDBC execute warn : $sql [$parameterList] , tryTimes:$tryTimes", event.cause())
+                      doBatch(sql, parameterList, p, conn, autoClose, tryTimes + 1)
+                    } else {
+                      if (autoClose) {
+                        conn.close()
+                      }
+                      logger.error(s"JDBC execute error : $sql [$parameterList]", event.cause())
+                      p.success(Resp.serverError(e.getMessage))
+                    }
+                  case e: Throwable =>
+                    if (autoClose) {
+                      conn.close()
+                    }
+                    logger.error(s"JDBC execute error : $sql [$parameterList]", event.cause())
+                    p.success(Resp.serverError(e.getMessage))
+                }
+              } else {
+                if (autoClose) {
+                  conn.close()
+                }
+                p.success(Resp.success(null))
               }
-              if (autoClose) {
-                conn.close()
-              }
-              p.success(Resp.success(null))
             }
           })
         }
@@ -390,7 +412,7 @@ object JDBCProcessor extends LazyLogging {
                 if (autoClose) {
                   conn.close()
                 }
-                logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
+                logger.error(s"JDBC execute error : $sql [$parameters]", event.cause())
                 p.success(Resp.serverError(event.cause().getMessage))
               }
             }
@@ -462,7 +484,7 @@ object JDBCProcessor extends LazyLogging {
                 if (autoClose) {
                   conn.close()
                 }
-                logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
+                logger.error(s"JDBC execute error : $sql [$parameters]", event.cause())
                 p.success(Resp.serverError(event.cause().getMessage))
               }
             }
@@ -545,7 +567,7 @@ object JDBCProcessor extends LazyLogging {
                       if (autoClose) {
                         conn.close()
                       }
-                      logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
+                      logger.error(s"JDBC execute error : $sql [$parameters]", event.cause())
                       p.success(Resp.serverError(event.cause().getMessage))
                     }
                   }
@@ -614,7 +636,7 @@ object JDBCProcessor extends LazyLogging {
                 if (autoClose) {
                   conn.close()
                 }
-                logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
+                logger.error(s"JDBC execute error : $sql [$parameters]", event.cause())
                 p.success(Resp.serverError(event.cause().getMessage))
               }
             }
@@ -675,7 +697,7 @@ object JDBCProcessor extends LazyLogging {
                 if (autoClose) {
                   conn.close()
                 }
-                logger.warn(s"JDBC execute error : $sql [$parameters]", event.cause())
+                logger.error(s"JDBC execute error : $sql [$parameters]", event.cause())
                 p.success(Resp.serverError(event.cause().getMessage))
               }
             }

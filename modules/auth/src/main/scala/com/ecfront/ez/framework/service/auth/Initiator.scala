@@ -178,7 +178,7 @@ object Initiator extends LazyLogging {
     }
   }
 
-  def initOrganization(orgCode: String): Unit = {
+  def initOrganization(orgCode: String): Unit = synchronized {
     EZ_Role.save(EZ_Role(EZ_Role.ORG_ADMIN_ROLE_FLAG, "Admin", List(
       s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/",
       s"${Method.GET}${BaseModel.SPLIT}/auth/manage/account/page/:pageNumber/:pageSize/",

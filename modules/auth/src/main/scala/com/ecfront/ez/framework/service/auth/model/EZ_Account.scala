@@ -557,7 +557,7 @@ object EZ_Account_JDBC extends JDBCSecureStorage[EZ_Account]
     deleteByCond( s"""( login_id = ? OR email = ? ) AND organization_code  = ?""", List(loginIdOrEmail, loginIdOrEmail, organizationCode))
   }
 
-  override def saveOrUpdateRelRoleData(accountCode: String, roleCodes: List[String]): Resp[Void] = {
+  override def saveOrUpdateRelRoleData(accountCode: String, roleCodes: List[String]): Resp[Void] = synchronized{
     deleteRelRoleData(accountCode)
     JDBCProcessor.batch(
       s"""INSERT INTO ${EZ_Account.TABLE_REL_ACCOUNT_ROLE} ( account_code , role_code ) VALUES ( ? , ? )""",
