@@ -219,7 +219,7 @@ object Initiator extends LazyLogging {
     ), orgCode)
     EZ_Account.save(account)
 
-    ServiceAdapter.ezEvent_organizationInit.publish(orgCode)
+    ServiceAdapter.ezEvent_organizationInit.send(orgCode)
   }
 
   def updateCache(): Unit = {
