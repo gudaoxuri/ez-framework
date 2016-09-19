@@ -157,7 +157,7 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
             field + "= ?" -> richValueInfo(field)
         }.toMap
         val existR = JDBCProcessor.exist(
-          s"SELECT 1 FROM $tableName WHERE ${existQuery.keys.toList.mkString(" OR ") + s" AND $idFieldName != ? "} ",
+          s"SELECT 1 FROM $tableName WHERE ${existQuery.keys.toList.mkString("( ", "OR ", " )") + s" AND $idFieldName != ? "} ",
           existQuery.values.toList.filter(_ != null) ++ List(idValue)
         )
         if (existR) {
