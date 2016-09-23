@@ -1,60 +1,61 @@
 = EZ.F - Scala中功能全面、使用简单的服务框架
 
-image::https://img.shields.io/travis/gudaoxuri/ez-framework.svg[link="https://travis-ci.org/gudaoxuri/ez-framework"]
-
 == 设计理念
+从第一个版本发展到现在，期间换过多个基础类库、也在异步与同步编程之间不断地尝试，这是个全新的版本，也这几年工程实践的最佳方案。
 
-. **类库化** 低侵入，虽然以“框架”称呼，但实际上是**多个类库的集合**，这里没有__容器__，不会与您的工程强耦合
-. **模块化** 所有功能按需选择，让您的工程尽可能轻量
-. **高性能** 核心模块提供同步与异步两种模型，高性能需求可选择异步模型
-. **功能全面** 集成了常用的服务，全栈支持
-. **使用简单** 各API都尽可能地统一与简化，降低使用成本
+=== 与其让用户选择不如不给用户选择
+世面上有很多技术都可以解决同一个问题，EZ之前的版本的好些服务都提供了多种实现技术，但一方面这增加了架构的复杂度，另一方面往往也会让用户难以选择，从这个版本起我们只提供经验证的最佳实践组合，使用单一技术解决同一个场景！比如上一版EZ提供了对JDBC与Mongo的全面支持，意图让用户可以在不怎么改变原有代码的情况下可以方便地来回切换，但从我们实践来看，Mongo虽有众多优势，但对于绝大部分的系统而言它并不适合存储核心业务，所以这一版我们将只对JDBC提供全面支持（ORMapping、事务等）对Mongo只提供简单地封装，并且不再强调两者API的一致性。
+
+=== 性能优先
+同步开发效率高，排错方便，但性能低，异步反之。之前EZ一直在两者之间尝试，在上一版本同时支持这两种方式，但从这一版本开始将坚定的只支持异步编程，在框架层面尽可能地减少以此带来的复杂性，一切为了性能！
+
+=== 做真正的微服务框架
+微服务很热，但并不是说一个轻量化的HTTP框架就可以自称“微服务”的，以前的某个版本有API网关组件，但后来应该考虑服务要轻量化去掉了，回归初心，EZ要做的不是一个类库，也不是一个单一的Web框架，EZ要解决不是小项目快速开发，它面对的是中大型项目，是起码有10个以上独立服务组成的大服务集群。所以这一版本将在服务治理是投入更多精力。
 
 == 功能列表
 
 . 核心服务
-.. 支持自定义同步或异步的拦截器栈处理
+.. 支持自定义拦截器栈处理
 .. 支持I18N
+.. 支持自定义服务管理
+.. 支持Metrics采集定义
+
+. API网关
+.. 支持全局认证
+.. 支持常用安全管理（Anti-DDOS，IP黑名单等）
+.. 支持服务转发
 
 . RPC服务
-.. 支持HTTP和WebSocket服务
+.. 支持HTTP(s)和WebSocket服务
 .. 基于注解服务发现
 .. Restful风格，支持GET POST PUT DELETE等常用方法
-.. 支持HTTPS
 .. 支持Json跨域请求
 .. 支持拦截器栈，可适配权限认证等服务
-.. 提供同步及异步HTTP客户端
+.. 提供HTTP客户端
 .. 提供CRUD脚手架服务
 .. 支持HTML与XML处理
 
 . 存储服务
-.. 支持Mongo或关系型数据库（JDBC）
-.. 统一API
+.. 支持关系型数据库
 .. 轻量级ORMapping，无Session处理
 .. 注解支持
 
 . 调度服务
 .. 支持cron表达式的调度任务
 .. 支持按模块调度
-.. 支持JDBC或Mongo的持久化
+.. 支持持久化
 
 . Redis缓存服务
 .. 支持Redis的常用操作
-.. 支持同步与异步操作
 
 . 基于RBAC的基础HTTP认证
 .. 支持RBAC的认证服务
 .. 支持菜单级和资源级（action）的授权
-.. 支持JDBC或Mongo的持久化
 .. 支持自助注册及密码找回
 
 . 邮件服务
 .. 支持同步或异步的邮件发送服务
 .. 支持添加附件
-
-. Kakfa服务
-
-. Master-Slave服务
 
 . 常用分布式服务
 .. 分布式计数
@@ -64,30 +65,6 @@ image::https://img.shields.io/travis/gudaoxuri/ez-framework.svg[link="https://tr
 .. 分布式消息发布订阅
 .. 分布式服务监控
 .. 分布式追踪日志
-
-== 使用
-
-通过Maven引用
-
-[source,xml]
-----
-<!-- 核心包 -->
-<dependency>
-    <groupId>com.ecfront</groupId>
-    <artifactId>ezf-core</artifactId>
-    <version>3.2.0</version>
-</dependency>
-<!-- 各服务模块包 -->
-<dependency>
-    <groupId>com.ecfront</groupId>
-    <artifactId>ezf-<服务模块></artifactId>
-    <version>3.2.0</version>
-</dependency>
-----
-
-== 文档
-
-http://gudaoxuri.github.io/ez-framework[http://gudaoxuri.github.io/ez-framework]
 
 == License
 
