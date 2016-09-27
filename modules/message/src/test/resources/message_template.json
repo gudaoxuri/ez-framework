@@ -1,8 +1,0 @@
-[
-  {
-    "templateCode": "apply_success",
-    "templateName": "申请成功",
-    "title": "客户 {{customer.name}} 申请成功",
-    "content": "客户 {{customer.name}} 申请 {{product.name}} 成功。"
-  }
-]

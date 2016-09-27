@@ -2,26 +2,18 @@ package com.ecfront.ez.framework.service.redis
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZServiceAdapter
-import io.vertx.core.json.JsonObject
+import com.fasterxml.jackson.databind.JsonNode
 
-object ServiceAdapter extends EZServiceAdapter[JsonObject] {
+object ServiceAdapter extends EZServiceAdapter[JsonNode] {
 
-  private val DEFAULT_REDIS_PORT: Integer = 6379
-
-
-  override def init(parameter: JsonObject): Resp[String] = {
-    val host = parameter.getString("host", "127.0.0.1")
-    val port = parameter.getInteger("port", DEFAULT_REDIS_PORT)
-    var address = host + ":" + port
-    if (parameter.containsKey("address")) {
-      address = parameter.getString("address")
-    }
-    val db = parameter.getInteger("db", 0)
-    val auth = parameter.getString("auth", null)
-    RedisProcessor.init(List(address), db, auth)
+  override def init(parameter: JsonNode): Resp[String] = {
+    val address = parameter.path("address").asText().split(";")
+    val db = parameter.path("db").asInt(0)
+    val auth = parameter.path("auth").asText("")
+    RedisProcessor.init(address, db, auth)
   }
 
-  override def destroy(parameter: JsonObject): Resp[String] = {
+  override def destroy(parameter: JsonNode): Resp[String] = {
     RedisProcessor.close()
     Resp.success("")
   }

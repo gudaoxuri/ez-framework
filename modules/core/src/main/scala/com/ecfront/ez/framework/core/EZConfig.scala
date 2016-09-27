@@ -1,12 +1,14 @@
 package com.ecfront.ez.framework.core
 
+import com.fasterxml.jackson.databind.JsonNode
+
 /**
   * EZ配置文件对象
   *
   * @param ez   EZ服务配置项
   * @param args APP级配置参数
   */
-case class EZConfig(ez: EZInfo, args: Map[String, Any])
+case class EZConfig(ez: EZInfo, args:JsonNode)
 
 // EZ服务配置项
 case class EZInfo(

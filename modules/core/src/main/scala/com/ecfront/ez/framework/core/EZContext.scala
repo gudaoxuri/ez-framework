@@ -3,9 +3,8 @@ package com.ecfront.ez.framework.core
 import java.net.InetAddress
 import java.util.UUID
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import io.vertx.core.Vertx
-import io.vertx.core.json.JsonObject
 
 /**
   * EZ容器，用于放置全局属性
@@ -24,10 +23,8 @@ object EZContext extends LazyLogging {
   var language: String = _
   // 性能配置
   var perf: Map[String, Any] = _
-  // Vertx实例
-  var vertx: Vertx = _
   // 配置文件中的APP级参数
-  var args: JsonObject = _
+  var args: JsonNode = _
   // 配置文件路径
   lazy val confPath: String = findConfPath()
   // 是否调试模式

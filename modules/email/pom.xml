@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.ecfront</groupId>
         <artifactId>ezf-parent</artifactId>
-        <version>3.2.0</version>
+        <version>4.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -18,13 +18,8 @@
     <packaging>jar</packaging>
     <version>${ezf-version}</version>
 
-    <scm>
-        <connection>scm:git:git@github.com:gudaoxuri/ez-framework.git</connection>
-        <developerConnection>scm:git:git@github.com:gudaoxuri/ez-framework.git</developerConnection>
-        <url>git@github.com:gudaoxuri/ez-framework.git</url>
-    </scm>
-
     <properties>
+        <mail.version>4.1.1</mail.version>
     </properties>
 
     <dependencies>
@@ -34,15 +29,15 @@
             <version>${ezf-version}</version>
         </dependency>
         <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-mail-client</artifactId>
-            <version>${vertx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-            <scope>test</scope>
+            <groupId>org.simplejavamail</groupId>
+            <artifactId>simple-java-mail</artifactId>
+            <version>${mail.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

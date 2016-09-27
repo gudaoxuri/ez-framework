@@ -4,7 +4,6 @@ import java.lang.reflect.ParameterizedType
 
 import com.ecfront.common.{JsonHelper, Resp}
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import io.vertx.core.json.JsonObject
 
 import scala.reflect.runtime._
 
@@ -26,7 +25,7 @@ trait EZServiceAdapter[E] extends Serializable with LazyLogging {
   def init(parameter: E): Resp[String]
 
   // 所有服务都初始化完成后调用
-  def initPost(): Unit= {}
+  def initPost(): Unit = {}
 
   // 服务销毁方法
   def destroy(parameter: E): Resp[String]
@@ -37,27 +36,16 @@ trait EZServiceAdapter[E] extends Serializable with LazyLogging {
   }
 
   private[core] def innerInit(parameter: Any): Resp[String] = {
-    if (modelClazz == classOf[JsonObject]) {
-      init(new JsonObject(JsonHelper.toJsonString(parameter)).asInstanceOf[E])
-    } else {
-      init(JsonHelper.toObject(parameter, modelClazz))
-    }
+    init(JsonHelper.toObject(parameter, modelClazz))
   }
 
   private[core] def innerDestroy(parameter: Any): Resp[String] = {
-    if (modelClazz == classOf[JsonObject]) {
-      destroy(new JsonObject(JsonHelper.toJsonString(parameter)).asInstanceOf[E])
-    } else {
-      destroy(JsonHelper.toObject(parameter, modelClazz))
-    }
+    destroy(JsonHelper.toObject(parameter, modelClazz))
   }
 
   private[core] def innerSetDynamicDependents(parameter: Any): Unit = {
-    val dynamicDependents = if (modelClazz == classOf[JsonObject]) {
-      getDynamicDependents(new JsonObject(JsonHelper.toJsonString(parameter)).asInstanceOf[E])
-    } else {
+    val dynamicDependents =
       getDynamicDependents(JsonHelper.toObject(parameter, modelClazz))
-    }
     if (dynamicDependents != null) {
       dependents ++= dynamicDependents
     }

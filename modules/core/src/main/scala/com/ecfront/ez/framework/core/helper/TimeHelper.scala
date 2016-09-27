@@ -18,6 +18,8 @@ object TimeHelper {
   val yf = new SimpleDateFormat("yyyy")
 
   val yyyy_MM_dd_HH_mm_ss_SSS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS")
+  val yyyy_MM_dd_HH_mm_ss = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+  val yyyy_MM_dd = new SimpleDateFormat("yyyy-MM-dd")
 
   def dateOffset(offsetValue: Int, offsetUnit: Int, currentTime: Long): Long = {
     val format = currentTime.toString.length match {
