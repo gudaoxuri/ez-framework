@@ -1,0 +1,19 @@
+{
+  "ez": {
+    "app": "",
+    "module": "",
+    "services": {
+      "jdbc": {
+        "url": "jdbc:h2:mem:db",
+        "userName": "sa",
+        "password": "",
+        "initialSize": 5,
+        "maxActive": 20,
+        "minIdle": 5,
+        "maxWait": 60000
+      }
+    }
+  },
+  "args": {
+  }
+}
