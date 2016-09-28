@@ -45,8 +45,14 @@ case class NowByUpdate() extends StaticAnnotation
 
 
 /**
-  * 主键策略
+  * 主键策略，默认是uuid，可选 seq
   *
+  * @param strategy 主键策略
   */
 @scala.annotation.meta.field
-case class Id() extends StaticAnnotation
+case class Id(strategy: String = "uuid") extends StaticAnnotation
+
+object Id {
+  val STRATEGY_SEQ = "seq"
+  val STRATEGY_UUID = "uuid"
+}

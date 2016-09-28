@@ -2,6 +2,7 @@ package com.ecfront.ez.framework.service.jdbc
 
 import java.io.BufferedReader
 import java.sql._
+import java.util
 import java.util.Date
 import java.util.concurrent.atomic.AtomicLong
 
@@ -21,46 +22,52 @@ object JDBCProcessor extends LazyLogging {
 
   private var defaultProcessor: JDBCProcessor = _
 
-  def update(sql: String, parameters: List[Any], conn: Connection = null, autoClose: Boolean = true): Resp[Void] = {
-    defaultProcessor.update(sql, parameters, conn, autoClose)
+  def ddl(ddl: String): Resp[Void] = {
+    defaultProcessor.ddl(ddl)
   }
 
-  def batch(sql: String, parameterList: List[List[Any]], conn: Connection = null, autoClose: Boolean = true): Resp[Void] = {
-    defaultProcessor.batch(sql, parameterList, conn, autoClose)
+  def insert(sql: String, parameters: List[Any]): Resp[String] = {
+    defaultProcessor.insert(sql, parameters)
   }
 
-  def getMap(sql: String, parameters: List[Any], conn: Connection = null, autoClose: Boolean = true): Resp[Map[String, Any]] = {
-    defaultProcessor.getMap(sql, parameters, conn, autoClose)
+  def update(sql: String, parameters: List[Any]): Resp[Void] = {
+    defaultProcessor.update(sql, parameters)
   }
 
-  def get[E](sql: String, parameters: List[Any], resultClass: Class[E], conn: Connection = null, autoClose: Boolean = true): Resp[E] = {
-    defaultProcessor.get(sql, parameters, resultClass, conn, autoClose)
+  def batch(sql: String, parameterList: List[List[Any]]): Resp[Void] = {
+    defaultProcessor.batch(sql, parameterList)
   }
 
-  def findMap(sql: String, parameters: List[Any], conn: Connection = null, autoClose: Boolean = true): Resp[List[Map[String, Any]]] = {
-    defaultProcessor.findMap(sql, parameters, conn, autoClose)
+  def get(sql: String, parameters: List[Any]): Resp[Map[String, Any]] = {
+    defaultProcessor.get(sql, parameters)
   }
 
-  def find[E](sql: String, parameters: List[Any], resultClass: Class[E], conn: Connection = null, autoClose: Boolean = true): Resp[List[E]] = {
-    defaultProcessor.find[E](sql, parameters, resultClass, conn, autoClose)
+  def get[E](sql: String, parameters: List[Any], resultClass: Class[E]): Resp[E] = {
+    defaultProcessor.get(sql, parameters, resultClass)
   }
 
-  def count(sql: String, parameters: List[Any], conn: Connection = null, autoClose: Boolean = true): Resp[Long] = {
-    defaultProcessor.count(sql, parameters, conn, autoClose)
+  def find(sql: String, parameters: List[Any]): Resp[List[Map[String, Any]]] = {
+    defaultProcessor.find(sql, parameters)
   }
 
-  def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int,
-              resultClass: Class[E], conn: Connection = null, autoClose: Boolean = true): Resp[Page[E]] = {
-    defaultProcessor.page[E](sql, parameters, pageNumber, pageSize, resultClass, conn, autoClose)
+  def find[E](sql: String, parameters: List[Any], resultClass: Class[E]): Resp[List[E]] = {
+    defaultProcessor.find[E](sql, parameters, resultClass)
   }
 
-  def pageMap(sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int,
-              conn: Connection = null, autoClose: Boolean = true): Resp[Page[Map[String, Any]]] = {
-    defaultProcessor.pageMap(sql, parameters, pageNumber, pageSize, conn, autoClose)
+  def count(sql: String, parameters: List[Any]): Resp[Long] = {
+    defaultProcessor.count(sql, parameters)
   }
 
-  def exist(sql: String, parameters: List[Any], conn: Connection = null, autoClose: Boolean = true): Resp[Boolean] = {
-    defaultProcessor.exist(sql, parameters, conn, autoClose)
+  def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int, resultClass: Class[E]): Resp[Page[E]] = {
+    defaultProcessor.page[E](sql, parameters, pageNumber, pageSize, resultClass)
+  }
+
+  def page(sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int): Resp[Page[Map[String, Any]]] = {
+    defaultProcessor.page(sql, parameters, pageNumber, pageSize)
+  }
+
+  def exist(sql: String, parameters: List[Any]): Resp[Boolean] = {
+    defaultProcessor.exist(sql, parameters)
   }
 
   /**
@@ -116,7 +123,6 @@ object JDBCProcessor extends LazyLogging {
 
 }
 
-
 case class JDBCProcessor(url: String, userName: String, password: String) extends LazyLogging {
 
   logger.info(s"Load JDBC client : $url")
@@ -132,21 +138,36 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
   private val localConnection = new ThreadLocal[Connection]
   private val localConnCounter = new ThreadLocal[AtomicLong]
 
+  /**
+    *  初始化时建立物理连接的个数。初始化发生在显示调用init方法，或者第一次getConnection时
+    *  默认0
+    */
   def setInitialSize(initialSize: Int): this.type = {
     ds.setInitialSize(initialSize)
     this
   }
 
+  /**
+    * 最大连接池数量
+    * 默认8
+    */
   def setMaxActive(maxActive: Int): this.type = {
     ds.setMaxActive(maxActive)
     this
   }
 
+  /**
+    * 最小连接池数量
+    */
   def setMinIdle(minIdle: Int): this.type = {
     ds.setMinIdle(minIdle)
     this
   }
 
+  /**
+    * 获取连接时最大等待时间，单位毫秒。
+    * 配置了maxWait之后，缺省启用公平锁，并发效率会有所下降，如果需要可以通过配置useUnfairLock属性为true使用非公平锁。
+    */
   def setMaxWait(maxWait: Int): this.type = {
     ds.setMaxWait(maxWait)
     this
@@ -161,7 +182,7 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     *
     * @return 当前事务的连接信息
     */
-  private def openTx(): Unit = {
+  def openTx(): Unit = {
     if (localConnCounter.get() == null) {
       localConnCounter.set(new AtomicLong(0))
       localConnection.set(ds.getConnection)
@@ -173,7 +194,7 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     * 提交事务
     *
     */
-  private def commit(): Unit = {
+  def commit(): Unit = {
     val counter = localConnCounter.get()
     if (counter == null) {
       logger.error("Transaction not open yet")
@@ -194,7 +215,7 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     * 回滚事务
     *
     */
-  private def rollback(): Unit = {
+  def rollback(): Unit = {
     val connection = localConnection.get()
     if (connection != null && !connection.isClosed) {
       connection.rollback()
@@ -203,7 +224,7 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     }
   }
 
-  private def tx[E](fun: => Resp[E])(implicit m: Manifest[E]): Resp[E] = {
+  def tx[E](fun: => Resp[E])(implicit m: Manifest[E]): Resp[E] = {
     openTx()
     try {
       val result = fun
@@ -222,15 +243,41 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     }
   }
 
-  private def update(sql: String, parameters: List[Any], conn: Connection = null, autoClose: Boolean = true): Resp[Void] = {
-    val (_conn, _autoClose) = getConnection(conn, autoClose)
+  def ddl(ddl: String): Resp[Void] = {
+    val (_conn, _autoClose) = getConnection
+    execute[Void]("ddl", {
+      queryRunner.update(_conn, ddl)
+      Resp.success(null)
+    }, ddl, List(), _conn, _autoClose)
+  }
+
+  def insert(sql: String, parameters: List[Any]): Resp[String] = {
+    val (_conn, _autoClose) = getConnection
+    val finalParameterR = formatParameters(parameters)
+    if (!finalParameterR) {
+      finalParameterR
+    } else {
+      execute[String]("insert", {
+        val result =
+          if (finalParameterR.body != null) {
+            queryRunner.insert(_conn, sql, new ScalarHandler[Object](), finalParameterR.body.map(_.asInstanceOf[Object]):_*)
+          } else {
+            queryRunner.insert(_conn, sql, new ScalarHandler[Object]())
+          }
+        Resp.success(result.toString)
+      }, sql, finalParameterR.body, _conn, _autoClose)
+    }
+  }
+
+  def update(sql: String, parameters: List[Any]): Resp[Void] = {
+    val (_conn, _autoClose) = getConnection
     val finalParameterR = formatParameters(parameters)
     if (!finalParameterR) {
       finalParameterR
     } else {
       execute[Void]("update", {
         if (finalParameterR.body != null) {
-          queryRunner.update(_conn, sql, finalParameterR.body)
+          queryRunner.update(_conn, sql, finalParameterR.body.map(_.asInstanceOf[Object]):_*)
         } else {
           queryRunner.update(_conn, sql)
         }
@@ -239,57 +286,38 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     }
   }
 
-  private def batch(sql: String, parameterList: List[List[Any]], conn: Connection = null, autoClose: Boolean = true): Resp[Void] = {
-    val (_conn, _autoClose) = getConnection(conn, autoClose)
+  def batch(sql: String, parameterList: List[List[Any]]): Resp[Void] = {
+    val (_conn, _autoClose) = getConnection
     val finalParameterR = parameterList.map(formatParameters)
     val errorR = finalParameterR.find(_.code != StandardCode.SUCCESS)
     if (errorR.isDefined) {
       errorR.get
     } else {
-      val finalParameters = finalParameterR.map(_.body)
-      logger.trace(s"JDBC batch : $sql [$finalParameters]")
-      try {
-        finalParameters.foreach {
-          parameters =>
-            if (parameters != null) {
-              queryRunner.update(_conn, sql, parameters)
-            } else {
-              queryRunner.update(_conn, sql)
-            }
-        }
-        if (_autoClose && !_conn.isClosed) {
-          _conn.close()
-        }
+      val finalParameters = finalParameterR.map(_.body.map(_.asInstanceOf[Object]).toArray).toArray
+      execute[Void]("batch", {
+        queryRunner.batch(_conn, sql, finalParameters)
         Resp.success(null)
-      } catch {
-        case e: Throwable =>
-          _conn.rollback()
-          if (!_conn.isClosed) {
-            _conn.close()
-          }
-          logger.error(s"JDBC batch error : $sql [$finalParameters]", e)
-          Resp.serverError(s"JDBC batch error : $sql [$finalParameters] ${e.getMessage}")
-      }
+      }, sql, finalParameterR, _conn, _autoClose)
     }
   }
 
-  private def getMap(sql: String, parameters: List[Any], conn: Connection = null, autoClose: Boolean = true): Resp[Map[String, Any]] = {
-    val (_conn, _autoClose) = getConnection(conn, autoClose)
+  def get(sql: String, parameters: List[Any]): Resp[Map[String, Any]] = {
+    val (_conn, _autoClose) = getConnection
     execute[Map[String, Any]]("get", {
       val tmpResult =
         if (parameters != null) {
-          queryRunner.query[java.util.Map[String, Object]](_conn, sql, new MapHandler(), parameters)
+          queryRunner.query[java.util.Map[String, Object]](_conn, sql, new MapHandler(), parameters.map(_.asInstanceOf[Object]):_*)
         } else {
           queryRunner.query[java.util.Map[String, Object]](_conn, sql, new MapHandler())
         }
       if (tmpResult != null) {
-        val result = tmpResult.map {
+        val result:Map[String,Any] = tmpResult.map {
           item =>
             item._1 -> (item._2 match {
               case c: Clob => convertClob(c)
               case _ => item._2
-            })
-        }
+            }).asInstanceOf[Any]
+        }.toMap
         Resp.success(result)
       } else {
         Resp.success(null)
@@ -297,12 +325,12 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     }, sql, parameters, _conn, _autoClose)
   }
 
-  private def get[E](sql: String, parameters: List[Any], resultClass: Class[E], conn: Connection = null, autoClose: Boolean = true): Resp[E] = {
-    val (_conn, _autoClose) = getConnection(conn, autoClose)
+  def get[E](sql: String, parameters: List[Any], resultClass: Class[E]): Resp[E] = {
+    val (_conn, _autoClose) = getConnection
     execute[E]("get", {
       val result =
         if (parameters != null) {
-          queryRunner.query[E](_conn, sql, new BeanHandler(resultClass), parameters)
+          queryRunner.query[E](_conn, sql, new BeanHandler(resultClass), parameters.map(_.asInstanceOf[Object]):_*)
         } else {
           queryRunner.query[E](_conn, sql, new BeanHandler(resultClass))
         }
@@ -310,25 +338,29 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     }, sql, parameters, _conn, _autoClose)
   }
 
-  private def findMap(sql: String, parameters: List[Any], conn: Connection = null, autoClose: Boolean = true): Resp[List[Map[String, Any]]] = {
-    val (_conn, _autoClose) = getConnection(conn, autoClose)
+  def find(sql: String, parameters: List[Any]): Resp[List[Map[String, Any]]] = {
+    val (_conn, _autoClose) = getConnection
+    doFind(sql, parameters, _conn, _autoClose)
+  }
+
+  private def doFind(sql: String, parameters: List[Any], _conn: Connection, _autoClose: Boolean): Resp[List[Map[String, Any]]] = {
     execute[List[Map[String, Any]]]("find", {
       val tmpResult =
         if (parameters != null) {
-          queryRunner.query[java.util.List[java.util.Map[String, Object]]](_conn, sql, new MapListHandler, parameters)
+          queryRunner.query[util.List[util.Map[String, Object]]](_conn, sql, new MapListHandler, parameters.map(_.asInstanceOf[Object]):_*)
         } else {
-          queryRunner.query[java.util.List[java.util.Map[String, Object]]](_conn, sql, new MapListHandler)
+          queryRunner.query[util.List[util.Map[String, Object]]](_conn, sql, new MapListHandler)
         }
       if (tmpResult != null) {
-        val result = tmpResult.map {
+        val result:List[Map[String, Any]] = tmpResult.map {
           _.map {
             item =>
               item._1 -> (item._2 match {
                 case c: Clob => convertClob(c)
                 case _ => item._2
-              })
-          }
-        }
+              }).asInstanceOf[Any]
+          }.toMap
+        }.toList
         Resp.success(result)
       } else {
         Resp.success(null)
@@ -336,26 +368,34 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     }, sql, parameters, _conn, _autoClose)
   }
 
-  private def find[E](sql: String, parameters: List[Any], resultClass: Class[E], conn: Connection = null, autoClose: Boolean = true): Resp[List[E]] = {
-    val (_conn, _autoClose) = getConnection(conn, autoClose)
-    execute[E]("find", {
+  def find[E](sql: String, parameters: List[Any], resultClass: Class[E]): Resp[List[E]] = {
+    val (_conn, _autoClose) = getConnection
+    doFind(sql, parameters, resultClass, _conn, _autoClose)
+  }
+
+  private def doFind[E](sql: String, parameters: List[Any], resultClass: Class[E], _conn: Connection, _autoClose: Boolean): Resp[List[E]] = {
+    execute[List[E]]("find", {
       val result =
         if (parameters != null) {
-          queryRunner.query[java.util.List[E]](_conn, sql, new BeanListHandler(resultClass), parameters)
+          queryRunner.query[util.List[E]](_conn, sql, new BeanListHandler(resultClass), parameters.map(_.asInstanceOf[Object]):_*)
         } else {
-          queryRunner.query[java.util.List[E]](_conn, sql, new BeanListHandler(resultClass))
+          queryRunner.query[util.List[E]](_conn, sql, new BeanListHandler(resultClass))
         }
-      Resp.success(result)
+      Resp.success(result.toList)
     }, sql, parameters, _conn, _autoClose)
   }
 
-  private def count(sql: String, parameters: List[Any], conn: Connection = null, autoClose: Boolean = true): Resp[Long] = {
-    val (_conn, _autoClose) = getConnection(conn, autoClose)
+  def count(sql: String, parameters: List[Any]): Resp[Long] = {
+    val (_conn, _autoClose) = getConnection
+    doCount(sql, parameters, _conn, _autoClose)
+  }
+
+  private def doCount(sql: String, parameters: List[Any], _conn: Connection, _autoClose: Boolean): Resp[Long] = {
     val finalSql = dialect.count(sql)
     execute[Long]("count", {
       val result =
         if (parameters != null) {
-          queryRunner.query[Long](_conn, finalSql, countHandler, parameters)
+          queryRunner.query[Long](_conn, finalSql, countHandler, parameters.map(_.asInstanceOf[Object]):_*)
         } else {
           queryRunner.query[Long](_conn, finalSql, countHandler)
         }
@@ -363,15 +403,14 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     }, finalSql, parameters, _conn, _autoClose)
   }
 
-  private def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int,
-                      resultClass: Class[E], conn: Connection = null, autoClose: Boolean = true): Resp[Page[E]] = {
-    val (_conn, _autoClose) = getConnection(conn, autoClose)
-    val countR = count(sql, parameters, _conn, autoClose = false)
+  def page[E](sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int, resultClass: Class[E]): Resp[Page[E]] = {
+    val (_conn, _autoClose) = getConnection
+    val countR = doCount(sql, parameters, _conn, _autoClose = false)
     if (!countR) {
       countR
     } else {
       val finalSql = dialect.paging(sql, pageNumber, pageSize)
-      val findR = find(finalSql, parameters, resultClass, _conn, _autoClose)
+      val findR = doFind(finalSql, parameters, resultClass, _conn, _autoClose)
       if (!findR) {
         findR
       } else {
@@ -386,15 +425,14 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     }
   }
 
-  private def pageMap(sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int,
-                      conn: Connection = null, autoClose: Boolean = true): Resp[Page[Map[String, Any]]] = {
-    val (_conn, _autoClose) = getConnection(conn, autoClose)
-    val countR = count(sql, parameters, _conn, autoClose = false)
+  def page(sql: String, parameters: List[Any], pageNumber: Long, pageSize: Int): Resp[Page[Map[String, Any]]] = {
+    val (_conn, _autoClose) = getConnection
+    val countR = doCount(sql, parameters, _conn, _autoClose = false)
     if (!countR) {
       countR
     } else {
       val finalSql = dialect.paging(sql, pageNumber, pageSize)
-      val findR = findMap(finalSql, parameters, _conn, _autoClose)
+      val findR = doFind(finalSql, parameters, _conn, _autoClose)
       if (!findR) {
         findR
       } else {
@@ -409,25 +447,21 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     }
   }
 
-  private def exist(sql: String, parameters: List[Any], conn: Connection = null, autoClose: Boolean = true): Resp[Boolean] = {
-    val (_conn, _autoClose) = getConnection(conn, autoClose)
-    val countR = count(sql, parameters, _conn, _autoClose)
+  def exist(sql: String, parameters: List[Any]): Resp[Boolean] = {
+    val (_conn, _autoClose) = getConnection
+    val countR = doCount(sql, parameters, _conn, _autoClose)
     if (countR) {
-      Resp.success(countR.body)
+      Resp.success(countR.body!=0)
     } else {
       countR
     }
   }
 
-  private def getConnection(conn: Connection, autoClose: Boolean): (Connection, Boolean) = {
-    if (conn == null) {
-      if (localConnection.get() != null) {
-        (localConnection.get(), false)
-      } else {
-        (ds.getConnection, true)
-      }
+  private def getConnection: (Connection, Boolean) = {
+    if (localConnection.get() != null) {
+      (localConnection.get(), false)
     } else {
-      (conn, autoClose)
+      (ds.getConnection, true)
     }
   }
 

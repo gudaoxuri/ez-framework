@@ -25,7 +25,7 @@
 
     <properties>
         <ezf-version>4.0</ezf-version>
-        <ez-common.version>1.2.0</ez-common.version>
+        <ez-common.version>1.2.1</ez-common.version>
     </properties>
 
     <modules>

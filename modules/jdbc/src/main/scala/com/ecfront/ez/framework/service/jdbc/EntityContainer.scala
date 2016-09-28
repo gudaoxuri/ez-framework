@@ -56,7 +56,16 @@ object EntityContainer extends LazyLogging {
         field.fieldName
     }
     val idFieldInfo = allAnnotations.find(_.annotation.isInstanceOf[Id]).orNull
-    val allFields = BeanHelper.findFields(clazz, excludeAnnotations = Seq())
+    val idStrategy = if (idFieldInfo != null) idFieldInfo.annotation.asInstanceOf[Id].strategy else "seq"
+    val allFields = BeanHelper.findFields(clazz, excludeAnnotations = Seq()).map {
+      item =>
+        val ttype = item._1 match {
+          case name if idFieldInfo != null && idFieldInfo.fieldName == name && idFieldInfo.annotation.asInstanceOf[Id].strategy != "" =>
+            idFieldInfo.annotation.asInstanceOf[Id].strategy
+          case _ => item._2
+        }
+        item._1 -> ttype
+    }
     val ignoreFieldNames = allFields.filter {
       field =>
         allAnnotations.filter(_.fieldName == field._1).exists {
@@ -75,6 +84,7 @@ object EntityContainer extends LazyLogging {
     model.nowBySaveFieldNames = nowBySaveFieldNames
     model.nowByUpdateFieldNames = nowByUpdateFieldNames
     model.idFieldName = if (idFieldInfo != null) idFieldInfo.fieldName else BaseModel.Id_FLAG
+    model.idStrategy =model.idStrategy
     model.allFields = allFields
     model.ignoreFieldNames = ignoreFieldNames
     model.persistentFields = persistentFields
@@ -94,6 +104,7 @@ class EntityInfo() {
   var nowBySaveFieldNames: List[String] = _
   var nowByUpdateFieldNames: List[String] = _
   var idFieldName: String = _
+  var idStrategy: String = _
   var allFields: Map[String, String] = _
   var persistentFields: Map[String, String] = _
   var ignoreFieldNames: List[String] = _

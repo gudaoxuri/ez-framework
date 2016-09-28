@@ -2,34 +2,25 @@ package com.ecfront.ez.framework.service.jdbc
 
 import java.util.Date
 
-import com.ecfront.common.StandardCode
+import com.ecfront.common.{Resp, StandardCode}
+import com.ecfront.ez.framework.core.helper.TimeHelper
 import com.ecfront.ez.framework.core.test.MockStartupSpec
-import com.ecfront.ez.framework.service.storage.foundation._
 
 import scala.beans.BeanProperty
 
 class JDBCSpec extends MockStartupSpec {
 
-  test("JDBC Test") {
-
-    // JDBCProcessor.find("select count(*) from testA join testB on testA.id = testB.id",List(),classOf[Long]),Duration.Inf)
-
-    JDBCProcessor.update(
+  def baseTest(): Unit = {
+    JDBCProcessor.ddl(
       """
-        |CREATE TABLE IF NOT EXISTS jdbc_test_entity
+        |CREATE TABLE IF NOT EXISTS test_entity
         |(
         | id INT NOT NULL AUTO_INCREMENT ,
         | name varchar(100) NOT NULL ,
         | age INT NOT NULL ,
         | time timestamp NOT NULL default CURRENT_TIMESTAMP,
-        | time_auto_create timestamp NOT NULL,
-        | time_auto_update timestamp NOT NULL,
-        | date1 datetime,
-        | date2 date,
-        | rel1 JSON ,
-        | rel2 JSON ,
-        | rel3 JSON ,
-        | rel4 JSON ,
+        | time_auto_create timestamp NOT NULL default now(),
+        | time_auto_update timestamp NOT NULL default now(),
         | create_user varchar(100) NOT NULL COMMENT '创建用户' ,
         | create_org varchar(100) NOT NULL COMMENT '创建组织' ,
         | create_time BIGINT NOT NULL COMMENT '创建时间(yyyyMMddHHmmssSSS)' ,
@@ -39,11 +30,56 @@ class JDBCSpec extends MockStartupSpec {
         | enable BOOLEAN NOT NULL COMMENT '是否启用' ,
         | PRIMARY KEY(id)
         |)ENGINE=innodb DEFAULT CHARSET=utf8
-      """.stripMargin
-    )
+      """.stripMargin)
+    JDBCProcessor.ddl(
+      s"""TRUNCATE test_entity""".stripMargin)
 
+    val id = JDBCProcessor.insert(
+      s"""
+         |insert into test_entity
+         |  (name,age,time_auto_create,time_auto_update,create_user,create_org,create_time,update_user,update_org,update_time,enable)
+         |  values
+         |  (?,?,now(),now(),?,?,?,?,?,?,?)
+       """.stripMargin
+      , List("张三", 11, "admin", "", TimeHelper.msf.format(new Date()), "admin", "", TimeHelper.msf.format(new Date()), true)).body
+    JDBCProcessor.update(
+      s"""
+         |update test_entity set name = ? where id = ?
+       """.stripMargin, List("李四", id))
+    JDBCProcessor.batch(
+      s"""
+         |insert into test_entity
+         |  (name,age,time_auto_create,time_auto_update,create_user,create_org,create_time,update_user,update_org,update_time,enable)
+         |  values
+         |  (?,?,now(),now(),?,?,?,?,?,?,?)
+       """.stripMargin
+      , List(
+        List("测试1", 11, "admin", "", TimeHelper.msf.format(new Date()), "admin", "", TimeHelper.msf.format(new Date()), true),
+        List("测试2", 11, "admin", "", TimeHelper.msf.format(new Date()), "admin", "", TimeHelper.msf.format(new Date()), true),
+        List("测试3", 11, "admin", "", TimeHelper.msf.format(new Date()), "admin", "", TimeHelper.msf.format(new Date()), false)
+      )).body
+    assert(JDBCProcessor.exist(s"""select * from test_entity where enable = ? order by time_auto_create desc""", List(1)).body)
+    assert(JDBCProcessor.count(s"""select * from test_entity where enable = ? order by time_auto_create desc""", List(true)).body == 3)
+
+    val getMap = JDBCProcessor.get(s"""select * from test_entity where id = ?""", List(id)).body
+    assert(getMap("name") == "李四" && getMap("enable") == true)
+    val findMap = JDBCProcessor.find(s"""select * from test_entity where enable = ?""", List(true)).body
+    assert(findMap.length == 3 && findMap.head("name") == "李四")
+    val pageMap = JDBCProcessor.page(s"""select * from test_entity where enable = ?""", List(true), 2, 1).body
+    assert(pageMap.recordTotal == 3 && pageMap.pageNumber == 2 && pageMap.pageSize == 1 && pageMap.pageTotal == 3
+      && pageMap.objects.length == 1 && pageMap.objects.head("name") == "测试1")
+
+    val get = JDBCProcessor.get(s"""select * from test_entity where id = ?""", List(id), classOf[JDBC_Test_Entity]).body
+    assert(get.name == "李四" && get.enable)
+    val find = JDBCProcessor.find(s"""select * from test_entity where enable = ?""", List(true), classOf[JDBC_Test_Entity]).body
+    assert(find.length == 3 && find.head.name == "李四")
+    val page = JDBCProcessor.page(s"""select * from test_entity where enable = ?""", List(true), 2, 1, classOf[JDBC_Test_Entity]).body
+    assert(page.recordTotal == 3 && page.pageNumber == 2 && page.pageSize == 1 && page.pageTotal == 3
+      && page.objects.length == 1 && page.objects.head.name == "测试1")
+  }
+
+  def entityTest(): Unit = {
     JDBC_Test_Entity.deleteByCond("", List()).body
-
     val jdbc = JDBC_Test_Entity()
     jdbc.age = 10
     assert(JDBC_Test_Entity.save(jdbc).code == StandardCode.BAD_REQUEST)
@@ -57,7 +93,6 @@ class JDBCSpec extends MockStartupSpec {
     JDBC_Test_Entity.deleteById(getResult.id).body
     getResult = JDBC_Test_Entity.getById(getResult.id).body
     assert(getResult == null)
-
     jdbc.name = "name_new_2"
     getResult = JDBC_Test_Entity.saveOrUpdate(jdbc).body
     getResult.name = "name_new_3"
@@ -82,7 +117,6 @@ class JDBCSpec extends MockStartupSpec {
     jdbc.name = "n4"
     jdbc.create_time = 0
     JDBC_Test_Entity.save(jdbc).body
-
     Thread.sleep(1)
     jdbc.id = "300"
     jdbc.name = "n4"
@@ -126,71 +160,8 @@ class JDBCSpec extends MockStartupSpec {
     assert(findResult.isEmpty)
   }
 
-  test("complex type test") {
-
-    var jdbc = JDBC_Test_Entity()
-    jdbc.id = "1"
-    jdbc.name = "n4"
-    jdbc.age = 1
-    jdbc.time = new Date()
-    jdbc.date1 = new Date()
-    jdbc.date2 = new Date()
-    jdbc.rel1 = List("1", "2")
-    jdbc.rel2 = Map("s" -> "sss")
-    val relModel = new Rel_Model()
-    relModel.f = "r"
-    jdbc.rel3 = List(relModel)
-    jdbc.rel4 = relModel
-
-    jdbc = JDBC_Test_Entity.save(jdbc).body
-    assert(jdbc.rel1 == List("1", "2"))
-    assert(jdbc.rel2 == Map("s" -> "sss"))
-    assert(jdbc.rel3.head.f == "r")
-    assert(jdbc.rel4.f == "r")
-    assert(jdbc.time_auto_create != null)
-    assert(jdbc.time_auto_update != null)
-    assert(jdbc.time != null)
-    assert(jdbc.date1 != null)
-    assert(jdbc.date2 != null)
-    jdbc.rel1 = List("new")
-    jdbc.rel2 = Map("new" -> "new")
-    val newRelModel = new Rel_Model()
-    newRelModel.f = "new"
-    jdbc.rel3 = List(newRelModel)
-    jdbc.rel4 = newRelModel
-    jdbc.time = null
-    jdbc = JDBC_Test_Entity.update(jdbc).body
-    assert(jdbc.rel1 == List("new"))
-    assert(jdbc.rel2 == Map("new" -> "new"))
-    assert(jdbc.rel3.head.f == "new")
-    assert(jdbc.rel4.f == "new")
-    assert(jdbc.time_auto_create != null)
-    assert(jdbc.time_auto_update != null)
-    assert(jdbc.time_auto_create != jdbc.time_auto_update)
-
-    jdbc = JDBC_Test_Entity.find("").body.head
-    assert(jdbc.rel1 == List("new"))
-    assert(jdbc.rel2 == Map("new" -> "new"))
-    assert(jdbc.rel3.head.f == "new")
-    assert(jdbc.rel4.f == "new")
-
-    jdbc = JDBC_Test_Entity.page("").body.objects.head
-    assert(jdbc.rel1 == List("new"))
-    assert(jdbc.rel2 == Map("new" -> "new"))
-    assert(jdbc.rel3.head.f == "new")
-    assert(jdbc.rel4.f == "new")
-
-    jdbc = JDBC_Test_Entity.getById("1").body
-    assert(jdbc.rel1 == List("new"))
-    assert(jdbc.rel2 == Map("new" -> "new"))
-    assert(jdbc.rel3.head.f == "new")
-    assert(jdbc.rel4.f == "new")
-
-  }
-
-  test("INT(1) Test") {
-
-    JDBCProcessor.update(
+  def intTest(): Unit = {
+    JDBCProcessor.ddl(
       """
         |CREATE TABLE IF NOT EXISTS jdbc_test_int
         |(
@@ -203,33 +174,117 @@ class JDBCSpec extends MockStartupSpec {
         |)ENGINE=innodb DEFAULT CHARSET=utf8
       """.stripMargin
     )
+    JDBCProcessor.ddl(s"TRUNCATE test_entity")
 
-    var obj=JDBC_Test_Int()
-    obj.status=1
-    obj.enabled=true
-    obj.gender=1
-    obj.age=11
-    obj= JDBC_Test_Int.save(obj).body
-    assert(obj.status==1&&obj.enabled&&obj.gender==1&&obj.age==11)
-    obj.status=0
-    obj.enabled=false
-    obj.gender=0
-    obj.age=11
-    obj= JDBC_Test_Int.update(obj).body
-    assert(obj.status==0&& !obj.enabled&&obj.gender==0&&obj.age==11)
-    obj.status=8
-    obj.enabled=true
-    obj.gender= -1
-    obj.age=11
-    obj= JDBC_Test_Int.update(obj).body
-    assert(obj.status==8&&obj.enabled&&obj.gender== -1&&obj.age==11)
+    var obj = JDBC_Test_Int()
+    obj.status = 1
+    obj.enabled = true
+    obj.gender = 1
+    obj.age = 11
+    obj = JDBC_Test_Int.save(obj).body
+    assert(obj.status == 1 && obj.enabled && obj.gender == 1 && obj.age == 11)
+    obj.status = 0
+    obj.enabled = false
+    obj.gender = 0
+    obj.age = 11
+    obj = JDBC_Test_Int.update(obj).body
+    assert(obj.status == 0 && !obj.enabled && obj.gender == 0 && obj.age == 11)
+    obj.status = 8
+    obj.enabled = true
+    obj.gender = -1
+    obj.age = 11
+    obj = JDBC_Test_Int.update(obj).body
+    assert(obj.status == 8 && obj.enabled && obj.gender == -1 && obj.age == 11)
+  }
+
+  def txTest(): Unit = {
+    JDBCProcessor.ddl(
+      """
+        |CREATE TABLE IF NOT EXISTS tx_test
+        |(
+        | id INT NOT NULL AUTO_INCREMENT ,
+        | name varchar(100) NOT NULL ,
+        | age INT NOT NULL ,
+        | PRIMARY KEY(id)
+        |)ENGINE=innodb DEFAULT CHARSET=utf8
+      """.stripMargin
+    )
+    JDBCProcessor.ddl(s"TRUNCATE tx_test")
+
+    JDBCProcessor.openTx()
+    JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("张三", 23))
+    JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("李四", 111))
+    JDBCProcessor.rollback()
+    assert(!JDBCProcessor.exist("SELECT * FROM  tx_test WHERE name =?", List("张三")).body)
+
+    JDBCProcessor.openTx()
+    JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("张三", 23))
+    JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("李四", 111))
+    // 需要至少两个连接
+    assert(!JDBCProcessor.exist("SELECT * FROM  tx_test WHERE name =?", List("张三")).body)
+    JDBCProcessor.commit()
+    assert(JDBCProcessor.exist("SELECT * FROM  tx_test WHERE name =?", List("张三")).body)
+
+    testTxFail()
+    assert(!JDBCProcessor.exist("SELECT * FROM  tx_test WHERE name =?", List("张三")).body)
+
+    JDBCProcessor.tx {
+      JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("张三", 23))
+      JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("李四", 111))
+      test3()
+    }
+    assert(JDBCProcessor.exist("SELECT * FROM  tx_test WHERE name =?", List("王五")).body)
+
+    // 事务重入
+    JDBCProcessor.tx {
+      JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("A", 1))
+      JDBCProcessor.tx {
+        JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("B", 1))
+        JDBCProcessor.tx {
+          JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("C", 1))
+        }
+      }
+    }
+    assert(JDBCProcessor.count("SELECT * FROM  tx_test WHERE name in (?,?,?)", List("A", "B", "C")).body == 3)
+    JDBCProcessor.tx {
+      JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("A", 1))
+      JDBCProcessor.tx[Void] {
+        JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("B", 1))
+        JDBCProcessor.tx {
+          JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("C", 1))
+        }
+        Resp.badRequest("")
+      }
+    }
+    assert(JDBCProcessor.count("SELECT * FROM  tx_test WHERE name in (?,?,?)", List("A", "B", "C")).body == 0)
+  }
+
+  def testTxFail() = JDBCProcessor.tx {
+    JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("张三", 23))
+    JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("李四", 111))
+    test2()
+  }
+
+  def test2(): Resp[Void] = {
+    JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("王五", 234))
+    Resp.forbidden("")
+  }
+
+  def test3(): Resp[Void] = {
+    JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("王五", 234))
+  }
+
+  test("JDBC Test") {
+    baseTest()
+    entityTest()
+    intTest()
+    txTest()
   }
 
 }
 
 @Entity("")
 case class JDBC_Test_Entity() extends SecureModel with StatusModel {
-
   @Unique
   @Require
   @Label("姓名")
@@ -243,13 +298,11 @@ case class JDBC_Test_Entity() extends SecureModel with StatusModel {
   @BeanProperty var time: Date = _
   @BeanProperty var date1: Date = _
   @BeanProperty var date2: Date = _
-  @BeanProperty var rel1: List[String] = _
-  @BeanProperty var rel2: Map[String, Any] = _
-  @BeanProperty var rel3: List[Rel_Model] = _
-  @BeanProperty var rel4: Rel_Model = _
-
 }
-object JDBC_Test_Entity extends JDBCSecureStorage[JDBC_Test_Entity] with JDBCStatusStorage[JDBC_Test_Entity]
+
+object JDBC_Test_Entity extends SecureStorage[JDBC_Test_Entity] with StatusStorage[JDBC_Test_Entity] {
+  customTableName("test_entity")
+}
 
 @Entity("")
 case class JDBC_Test_Int() extends BaseModel {
@@ -258,11 +311,12 @@ case class JDBC_Test_Int() extends BaseModel {
   @BeanProperty var gender: Int = _
   @BeanProperty var age: Int = _
 }
-object JDBC_Test_Int extends JDBCBaseStorage[JDBC_Test_Int]
 
-class Rel_Model extends Serializable {
+object JDBC_Test_Int extends BaseStorage[JDBC_Test_Int]
 
-  @BeanProperty var f: String = _
 
-}
+
+
+
+
 

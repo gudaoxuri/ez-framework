@@ -14,7 +14,7 @@ import scala.reflect.runtime._
   */
 trait BaseModel extends Serializable {
 
-  @Id()
+  @Id("seq")
   @BeanProperty var id: String = _
 
 }
@@ -121,7 +121,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @return 保存后的实体对象
     */
   def save(model: M, context: EZStorageContext = EZStorageContext()): Resp[M] = {
-    val preR = preSave(model, context)
+    val _model=_modelClazz.newInstance()
+    BeanHelper.copyProperties(_model,model)
+    val preR = preSave(_model, context)
     if (preR) {
       val filterR = filterByModel(preR.body, context)
       if (filterR) {
@@ -185,8 +187,10 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @return 更新后的实体对象
     */
   def update(model: M, context: EZStorageContext = EZStorageContext()): Resp[M] = {
-    model.id = model.id.trim
-    val preR = preUpdate(model, context)
+    val _model=_modelClazz.newInstance()
+    BeanHelper.copyProperties(_model,model)
+    _model.id = _model.id.trim
+    val preR = preUpdate(_model, context)
     if (preR) {
       val filterR = filterByModel(preR.body, context)
       if (filterR) {
@@ -251,10 +255,12 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @return 保存或更新后的实体对象
     */
   def saveOrUpdate(model: M, context: EZStorageContext = EZStorageContext()): Resp[M] = {
-    if (model.id != null) {
-      model.id = model.id.trim
+    val _model=_modelClazz.newInstance()
+    BeanHelper.copyProperties(_model,model)
+    if (_model.id != null) {
+      _model.id = _model.id.trim
     }
-    val preR = preSaveOrUpdate(model, context)
+    val preR = preSaveOrUpdate(_model, context)
     if (preR) {
       val filterR = filterByModel(preR.body, context)
       if (filterR) {

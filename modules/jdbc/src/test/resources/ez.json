@@ -4,13 +4,13 @@
     "module": "",
     "services": {
       "jdbc": {
-        "url": "jdbc:h2:mem:db",
-        "userName": "sa",
-        "password": "",
-        "initialSize": 5,
-        "maxActive": 20,
-        "minIdle": 5,
-        "maxWait": 60000
+        "url": "jdbc:mysql://127.0.0.1:3306/ez?characterEncoding=UTF-8&autoReconnect=true",
+        "userName": "root",
+        "password": "123456",
+        "initialSize": 1, // 初始化时建立物理连接的个数。初始化发生在显示调用init方法，或者第一次getConnection时，默认0
+        "minIdle": 2, // 最小连接池数量
+        "maxActive": 2, // 最大连接池数量，默认8
+        "maxWait": 60000 // 获取连接时最大等待时间，单位毫秒
       }
     }
   },
