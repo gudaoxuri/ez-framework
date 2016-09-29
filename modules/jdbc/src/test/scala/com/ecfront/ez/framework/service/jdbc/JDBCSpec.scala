@@ -220,10 +220,9 @@ class JDBCSpec extends MockStartupSpec {
     JDBCProcessor.openTx()
     JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("张三", 23))
     JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("李四", 111))
-    // 需要至少两个连接
-    assert(!JDBCProcessor.exist("SELECT * FROM  tx_test WHERE name =?", List("张三")).body)
     JDBCProcessor.commit()
     assert(JDBCProcessor.exist("SELECT * FROM  tx_test WHERE name =?", List("张三")).body)
+    JDBCProcessor.ddl(s"TRUNCATE tx_test")
 
     testTxFail()
     assert(!JDBCProcessor.exist("SELECT * FROM  tx_test WHERE name =?", List("张三")).body)
@@ -246,6 +245,21 @@ class JDBCSpec extends MockStartupSpec {
       }
     }
     assert(JDBCProcessor.count("SELECT * FROM  tx_test WHERE name in (?,?,?)", List("A", "B", "C")).body == 3)
+    JDBCProcessor.ddl(s"TRUNCATE tx_test")
+
+    JDBCProcessor.tx {
+      JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("A", 1))
+      JDBCProcessor.tx[Void] {
+        JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("B", 1))
+        JDBCProcessor.tx[Void] {
+          JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("C", 1))
+          Resp.badRequest("")
+        }
+        Resp.badRequest("")
+      }
+    }
+    assert(JDBCProcessor.count("SELECT * FROM  tx_test WHERE name in (?,?,?)", List("A", "B", "C")).body == 0)
+
     JDBCProcessor.tx {
       JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("A", 1))
       JDBCProcessor.tx[Void] {
@@ -257,21 +271,22 @@ class JDBCSpec extends MockStartupSpec {
       }
     }
     assert(JDBCProcessor.count("SELECT * FROM  tx_test WHERE name in (?,?,?)", List("A", "B", "C")).body == 0)
+
   }
 
   def testTxFail() = JDBCProcessor.tx {
-    JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("张三", 23))
-    JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("李四", 111))
+    JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("张三", 23))
+    JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("李四", 111))
     test2()
   }
 
   def test2(): Resp[Void] = {
-    JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("王五", 234))
+    JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("王五", 234))
     Resp.forbidden("")
   }
 
   def test3(): Resp[Void] = {
-    JDBCProcessor.update(s"""INSERT INTO jdbc_test_entity (name,age) VALUES (? ,?)""", List("王五", 234))
+    JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("王五", 234))
   }
 
   test("JDBC Test") {

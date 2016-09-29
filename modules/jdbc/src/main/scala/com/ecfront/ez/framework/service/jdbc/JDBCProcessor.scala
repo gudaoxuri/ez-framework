@@ -139,8 +139,8 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
   private val localConnCounter = new ThreadLocal[AtomicLong]
 
   /**
-    *  初始化时建立物理连接的个数。初始化发生在显示调用init方法，或者第一次getConnection时
-    *  默认0
+    * 初始化时建立物理连接的个数。初始化发生在显示调用init方法，或者第一次getConnection时
+    * 默认0
     */
   def setInitialSize(initialSize: Int): this.type = {
     ds.setInitialSize(initialSize)
@@ -185,9 +185,12 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
   def openTx(): Unit = {
     if (localConnCounter.get() == null) {
       localConnCounter.set(new AtomicLong(0))
-      localConnection.set(ds.getConnection)
+      val conn = ds.getConnection
+      conn.setAutoCommit(false)
+      localConnection.set(conn)
+    } else {
+      localConnCounter.get().incrementAndGet()
     }
-    localConnCounter.get().incrementAndGet()
   }
 
   /**
@@ -203,6 +206,8 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
         val connection = localConnection.get()
         if (connection != null && !connection.isClosed) {
           connection.commit()
+          connection.close()
+          localConnCounter.remove()
           localConnection.remove()
         }
       } else {
@@ -216,11 +221,21 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     *
     */
   def rollback(): Unit = {
-    val connection = localConnection.get()
-    if (connection != null && !connection.isClosed) {
-      connection.rollback()
-      localConnection.remove()
-      localConnCounter.get().set(0)
+    val counter = localConnCounter.get()
+    if (counter == null) {
+      logger.error("Transaction not open yet")
+    } else {
+      if (counter.get() == 0) {
+        val connection = localConnection.get()
+        if (connection != null && !connection.isClosed) {
+          connection.rollback()
+          connection.close()
+          localConnCounter.remove()
+          localConnection.remove()
+        }
+      } else {
+        counter.decrementAndGet()
+      }
     }
   }
 
@@ -260,7 +275,7 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
       execute[String]("insert", {
         val result =
           if (finalParameterR.body != null) {
-            queryRunner.insert(_conn, sql, new ScalarHandler[Object](), finalParameterR.body.map(_.asInstanceOf[Object]):_*)
+            queryRunner.insert(_conn, sql, new ScalarHandler[Object](), finalParameterR.body.map(_.asInstanceOf[Object]): _*)
           } else {
             queryRunner.insert(_conn, sql, new ScalarHandler[Object]())
           }
@@ -277,7 +292,7 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     } else {
       execute[Void]("update", {
         if (finalParameterR.body != null) {
-          queryRunner.update(_conn, sql, finalParameterR.body.map(_.asInstanceOf[Object]):_*)
+          queryRunner.update(_conn, sql, finalParameterR.body.map(_.asInstanceOf[Object]): _*)
         } else {
           queryRunner.update(_conn, sql)
         }
@@ -306,12 +321,12 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     execute[Map[String, Any]]("get", {
       val tmpResult =
         if (parameters != null) {
-          queryRunner.query[java.util.Map[String, Object]](_conn, sql, new MapHandler(), parameters.map(_.asInstanceOf[Object]):_*)
+          queryRunner.query[java.util.Map[String, Object]](_conn, sql, new MapHandler(), parameters.map(_.asInstanceOf[Object]): _*)
         } else {
           queryRunner.query[java.util.Map[String, Object]](_conn, sql, new MapHandler())
         }
       if (tmpResult != null) {
-        val result:Map[String,Any] = tmpResult.map {
+        val result: Map[String, Any] = tmpResult.map {
           item =>
             item._1 -> (item._2 match {
               case c: Clob => convertClob(c)
@@ -330,7 +345,7 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     execute[E]("get", {
       val result =
         if (parameters != null) {
-          queryRunner.query[E](_conn, sql, new BeanHandler(resultClass), parameters.map(_.asInstanceOf[Object]):_*)
+          queryRunner.query[E](_conn, sql, new BeanHandler(resultClass), parameters.map(_.asInstanceOf[Object]): _*)
         } else {
           queryRunner.query[E](_conn, sql, new BeanHandler(resultClass))
         }
@@ -347,12 +362,12 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     execute[List[Map[String, Any]]]("find", {
       val tmpResult =
         if (parameters != null) {
-          queryRunner.query[util.List[util.Map[String, Object]]](_conn, sql, new MapListHandler, parameters.map(_.asInstanceOf[Object]):_*)
+          queryRunner.query[util.List[util.Map[String, Object]]](_conn, sql, new MapListHandler, parameters.map(_.asInstanceOf[Object]): _*)
         } else {
           queryRunner.query[util.List[util.Map[String, Object]]](_conn, sql, new MapListHandler)
         }
       if (tmpResult != null) {
-        val result:List[Map[String, Any]] = tmpResult.map {
+        val result: List[Map[String, Any]] = tmpResult.map {
           _.map {
             item =>
               item._1 -> (item._2 match {
@@ -377,7 +392,7 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     execute[List[E]]("find", {
       val result =
         if (parameters != null) {
-          queryRunner.query[util.List[E]](_conn, sql, new BeanListHandler(resultClass), parameters.map(_.asInstanceOf[Object]):_*)
+          queryRunner.query[util.List[E]](_conn, sql, new BeanListHandler(resultClass), parameters.map(_.asInstanceOf[Object]): _*)
         } else {
           queryRunner.query[util.List[E]](_conn, sql, new BeanListHandler(resultClass))
         }
@@ -395,7 +410,7 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     execute[Long]("count", {
       val result =
         if (parameters != null) {
-          queryRunner.query[Long](_conn, finalSql, countHandler, parameters.map(_.asInstanceOf[Object]):_*)
+          queryRunner.query[Long](_conn, finalSql, countHandler, parameters.map(_.asInstanceOf[Object]): _*)
         } else {
           queryRunner.query[Long](_conn, finalSql, countHandler)
         }
@@ -451,7 +466,7 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
     val (_conn, _autoClose) = getConnection
     val countR = doCount(sql, parameters, _conn, _autoClose)
     if (countR) {
-      Resp.success(countR.body!=0)
+      Resp.success(countR.body != 0)
     } else {
       countR
     }
