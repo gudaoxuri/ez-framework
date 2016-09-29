@@ -3,7 +3,6 @@ package com.ecfront.ez.framework.core
 import java.net.InetAddress
 import java.util.UUID
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 /**
@@ -21,10 +20,6 @@ object EZContext extends LazyLogging {
   var instance: String = _
   // 语言
   var language: String = _
-  // 性能配置
-  var perf: Map[String, Any] = _
-  // 配置文件中的APP级参数
-  var args: JsonNode = _
   // 配置文件路径
   lazy val confPath: String = findConfPath()
   // 是否调试模式

@@ -1,4 +1,4 @@
-package com.ecfront.ez.framework.service.redis
+package com.ecfront.ez.framework.core.redis
 
 import com.ecfront.common.Resp
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -22,7 +22,7 @@ object RedisProcessor extends LazyLogging {
     * @param auth    密码
     * @return 结果
     */
-  private[redis] def init(address: Seq[String], db: Integer, auth: String = ""): Resp[String] = {
+  private[core] def init(address: Seq[String], db: Integer, auth: String = ""): Resp[Void] = {
     if (address.size == 1) {
       val Array(host, port) = address.head.split(":")
       redisPool = new JedisPool(
@@ -37,10 +37,14 @@ object RedisProcessor extends LazyLogging {
       redisCluster = new JedisCluster(node)
       // TODO select db & pwd
     }
-    Resp.success("Distributed started")
+    sys.addShutdownHook {
+      close()
+    }
+    logger.info("Redis started")
+    Resp.success(null)
   }
 
-  private[redis] def close(): Unit = {
+  private def close(): Unit = {
     if (redisCluster != null) {
       redisCluster.close()
     }

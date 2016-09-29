@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode
   * @param ez   EZ服务配置项
   * @param args APP级配置参数
   */
-case class EZConfig(ez: EZInfo, args:JsonNode)
+case class EZConfig(ez: EZInfo, args: JsonNode)
 
 // EZ服务配置项
 case class EZInfo(
@@ -16,10 +16,12 @@ case class EZInfo(
                    app: String,
                    // 模块名称
                    module: String,
-                   // 时区
-                   timezone: String,
                    // 实例名称
                    var instance: String,
+                   // 缓存服务地址
+                   cache: Map[String, Any],
+                   // 时区
+                   timezone: String,
                    // 语言
                    var language: String,
                    var isDebug: Boolean,

@@ -1,4 +1,4 @@
-package com.ecfront.ez.framework.service.redis
+package com.ecfront.ez.framework.core.redis
 
 import java.util.concurrent.CountDownLatch
 

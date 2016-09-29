@@ -1,10 +1,15 @@
 package com.ecfront.ez.framework.core
 
 import com.ecfront.common.{JsonHelper, Resp}
+import com.ecfront.ez.framework.core.eventbus.EventBusProcessor
 import com.ecfront.ez.framework.core.i18n.I18NProcessor
+import com.ecfront.ez.framework.core.redis.RedisProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import io.vertx.core.{Vertx, VertxOptions}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.io.Source
 import scala.reflect.runtime._
 
@@ -17,6 +22,52 @@ object EZManager extends LazyLogging {
   private var ezServiceConfig: Map[String, Any] = _
   // EZ服务容器
   private var ezServices: List[EZServiceAdapter[_]] = _
+
+  System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
+  System.setProperty("vertx.disableFileCaching", "true")
+  System.setProperty("vertx.disableFileCPResolving", "true")
+
+  private val FLAG_PERF_EVENT_LOOP_POOL_SIZE = "eventLoopPoolSize"
+  private val FLAG_PERF_WORKER_POOL_SIZE = "workerPoolSize"
+  private val FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE = "internalBlockingPoolSize"
+  private val FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME = "maxEventLoopExecuteTime"
+  private val FLAG_PERF_WORKER_EXECUTE_TIME = "maxWorkerExecuteTime"
+  private val FLAG_PERF_WARNING_EXCEPTION_TIME = "warningExceptionTime"
+
+  /**
+    * 初始Vertx
+    *
+    * @return vertx实例
+    */
+  private def initVertx(perf: Map[String, Any]): Resp[Void] = {
+    val opt = new VertxOptions()
+    if (perf.contains(FLAG_PERF_EVENT_LOOP_POOL_SIZE)) {
+      opt.setEventLoopPoolSize(perf(FLAG_PERF_EVENT_LOOP_POOL_SIZE).asInstanceOf[Int])
+    }
+    if (perf.contains(FLAG_PERF_WORKER_POOL_SIZE)) {
+      opt.setWorkerPoolSize(perf(FLAG_PERF_WORKER_POOL_SIZE).asInstanceOf[Int])
+    }
+    if (perf.contains(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE)) {
+      opt.setInternalBlockingPoolSize(perf(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE).asInstanceOf[Int])
+    }
+    if (perf.contains(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME)) {
+      opt.setMaxEventLoopExecuteTime(perf(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).asInstanceOf[Int] * 1000000L)
+    }
+    if (perf.contains(FLAG_PERF_WORKER_EXECUTE_TIME)) {
+      opt.setMaxWorkerExecuteTime(perf(FLAG_PERF_WORKER_EXECUTE_TIME).asInstanceOf[Int] * 1000000L)
+    }
+    if (perf.contains(FLAG_PERF_WARNING_EXCEPTION_TIME)) {
+      opt.setWarningExceptionTime(perf(FLAG_PERF_WARNING_EXCEPTION_TIME).asInstanceOf[Int] * 1000000L)
+    }
+    Await.result(EventBusProcessor.init(Vertx.vertx(opt)), Duration.Inf)
+  }
+
+  private def initCache(cache: Map[String, Any]): Resp[Void] = {
+    val address = cache("address").asInstanceOf[String].split(";")
+    val db = cache.getOrElse("db", 0).asInstanceOf[Int]
+    val auth = cache.getOrElse("auth", "").asInstanceOf[String]
+    RedisProcessor.init(address, db, auth)
+  }
 
   /**
     * 解析服务配置 , 默认情况下加载classpath根路径下的`ez.json`文件
@@ -42,7 +93,24 @@ object EZManager extends LazyLogging {
       if (ezConfig.ez.perf == null) {
         ezConfig.ez.perf = collection.mutable.Map[String, Any]()
       }
-      // TODO perf
+      if (System.getProperty(FLAG_PERF_EVENT_LOOP_POOL_SIZE) != null) {
+        ezConfig.ez.perf += FLAG_PERF_EVENT_LOOP_POOL_SIZE -> System.getProperty(FLAG_PERF_EVENT_LOOP_POOL_SIZE).toInt
+      }
+      if (System.getProperty(FLAG_PERF_WORKER_POOL_SIZE) != null) {
+        ezConfig.ez.perf += FLAG_PERF_WORKER_POOL_SIZE -> System.getProperty(FLAG_PERF_WORKER_POOL_SIZE).toInt
+      }
+      if (System.getProperty(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE) != null) {
+        ezConfig.ez.perf += FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE -> System.getProperty(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE).toInt
+      }
+      if (System.getProperty(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME) != null) {
+        ezConfig.ez.perf += FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME -> System.getProperty(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).toLong
+      }
+      if (System.getProperty(FLAG_PERF_WORKER_EXECUTE_TIME) != null) {
+        ezConfig.ez.perf += FLAG_PERF_WORKER_EXECUTE_TIME -> System.getProperty(FLAG_PERF_WORKER_EXECUTE_TIME).toLong
+      }
+      if (System.getProperty(FLAG_PERF_WARNING_EXCEPTION_TIME) != null) {
+        ezConfig.ez.perf += FLAG_PERF_WARNING_EXCEPTION_TIME -> System.getProperty(FLAG_PERF_WARNING_EXCEPTION_TIME).toLong
+      }
       Resp.success(ezConfig)
     } catch {
       case e: Throwable =>
@@ -134,57 +202,59 @@ object EZManager extends LazyLogging {
     val ezConfigR = startInParseConfig(configContent)
     if (ezConfigR) {
       val ezConfig = ezConfigR.body
-      EZContext.app = ezConfig.ez.app
-      EZContext.perf = ezConfig.ez.perf.toMap
-      EZContext.module = ezConfig.ez.module
-      EZContext.timezone = ezConfig.ez.timezone
-      EZContext.instance = ezConfig.ez.instance
-      EZContext.language = ezConfig.ez.language
-      EZContext.args = ezConfig.args
-      EZContext.isDebug = ezConfig.ez.isDebug
+      if (initVertx(ezConfig.ez.perf.toMap) && initCache(ezConfig.ez.cache)) {
+        EZContext.app = ezConfig.ez.app
+        EZContext.module = ezConfig.ez.module
+        EZContext.timezone = ezConfig.ez.timezone
+        EZContext.instance = ezConfig.ez.instance
+        EZContext.language = ezConfig.ez.language
+        EZContext.isDebug = ezConfig.ez.isDebug
 
-      ezServiceConfig = ezConfig.ez.services
-      logger.info("\r\n=== Discover Services ...")
-      val ezServicesR = startInDiscoverServices()
-      if (ezServicesR) {
-        logger.info("\r\n=== Order Services ...")
-        val orderServicesR = startInOrderServices(ezServicesR.body)
-        if (orderServicesR) {
-          ezServices = orderServicesR.body
-          var isSuccess = true
-          var message = ""
-          ezServices.foreach {
-            service =>
-              if (isSuccess) {
-                logger.info(s"\r\n>>> Init ${service.serviceName}")
-                try {
-                  val initR = service.innerInit(ezServiceConfig(service.serviceName))
-                  if (!initR) {
-                    message = s"Init [${service.serviceName}] Service error : [${initR.code}] [${initR.message}]"
-                    isSuccess = false
-                  } else {
-                    logger.info(s"\r\n>>> ${initR.body}")
+        ezServiceConfig = ezConfig.ez.services
+        logger.info("\r\n=== Discover Services ...")
+        val ezServicesR = startInDiscoverServices()
+        if (ezServicesR) {
+          logger.info("\r\n=== Order Services ...")
+          val orderServicesR = startInOrderServices(ezServicesR.body)
+          if (orderServicesR) {
+            ezServices = orderServicesR.body
+            var isSuccess = true
+            var message = ""
+            ezServices.foreach {
+              service =>
+                if (isSuccess) {
+                  logger.info(s"\r\n>>> Init ${service.serviceName}")
+                  try {
+                    val initR = service.innerInit(ezServiceConfig(service.serviceName))
+                    if (!initR) {
+                      message = s"Init [${service.serviceName}] Service error : [${initR.code}] [${initR.message}]"
+                      isSuccess = false
+                    } else {
+                      logger.info(s"\r\n>>> ${initR.body}")
+                    }
+                  } catch {
+                    case e: Throwable =>
+                      logger.error(s"Init [${service.serviceName}] Service error : ${e.getMessage}", e)
+                      message = s"Init [${service.serviceName}] Service error : ${e.getMessage}"
+                      isSuccess = false
                   }
-                } catch {
-                  case e: Throwable =>
-                    logger.error(s"Init [${service.serviceName}] Service error : ${e.getMessage}", e)
-                    message = s"Init [${service.serviceName}] Service error : ${e.getMessage}"
-                    isSuccess = false
                 }
-              }
-          }
-          if (isSuccess) {
-            ezServices.foreach(_.initPost())
-            I18NProcessor.init()
-            logSuccess("Start Success")
+            }
+            if (isSuccess) {
+              ezServices.foreach(_.initPost())
+              I18NProcessor.init()
+              logSuccess("Start Success")
+            } else {
+              logError(s"Start Fail : $message")
+            }
           } else {
-            logError(s"Start Fail : $message")
+            logError(s"Start Fail : ${orderServicesR.message}")
           }
         } else {
-          logError(s"Start Fail : ${orderServicesR.message}")
+          logError(s"Start Fail : ${ezServicesR.message}")
         }
       } else {
-        logError(s"Start Fail : ${ezServicesR.message}")
+        logError(s"Start Fail : Core services start error")
       }
     } else {
       logError(s"Start Fail : ${ezConfigR.message}")

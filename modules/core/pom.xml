@@ -18,4 +18,15 @@
     <packaging>jar</packaging>
     <version>${ezf-version}</version>
 
+    <properties>
+        <redis.version>2.8.1</redis.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>${redis.version}</version>
+        </dependency>
+    </dependencies>
 </project>

@@ -3,14 +3,20 @@
   "ez": {
     "app": "",
     "module": "",
+    "cache": {
+      "address": "127.0.0.1:6379"
+    },
     "timezone": "Asia/Shanghai",
     "perf": {
       "eventLoopPoolSize": 2,
       "workerPoolSize": 20,
       "internalBlockingPoolSize": 20,
-      "maxEventLoopExecuteTime": 2000, // ms
-      "maxWorkerExecuteTime": 60000, // ms
-      "warningExceptionTime": 5000 // ms
+      "maxEventLoopExecuteTime": 2000,
+      // ms
+      "maxWorkerExecuteTime": 60000,
+      // ms
+      "warningExceptionTime": 5000
+      // ms
     },
     "services": {
       "test1": {

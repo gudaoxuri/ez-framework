@@ -1,4 +1,4 @@
-package com.ecfront.ez.framework
+package com.ecfront.ez.framework.core
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.i18n.I18NProcessor

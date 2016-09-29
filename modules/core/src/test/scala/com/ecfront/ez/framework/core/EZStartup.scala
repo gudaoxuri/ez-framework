@@ -1,6 +1,5 @@
-package com.ecfront.ez.framework
+package com.ecfront.ez.framework.core
 
-import com.ecfront.ez.framework.core.EZManager
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 /**
