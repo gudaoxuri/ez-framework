@@ -4,7 +4,7 @@ import java.io.File
 import java.util.regex.Pattern
 
 import com.ecfront.common.Resp
-import com.ecfront.ez.framework.core.EZContext
+import com.ecfront.ez.framework.core.EZ
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.io.Source
@@ -31,7 +31,7 @@ object I18NProcessor extends LazyLogging {
     * 加载i18n文件
     */
   def load(): Unit = {
-    val i18nPath = new File(EZContext.Info.confPath + "i18n/")
+    val i18nPath = new File(EZ.Info.confPath + "i18n/")
     if (i18nPath.exists()) {
       i18nPath.listFiles().foreach {
         file =>
@@ -56,7 +56,7 @@ object I18NProcessor extends LazyLogging {
     * @param _language 语言编码
     */
   def setLanguage(_language: String): Unit = {
-    EZContext.Info.language = _language
+    EZ.Info.language = _language
   }
 
   private val tabR = "\t"
@@ -72,7 +72,7 @@ object I18NProcessor extends LazyLogging {
     i18nInfo.find(_._1.matcher(str).matches()).foreach {
       matchedItem =>
         val matcher = matchedItem._1.matcher(str)
-        newStr = matcher.replaceAll(matchedItem._2(EZContext.Info.language))
+        newStr = matcher.replaceAll(matchedItem._2(EZ.Info.language))
     }
     newStr
   }

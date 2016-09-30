@@ -55,6 +55,7 @@ object EntityContainer extends LazyLogging {
       field =>
         field.fieldName
     }
+    val uuidFieldInfo = allAnnotations.find(_.annotation.isInstanceOf[UUID]).orNull
     val idFieldInfo = allAnnotations.find(_.annotation.isInstanceOf[Id]).orNull
     val idStrategy = if (idFieldInfo != null) idFieldInfo.annotation.asInstanceOf[Id].strategy else "seq"
     val allFields = BeanHelper.findFields(clazz, excludeAnnotations = Seq()).map {
@@ -83,8 +84,9 @@ object EntityContainer extends LazyLogging {
     model.requireFieldNames = requireFieldNames
     model.nowBySaveFieldNames = nowBySaveFieldNames
     model.nowByUpdateFieldNames = nowByUpdateFieldNames
+    model.uuidFieldName = if (uuidFieldInfo != null) uuidFieldInfo.fieldName else null
     model.idFieldName = if (idFieldInfo != null) idFieldInfo.fieldName else BaseModel.Id_FLAG
-    model.idStrategy =model.idStrategy
+    model.idStrategy = idStrategy
     model.allFields = allFields
     model.ignoreFieldNames = ignoreFieldNames
     model.persistentFields = persistentFields
@@ -104,6 +106,7 @@ class EntityInfo() {
   var nowBySaveFieldNames: List[String] = _
   var nowByUpdateFieldNames: List[String] = _
   var idFieldName: String = _
+  var uuidFieldName: String = _
   var idStrategy: String = _
   var allFields: Map[String, String] = _
   var persistentFields: Map[String, String] = _

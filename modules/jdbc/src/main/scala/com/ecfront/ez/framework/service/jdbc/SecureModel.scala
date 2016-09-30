@@ -3,6 +3,7 @@ package com.ecfront.ez.framework.service.jdbc
 import java.util.Date
 
 import com.ecfront.common.Resp
+import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.helper.TimeHelper
 
 import scala.beans.BeanProperty
@@ -35,48 +36,46 @@ object SecureModel {
 
 trait SecureStorage[M <: SecureModel] extends BaseStorage[M] {
 
-  override def preSave(model: M, context: EZStorageContext): Resp[M] = {
-    wrapSecureSave(model, context)
-    super.preSave(model, context)
+  override def preSave(model: M): Resp[M] = {
+    wrapSecureSave(model)
+    super.preSave(model)
   }
 
-  override def preUpdate(model: M, context: EZStorageContext): Resp[M] = {
-    wrapSecureUpdate(model, context)
-    super.preUpdate(model, context)
+  override def preUpdate(model: M): Resp[M] = {
+    wrapSecureUpdate(model)
+    super.preUpdate(model)
   }
 
-  override def preSaveOrUpdate(model: M, context: EZStorageContext): Resp[M] = {
-    wrapSecureSave(model, context)
-    super.preSaveOrUpdate(model, context)
+  override def preSaveOrUpdate(model: M): Resp[M] = {
+    wrapSecureSave(model)
+    super.preSaveOrUpdate(model)
   }
 
   /**
     * 注入操作信息
     *
-    * @param model   实体对象
-    * @param context 上下文
+    * @param model 实体对象
     */
-  private def wrapSecureSave(model: M, context: EZStorageContext = EZStorageContext()): Unit = {
+  private def wrapSecureSave(model: M): Unit = {
     val now = TimeHelper.msf.format(new Date()).toLong
-    model.create_user = context.optAccount
+    model.create_user = EZ.context.optAccCode
     model.create_time = now
-    model.create_org = context.optOrganization
-    model.update_user = context.optAccount
+    model.create_org = EZ.context.optOrgCode
+    model.update_user = EZ.context.optAccCode
     model.update_time = now
-    model.update_org = context.optOrganization
+    model.update_org = EZ.context.optOrgCode
   }
 
   /**
     * 注入操作信息
     *
-    * @param model   实体对象
-    * @param context 上下文
+    * @param model 实体对象
     */
-  private def wrapSecureUpdate(model: M, context: EZStorageContext = EZStorageContext()): Unit = {
+  private def wrapSecureUpdate(model: M): Unit = {
     val now = TimeHelper.msf.format(new Date()).toLong
-    model.update_user = context.optAccount
+    model.update_user = EZ.context.optAccCode
     model.update_time = now
-    model.update_org = context.optOrganization
+    model.update_org = EZ.context.optOrgCode
   }
 
 }

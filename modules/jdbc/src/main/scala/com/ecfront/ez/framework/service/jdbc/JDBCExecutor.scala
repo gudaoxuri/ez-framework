@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.service.jdbc
 
 import com.ecfront.common.Resp
+import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
@@ -11,10 +12,14 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
   def save[M](entityInfo: EntityInfo, valueInfo: Map[String, Any], clazz: Class[M]): Resp[M] = {
     val tableName = entityInfo.tableName
     val idFieldName = entityInfo.idFieldName
+    val uuidFieldName = entityInfo.uuidFieldName
     val richValueInfo = collection.mutable.Map[String, Any]()
     richValueInfo ++= valueInfo
     if (entityInfo.idStrategy == Id.STRATEGY_SEQ && richValueInfo.contains(idFieldName) && richValueInfo(idFieldName) == 0) {
       richValueInfo -= idFieldName
+    }
+    if (!richValueInfo.contains(uuidFieldName)) {
+      richValueInfo += uuidFieldName -> EZ.createUUID
     }
     if (entityInfo.uniqueFieldNames.nonEmpty && (entityInfo.uniqueFieldNames.toSet & richValueInfo.keys.toSet).nonEmpty) {
       val existQuery = entityInfo.uniqueFieldNames.filter(richValueInfo.contains).map {
@@ -50,7 +55,7 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
 
   private def doSave[M](tableName: String, idFieldName: String, richValueInfo: mutable.Map[String, Any], clazz: Class[M], entityInfo: EntityInfo): Resp[M] = {
     var fieldsSql = richValueInfo.keys.mkString(",")
-    var valuesSql = (for(_ <- 0 until richValueInfo.size) yield "?").mkString(",")
+    var valuesSql = (for (_ <- 0 until richValueInfo.size) yield "?").mkString(",")
     if (entityInfo.nowBySaveFieldNames.nonEmpty) {
       fieldsSql += entityInfo.nowBySaveFieldNames.mkString(",", ",", "")
       valuesSql += entityInfo.nowBySaveFieldNames.map(_ => " now() ").mkString(",", ",", "")

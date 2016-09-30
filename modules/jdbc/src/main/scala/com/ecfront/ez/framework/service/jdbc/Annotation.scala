@@ -43,6 +43,8 @@ case class NowBySave() extends StaticAnnotation
 @scala.annotation.meta.field
 case class NowByUpdate() extends StaticAnnotation
 
+@scala.annotation.meta.field
+case class UUID() extends StaticAnnotation
 
 /**
   * 主键策略，默认是uuid，可选 seq

@@ -60,7 +60,7 @@ object EZManager extends LazyLogging {
       opt.setWarningExceptionTime(perf(FLAG_PERF_WARNING_EXCEPTION_TIME).asInstanceOf[Int] * 1000000L)
     }
     val eb = new VertxEventBusProcessor()
-    EZContext.eb = eb
+    EZ.eb = eb
     Await.result(eb.init(Vertx.vertx(opt)), Duration.Inf)
   }
 
@@ -69,7 +69,7 @@ object EZManager extends LazyLogging {
     val db = args.getOrElse("db", 0).asInstanceOf[Int]
     val auth = args.getOrElse("auth", "").asInstanceOf[String]
     val cache = new RedisCacheProcessor()
-    EZContext.cache = cache
+    EZ.cache = cache
     cache.init(address, db, auth)
   }
 
@@ -83,13 +83,13 @@ object EZManager extends LazyLogging {
     try {
       val finalConfigContent =
         if (configContent == null) {
-          Source.fromFile(EZContext.Info.confPath + "ez.json", "UTF-8").mkString
+          Source.fromFile(EZ.Info.confPath + "ez.json", "UTF-8").mkString
         } else {
           configContent
         }
       val ezConfig = JsonHelper.toObject(finalConfigContent, classOf[EZConfig])
       if (ezConfig.ez.instance == null) {
-        ezConfig.ez.instance = (EZContext.Info.projectIp + EZContext.Info.projectPath).hashCode + ""
+        ezConfig.ez.instance = (EZ.Info.projectIp + EZ.Info.projectPath).hashCode + ""
       }
       if (ezConfig.ez.language == null) {
         ezConfig.ez.language = "en"
@@ -207,12 +207,12 @@ object EZManager extends LazyLogging {
     if (ezConfigR) {
       val ezConfig = ezConfigR.body
       if (initVertx(ezConfig.ez.perf.toMap) && initCache(ezConfig.ez.cache)) {
-        EZContext.Info.app = ezConfig.ez.app
-        EZContext.Info.module = ezConfig.ez.module
-        EZContext.Info.timezone = ezConfig.ez.timezone
-        EZContext.Info.instance = ezConfig.ez.instance
-        EZContext.Info.language = ezConfig.ez.language
-        EZContext.isDebug = ezConfig.ez.isDebug
+        EZ.Info.app = ezConfig.ez.app
+        EZ.Info.module = ezConfig.ez.module
+        EZ.Info.timezone = ezConfig.ez.timezone
+        EZ.Info.instance = ezConfig.ez.instance
+        EZ.Info.language = ezConfig.ez.language
+        EZ.isDebug = ezConfig.ez.isDebug
 
         ezServiceConfig = ezConfig.ez.services
         logger.info("\r\n=== Discover Services ...")

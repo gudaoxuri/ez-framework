@@ -53,11 +53,13 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     _entityInfo = EntityContainer.CONTAINER(tableName)
   }
 
-  def filterByModel(model: M, context: EZStorageContext): Resp[M] = Resp.success(model)
+  def filterByModel(model: M): Resp[M] = Resp.success(model)
 
-  def filterById(id: Any, context: EZStorageContext): Resp[(String, List[Any])] = Resp.success(null)
+  def filterById(id: Any): Resp[(String, List[Any])] = Resp.success(null)
 
-  def filterByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
+  def filterByUUID(uuid: String): Resp[(String, List[Any])] = Resp.success(null)
+
+  def filterByCond(condition: String, parameters: List[Any]): Resp[(String, List[Any])] = Resp.success((condition, parameters))
 
   /**
     * 持久化前检查
@@ -97,39 +99,36 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 保存前处理
     *
-    * @param model   实体对象
-    * @param context 上下文
+    * @param model 实体对象
     * @return 是否允许保存
     */
-  def preSave(model: M, context: EZStorageContext): Resp[M] = Resp.success(model)
+  def preSave(model: M): Resp[M] = Resp.success(model)
 
   /**
     * 保存后处理
     *
     * @param saveResult 保存后的实体对象
     * @param preResult  保存前的实体对象
-    * @param context    上下文
     * @return 处理后的实体对象
     */
-  def postSave(saveResult: M, preResult: M, context: EZStorageContext): Resp[M] = Resp.success(saveResult)
+  def postSave(saveResult: M, preResult: M): Resp[M] = Resp.success(saveResult)
 
   /**
     * 保存
     *
-    * @param model   实体对象
-    * @param context 上下文
+    * @param model 实体对象
     * @return 保存后的实体对象
     */
-  def save(model: M, context: EZStorageContext = EZStorageContext()): Resp[M] = {
-    val _model=_modelClazz.newInstance()
-    BeanHelper.copyProperties(_model,model)
-    val preR = preSave(_model, context)
+  def save(model: M): Resp[M] = {
+    val _model = _modelClazz.newInstance()
+    BeanHelper.copyProperties(_model, model)
+    val preR = preSave(_model)
     if (preR) {
-      val filterR = filterByModel(preR.body, context)
+      val filterR = filterByModel(preR.body)
       if (filterR) {
-        val doR = doSave(filterR.body, context)
+        val doR = doSave(filterR.body)
         if (doR) {
-          postSave(doR.body, filterR.body, context)
+          postSave(doR.body, filterR.body)
         } else {
           doR
         }
@@ -144,11 +143,10 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 保存实现方法
     *
-    * @param model   实体对象
-    * @param context 上下文
+    * @param model 实体对象
     * @return 保存后的实体对象
     */
-  protected def doSave(model: M, context: EZStorageContext): Resp[M] = {
+  protected def doSave(model: M): Resp[M] = {
     val requireResp = storageCheck(model, _entityInfo, isUpdate = false)
     if (requireResp) {
       JDBCExecutor.save(_entityInfo, getMapValue(model).filter(i => i._2 != null
@@ -163,40 +161,37 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 更新前处理
     *
-    * @param model   实体对象
-    * @param context 上下文
+    * @param model 实体对象
     * @return 是否允许更新
     */
-  def preUpdate(model: M, context: EZStorageContext): Resp[M] = Resp.success(model)
+  def preUpdate(model: M): Resp[M] = Resp.success(model)
 
   /**
     * 更新后处理
     *
     * @param updateResult 更新后的实体对象
     * @param preResult    更新前的实体对象
-    * @param context      上下文
     * @return 处理后的实体对象
     */
-  def postUpdate(updateResult: M, preResult: M, context: EZStorageContext): Resp[M] = Resp.success(updateResult)
+  def postUpdate(updateResult: M, preResult: M): Resp[M] = Resp.success(updateResult)
 
   /**
     * 更新
     *
-    * @param model   实体对象
-    * @param context 上下文
+    * @param model 实体对象
     * @return 更新后的实体对象
     */
-  def update(model: M, context: EZStorageContext = EZStorageContext()): Resp[M] = {
-    val _model=_modelClazz.newInstance()
-    BeanHelper.copyProperties(_model,model)
+  def update(model: M): Resp[M] = {
+    val _model = _modelClazz.newInstance()
+    BeanHelper.copyProperties(_model, model)
     _model.id = _model.id.trim
-    val preR = preUpdate(_model, context)
+    val preR = preUpdate(_model)
     if (preR) {
-      val filterR = filterByModel(preR.body, context)
+      val filterR = filterByModel(preR.body)
       if (filterR) {
-        val doR = doUpdate(filterR.body, context)
+        val doR = doUpdate(filterR.body)
         if (doR) {
-          postUpdate(doR.body, filterR.body, context)
+          postUpdate(doR.body, filterR.body)
         } else {
           doR
         }
@@ -211,11 +206,10 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 更新实现方法
     *
-    * @param model   实体对象
-    * @param context 上下文
+    * @param model 实体对象
     * @return 更新后的实体对象
     */
-  protected def doUpdate(model: M, context: EZStorageContext): Resp[M] = {
+  protected def doUpdate(model: M): Resp[M] = {
     val requireResp = storageCheck(model, _entityInfo, isUpdate = true)
     if (requireResp) {
       JDBCExecutor.update(_entityInfo, getIdValue(model),
@@ -231,42 +225,39 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 保存或更新前处理
     *
-    * @param model   实体对象
-    * @param context 上下文
+    * @param model 实体对象
     * @return 是否允许保存或更新
     */
-  def preSaveOrUpdate(model: M, context: EZStorageContext): Resp[M] = Resp.success(model)
+  def preSaveOrUpdate(model: M): Resp[M] = Resp.success(model)
 
   /**
     * 保存或更新后处理
     *
     * @param saveOrUpdateResult 保存或更新后的实体对象
     * @param preResult          保存或更新前的实体对象
-    * @param context            上下文
     * @return 处理后的实体对象
     */
-  def postSaveOrUpdate(saveOrUpdateResult: M, preResult: M, context: EZStorageContext): Resp[M] = Resp.success(saveOrUpdateResult)
+  def postSaveOrUpdate(saveOrUpdateResult: M, preResult: M): Resp[M] = Resp.success(saveOrUpdateResult)
 
   /**
     * 保存或更新
     *
-    * @param model   实体对象
-    * @param context 上下文
+    * @param model 实体对象
     * @return 保存或更新后的实体对象
     */
-  def saveOrUpdate(model: M, context: EZStorageContext = EZStorageContext()): Resp[M] = {
-    val _model=_modelClazz.newInstance()
-    BeanHelper.copyProperties(_model,model)
+  def saveOrUpdate(model: M): Resp[M] = {
+    val _model = _modelClazz.newInstance()
+    BeanHelper.copyProperties(_model, model)
     if (_model.id != null) {
       _model.id = _model.id.trim
     }
-    val preR = preSaveOrUpdate(_model, context)
+    val preR = preSaveOrUpdate(_model)
     if (preR) {
-      val filterR = filterByModel(preR.body, context)
+      val filterR = filterByModel(preR.body)
       if (filterR) {
-        val doR = doSaveOrUpdate(filterR.body, context)
+        val doR = doSaveOrUpdate(filterR.body)
         if (doR) {
-          postSaveOrUpdate(doR.body, filterR.body, context)
+          postSaveOrUpdate(doR.body, filterR.body)
         } else {
           doR
         }
@@ -281,11 +272,10 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 保存或更新实现方法
     *
-    * @param model   实体对象
-    * @param context 上下文
+    * @param model 实体对象
     * @return 保存或更新后的实体对象
     */
-  protected def doSaveOrUpdate(model: M, context: EZStorageContext): Resp[M] = {
+  protected def doSaveOrUpdate(model: M): Resp[M] = {
     val requireResp = storageCheck(model, _entityInfo, model.id != null && model.id.nonEmpty)
     if (requireResp) {
       JDBCExecutor.saveOrUpdate(_entityInfo, getIdValue(model),
@@ -304,13 +294,10 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param newValues  新值，SQL (相当于SET中的条件)或Json
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 是否允许更新
     */
   def preUpdateByCond(
-                       newValues: String, condition: String,
-                       parameters: List[Any],
-                       context: EZStorageContext): Resp[(String, String, List[Any])] =
+                       newValues: String, condition: String, parameters: List[Any]): Resp[(String, String, List[Any])] =
   Resp.success((newValues, condition, parameters))
 
   /**
@@ -319,10 +306,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param newValues  新值，SQL (相当于SET中的条件)或Json
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 是否成功
     */
-  def postUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZStorageContext): Resp[Void] = Resp.success(null)
+  def postUpdateByCond(newValues: String, condition: String, parameters: List[Any]): Resp[Void] = Resp.success(null)
 
   /**
     * 更新
@@ -330,17 +316,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param newValues  新值，SQL (相当于SET中的条件)或Json
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 是否成功
     */
-  def updateByCond(newValues: String, condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Void] = {
-    val preR = preUpdateByCond(newValues, condition, parameters, context)
+  def updateByCond(newValues: String, condition: String, parameters: List[Any] = List()): Resp[Void] = {
+    val preR = preUpdateByCond(newValues, condition, parameters)
     if (preR) {
-      val filterR = filterByCond(preR.body._2, preR.body._3, context)
+      val filterR = filterByCond(preR.body._2, preR.body._3)
       if (filterR) {
-        val doR = doUpdateByCond(preR.body._1, filterR.body._1, filterR.body._2, context)
+        val doR = doUpdateByCond(preR.body._1, filterR.body._1, filterR.body._2)
         if (doR) {
-          postUpdateByCond(preR.body._1, filterR.body._1, filterR.body._2, context)
+          postUpdateByCond(preR.body._1, filterR.body._1, filterR.body._2)
         } else {
           doR
         }
@@ -358,10 +343,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param newValues  新值，SQL (相当于SET中的条件)或Json
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 是否成功
     */
-  protected def doUpdateByCond(newValues: String, condition: String, parameters: List[Any], context: EZStorageContext): Resp[Void] = {
+  protected def doUpdateByCond(newValues: String, condition: String, parameters: List[Any]): Resp[Void] = {
     JDBCProcessor.update(
       s"UPDATE $tableName Set $newValues WHERE ${packageCondition(condition)}",
       parameters
@@ -371,40 +355,37 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 删除前处理
     *
-    * @param id      主键
-    * @param context 上下文
+    * @param id 主键
     * @return 是否允许删除
     */
-  def preDeleteById(id: Any, context: EZStorageContext): Resp[Any] = Resp.success(id)
+  def preDeleteById(id: Any): Resp[Any] = Resp.success(id)
 
   /**
     * 删除后处理
     *
-    * @param id      主键
-    * @param context 上下文
+    * @param id 主键
     * @return 是否成功
     */
-  def postDeleteById(id: Any, context: EZStorageContext): Resp[Void] = Resp.success(null)
+  def postDeleteById(id: Any): Resp[Void] = Resp.success(null)
 
   /**
     * 删除
     *
-    * @param id      主键
-    * @param context 上下文
+    * @param id 主键
     * @return 是否成功
     */
-  def deleteById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[Void] = {
+  def deleteById(id: Any): Resp[Void] = {
     if (id == null) {
       logger.warn("【id】not null")
       Resp.badRequest("【id】not null")
     } else {
-      val preR = preDeleteById(id, context)
+      val preR = preDeleteById(id)
       if (preR) {
-        val filterR = filterById(id, context)
+        val filterR = filterById(id)
         if (filterR) {
-          val doR = if (filterR.body == null) doDeleteById(preR.body, context) else doDeleteByCond(filterR.body._1, filterR.body._2, context)
+          val doR = if (filterR.body == null) doDeleteById(preR.body) else doDeleteByCond(filterR.body._1, filterR.body._2)
           if (doR) {
-            postDeleteById(preR.body, context)
+            postDeleteById(preR.body)
           } else {
             doR
           }
@@ -420,11 +401,10 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 删除实现方法
     *
-    * @param id      主键
-    * @param context 上下文
+    * @param id 主键
     * @return 是否成功
     */
-  protected def doDeleteById(id: Any, context: EZStorageContext): Resp[Void] = {
+  protected def doDeleteById(id: Any): Resp[Void] = {
     JDBCProcessor.update(
       s"DELETE FROM $tableName WHERE ${_entityInfo.idFieldName} = ? ",
       List(id)
@@ -434,14 +414,71 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 删除前处理
     *
+    * @param uuid 主键
+    * @return 是否允许删除
+    */
+  def preDeleteByUUID(uuid: String): Resp[String] = Resp.success(uuid)
+
+  /**
+    * 删除后处理
+    *
+    * @param uuid 主键
+    * @return 是否成功
+    */
+  def postDeleteByUUID(uuid: String): Resp[Void] = Resp.success(null)
+
+  /**
+    * 删除
+    *
+    * @param uuid 主键
+    * @return 是否成功
+    */
+  def deleteByUUID(uuid: String): Resp[Void] = {
+    if (uuid == null) {
+      logger.warn("【uuid】not null")
+      Resp.badRequest("【uuid】not null")
+    } else {
+      val preR = preDeleteByUUID(uuid)
+      if (preR) {
+        val filterR = filterByUUID(uuid)
+        if (filterR) {
+          val doR = if (filterR.body == null) doDeleteByUUID(preR.body) else doDeleteByCond(filterR.body._1, filterR.body._2)
+          if (doR) {
+            postDeleteByUUID(preR.body)
+          } else {
+            doR
+          }
+        } else {
+          filterR
+        }
+      } else {
+        preR
+      }
+    }
+  }
+
+  /**
+    * 删除实现方法
+    *
+    * @param uuid 主键
+    * @return 是否成功
+    */
+  protected def doDeleteByUUID(uuid: String): Resp[Void] = {
+    JDBCProcessor.update(
+      s"DELETE FROM $tableName WHERE ${_entityInfo.uuidFieldName} = ? ",
+      List(uuid)
+    )
+  }
+
+  /**
+    * 删除前处理
+    *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 是否允许删除
     */
   def preDeleteByCond(
-                       condition: String, parameters: List[Any],
-                       context: EZStorageContext): Resp[(String, List[Any])] =
+                       condition: String, parameters: List[Any]): Resp[(String, List[Any])] =
   Resp.success((condition, parameters))
 
   /**
@@ -449,31 +486,29 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 是否成功
     */
-  def postDeleteByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Void] = Resp.success(null)
+  def postDeleteByCond(condition: String, parameters: List[Any]): Resp[Void] = Resp.success(null)
 
   /**
     * 删除
     *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 是否成功
     */
-  def deleteByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Void] = {
+  def deleteByCond(condition: String, parameters: List[Any] = List()): Resp[Void] = {
     if (condition == null) {
       logger.warn("【condition】not null")
       Resp.badRequest("【condition】not null")
     } else {
-      val preR = preDeleteByCond(condition, parameters, context)
+      val preR = preDeleteByCond(condition, parameters)
       if (preR) {
-        val filterR = filterByCond(preR.body._1, preR.body._2, context)
+        val filterR = filterByCond(preR.body._1, preR.body._2)
         if (filterR) {
-          val doR = doDeleteByCond(filterR.body._1, filterR.body._2, context)
+          val doR = doDeleteByCond(filterR.body._1, filterR.body._2)
           if (doR) {
-            postDeleteByCond(filterR.body._1, filterR.body._2, context)
+            postDeleteByCond(filterR.body._1, filterR.body._2)
           } else {
             doR
           }
@@ -491,10 +526,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 是否成功
     */
-  protected def doDeleteByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Void] = {
+  protected def doDeleteByCond(condition: String, parameters: List[Any]): Resp[Void] = {
     JDBCProcessor.update(
       s"DELETE FROM $tableName WHERE ${packageCondition(condition)} ",
       parameters
@@ -504,41 +538,38 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 获取一条记录前处理
     *
-    * @param id      主键
-    * @param context 上下文
+    * @param id 主键
     * @return 是否允许获取这条记录
     */
-  def preGetById(id: Any, context: EZStorageContext): Resp[Any] = Resp.success(id)
+  def preGetById(id: Any): Resp[Any] = Resp.success(id)
 
   /**
     * 获取一条记录后处理
     *
     * @param id        主键
     * @param getResult 获取到的记录
-    * @param context   上下文
     * @return 处理后的记录
     */
-  def postGetById(id: Any, getResult: M, context: EZStorageContext): Resp[M] = Resp.success(getResult)
+  def postGetById(id: Any, getResult: M): Resp[M] = Resp.success(getResult)
 
   /**
     * 获取一条记录
     *
-    * @param id      主键
-    * @param context 上下文
+    * @param id 主键
     * @return 获取到的记录
     */
-  def getById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[M] = {
+  def getById(id: Any): Resp[M] = {
     if (id == null) {
       logger.warn("【id】not null")
       Resp.badRequest("【id】not null")
     } else {
-      val preR = preGetById(id, context)
+      val preR = preGetById(id)
       if (preR) {
-        val filterR = filterById(id, context)
+        val filterR = filterById(id)
         if (filterR) {
-          val doR = if (filterR.body == null) doGetById(preR.body, context) else doGetByCond(filterR.body._1, filterR.body._2, context)
+          val doR = if (filterR.body == null) doGetById(preR.body) else doGetByCond(filterR.body._1, filterR.body._2)
           if (doR) {
-            postGetById(preR.body, doR.body, context)
+            postGetById(preR.body, doR.body)
           } else {
             doR
           }
@@ -554,14 +585,75 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 获取一条记录实现方法
     *
-    * @param id      主键
-    * @param context 上下文
+    * @param id 主键
     * @return 获取到的记录
     */
-  protected def doGetById(id: Any, context: EZStorageContext): Resp[M] = {
+  protected def doGetById(id: Any): Resp[M] = {
     JDBCProcessor.get(
       s"SELECT * FROM $tableName WHERE ${_entityInfo.idFieldName}  = ? ",
       List(id),
+      _modelClazz
+    )
+  }
+
+
+  /**
+    * 获取一条记录前处理
+    *
+    * @param uuid 主键
+    * @return 是否允许获取这条记录
+    */
+  def preGetByUUID(uuid: String): Resp[String] = Resp.success(uuid)
+
+  /**
+    * 获取一条记录后处理
+    *
+    * @param uuid      主键
+    * @param getResult 获取到的记录
+    * @return 处理后的记录
+    */
+  def postGetByUUID(uuid: String, getResult: M): Resp[M] = Resp.success(getResult)
+
+  /**
+    * 获取一条记录
+    *
+    * @param uuid 主键
+    * @return 获取到的记录
+    */
+  def getByUUID(uuid: String): Resp[M] = {
+    if (uuid == null) {
+      logger.warn("【uuid】not null")
+      Resp.badRequest("【uuid】not null")
+    } else {
+      val preR = preGetByUUID(uuid)
+      if (preR) {
+        val filterR = filterByUUID(uuid)
+        if (filterR) {
+          val doR = if (filterR.body == null) doGetByUUID(preR.body) else doGetByCond(filterR.body._1, filterR.body._2)
+          if (doR) {
+            postGetByUUID(preR.body, doR.body)
+          } else {
+            doR
+          }
+        } else {
+          filterR
+        }
+      } else {
+        preR
+      }
+    }
+  }
+
+  /**
+    * 获取一条记录实现方法
+    *
+    * @param uuid 主键
+    * @return 获取到的记录
+    */
+  protected def doGetByUUID(uuid: String): Resp[M] = {
+    JDBCProcessor.get(
+      s"SELECT * FROM $tableName WHERE ${_entityInfo.uuidFieldName}  = ? ",
+      List(uuid),
       _modelClazz
     )
   }
@@ -571,11 +663,10 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 是否允许获取这条记录
     */
   def preGetByCond(condition: String,
-                   parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] =
+                   parameters: List[Any]): Resp[(String, List[Any])] =
   Resp.success((condition, parameters))
 
   /**
@@ -584,31 +675,29 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
     * @param getResult  获取到的记录
-    * @param context    上下文
     * @return 处理后的记录
     */
-  def postGetByCond(condition: String, parameters: List[Any], getResult: M, context: EZStorageContext): Resp[M] = Resp.success(getResult)
+  def postGetByCond(condition: String, parameters: List[Any], getResult: M): Resp[M] = Resp.success(getResult)
 
   /**
     * 获取一条记录
     *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 获取到的记录
     */
-  def getByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[M] = {
+  def getByCond(condition: String, parameters: List[Any] = List()): Resp[M] = {
     if (condition == null) {
       logger.warn("【condition】not null")
       Resp.badRequest("【condition】not null")
     } else {
-      val preR = preGetByCond(condition, parameters, context)
+      val preR = preGetByCond(condition, parameters)
       if (preR) {
-        val filterR = filterByCond(preR.body._1, preR.body._2, context)
+        val filterR = filterByCond(preR.body._1, preR.body._2)
         if (filterR) {
-          val doR = doGetByCond(filterR.body._1, filterR.body._2, context)
+          val doR = doGetByCond(filterR.body._1, filterR.body._2)
           if (doR) {
-            postGetByCond(filterR.body._1, filterR.body._2, doR.body, context)
+            postGetByCond(filterR.body._1, filterR.body._2, doR.body)
           } else {
             doR
           }
@@ -626,10 +715,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 获取到的记录
     */
-  protected def doGetByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[M] = {
+  protected def doGetByCond(condition: String, parameters: List[Any]): Resp[M] = {
     JDBCProcessor.get(
       s"SELECT * FROM $tableName WHERE ${packageCondition(condition)} ",
       parameters,
@@ -640,41 +728,38 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 判断是否存在前处理
     *
-    * @param id      主键
-    * @param context 上下文
+    * @param id 主键
     * @return 是否允许判断是否存在
     */
-  def preExistById(id: Any, context: EZStorageContext): Resp[Any] = Resp.success(id)
+  def preExistById(id: Any): Resp[Any] = Resp.success(id)
 
   /**
     * 判断是否存在后处理
     *
     * @param id          主键
     * @param existResult 是否存在
-    * @param context     上下文
     * @return 处理后的结果
     */
-  def postExistById(id: Any, existResult: Boolean, context: EZStorageContext): Resp[Boolean] = Resp.success(existResult)
+  def postExistById(id: Any, existResult: Boolean): Resp[Boolean] = Resp.success(existResult)
 
   /**
     * 判断是否存在
     *
-    * @param id      主键
-    * @param context 上下文
+    * @param id 主键
     * @return 是否存在
     */
-  def existById(id: Any, context: EZStorageContext = EZStorageContext()): Resp[Boolean] = {
+  def existById(id: Any): Resp[Boolean] = {
     if (id == null) {
       logger.warn("【id】not null")
       Resp.badRequest("【id】not null")
     } else {
-      val preR = preExistById(id, context)
+      val preR = preExistById(id)
       if (preR) {
-        val filterR = filterById(id, context)
+        val filterR = filterById(id)
         if (filterR) {
-          val doR = if (filterR.body == null) doExistById(preR.body, context) else doExistByCond(filterR.body._1, filterR.body._2, context)
+          val doR = if (filterR.body == null) doExistById(preR.body) else doExistByCond(filterR.body._1, filterR.body._2)
           if (doR) {
-            postExistById(preR.body, doR.body, context)
+            postExistById(preR.body, doR.body)
           } else {
             doR
           }
@@ -690,11 +775,10 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 判断是否存在实现方法
     *
-    * @param id      主键
-    * @param context 上下文
+    * @param id 主键
     * @return 是否存在
     */
-  protected def doExistById(id: Any, context: EZStorageContext): Resp[Boolean] = {
+  protected def doExistById(id: Any): Resp[Boolean] = {
     JDBCProcessor.exist(
       s"SELECT 1 FROM $tableName WHERE ${_entityInfo.idFieldName}  = ? ",
       List(id)
@@ -704,13 +788,71 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 判断是否存在前处理
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
+    * @param uuid 主键
     * @return 是否允许判断是否存在
     */
-  def preExistByCond(condition: String, parameters: List[Any],
-                     context: EZStorageContext): Resp[(String, List[Any])] =
+  def preExistByUUID(uuid: String): Resp[String] = Resp.success(uuid)
+
+  /**
+    * 判断是否存在后处理
+    *
+    * @param uuid        主键
+    * @param existResult 是否存在
+    * @return 处理后的结果
+    */
+  def postExistByUUID(uuid: String, existResult: Boolean): Resp[Boolean] = Resp.success(existResult)
+
+  /**
+    * 判断是否存在
+    *
+    * @param uuid 主键
+    * @return 是否存在
+    */
+  def existByUUID(uuid: String): Resp[Boolean] = {
+    if (uuid == null) {
+      logger.warn("【uuid】not null")
+      Resp.badRequest("【uuid】not null")
+    } else {
+      val preR = preExistByUUID(uuid)
+      if (preR) {
+        val filterR = filterByUUID(uuid)
+        if (filterR) {
+          val doR = if (filterR.body == null) doExistByUUID(preR.body) else doExistByCond(filterR.body._1, filterR.body._2)
+          if (doR) {
+            postExistByUUID(preR.body, doR.body)
+          } else {
+            doR
+          }
+        } else {
+          filterR
+        }
+      } else {
+        preR
+      }
+    }
+  }
+
+  /**
+    * 判断是否存在实现方法
+    *
+    * @param uuid 主键
+    * @return 是否存在
+    */
+  protected def doExistByUUID(uuid: String): Resp[Boolean] = {
+    JDBCProcessor.exist(
+      s"SELECT 1 FROM $tableName WHERE ${_entityInfo.uuidFieldName}  = ? ",
+      List(uuid)
+    )
+  }
+
+  /**
+    * 判断是否存在前处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)或Json
+    * @param parameters 参数 ，Mongo不需要
+    * @return 是否允许判断是否存在
+    */
+  def preExistByCond(condition: String, parameters: List[Any]): Resp[(String, List[Any])] =
   Resp.success((condition, parameters))
 
   /**
@@ -719,11 +861,10 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param condition   条件，SQL (相当于Where中的条件)或Json
     * @param parameters  参数 ，Mongo不需要
     * @param existResult 是否存在
-    * @param context     上下文
     * @return 处理后的结果
     */
   def postExistByCond(condition: String, parameters: List[Any],
-                      existResult: Boolean, context: EZStorageContext): Resp[Boolean] =
+                      existResult: Boolean): Resp[Boolean] =
   Resp.success(existResult)
 
   /**
@@ -731,21 +872,20 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 是否存在
     */
-  def existByCond(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Boolean] = {
+  def existByCond(condition: String, parameters: List[Any] = List()): Resp[Boolean] = {
     if (condition == null) {
       logger.warn("【condition】not null")
       Resp.badRequest("【condition】not null")
     } else {
-      val preR = preExistByCond(condition, parameters, context)
+      val preR = preExistByCond(condition, parameters)
       if (preR) {
-        val filterR = filterByCond(preR.body._1, preR.body._2, context)
+        val filterR = filterByCond(preR.body._1, preR.body._2)
         if (filterR) {
-          val doR = doExistByCond(filterR.body._1, filterR.body._2, context)
+          val doR = doExistByCond(filterR.body._1, filterR.body._2)
           if (doR) {
-            postExistByCond(filterR.body._1, filterR.body._2, doR.body, context)
+            postExistByCond(filterR.body._1, filterR.body._2, doR.body)
           } else {
             doR
           }
@@ -763,10 +903,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 是否存在
     */
-  protected def doExistByCond(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Boolean] = {
+  protected def doExistByCond(condition: String, parameters: List[Any]): Resp[Boolean] = {
     JDBCProcessor.exist(
       s"SELECT 1 FROM $tableName WHERE ${packageCondition(condition)} ",
       parameters
@@ -778,10 +917,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 是否允许查找
     */
-  def preFind(condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
+  def preFind(condition: String, parameters: List[Any]): Resp[(String, List[Any])] = Resp.success((condition, parameters))
 
   /**
     * 查找后处理
@@ -789,27 +927,25 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
     * @param findResult 是否存在
-    * @param context    上下文
     * @return 处理后的结果
     */
-  def postFind(condition: String, parameters: List[Any], findResult: List[M], context: EZStorageContext): Resp[List[M]] = Resp.success(findResult)
+  def postFind(condition: String, parameters: List[Any], findResult: List[M]): Resp[List[M]] = Resp.success(findResult)
 
   /**
     * 查找
     *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 查找结果
     */
-  def find(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[List[M]] = {
-    val preR = preFind(condition, parameters, context)
+  def find(condition: String, parameters: List[Any] = List()): Resp[List[M]] = {
+    val preR = preFind(condition, parameters)
     if (preR) {
-      val filterR = filterByCond(preR.body._1, preR.body._2, context)
+      val filterR = filterByCond(preR.body._1, preR.body._2)
       if (filterR) {
-        val doR = doFind(filterR.body._1, filterR.body._2, context)
+        val doR = doFind(filterR.body._1, filterR.body._2)
         if (doR) {
-          postFind(filterR.body._1, filterR.body._2, doR.body, context)
+          postFind(filterR.body._1, filterR.body._2, doR.body)
         } else {
           doR
         }
@@ -826,10 +962,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 查找结果
     */
-  protected def doFind(condition: String, parameters: List[Any], context: EZStorageContext): Resp[List[M]] = {
+  protected def doFind(condition: String, parameters: List[Any]): Resp[List[M]] = {
     JDBCProcessor.find(
       s"SELECT * FROM $tableName WHERE ${packageCondition(condition)} ",
       parameters,
@@ -844,11 +979,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param parameters 参数 ，Mongo不需要
     * @param pageNumber 当前页，从1开始
     * @param pageSize   每页条数
-    * @param context    上下文
     * @return 是否允许分页
     */
-  def prePage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int,
-              context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
+  def prePage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int): Resp[(String, List[Any])] = Resp.success((condition, parameters))
 
   /**
     * 分页后处理
@@ -858,11 +991,10 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param pageNumber 当前页，从1开始
     * @param pageSize   每页条数
     * @param pageResult 是否存在
-    * @param context    上下文
     * @return 处理后的结果
     */
   def postPage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int,
-               pageResult: Page[M], context: EZStorageContext): Resp[Page[M]] = Resp.success(pageResult)
+               pageResult: Page[M]): Resp[Page[M]] = Resp.success(pageResult)
 
   /**
     * 分页
@@ -871,18 +1003,17 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param parameters 参数 ，Mongo不需要
     * @param pageNumber 当前页，从1开始
     * @param pageSize   每页条数
-    * @param context    上下文
     * @return 分页结果
     */
   def page(condition: String, parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10,
-           context: EZStorageContext = EZStorageContext()): Resp[Page[M]] = {
-    val preR = prePage(condition, parameters, pageNumber, pageSize, context)
+           context: EZStorageContext): Resp[Page[M]] = {
+    val preR = prePage(condition, parameters, pageNumber, pageSize)
     if (preR) {
-      val filterR = filterByCond(preR.body._1, preR.body._2, context)
+      val filterR = filterByCond(preR.body._1, preR.body._2)
       if (filterR) {
-        val doR = doPage(filterR.body._1, filterR.body._2, pageNumber, pageSize, context)
+        val doR = doPage(filterR.body._1, filterR.body._2, pageNumber, pageSize)
         if (doR) {
-          postPage(filterR.body._1, filterR.body._2, pageNumber, pageSize, doR.body, context)
+          postPage(filterR.body._1, filterR.body._2, pageNumber, pageSize, doR.body)
         } else {
           doR
         }
@@ -901,10 +1032,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param parameters 参数 ，Mongo不需要
     * @param pageNumber 当前页，从1开始
     * @param pageSize   每页条数
-    * @param context    上下文
     * @return 分页结果
     */
-  protected def doPage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int, context: EZStorageContext): Resp[Page[M]] = {
+  protected def doPage(condition: String, parameters: List[Any], pageNumber: Long, pageSize: Int): Resp[Page[M]] = {
     JDBCProcessor.page(
       s"SELECT * FROM $tableName WHERE ${packageCondition(condition)} ",
       parameters,
@@ -918,10 +1048,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 是否允许计数
     */
-  def preCount(condition: String, parameters: List[Any], context: EZStorageContext): Resp[(String, List[Any])] = Resp.success((condition, parameters))
+  def preCount(condition: String, parameters: List[Any]): Resp[(String, List[Any])] = Resp.success((condition, parameters))
 
   /**
     * 计数后处理
@@ -929,27 +1058,25 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param condition   条件，SQL (相当于Where中的条件)或Json
     * @param parameters  参数 ，Mongo不需要
     * @param countResult 是否存在
-    * @param context     上下文
     * @return 处理后的结果
     */
-  def postCount(condition: String, parameters: List[Any], countResult: Long, context: EZStorageContext): Resp[Long] = Resp.success(countResult)
+  def postCount(condition: String, parameters: List[Any], countResult: Long): Resp[Long] = Resp.success(countResult)
 
   /**
     * 计数
     *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 条数
     */
-  def count(condition: String, parameters: List[Any] = List(), context: EZStorageContext = EZStorageContext()): Resp[Long] = {
-    val preR = preCount(condition, parameters, context)
+  def count(condition: String, parameters: List[Any] = List()): Resp[Long] = {
+    val preR = preCount(condition, parameters)
     if (preR) {
-      val filterR = filterByCond(preR.body._1, preR.body._2, context)
+      val filterR = filterByCond(preR.body._1, preR.body._2)
       if (filterR) {
-        val doR = doCount(filterR.body._1, filterR.body._2, context)
+        val doR = doCount(filterR.body._1, filterR.body._2)
         if (doR) {
-          postCount(filterR.body._1, filterR.body._2, doR.body, context)
+          postCount(filterR.body._1, filterR.body._2, doR.body)
         } else {
           doR
         }
@@ -966,10 +1093,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     *
     * @param condition  条件，SQL (相当于Where中的条件)或Json
     * @param parameters 参数 ，Mongo不需要
-    * @param context    上下文
     * @return 条数
     */
-  protected def doCount(condition: String, parameters: List[Any], context: EZStorageContext): Resp[Long] = {
+  protected def doCount(condition: String, parameters: List[Any]): Resp[Long] = {
     JDBCProcessor.count(
       s"SELECT 1 FROM $tableName WHERE ${packageCondition(condition)} ",
       parameters
@@ -999,6 +1125,10 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     }
   }
 
+  protected def getUUIDValue(model: BaseModel): String = {
+    getValueByField(model, _entityInfo.uuidFieldName).asInstanceOf[String]
+  }
+
   protected def getValueByField(model: AnyRef, fieldName: String): Any = {
     BeanHelper.getValue(model, fieldName).orNull
   }
@@ -1008,4 +1138,3 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   }
 
 }
-
