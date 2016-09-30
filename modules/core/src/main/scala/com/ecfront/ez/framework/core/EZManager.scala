@@ -4,6 +4,7 @@ import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.cache.RedisCacheProcessor
 import com.ecfront.ez.framework.core.eventbus.VertxEventBusProcessor
 import com.ecfront.ez.framework.core.i18n.I18NProcessor
+import com.ecfront.ez.framework.core.rpc.AutoBuildingProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.{Vertx, VertxOptions}
 
@@ -71,6 +72,11 @@ object EZManager extends LazyLogging {
     val cache = new RedisCacheProcessor()
     EZ.cache = cache
     cache.init(address, db, auth)
+  }
+
+  private def initRPC(args: Map[String, Any]): Resp[Void] = {
+    AutoBuildingProcessor.autoBuilding(args("package").asInstanceOf[String])
+    Resp.success(null)
   }
 
   /**
@@ -206,14 +212,13 @@ object EZManager extends LazyLogging {
     val ezConfigR = startInParseConfig(configContent)
     if (ezConfigR) {
       val ezConfig = ezConfigR.body
-      if (initVertx(ezConfig.ez.perf.toMap) && initCache(ezConfig.ez.cache)) {
+      if (initVertx(ezConfig.ez.perf.toMap) && initCache(ezConfig.ez.cache) && initRPC(ezConfig.ez.rpc)) {
         EZ.Info.app = ezConfig.ez.app
         EZ.Info.module = ezConfig.ez.module
         EZ.Info.timezone = ezConfig.ez.timezone
         EZ.Info.instance = ezConfig.ez.instance
         EZ.Info.language = ezConfig.ez.language
         EZ.isDebug = ezConfig.ez.isDebug
-
         ezServiceConfig = ezConfig.ez.services
         logger.info("\r\n=== Discover Services ...")
         val ezServicesR = startInDiscoverServices()

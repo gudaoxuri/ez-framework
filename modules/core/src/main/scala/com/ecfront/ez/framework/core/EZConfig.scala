@@ -20,6 +20,8 @@ private[core] case class EZInfo(
                    var instance: String,
                    // 缓存服务地址
                    cache: Map[String, Any],
+                   // RPC信息
+                   rpc: Map[String, Any],
                    // 时区
                    timezone: String,
                    // 语言

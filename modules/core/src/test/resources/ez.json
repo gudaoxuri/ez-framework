@@ -6,6 +6,9 @@
     "cache": {
       "address": "127.0.0.1:6379"
     },
+    "rpc":{
+      "package":"com.ecfront.ez"
+    },
     "timezone": "Asia/Shanghai",
     "perf": {
       "eventLoopPoolSize": 2,
