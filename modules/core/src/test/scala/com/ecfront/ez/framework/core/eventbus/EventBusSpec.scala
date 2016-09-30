@@ -2,27 +2,26 @@ package com.ecfront.ez.framework.core.eventbus
 
 import java.util.concurrent.CountDownLatch
 
-import com.ecfront.ez.framework.core.redis.RedisProcessor
+import com.ecfront.ez.framework.core.EZContext
 import com.ecfront.ez.framework.core.test.MockStartupSpec
 
 import scala.beans.BeanProperty
 
-
-class EventBusProcessorSpec extends MockStartupSpec {
+class EventBusSpec extends MockStartupSpec {
 
   test("EventBus测试") {
     // pub-sub
     var counter = new CountDownLatch(3)
-    EventBusProcessor.subscribe[String]("a") {
+    EZContext.eb.subscribe[String]("a") {
       message =>
         counter.countDown()
         logger.info(">>>>>>>>>>>>>>>>>>>> sub")
         assert(message == "abc")
     }
-    EventBusProcessor.publish("a", "abc")
+    EZContext.eb.publish("a", "abc")
     new Thread(new Runnable {
       override def run(): Unit = {
-        EventBusProcessor.subscribe[TestObj]("aa") {
+        EZContext.eb.subscribe[TestObj]("aa") {
           message =>
             counter.countDown()
             logger.info(">>>>>>>>>>>>>>>>>>>> sub")
@@ -32,7 +31,7 @@ class EventBusProcessorSpec extends MockStartupSpec {
     }).start()
     new Thread(new Runnable {
       override def run(): Unit = {
-        EventBusProcessor.subscribe[TestObj]("aa") {
+        EZContext.eb.subscribe[TestObj]("aa") {
           message =>
             counter.countDown()
             logger.info(">>>>>>>>>>>>>>>>>>>> sub")
@@ -40,24 +39,24 @@ class EventBusProcessorSpec extends MockStartupSpec {
         }
       }
     }).start()
-    EventBusProcessor.publish("aa", TestObj("字段1", 0.1))
+    EZContext.eb.publish("aa", TestObj("字段1", 0.1))
     counter.await()
 
     // req-resp
     counter = new CountDownLatch(3)
-    EventBusProcessor.response[String]("b") {
+    EZContext.eb.response[String]("b") {
       message =>
         assert(message == "456")
         counter.countDown()
     }
-    EventBusProcessor.request("b", "456")
-    EventBusProcessor.request("bb", TestObj("字段1", 0.1))
-    EventBusProcessor.request("bb", TestObj("字段1", 0.2))
-    var executingMessages = RedisProcessor.hgetAll("ez:eb:executing:bb")
+    EZContext.eb.request("b", "456")
+    EZContext.eb.request("bb", TestObj("字段1", 0.1))
+    EZContext.eb.request("bb", TestObj("字段1", 0.2))
+    var executingMessages = EZContext.cache.hgetAll("ez:eb:executing:bb")
     assert(executingMessages.size == 2 && executingMessages.head._2 == """{"f1":"字段1","f2":0.1}""")
     new Thread(new Runnable {
       override def run(): Unit = {
-        EventBusProcessor.response[TestObj]("bb") {
+        EZContext.eb.response[TestObj]("bb") {
           message =>
             logger.info(">>>>>>>>>>>>>>>>>>>> resp")
             assert(message.f1 == "字段1")
@@ -67,7 +66,7 @@ class EventBusProcessorSpec extends MockStartupSpec {
     }).start()
     new Thread(new Runnable {
       override def run(): Unit = {
-        EventBusProcessor.response[TestObj]("bb") {
+        EZContext.eb.response[TestObj]("bb") {
           message =>
             logger.info(">>>>>>>>>>>>>>>>>>>> resp")
             assert(message.f1 == "字段1")
@@ -76,13 +75,13 @@ class EventBusProcessorSpec extends MockStartupSpec {
       }
     }).start()
     counter.await()
-    executingMessages = RedisProcessor.hgetAll("ez:eb:executing:bb")
+    executingMessages = EZContext.cache.hgetAll("ez:eb:executing:bb")
     assert(executingMessages.isEmpty)
 
     // ack
     new Thread(new Runnable {
       override def run(): Unit = {
-        EventBusProcessor.reply[String]("test") {
+        EZContext.eb.reply[String]("test") {
           message =>
             message
         }
@@ -91,14 +90,14 @@ class EventBusProcessorSpec extends MockStartupSpec {
     new Thread(new Runnable {
       override def run(): Unit = {
         while (true) {
-          assert(EventBusProcessor.ack[String]("test", "a") == "a")
+          assert(EZContext.eb.ack[String]("test", "a") == "a")
         }
       }
     }).start()
     new Thread(new Runnable {
       override def run(): Unit = {
         while (true) {
-          assert(EventBusProcessor.ack[String]("test", "b") == "b")
+          assert(EZContext.eb.ack[String]("test", "b") == "b")
         }
       }
     }).start()

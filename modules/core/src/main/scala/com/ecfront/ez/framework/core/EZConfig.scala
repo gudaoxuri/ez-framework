@@ -8,10 +8,10 @@ import com.fasterxml.jackson.databind.JsonNode
   * @param ez   EZ服务配置项
   * @param args APP级配置参数
   */
-case class EZConfig(ez: EZInfo, args: JsonNode)
+private[core] case class EZConfig(ez: EZInfo, args: JsonNode)
 
 // EZ服务配置项
-case class EZInfo(
+private[core] case class EZInfo(
                    // APP名称
                    app: String,
                    // 模块名称

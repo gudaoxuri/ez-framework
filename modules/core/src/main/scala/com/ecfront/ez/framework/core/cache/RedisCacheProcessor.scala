@@ -1,7 +1,6 @@
-package com.ecfront.ez.framework.core.redis
+package com.ecfront.ez.framework.core.cache
 
 import com.ecfront.common.Resp
-import com.typesafe.scalalogging.slf4j.LazyLogging
 import redis.clients.jedis._
 
 import scala.collection.JavaConversions._
@@ -9,7 +8,7 @@ import scala.collection.JavaConversions._
 /**
   * Redis处理类
   */
-object RedisProcessor extends LazyLogging {
+class RedisCacheProcessor extends CacheProcessor[JedisCommands] {
 
   private var redisCluster: JedisCluster = _
   private var redisPool: JedisPool = _
@@ -58,7 +57,7 @@ object RedisProcessor extends LazyLogging {
     *
     * @return redis client
     */
-  def client(): JedisCommands = {
+  override def client(): JedisCommands = {
     if (redisPool != null) {
       redisPool.getResource
     } else {
@@ -73,7 +72,7 @@ object RedisProcessor extends LazyLogging {
     * @param key key
     * @return 是否存在
     */
-  def exists(key: String): Boolean = {
+  override def exists(key: String): Boolean = {
     execute[Boolean](client(), {
       _.exists(key)
     }, "exists")
@@ -85,7 +84,7 @@ object RedisProcessor extends LazyLogging {
     * @param key key
     * @return 值
     */
-  def get(key: String): String = {
+  override def get(key: String): String = {
     execute[String](client(), {
       _.get(key)
     }, "get")
@@ -98,7 +97,7 @@ object RedisProcessor extends LazyLogging {
     * @param value  value
     * @param expire 过期时间(seconds)，0表示永不过期
     */
-  def set(key: String, value: String, expire: Int = 0): Unit = {
+  override def set(key: String, value: String, expire: Int = 0): Unit = {
     execute[Unit](client(), {
       client =>
         client.set(key, value)
@@ -113,7 +112,7 @@ object RedisProcessor extends LazyLogging {
     *
     * @param key key
     */
-  def del(key: String): Unit = {
+  override def del(key: String): Unit = {
     execute[Unit](client(), {
       _.del(key)
     }, "del")
@@ -126,7 +125,7 @@ object RedisProcessor extends LazyLogging {
     * @param values values
     * @param expire 过期时间(seconds)，0表示永不过期
     */
-  def lmset(key: String, values: List[String], expire: Int = 0): Unit = {
+  override def lmset(key: String, values: List[String], expire: Int = 0): Unit = {
     execute[Unit](client(), {
       client =>
         if (values.nonEmpty) {
@@ -144,7 +143,7 @@ object RedisProcessor extends LazyLogging {
     * @param key   key
     * @param value value
     */
-  def lpush(key: String, value: String): Unit = {
+  override def lpush(key: String, value: String): Unit = {
     execute[Unit](client(), {
       _.lpush(key, value)
     }, "lpush")
@@ -157,7 +156,7 @@ object RedisProcessor extends LazyLogging {
     * @param value value
     * @param index 索引
     */
-  def lset(key: String, value: String, index: Long): Unit = {
+  override def lset(key: String, value: String, index: Long): Unit = {
     execute[Unit](client(), {
       _.lset(key, index, value)
     }, "lset")
@@ -170,7 +169,7 @@ object RedisProcessor extends LazyLogging {
     * @param key key
     * @return 栈顶的列表值
     */
-  def lpop(key: String): String = {
+  override def lpop(key: String): String = {
     execute[String](client(), {
       _.lpop(key)
     }, "lpop")
@@ -184,7 +183,7 @@ object RedisProcessor extends LazyLogging {
     * @param index 索引
     * @return 索引对应的值
     */
-  def lindex(key: String, index: Int): String = {
+  override def lindex(key: String, index: Int): String = {
     execute[String](client(), {
       _.lindex(key, index)
     }, "lindex")
@@ -196,7 +195,7 @@ object RedisProcessor extends LazyLogging {
     * @param key key
     * @return 长度
     */
-  def llen(key: String): Long = {
+  override def llen(key: String): Long = {
     execute[Long](client(), {
       _.llen(key)
     }, "llen")
@@ -208,7 +207,7 @@ object RedisProcessor extends LazyLogging {
     * @param key key
     * @return 值列表
     */
-  def lget(key: String): List[String] = {
+  override def lget(key: String): List[String] = {
     execute[List[String]](client(), {
       client =>
         client.lrange(key, 0, client.llen(key)).toList
@@ -222,7 +221,7 @@ object RedisProcessor extends LazyLogging {
     * @param values values
     * @param expire 过期时间(seconds)，0表示永不过期
     */
-  def hmset(key: String, values: Map[String, String], expire: Int = 0): Unit = {
+  override def hmset(key: String, values: Map[String, String], expire: Int = 0): Unit = {
     execute[Unit](client(), {
       client =>
         client.hmset(key, values)
@@ -239,7 +238,7 @@ object RedisProcessor extends LazyLogging {
     * @param field field
     * @param value value
     */
-  def hset(key: String, field: String, value: String): Unit = {
+  override def hset(key: String, field: String, value: String): Unit = {
     execute[Unit](client(), {
       _.hset(key, field, value)
     }, "hset")
@@ -252,7 +251,7 @@ object RedisProcessor extends LazyLogging {
     * @param field field
     * @return field对应的值
     */
-  def hget(key: String, field: String): String = {
+  override def hget(key: String, field: String): String = {
     execute[String](client(), {
       _.hget(key, field)
     }, "hget")
@@ -265,7 +264,7 @@ object RedisProcessor extends LazyLogging {
     * @param field field
     * @return 是否存在
     */
-  def hexists(key: String, field: String): Boolean = {
+  override def hexists(key: String, field: String): Boolean = {
     execute[Boolean](client(), {
       _.hexists(key, field)
     }, "hexists")
@@ -277,7 +276,7 @@ object RedisProcessor extends LazyLogging {
     * @param key key
     * @return 所有值
     */
-  def hgetAll(key: String): Map[String, String] = {
+  override def hgetAll(key: String): Map[String, String] = {
     execute[Map[String, String]](client(), {
       _.hgetAll(key).toMap
     }, "hgetAll")
@@ -289,7 +288,7 @@ object RedisProcessor extends LazyLogging {
     * @param key   key
     * @param field field
     */
-  def hdel(key: String, field: String): Unit = {
+  override def hdel(key: String, field: String): Unit = {
     execute[Unit](client(), {
       _.hdel(key, field)
     }, "hdel")
@@ -302,7 +301,7 @@ object RedisProcessor extends LazyLogging {
     * @param incrValue 要增加的值，必须是Long Int Float 或 Double
     * @return 操作后的值
     */
-  def incr(key: String, incrValue: Long = 1): Long = {
+  override def incr(key: String, incrValue: Long = 1): Long = {
     execute[Long](client(), {
       _.incrBy(key, incrValue)
     }, "incr")
@@ -315,19 +314,19 @@ object RedisProcessor extends LazyLogging {
     * @param decrValue 要减少的值，必须是Long  或 Int
     * @return 操作后的值
     */
-  def decr(key: String, decrValue: Long = 1): Long = {
+  override def decr(key: String, decrValue: Long = 1): Long = {
     execute[Long](client(), {
       _.decrBy(key, decrValue)
     }, "decr")
   }
 
-  def expire(key: String, expire: Int = 0): Unit = {
+  override def expire(key: String, expire: Int = 0): Unit = {
     execute[Unit](client(), {
       _.expire(key, expire)
     }, "expire")
   }
 
-  def flushdb(): Unit = {
+  override def flushdb(): Unit = {
     execute[Unit](client(), {
       client =>
         if (redisPool != null) {

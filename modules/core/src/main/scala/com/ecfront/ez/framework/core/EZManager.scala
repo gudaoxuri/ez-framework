@@ -1,9 +1,9 @@
 package com.ecfront.ez.framework.core
 
 import com.ecfront.common.{JsonHelper, Resp}
-import com.ecfront.ez.framework.core.eventbus.EventBusProcessor
+import com.ecfront.ez.framework.core.cache.RedisCacheProcessor
+import com.ecfront.ez.framework.core.eventbus.VertxEventBusProcessor
 import com.ecfront.ez.framework.core.i18n.I18NProcessor
-import com.ecfront.ez.framework.core.redis.RedisProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.{Vertx, VertxOptions}
 
@@ -59,14 +59,18 @@ object EZManager extends LazyLogging {
     if (perf.contains(FLAG_PERF_WARNING_EXCEPTION_TIME)) {
       opt.setWarningExceptionTime(perf(FLAG_PERF_WARNING_EXCEPTION_TIME).asInstanceOf[Int] * 1000000L)
     }
-    Await.result(EventBusProcessor.init(Vertx.vertx(opt)), Duration.Inf)
+    val eb = new VertxEventBusProcessor()
+    EZContext.eb = eb
+    Await.result(eb.init(Vertx.vertx(opt)), Duration.Inf)
   }
 
-  private def initCache(cache: Map[String, Any]): Resp[Void] = {
-    val address = cache("address").asInstanceOf[String].split(";")
-    val db = cache.getOrElse("db", 0).asInstanceOf[Int]
-    val auth = cache.getOrElse("auth", "").asInstanceOf[String]
-    RedisProcessor.init(address, db, auth)
+  private def initCache(args: Map[String, Any]): Resp[Void] = {
+    val address = args("address").asInstanceOf[String].split(";")
+    val db = args.getOrElse("db", 0).asInstanceOf[Int]
+    val auth = args.getOrElse("auth", "").asInstanceOf[String]
+    val cache = new RedisCacheProcessor()
+    EZContext.cache = cache
+    cache.init(address, db, auth)
   }
 
   /**
@@ -75,17 +79,17 @@ object EZManager extends LazyLogging {
     * @param configContent 使用自定义配置内容（json格式）
     * @return 服务配置
     */
-  private[ez] def startInParseConfig(configContent: String = null): Resp[EZConfig] = {
+  private def startInParseConfig(configContent: String = null): Resp[EZConfig] = {
     try {
       val finalConfigContent =
         if (configContent == null) {
-          Source.fromFile(EZContext.confPath + "ez.json", "UTF-8").mkString
+          Source.fromFile(EZContext.Info.confPath + "ez.json", "UTF-8").mkString
         } else {
           configContent
         }
       val ezConfig = JsonHelper.toObject(finalConfigContent, classOf[EZConfig])
       if (ezConfig.ez.instance == null) {
-        ezConfig.ez.instance = (EZContext.projectIp + EZContext.projectPath).hashCode + ""
+        ezConfig.ez.instance = (EZContext.Info.projectIp + EZContext.Info.projectPath).hashCode + ""
       }
       if (ezConfig.ez.language == null) {
         ezConfig.ez.language = "en"
@@ -203,11 +207,11 @@ object EZManager extends LazyLogging {
     if (ezConfigR) {
       val ezConfig = ezConfigR.body
       if (initVertx(ezConfig.ez.perf.toMap) && initCache(ezConfig.ez.cache)) {
-        EZContext.app = ezConfig.ez.app
-        EZContext.module = ezConfig.ez.module
-        EZContext.timezone = ezConfig.ez.timezone
-        EZContext.instance = ezConfig.ez.instance
-        EZContext.language = ezConfig.ez.language
+        EZContext.Info.app = ezConfig.ez.app
+        EZContext.Info.module = ezConfig.ez.module
+        EZContext.Info.timezone = ezConfig.ez.timezone
+        EZContext.Info.instance = ezConfig.ez.instance
+        EZContext.Info.language = ezConfig.ez.language
         EZContext.isDebug = ezConfig.ez.isDebug
 
         ezServiceConfig = ezConfig.ez.services
