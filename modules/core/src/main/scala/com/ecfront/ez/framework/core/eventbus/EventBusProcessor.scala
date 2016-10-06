@@ -10,10 +10,10 @@ trait EventBusProcessor extends LazyLogging {
 
   def ack[E: Manifest](address: String, message: Any, args: Map[String, String] = Map(), timeout: Long = 30 * 1000): E
 
-  def subscribe[E: Manifest](address: String)(receivedFun: (E, Map[String, String]) => Unit): Unit
+  def subscribe[E: Manifest](address: String, reqClazz: Class[E] = null)(receivedFun: (E, Map[String, String]) => Unit): Unit
 
-  def response[E: Manifest](address: String)(receivedFun: (E, Map[String, String]) => Unit): Unit
+  def response[E: Manifest](address: String, reqClazz: Class[E] = null)(receivedFun: (E, Map[String, String]) => Unit): Unit
 
-  def reply[E: Manifest](address: String)(receivedFun: (E, Map[String, String]) => Any): Unit
+  def reply[E: Manifest](address: String, reqClazz: Class[E] = null)(receivedFun: (E, Map[String, String]) => Any): Unit
 
 }

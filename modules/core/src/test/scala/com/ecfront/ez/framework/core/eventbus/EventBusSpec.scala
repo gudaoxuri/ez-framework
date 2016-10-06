@@ -13,7 +13,7 @@ class EventBusSpec extends MockStartupSpec {
     // pub-sub
     var counter = new CountDownLatch(3)
     EZ.eb.subscribe[String]("a") {
-      message =>
+      (message,_) =>
         counter.countDown()
         logger.info(">>>>>>>>>>>>>>>>>>>> sub")
         assert(message == "abc")
@@ -22,7 +22,7 @@ class EventBusSpec extends MockStartupSpec {
     new Thread(new Runnable {
       override def run(): Unit = {
         EZ.eb.subscribe[TestObj]("aa") {
-          message =>
+          (message,_) =>
             counter.countDown()
             logger.info(">>>>>>>>>>>>>>>>>>>> sub")
             assert(message.f1 == "字段1" && message.f2 == 0.1)
@@ -32,7 +32,7 @@ class EventBusSpec extends MockStartupSpec {
     new Thread(new Runnable {
       override def run(): Unit = {
         EZ.eb.subscribe[TestObj]("aa") {
-          message =>
+          (message,_) =>
             counter.countDown()
             logger.info(">>>>>>>>>>>>>>>>>>>> sub")
             assert(message.f1 == "字段1" && message.f2 == 0.1)
@@ -45,7 +45,7 @@ class EventBusSpec extends MockStartupSpec {
     // req-resp
     counter = new CountDownLatch(3)
     EZ.eb.response[String]("b") {
-      message =>
+      (message,_) =>
         assert(message == "456")
         counter.countDown()
     }
@@ -57,7 +57,7 @@ class EventBusSpec extends MockStartupSpec {
     new Thread(new Runnable {
       override def run(): Unit = {
         EZ.eb.response[TestObj]("bb") {
-          message =>
+          (message,_) =>
             logger.info(">>>>>>>>>>>>>>>>>>>> resp")
             assert(message.f1 == "字段1")
             counter.countDown()
@@ -67,7 +67,7 @@ class EventBusSpec extends MockStartupSpec {
     new Thread(new Runnable {
       override def run(): Unit = {
         EZ.eb.response[TestObj]("bb") {
-          message =>
+          (message,_) =>
             logger.info(">>>>>>>>>>>>>>>>>>>> resp")
             assert(message.f1 == "字段1")
             counter.countDown()
@@ -82,7 +82,7 @@ class EventBusSpec extends MockStartupSpec {
     new Thread(new Runnable {
       override def run(): Unit = {
         EZ.eb.reply[String]("test") {
-          message =>
+          (message,_) =>
             message
         }
       }

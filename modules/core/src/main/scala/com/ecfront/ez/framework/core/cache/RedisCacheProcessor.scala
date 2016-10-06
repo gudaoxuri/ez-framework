@@ -39,7 +39,7 @@ class RedisCacheProcessor extends CacheProcessor[JedisCommands] {
     sys.addShutdownHook {
       close()
     }
-    logger.info("Redis started")
+    logger.info("[Redis] Init successful")
     Resp.success(null)
   }
 

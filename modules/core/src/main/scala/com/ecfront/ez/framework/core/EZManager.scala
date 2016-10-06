@@ -4,13 +4,11 @@ import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.cache.RedisCacheProcessor
 import com.ecfront.ez.framework.core.eventbus.VertxEventBusProcessor
 import com.ecfront.ez.framework.core.i18n.I18NProcessor
-import com.ecfront.ez.framework.core.rpc.AutoBuildingProcessor
+import com.ecfront.ez.framework.core.rpc.RPCProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.{Vertx, VertxOptions}
 
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 import scala.io.Source
 import scala.reflect.runtime._
 
@@ -40,7 +38,7 @@ object EZManager extends LazyLogging {
     *
     * @return vertx实例
     */
-  private def initVertx(perf: Map[String, Any]): Resp[Void] = {
+  private def initVertx(perf: Map[String, Any],isDebug:Boolean): Resp[Void] = {
     val opt = new VertxOptions()
     if (perf.contains(FLAG_PERF_EVENT_LOOP_POOL_SIZE)) {
       opt.setEventLoopPoolSize(perf(FLAG_PERF_EVENT_LOOP_POOL_SIZE).asInstanceOf[Int])
@@ -60,9 +58,10 @@ object EZManager extends LazyLogging {
     if (perf.contains(FLAG_PERF_WARNING_EXCEPTION_TIME)) {
       opt.setWarningExceptionTime(perf(FLAG_PERF_WARNING_EXCEPTION_TIME).asInstanceOf[Int] * 1000000L)
     }
+    if(isDebug) opt.setWarningExceptionTime(600L * 1000 * 1000000)
     val eb = new VertxEventBusProcessor()
     EZ.eb = eb
-    Await.result(eb.init(Vertx.vertx(opt)), Duration.Inf)
+    eb.init(Vertx.vertx(opt))
   }
 
   private def initCache(args: Map[String, Any]): Resp[Void] = {
@@ -75,8 +74,7 @@ object EZManager extends LazyLogging {
   }
 
   private def initRPC(args: Map[String, Any]): Resp[Void] = {
-    AutoBuildingProcessor.autoBuilding(args("package").asInstanceOf[String])
-    Resp.success(null)
+    RPCProcessor.init(args("package").asInstanceOf[String])
   }
 
   /**
@@ -212,7 +210,7 @@ object EZManager extends LazyLogging {
     val ezConfigR = startInParseConfig(configContent)
     if (ezConfigR) {
       val ezConfig = ezConfigR.body
-      if (initVertx(ezConfig.ez.perf.toMap) && initCache(ezConfig.ez.cache) && initRPC(ezConfig.ez.rpc)) {
+      if (initVertx(ezConfig.ez.perf.toMap,ezConfig.ez.isDebug) && initCache(ezConfig.ez.cache) && I18NProcessor.init()) {
         EZ.Info.app = ezConfig.ez.app
         EZ.Info.module = ezConfig.ez.module
         EZ.Info.timezone = ezConfig.ez.timezone
@@ -251,8 +249,11 @@ object EZManager extends LazyLogging {
             }
             if (isSuccess) {
               ezServices.foreach(_.initPost())
-              I18NProcessor.init()
-              logSuccess("Start Success")
+              if (initRPC(ezConfig.ez.rpc)) {
+                logSuccess("Start Success")
+              } else {
+                logError(s"Start Fail : Core services start error")
+              }
             } else {
               logError(s"Start Fail : $message")
             }

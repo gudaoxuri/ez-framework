@@ -23,14 +23,13 @@ object EZContext {
   private[core] def getContext: EZContext = {
     var cxt = _context.get()
     if (cxt == null) {
+      cxt = new EZContext
       cxt.id = EZ.createUUID
       cxt.startTime = TimeHelper.msf.format(new Date).toLong
       cxt.sourceIP = EZ.Info.projectIp
       cxt.sourceRPCPath = ""
       cxt.optAccCode = ""
       cxt.optOrgCode = ""
-      cxt.id = EZ.createUUID
-      cxt = new EZContext
       setContext(cxt)
     }
     cxt

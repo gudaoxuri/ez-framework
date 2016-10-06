@@ -2,6 +2,7 @@ package com.ecfront.ez.framework.core.rpc
 
 import com.ecfront.common._
 import com.ecfront.ez.framework.core.EZ
+import com.ecfront.ez.framework.core.rpc.Method.Method
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.reflect.runtime._
@@ -42,23 +43,23 @@ object AutoBuildingProcessor extends LazyLogging {
           val methodMirror = BeanHelper.invoke(instance, methodInfo.method)
           val annInfo = methodInfo.annotation match {
             case ann: GET =>
-              (Method.GET, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, null)
+              (Channel.HTTP, Method.GET, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, null)
             case ann: POST =>
-              (Method.POST, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
+              (Channel.HTTP, Method.POST, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
             case ann: PUT =>
-              (Method.PUT, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
+              (Channel.HTTP, Method.PUT, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
             case ann: DELETE =>
-              (Method.DELETE, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, null)
+              (Channel.HTTP, Method.DELETE, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, null)
             case ann: WS =>
-              (Method.WS, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
+              (Channel.WS, Method.WS, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
             case ann: SUB =>
-              (Method.PUB_SUB, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
+              (Channel.EB, Method.PUB_SUB, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
             case ann: RESP =>
-              (Method.REQ_RESP, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
+              (Channel.EB, Method.REQ_RESP, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
             case ann: REPLY =>
-              (Method.ACK, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
+              (Channel.EB, Method.REPLY, if (ann.uri.startsWith("/")) ann.uri else baseUri + ann.uri, getClassFromMethodInfo(methodInfo))
           }
-          Router.add(annInfo._1, annInfo._2, annInfo._3, fun(annInfo._1, methodMirror))
+          RPCProcessor.add(annInfo._1, annInfo._2, annInfo._3, annInfo._4, fun(annInfo._2, methodMirror))
       }
     } catch {
       case e: Throwable =>
@@ -67,7 +68,7 @@ object AutoBuildingProcessor extends LazyLogging {
     }
   }
 
-  private def fun(method: String, methodMirror: universe.MethodMirror): (Map[String, String], Any) => Resp[Any] = {
+  private def fun(method: Method, methodMirror: universe.MethodMirror): (Map[String, String], Any) => Resp[Any] = {
     (parameter, body) =>
       try {
         if (method == Method.GET || method == Method.DELETE) {

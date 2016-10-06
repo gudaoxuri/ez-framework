@@ -17,14 +17,15 @@ object I18NProcessor extends LazyLogging {
   // 正则信息 -> 语言 -> 翻译后的信息
   private val i18nInfo = collection.mutable.Map[Pattern, Map[String, String]]()
 
-  def init(): Unit = {
-    logger.info("Init i18n processor")
+  def init(): Resp[Void] = {
     load()
     if (i18nInfo.nonEmpty) {
       Resp.customInit = process
     } else {
       logger.info("i18n function disabled")
     }
+    logger.info("[I18N] Init successful")
+    Resp.success(null)
   }
 
   /**
