@@ -1005,8 +1005,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param pageSize   每页条数
     * @return 分页结果
     */
-  def page(condition: String, parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10,
-           context: EZStorageContext): Resp[Page[M]] = {
+  def page(condition: String, parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10): Resp[Page[M]] = {
     val preR = prePage(condition, parameters, pageNumber, pageSize)
     if (preR) {
       val filterR = filterByCond(preR.body._1, preR.body._2)
@@ -1125,8 +1124,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     }
   }
 
+  def setIdValue(idValue:String,model:BaseModel):Unit={
+    setValueByField(model,_entityInfo.idFieldName,idValue)
+  }
+
   protected def getUUIDValue(model: BaseModel): String = {
     getValueByField(model, _entityInfo.uuidFieldName).asInstanceOf[String]
+  }
+
+  def setUUIDValue(uuidValue:String,model:BaseModel):Unit={
+    setValueByField(model,_entityInfo.uuidFieldName,uuidValue)
   }
 
   protected def getValueByField(model: AnyRef, fieldName: String): Any = {

@@ -6,6 +6,7 @@ import java.util.UUID
 import com.ecfront.ez.framework.core.cache.CacheProcessor
 import com.ecfront.ez.framework.core.eventbus.EventBusProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import io.vertx.core.Vertx
 import redis.clients.jedis.JedisCommands
 
 /**
@@ -26,6 +27,8 @@ object EZ extends LazyLogging {
     var language: String = _
     // 配置文件路径
     lazy val confPath: String = findConfPath()
+
+    private[ecfront] var config:EZConfig=_
 
     // 项目主机IP
     val projectIp = InetAddress.getLocalHost.getHostAddress
@@ -54,6 +57,8 @@ object EZ extends LazyLogging {
 
   }
 
+  private[ecfront] var vertx:Vertx=_
+
   // 是否调试模式
   var isDebug: Boolean = _
 
@@ -61,7 +66,7 @@ object EZ extends LazyLogging {
 
   var cache: CacheProcessor[JedisCommands] = _
 
-  def context = EZContext.getContext
+  def context:EZContext = EZContext.getContext
 
   def createUUID: String = UUID.randomUUID().toString.replace("-", "")
 

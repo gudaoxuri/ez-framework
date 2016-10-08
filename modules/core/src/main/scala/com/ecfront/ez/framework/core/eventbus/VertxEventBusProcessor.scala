@@ -18,9 +18,9 @@ import scala.concurrent.{Await, Promise}
 class VertxEventBusProcessor extends EventBusProcessor {
 
   private val FLAG_QUEUE_EXECUTING = "ez:eb:executing:"
-  private val FLAG_CONTEXT = "__ez_context__"
+  private[ecfront] val FLAG_CONTEXT = "__ez_context__"
 
-  private var eb: EventBus = _
+  private[ecfront] var eb: EventBus = _
   private var vertx: Vertx = _
   private val consumerEBs = ArrayBuffer[MessageConsumer[_]]()
 
@@ -176,7 +176,7 @@ class VertxEventBusProcessor extends EventBusProcessor {
     })
   }
 
-  private def toAllowedMessage(message: Any): Any = {
+  private[ecfront] def toAllowedMessage(message: Any): Any = {
     message match {
       case m if m.isInstanceOf[String] || m.isInstanceOf[Int] ||
         m.isInstanceOf[Long] || m.isInstanceOf[Double] || m.isInstanceOf[Float] ||

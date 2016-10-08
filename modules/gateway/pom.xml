@@ -31,7 +31,18 @@
         <dependency>
             <groupId>com.ecfront</groupId>
             <artifactId>ezf-core</artifactId>
-            <version>${ezf.version}</version>
+            <version>${ezf-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-redis-client</artifactId>
+            <version>${vertx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-jdbc</artifactId>
+            <version>${ezf-version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

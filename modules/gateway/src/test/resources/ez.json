@@ -1,0 +1,47 @@
+{
+  "ez": {
+    "app": "",
+    "module": "",
+    "services": {
+      "rpc.http": {
+        "servicePath": "com.ecfront.ez.framework.service.rpc.http.test",
+        "webUrl": "http://localhost:63342/shtzsr/ui/index.html",
+        "publicUrl": "https://127.0.0.1:8080/",
+        "host": "0.0.0.0",
+        "port": 8080,
+/*        "antiDDoS":{
+          "reqRatePerMinute":0,
+          "illegalReqRatePerMinute":0
+        },*/
+        "monitor": {
+          "slow": {
+            // 最慢时间，单位毫秒
+            "time": 10,
+            "includes": [],
+            "excludes": []
+          }
+        },
+        "resourcePath": "c:/tmp/",
+        "accessControlAllowOrigin": "*"
+        /*,
+                "ssl": {
+                  "keyPath": "keystore.jks",
+                  "keyPassword": "123456"
+                }*/
+      },
+      "redis": {
+        "host": "127.0.0.1",
+        "port": 6379,
+        "auth": "",
+        "db": 0
+      },
+      "storage.mongo": {
+        "host": "127.0.0.1",
+        "port": 27017,
+        "db_name": "ez_test"
+      }
+    }
+  },
+  "args": {
+  }
+}

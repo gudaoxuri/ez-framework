@@ -2,7 +2,9 @@ package com.ecfront.ez.framework.core
 
 import java.util.Date
 
+import com.ecfront.common.JsonHelper
 import com.ecfront.ez.framework.core.helper.TimeHelper
+import com.ecfront.ez.framework.core.rpc.{OptInfo, RPCProcessor}
 
 import scala.beans.BeanProperty
 import scala.language.implicitConversions
@@ -12,8 +14,21 @@ class EZContext {
   @BeanProperty var sourceIP: String = _
   @BeanProperty var startTime: Long = _
   @BeanProperty var sourceRPCPath: String = _
+  @BeanProperty var token: String = _
   @BeanProperty var optAccCode: String = _
   @BeanProperty var optOrgCode: String = _
+  lazy val optInfo: Option[OptInfo] = {
+    if (token != null && token.nonEmpty) {
+      val result = EZ.cache.get(RPCProcessor.TOKEN_INFO_FLAG + token)
+      if (result != null && result.nonEmpty) {
+        Some(JsonHelper.toObject[OptInfo](result))
+      } else {
+        None
+      }
+    } else {
+      None
+    }
+  }
 }
 
 object EZContext {
@@ -28,6 +43,7 @@ object EZContext {
       cxt.startTime = TimeHelper.msf.format(new Date).toLong
       cxt.sourceIP = EZ.Info.projectIp
       cxt.sourceRPCPath = ""
+      cxt.token = ""
       cxt.optAccCode = ""
       cxt.optOrgCode = ""
       setContext(cxt)
@@ -35,7 +51,7 @@ object EZContext {
     cxt
   }
 
-  private[core] def setContext(context: EZContext): Unit = {
+  private[ecfront] def setContext(context: EZContext): Unit = {
     _context.set(context)
   }
 
