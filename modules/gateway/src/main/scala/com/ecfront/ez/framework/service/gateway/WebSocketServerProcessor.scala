@@ -1,10 +1,10 @@
-package com.ecfront.ez.framework.gateway
+package com.ecfront.ez.framework.service.gateway
 
 import java.net.URLDecoder
 
 import com.ecfront.common.JsonHelper
 import com.ecfront.ez.framework.core.rpc.{Channel, Method}
-import com.ecfront.ez.framework.gateway.interceptor.EZAPIContext
+import com.ecfront.ez.framework.service.gateway.interceptor.EZAPIContext
 import io.vertx.core.Handler
 import io.vertx.core.http._
 

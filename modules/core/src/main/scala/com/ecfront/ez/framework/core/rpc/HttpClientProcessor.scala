@@ -39,6 +39,9 @@ object HttpClientProcessor extends LazyLogging {
     if (System.getProperty(FLAG_PERF_MAX_POOL_SIZE) != null) {
       httpOpt.setMaxPoolSize(System.getProperty(FLAG_PERF_MAX_POOL_SIZE).toInt)
       httpsOpt.setMaxPoolSize(System.getProperty(FLAG_PERF_MAX_POOL_SIZE).toInt)
+    } else {
+      httpOpt.setMaxPoolSize(100)
+      httpsOpt.setMaxPoolSize(100)
     }
     httpClient = vertx.createHttpClient(httpOpt)
     httpClients = vertx.createHttpClient(httpsOpt)
@@ -138,7 +141,7 @@ object HttpClientProcessor extends LazyLogging {
       request(HttpMethod.DELETE, url, null, contentType)
     }
 
-    private[http] def request(method: HttpMethod, url: String, body: Any, contentType: String): Future[String] = {
+    private[core] def request(method: HttpMethod, url: String, body: Any, contentType: String): Future[String] = {
       val realContextType = getRealContextType(body, contentType)
       val p = Promise[String]()
       val clientChannel =
@@ -223,36 +226,35 @@ object HttpClientProcessor extends LazyLogging {
       p.future
     }
 
-  }
-
-  private def getRealContextType(body: Any, contentType: String): String = {
-    if (body != null && body.isInstanceOf[File]) {
-      "multipart/form-data"
-    } else if (body != null && body.isInstanceOf[ReqFile]) {
-      "multipart/form-data; boundary=ez_boundary"
-    } else {
-      contentType
+    private def getRealContextType(body: Any, contentType: String): String = {
+      if (body != null && body.isInstanceOf[File]) {
+        "multipart/form-data"
+      } else if (body != null && body.isInstanceOf[ReqFile]) {
+        "multipart/form-data; boundary=ez_boundary"
+      } else {
+        contentType
+      }
     }
-  }
 
-  private def getBufferBody(file: File, fieldName: String, fileName: String = null): Buffer = {
-    val finalFileName = if (fileName == null) {
-      file.getName.substring(0, file.getName.lastIndexOf(".")) + "_" + System.nanoTime() + "." + file.getName.substring(file.getName.lastIndexOf(".") + 1)
-    } else {
-      fileName
+    private def getBufferBody(file: File, fieldName: String, fileName: String = null): Buffer = {
+      val finalFileName = if (fileName == null) {
+        file.getName.substring(0, file.getName.lastIndexOf(".")) + "_" + System.nanoTime() + "." + file.getName.substring(file.getName.lastIndexOf(".") + 1)
+      } else {
+        fileName
+      }
+      val buffer = Buffer.buffer()
+      buffer.appendString("--ez_boundary\r\n")
+      buffer.appendString("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + finalFileName + "\"\r\n")
+      buffer.appendString("Content-Type: application/octet-stream\r\n")
+      buffer.appendString("Content-Transfer-Encoding: binary\r\n")
+      buffer.appendString("\r\n")
+      buffer.appendBytes(Files.readAllBytes(file.toPath))
+      buffer.appendString("\r\n")
+      buffer.appendString("--ez_boundary--\r\n")
+      buffer
     }
-    val buffer = Buffer.buffer()
-    buffer.appendString("--ez_boundary\r\n")
-    buffer.appendString("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + finalFileName + "\"\r\n")
-    buffer.appendString("Content-Type: application/octet-stream\r\n")
-    buffer.appendString("Content-Transfer-Encoding: binary\r\n")
-    buffer.appendString("\r\n")
-    buffer.appendBytes(Files.readAllBytes(file.toPath))
-    buffer.appendString("\r\n")
-    buffer.appendString("--ez_boundary--\r\n")
-    buffer
-  }
 
+  }
 
 }
 

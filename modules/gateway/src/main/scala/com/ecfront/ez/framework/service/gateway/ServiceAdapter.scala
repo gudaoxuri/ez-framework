@@ -1,12 +1,12 @@
-package com.ecfront.ez.framework.gateway
+package com.ecfront.ez.framework.service.gateway
 
 import java.util.concurrent.CountDownLatch
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
 import com.ecfront.ez.framework.core.{EZ, EZServiceAdapter}
-import com.ecfront.ez.framework.gateway.helper.AsyncRedisProcessor
-import com.ecfront.ez.framework.gateway.interceptor.{AuthInterceptor, GatewayInterceptor, SlowMonitorInterceptor}
+import com.ecfront.ez.framework.service.gateway.helper.AsyncRedisProcessor
+import com.ecfront.ez.framework.service.gateway.interceptor.{AuthInterceptor, GatewayInterceptor, SlowMonitorInterceptor}
 import com.fasterxml.jackson.databind.JsonNode
 import io.vertx.core.http.{HttpServer, HttpServerOptions}
 import io.vertx.core.net.JksOptions
@@ -97,6 +97,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
   }
 
   override def destroy(parameter: JsonNode): Resp[String] = {
+    AsyncRedisProcessor.close()
     Resp.success("")
   }
 

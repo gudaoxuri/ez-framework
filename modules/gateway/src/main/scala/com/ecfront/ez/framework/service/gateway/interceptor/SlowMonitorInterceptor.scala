@@ -1,4 +1,4 @@
-package com.ecfront.ez.framework.gateway.interceptor
+package com.ecfront.ez.framework.service.gateway.interceptor
 
 import java.lang.Long
 
@@ -50,7 +50,7 @@ object SlowMonitorInterceptor extends GatewayInterceptor {
     if (useTime > time) {
       logger.warn(s"[RPC][SlowTime] Request [${obj.method}:${obj.realUri}] use time [$useTime] ms")
     } else {
-      logger.info(s"[RPC][Time] Request [${obj.method}:${obj.realUri}] use time [$useTime] ms")
+      logger.trace(s"[RPC][Time] Request [${obj.method}:${obj.realUri}] use time [$useTime] ms")
     }
   }
 

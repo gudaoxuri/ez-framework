@@ -51,7 +51,7 @@ object EZContext {
     cxt
   }
 
-  private[ecfront] def setContext(context: EZContext): Unit = {
+  private[core] def setContext(context: EZContext): Unit = {
     _context.set(context)
   }
 

@@ -1,19 +1,16 @@
-package com.ecfront.ez.framework.gateway
+package com.ecfront.ez.framework.service.gateway
 
 import java.io.File
 import java.net.URLEncoder
 import java.nio.file.Files
 
 import com.ecfront.common.{JsonHelper, Resp}
-import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.helper.FileType
 import com.ecfront.ez.framework.core.rpc._
-import com.ecfront.ez.framework.gateway.interceptor.EZAPIContext
+import com.ecfront.ez.framework.service.gateway.interceptor.EZAPIContext
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpServerFileUpload, HttpServerRequest, HttpServerResponse}
-import org.joox.JOOX._
-import org.w3c.dom.Document
 
 import scala.collection.JavaConversions._
 
@@ -24,8 +21,6 @@ import scala.collection.JavaConversions._
   * @param accessControlAllowOrigin 允许跨域的域名
   */
 class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String = "*") extends Handler[HttpServerRequest] with GatewayProcessor {
-
-  private val FLAG_FILE_NAME = "filename"
 
   override def handle(request: HttpServerRequest): Unit = {
     if (request.method().name() == "OPTIONS") {
@@ -127,11 +122,6 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
   }
 
   private def execute(request: HttpServerRequest, body: String, context: EZAPIContext): Unit = {
-    if (!EZ.isDebug) {
-      logger.info(s"Execute a request from ${context.remoteIP} to [${context.method}] ${context.realUri}")
-    } else {
-      logger.trace(s"Execute a request from ${context.remoteIP} to [${context.method}] ${context.realUri} | $body")
-    }
     execute(body, context, {
       resp =>
         if (resp) {
@@ -145,73 +135,67 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
 
   private def returnContent(result: Any, request: HttpServerRequest, accept: String, contentType: String): Unit = {
     val response = request.response()
-    result match {
-      case r: Resp[_] if r && r.body.isInstanceOf[DownloadFile] =>
-        val fileInfo = r.body.asInstanceOf[DownloadFile]
-        val fileType = Files.probeContentType(new File(fileInfo.file).toPath)
-        if (FileType.TYPE_IMAGE.contains(fileType)) {
-          // 显示图片
-          response.putHeader("Content-Transfer-Encoding", "binary")
-        } else {
-          // 资源下载
-          val ua = if (request.headers().contains("User-Agent")) request.getHeader("User-Agent") else ""
-          ua match {
-            case u if u.toLowerCase().contains("firefox") =>
-              response.putHeader("Content-disposition", "attachment; filename*=UTF-8''" + URLEncoder.encode(fileInfo.fileName, "UTF-8"))
-            case _ =>
-              response.putHeader("Content-disposition", "attachment; filename=" + URLEncoder.encode(fileInfo.fileName, "UTF-8"))
-          }
-        }
-        response.setStatusCode(HTTP_STATUS_200)
-        response.sendFile(fileInfo.file)
-      case r: Resp[_] if r && r.body.isInstanceOf[RespRedirect] =>
-        // 重定向
-        response.putHeader("Location", r.body.asInstanceOf[RespRedirect].url)
-          .setStatusCode(HTTP_STATUS_302)
-          .end()
-      case r: Resp[_] if r && r.body.isInstanceOf[Raw] =>
-        returnContent(response, accept, r.body.asInstanceOf[Raw].raw.toString)
-      case r: Resp[_] =>
-        val res = contentType match {
-          case t if t.contains("json") =>
-            // Json
-            JsonHelper.toJsonString(r)
-          case t if t.contains("xml") =>
-            // Xml
-            if (r) {
-              if (r.body == null) {
-                ""
-              } else {
-                r.body match {
-                  case b: Document =>
-                    $(b).toString
-                  case b: String => b
-                  case _ =>
-                    logger.warn(s"Not support return type [${r.body.getClass.getName}] by xml")
-                    s"""<?xml version="1.0" encoding="UTF-8"?>
-                        |<xml>
-                        | <error>
-                        |  <code>-1</code>
-                        |  <message>Not support return type [${r.body.getClass.getName}] by xml</message>
-                        | </error>
-                        |</xml>
-                 """.stripMargin
-                }
-              }
-            } else {
-              s"""<?xml version="1.0" encoding="UTF-8"?>
-                  |<xml>
-                  | <error>
-                  |  <code>${r.code}</code>
-                  |  <message>${r.message}</message>
-                  | </error>
-                  |</xml>
-                 """.stripMargin
+    try {
+      result match {
+        case r: Resp[_] if r && r.body.isInstanceOf[DownloadFile] =>
+          val fileInfo = r.body.asInstanceOf[DownloadFile]
+          val fileType = Files.probeContentType(new File(fileInfo.file).toPath)
+          if (FileType.TYPE_IMAGE.contains(fileType)) {
+            // 显示图片
+            response.putHeader("Content-Transfer-Encoding", "binary")
+          } else {
+            // 资源下载
+            val ua = if (request.headers().contains("User-Agent")) request.getHeader("User-Agent") else ""
+            ua match {
+              case u if u.toLowerCase().contains("firefox") =>
+                response.putHeader("Content-disposition", "attachment; filename*=UTF-8''" + URLEncoder.encode(fileInfo.fileName, "UTF-8"))
+              case _ =>
+                response.putHeader("Content-disposition", "attachment; filename=" + URLEncoder.encode(fileInfo.fileName, "UTF-8"))
             }
-          case _ => r.toString
-        }
-        returnContent(response, accept, res)
-      case _ => logger.warn(s"The response type [${result.getClass.getName}] not support")
+          }
+          response.setStatusCode(HTTP_STATUS_200)
+          response.sendFile(fileInfo.file)
+        case r: Resp[_] if r && r.body.isInstanceOf[RespRedirect] =>
+          // 重定向
+          response.putHeader("Location", r.body.asInstanceOf[RespRedirect].url)
+            .setStatusCode(HTTP_STATUS_302)
+            .end()
+        case r: Resp[_] if r && r.body.isInstanceOf[Raw] =>
+          returnContent(response, accept, r.body.asInstanceOf[Raw].raw.toString)
+        case r: Resp[_] =>
+          // gateway 本身生成的对象，如认证失败
+          returnContent(response, accept, JsonHelper.toJsonString(r))
+        case _ =>
+          val ret = contentType match {
+            case t if t.contains("xml") =>
+              // Xml
+              val resp = JsonHelper.toObject[Resp[String]](result.asInstanceOf[String])
+              if (resp) {
+                if (resp.body == null) {
+                  ""
+                } else {
+                  resp.body
+                }
+              } else {
+                s"""<?xml version="1.0" encoding="UTF-8"?>
+                    |<xml>
+                    | <error>
+                    |  <code>${resp.code}</code>
+                    |  <message>${resp.message}</message>
+                    | </error>
+                    |</xml>
+                 """.stripMargin
+              }
+            case _ =>
+              // Json
+              result.asInstanceOf[String]
+          }
+          returnContent(response, accept, ret)
+      }
+    } catch {
+      case e: Throwable =>
+        logger.error("Http process error.", e)
+        returnContent(request.response(), "text/html", s"Request process error：${e.getMessage}")
     }
   }
 

@@ -2,25 +2,25 @@
   "ez": {
     "app": "",
     "module": "",
+    "cache": {
+      "address": "127.0.0.1:6379"
+    },
+    "rpc":{
+      "package":"com.ecfront.ez"
+    },
     "services": {
-      "rpc.http": {
-        "servicePath": "com.ecfront.ez.framework.service.rpc.http.test",
-        "webUrl": "http://localhost:63342/shtzsr/ui/index.html",
-        "publicUrl": "https://127.0.0.1:8080/",
+      "gateway": {
         "host": "0.0.0.0",
         "port": 8080,
-/*        "antiDDoS":{
-          "reqRatePerMinute":0,
-          "illegalReqRatePerMinute":0
-        },*/
+        "wsPort": 8081,
         "monitor": {
           "slow": {
-            // 最慢时间，单位毫秒
-            "time": 10,
+            "time": 10,  // 最慢时间，单位毫秒
             "includes": [],
             "excludes": []
           }
         },
+        "publicUriPrefix":"/public/",
         "resourcePath": "c:/tmp/",
         "accessControlAllowOrigin": "*"
         /*,
@@ -29,16 +29,10 @@
                   "keyPassword": "123456"
                 }*/
       },
-      "redis": {
-        "host": "127.0.0.1",
-        "port": 6379,
-        "auth": "",
-        "db": 0
-      },
-      "storage.mongo": {
-        "host": "127.0.0.1",
-        "port": 27017,
-        "db_name": "ez_test"
+      "jdbc": {
+        "url": "jdbc:mysql://127.0.0.1:3306/ez?characterEncoding=UTF-8&autoReconnect=true",
+        "userName": "root",
+        "password": "123456"
       }
     }
   },

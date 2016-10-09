@@ -1,4 +1,4 @@
-package com.ecfront.ez.framework.gateway
+package com.ecfront.ez.framework.service.gateway
 
 import java.util.regex.Pattern
 
@@ -7,50 +7,49 @@ import com.ecfront.ez.framework.core.rpc.{Channel, Method, RPCProcessor}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 object LocalCacheContainer extends LazyLogging {
 
-  private val routerContainer = Map[String, Map[String, ArrayBuffer[String]]](
+  private val routerContainer = Map[String, Map[String, collection.mutable.Set[String]]](
     Channel.HTTP.toString -> Map(
-      Method.GET.toString -> ArrayBuffer[String](),
-      Method.POST.toString -> ArrayBuffer[String](),
-      Method.PUT.toString -> ArrayBuffer[String](),
-      Method.DELETE.toString -> ArrayBuffer[String]()
+      Method.GET.toString -> collection.mutable.Set[String](),
+      Method.POST.toString -> collection.mutable.Set[String](),
+      Method.PUT.toString -> collection.mutable.Set[String](),
+      Method.DELETE.toString -> collection.mutable.Set[String]()
     ),
-    Channel.WS.toString -> Map(Method.WS.toString -> ArrayBuffer[String]())
+    Channel.WS.toString -> Map(Method.WS.toString -> collection.mutable.Set[String]())
   )
 
-  private val routerContainerR = Map[String, Map[String, ArrayBuffer[RouterRContent]]](
+  private val routerContainerR = Map[String, Map[String, collection.mutable.Set[RouterRContent]]](
     Channel.HTTP.toString -> Map(
-      Method.GET.toString -> ArrayBuffer[RouterRContent](),
-      Method.POST.toString -> ArrayBuffer[RouterRContent](),
-      Method.PUT.toString -> ArrayBuffer[RouterRContent](),
-      Method.DELETE.toString -> ArrayBuffer[RouterRContent]()
+      Method.GET.toString -> collection.mutable.Set[RouterRContent](),
+      Method.POST.toString -> collection.mutable.Set[RouterRContent](),
+      Method.PUT.toString -> collection.mutable.Set[RouterRContent](),
+      Method.DELETE.toString -> collection.mutable.Set[RouterRContent]()
     ),
-    Channel.WS.toString -> Map(Method.WS.toString -> ArrayBuffer[RouterRContent]())
+    Channel.WS.toString -> Map(Method.WS.toString -> collection.mutable.Set[RouterRContent]())
   )
 
-  private val resources = Map[String, Map[String, ArrayBuffer[(String, String)]]](
+  private val resources = Map[String, Map[String, collection.mutable.Set[(String, String)]]](
     Channel.HTTP.toString -> Map(
-      Method.GET.toString -> ArrayBuffer[(String, String)](),
-      Method.POST.toString -> ArrayBuffer[(String, String)](),
-      Method.PUT.toString -> ArrayBuffer[(String, String)](),
-      Method.DELETE.toString -> ArrayBuffer[(String, String)](),
-      "*" -> ArrayBuffer[(String, String)]()
+      Method.GET.toString -> collection.mutable.Set[(String, String)](),
+      Method.POST.toString -> collection.mutable.Set[(String, String)](),
+      Method.PUT.toString -> collection.mutable.Set[(String, String)](),
+      Method.DELETE.toString -> collection.mutable.Set[(String, String)](),
+      "*" -> collection.mutable.Set[(String, String)]()
     ),
-    Channel.WS.toString -> Map(Method.WS.toString -> ArrayBuffer[(String, String)]())
+    Channel.WS.toString -> Map(Method.WS.toString -> collection.mutable.Set[(String, String)]())
   )
 
-  private val resourcesR = Map[String, Map[String, ArrayBuffer[(String, String)]]](
+  private val resourcesR = Map[String, Map[String, collection.mutable.Set[(String, String)]]](
     Channel.HTTP.toString -> Map(
-      Method.GET.toString -> ArrayBuffer[(String, String)](),
-      Method.POST.toString -> ArrayBuffer[(String, String)](),
-      Method.PUT.toString -> ArrayBuffer[(String, String)](),
-      Method.DELETE.toString -> ArrayBuffer[(String, String)](),
-      "*" -> ArrayBuffer[(String, String)]()
+      Method.GET.toString -> collection.mutable.Set[(String, String)](),
+      Method.POST.toString -> collection.mutable.Set[(String, String)](),
+      Method.PUT.toString -> collection.mutable.Set[(String, String)](),
+      Method.DELETE.toString -> collection.mutable.Set[(String, String)](),
+      "*" -> collection.mutable.Set[(String, String)]()
     ),
-    Channel.WS.toString -> Map(Method.WS.toString -> ArrayBuffer[(String, String)]())
+    Channel.WS.toString -> Map(Method.WS.toString -> collection.mutable.Set[(String, String)]())
   )
 
   private val organizations = collection.mutable.Set[String]()
@@ -58,16 +57,20 @@ object LocalCacheContainer extends LazyLogging {
 
   def addResource(channel: String, method: String, path: String): Resp[Void] = {
     if (path.endsWith("*")) {
-      resourcesR(channel)(method) += ((path, RPCProcessor.packageAddress(channel, method, path)))
+      if (!resourcesR(channel)(method).exists(_._1 == path.substring(0, path.length - 1))) {
+        resourcesR(channel)(method) += ((path.substring(0, path.length - 1), RPCProcessor.packageAddress(channel, method, path)))
+      }
     } else {
-      resources(channel)(method) += ((path, RPCProcessor.packageAddress(channel, method, path)))
+      if (!resources(channel)(method).exists(_._1 == path)) {
+        resources(channel)(method) += ((path, RPCProcessor.packageAddress(channel, method, path)))
+      }
     }
     Resp.success(null)
   }
 
   def removeResource(channel: String, method: String, path: String): Resp[Void] = {
     if (path.endsWith("*")) {
-      resourcesR(channel)(method) -= ((path, RPCProcessor.packageAddress(channel, method, path)))
+      resourcesR(channel)(method) -= ((path.substring(0, path.length - 1), RPCProcessor.packageAddress(channel, method, path)))
     } else {
       resources(channel)(method) -= ((path, RPCProcessor.packageAddress(channel, method, path)))
     }
@@ -75,15 +78,20 @@ object LocalCacheContainer extends LazyLogging {
   }
 
   def getResourceCode(channel: String, method: String, path: String): String = {
-    var res = resourcesR(channel)("*").find(_._1.startsWith(path))
+    var res: Option[(String, String)] = None
+    if (Channel.HTTP.toString == channel) {
+      res = resourcesR(channel)("*").find(i => path.startsWith(i._1))
+    }
     if (res.isDefined) {
       res.get._2
     } else {
-      res = resourcesR(channel)(method).find(_._1.startsWith(path))
+      res = resourcesR(channel)(method).find(i => path.startsWith(i._1))
       if (res.isDefined) {
         res.get._2
       } else {
-        res = resources(channel)("*").find(_._1 == path)
+        if (Channel.HTTP.toString == channel) {
+          res = resources(channel)("*").find(_._1 == path)
+        }
         if (res.isDefined) {
           res.get._2
         } else {
@@ -113,7 +121,14 @@ object LocalCacheContainer extends LazyLogging {
   }
 
   def addRole(code: String, resourceCodes: Set[String]): Resp[Void] = {
-    roles += code -> resourceCodes
+    roles += code -> resourceCodes.map {
+      resCode =>
+        if (!resCode.endsWith("/")) {
+          resCode + "/"
+        } else {
+          resCode
+        }
+    }
     Resp.success(null)
   }
 
@@ -135,7 +150,9 @@ object LocalCacheContainer extends LazyLogging {
       // regular
       val r = getRegex(path)
       // 注册到正则路由表
-      routerContainerR(channel)(method) += RouterRContent(path, r._1, r._2)
+      if (!routerContainerR(channel)(method).exists(_.originalPath == path)) {
+        routerContainerR(channel)(method) += RouterRContent(path, r._1, r._2)
+      }
     } else {
       // 注册到非正则路由表
       routerContainer(channel)(method) += path
@@ -143,9 +160,9 @@ object LocalCacheContainer extends LazyLogging {
     Resp.success(null)
   }
 
-  private[rpc] def getRouter(
-                              channel: String, method: String, path: String,
-                              parameters: Map[String, String], ip: String): (Resp[_], Map[String, String], String) = {
+  private[gateway] def getRouter(
+                                  channel: String, method: String, path: String,
+                                  parameters: Map[String, String], ip: String): (Resp[_], Map[String, String], String) = {
     val newParameters = collection.mutable.Map[String, String]()
     newParameters ++= parameters
     // 格式化path
@@ -173,13 +190,13 @@ object LocalCacheContainer extends LazyLogging {
         (Resp.success(null), newParameters.toMap, urlTemplate)
       } else {
         // 没有匹配到路由
-        logger.warn(s"[$channel] method [$method] path : $path not implemented from $ip")
-        (Resp.notImplemented(s"[$channel] method [$method] path : $path from $ip"), newParameters.toMap, null)
+        logger.warn(s"[$channel] method [$method] path : $formatPath not implemented from $ip")
+        (Resp.notImplemented(s"[$channel] method [$method] path : $formatPath from $ip"), newParameters.toMap, null)
       }
     } else {
       // 没有匹配到路由
-      logger.warn(s"[$channel] method [$method] path : $path not implemented from $ip")
-      (Resp.notImplemented(s"[$channel] method [$method] path : $path from $ip"), newParameters.toMap, null)
+      logger.warn(s"[$channel] method [$method] path : $formatPath not implemented from $ip")
+      (Resp.notImplemented(s"[$channel] method [$method] path : $formatPath from $ip"), newParameters.toMap, null)
     }
   }
 

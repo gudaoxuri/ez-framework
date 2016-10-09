@@ -11,8 +11,9 @@ import io.vertx.core.Vertx
 object RPCProcessor extends LazyLogging {
 
   private val FLAG_RPC_API_URL = "/ez/gateway/address/add/"
-  // Token信息 key : ez.token.info:<token Id> value : <token info>
-  val TOKEN_INFO_FLAG = "ez:token:info:"
+  val FLAG_RESP_TYPE = "__respType__"
+  // Token信息 key : ez:auth:token:info:<token Id> value : <token info>
+  val TOKEN_INFO_FLAG = "ez:auth:token:info:"
 
   private val address = collection.mutable.Set[String]()
 
@@ -31,7 +32,8 @@ object RPCProcessor extends LazyLogging {
     Resp.success(null)
   }
 
-  private[core] def add[E: Manifest](channel: Channel, method: Method, path: String, bodyClass: Class[E], fun: => (Map[String, String], E) => Any): Unit = {
+  private[core] def add[E: Manifest](channel: Channel, method: Method, path: String,
+                                     bodyClass: Class[E], respType:String, fun: => (Map[String, String], E) => Any): Unit = {
     // 格式化path
     val formatPath = packageAddress(channel.toString, method.toString, path)
     address += formatPath
@@ -41,13 +43,13 @@ object RPCProcessor extends LazyLogging {
         EZ.eb.publish(FLAG_RPC_API_URL, APIDTO(channel.toString, method.toString, path))
         (formatPath, EZ.eb.reply[E](formatPath, bodyClass) {
           (message, args) =>
-            execute[E](bodyClass, fun, message, args)
+            (execute[E](bodyClass, fun, message, args),Map(FLAG_RESP_TYPE -> respType))
         })
       case Channel.WS =>
         EZ.eb.publish(FLAG_RPC_API_URL, APIDTO(channel.toString, method.toString, path))
         (formatPath, EZ.eb.reply[E](formatPath, bodyClass) {
           (message, args) =>
-            execute[E](bodyClass, fun, message, args)
+            (execute[E](bodyClass, fun, message, args),Map(FLAG_RESP_TYPE -> respType))
         })
       case Channel.EB =>
         method match {
@@ -64,7 +66,7 @@ object RPCProcessor extends LazyLogging {
           case Method.REPLY =>
             (formatPath, EZ.eb.reply[E](formatPath, bodyClass) {
               (message, args) =>
-                execute[E](bodyClass, fun, message, args)
+                (execute[E](bodyClass, fun, message, args),Map(FLAG_RESP_TYPE -> respType))
             })
         }
     }

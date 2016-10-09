@@ -2,6 +2,12 @@
   "ez": {
     "app": "",
     "module": "",
+    "cache": {
+      "address": "127.0.0.1:6379"
+    },
+    "rpc":{
+      "package":"com.ecfront.ez"
+    },
     "services": {
       "jdbc": {
         "url": "jdbc:mysql://127.0.0.1:3306/ez?characterEncoding=UTF-8&autoReconnect=true",

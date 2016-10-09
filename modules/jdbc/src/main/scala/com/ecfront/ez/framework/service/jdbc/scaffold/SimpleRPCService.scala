@@ -73,7 +73,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     } else {
       logger.trace(s" RPC simple update : $body")
       val model = JsonHelper.toObject(body, modelClazz)
-      storageObj.setIdValue(parameter("uuid"), model)
+      storageObj.setUUIDValue(parameter("uuid"), model)
       storageObj.update(model)
     }
   }
@@ -89,8 +89,8 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     logger.trace(s" RPC simple find enable : $parameter")
     if (classOf[StatusModel].isAssignableFrom(modelClazz)) {
       val conditionR = if (parameter.contains("condition")) conditionCheck(parameter("condition")) else Resp.success("")
-      if (conditionR) {
-        storageObj.asInstanceOf[StatusStorage[_]].findEnabled(conditionR.body, List())
+     if (conditionR) {
+        storageObj.asInstanceOf[StatusStorage[_]].findEnabled(conditionR.body, List()).asInstanceOf[Resp[List[M]]]
       } else {
         conditionR
       }
@@ -154,7 +154,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     val pageSize = if (parameter.contains("pageSize")) parameter("pageSize").toInt else DEFAULT_PAGE_SIZE
     val conditionR = if (parameter.contains("condition")) conditionCheck(parameter("condition")) else Resp.success("")
     if (conditionR) {
-      storageObj.asInstanceOf[StatusStorage[_]].pageEnabled(conditionR.body, List(), pageNumber, pageSize)
+      storageObj.asInstanceOf[StatusStorage[_]].pageEnabled(conditionR.body, List(), pageNumber, pageSize).asInstanceOf[Resp[Page[M]]]
     } else {
       conditionR
     }

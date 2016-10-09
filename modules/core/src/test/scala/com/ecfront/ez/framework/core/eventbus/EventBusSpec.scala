@@ -83,21 +83,21 @@ class EventBusSpec extends MockStartupSpec {
       override def run(): Unit = {
         EZ.eb.reply[String]("test") {
           (message,_) =>
-            message
+            (message,Map())
         }
       }
     }).start()
     new Thread(new Runnable {
       override def run(): Unit = {
         while (true) {
-          assert(EZ.eb.ack[String]("test", "a") == "a")
+          assert(EZ.eb.ack[String]("test", "a")._1 == "a")
         }
       }
     }).start()
     new Thread(new Runnable {
       override def run(): Unit = {
         while (true) {
-          assert(EZ.eb.ack[String]("test", "b") == "b")
+          assert(EZ.eb.ack[String]("test", "b")._1 == "b")
         }
       }
     }).start()

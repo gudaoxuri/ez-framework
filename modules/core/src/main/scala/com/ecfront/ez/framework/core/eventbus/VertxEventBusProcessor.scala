@@ -80,8 +80,8 @@ class VertxEventBusProcessor extends EventBusProcessor {
     eb.send(address, msg)
   }
 
-  override def ack[E: Manifest](address: String, message: Any, args: Map[String, String] = Map(), timeout: Long = 30 * 1000): E = {
-    val p = Promise[E]()
+  override def ack[E: Manifest](address: String, message: Any, args: Map[String, String] = Map(), timeout: Long = 30 * 1000): (E, Map[String, String]) = {
+    val p = Promise[(E, Map[String, String])]()
     val msg = toAllowedMessage(message)
     logger.trace(s"[EB] Ack send a message [$address] : $args > $msg ")
     val opt = new DeliveryOptions
@@ -96,8 +96,15 @@ class VertxEventBusProcessor extends EventBusProcessor {
         if (event.succeeded()) {
           logger.trace(s"[EB] Ack reply a message [$address] : ${event.result().body()} ")
           val msg = JsonHelper.toObject[E](event.result().body())
+          val headers = collection.mutable.Map[String, String]()
           EZContext.setContext(JsonHelper.toObject[EZContext](event.result().headers().get(FLAG_CONTEXT)))
-          p.success(msg)
+          event.result().headers().remove(FLAG_CONTEXT)
+          val it = event.result().headers().names().iterator()
+          while (it.hasNext) {
+            val key = it.next()
+            headers += key -> event.result().headers().get(key)
+          }
+          p.success(msg, headers.toMap)
         } else {
           logger.error(s"[EB] Ack reply a message error : [$address] : ${event.cause().getMessage} ", event.cause())
           throw event.cause()
@@ -108,7 +115,11 @@ class VertxEventBusProcessor extends EventBusProcessor {
   }
 
   override def subscribe[E: Manifest](address: String, reqClazz: Class[E] = null)(receivedFun: (E, Map[String, String]) => Unit): Unit = {
-    consumer("Subscribe", address, receivedFun, needReply = false, reqClazz)
+    consumer("subscribe", address, {
+      (message: E, args) =>
+        receivedFun(message, args)
+        null
+    }, needReply = false, reqClazz)
   }
 
   override def response[E: Manifest](address: String, reqClazz: Class[E] = null)(receivedFun: (E, Map[String, String]) => Unit): Unit = {
@@ -117,34 +128,46 @@ class VertxEventBusProcessor extends EventBusProcessor {
         logger.trace(s"[EB] Request executing a message [$address] : ${message._2} ")
         eb.send(address, message._2)
     }
-    consumer("Response", address, receivedFun, needReply = false, reqClazz)
+    consumer("response", address, {
+      (message: E, args) =>
+        receivedFun(message, args)
+        null
+    }, needReply = false, reqClazz)
   }
 
-  override def reply[E: Manifest](address: String, reqClazz: Class[E] = null)(receivedFun: (E, Map[String, String]) => Any): Unit = {
-    consumer("Reply", address, receivedFun, needReply = true, reqClazz)
+  override def reply[E: Manifest](address: String, reqClazz: Class[E] = null)(receivedFun: (E, Map[String, String]) => (Any, Map[String, String])): Unit = {
+    consumer("reply", address, receivedFun, needReply = true, reqClazz)
   }
 
-  private def consumer[E: Manifest](method: String, address: String,
-                                    receivedFun: (E, Map[String, String]) => Any, needReply: Boolean, reqClazz: Class[E] = null): Unit = {
+  private def consumer[E: Manifest](method: String, address: String, receivedFun: (E, Map[String, String]) => (Any, Map[String, String]),
+                                    needReply: Boolean, reqClazz: Class[E] = null): Unit = {
     val consumerEB = eb.consumer(address, new Handler[Message[String]] {
       override def handle(event: Message[String]): Unit = {
-        val headers = collection.mutable.Map[String, String]()
-        EZContext.setContext(JsonHelper.toObject[EZContext](event.headers().get(FLAG_CONTEXT)))
-        event.headers.remove(FLAG_CONTEXT)
-        val it = event.headers().names().iterator()
-        while (it.hasNext) {
-          val key = it.next()
-          headers += key -> event.headers().get(key)
-        }
-        logger.trace(s"[EB] $method a message [$address] : $headers > ${event.body()} ")
         vertx.executeBlocking(new Handler[io.vertx.core.Future[Void]] {
           override def handle(e: io.vertx.core.Future[Void]): Unit = {
+            val headers = collection.mutable.Map[String, String]()
+            EZContext.setContext(JsonHelper.toObject[EZContext](event.headers().get(FLAG_CONTEXT)))
+            event.headers.remove(FLAG_CONTEXT)
+            val it = event.headers().names().iterator()
+            while (it.hasNext) {
+              val key = it.next()
+              headers += key -> event.headers().get(key)
+            }
+            logger.trace(s"[EB] Received a $method message [$address] : $headers > ${event.body()} ")
             try {
               EZ.cache.hdel(FLAG_QUEUE_EXECUTING + address, (address + event.body()).hashCode + "")
               val message = toObject(event.body(), reqClazz)
               val replyData = receivedFun(message, headers.toMap)
               if (needReply) {
-                event.reply(JsonHelper.toJsonString(replyData))
+                val opt = new DeliveryOptions()
+                if (replyData._2 != null && replyData._2.nonEmpty) {
+                  replyData._2.foreach {
+                    item =>
+                      opt.addHeader(item._1, item._2)
+                  }
+                }
+                opt.addHeader(FLAG_CONTEXT, JsonHelper.toJsonString(EZ.context))
+                event.reply(JsonHelper.toJsonString(replyData._1), opt)
               }
               e.complete()
             } catch {

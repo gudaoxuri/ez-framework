@@ -1,4 +1,4 @@
-package com.ecfront.ez.framework.gateway
+package com.ecfront.ez.framework.service.gateway
 
 import java.util.Date
 
@@ -8,9 +8,9 @@ import com.ecfront.ez.framework.core.helper.TimeHelper
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
 import com.ecfront.ez.framework.core.rpc._
 import com.ecfront.ez.framework.core.{EZ, EZContext}
-import com.ecfront.ez.framework.gateway.interceptor.{EZAPIContext, GatewayInterceptor}
+import com.ecfront.ez.framework.service.gateway.interceptor.{EZAPIContext, GatewayInterceptor}
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import io.vertx.core.eventbus.{DeliveryOptions, Message}
+import io.vertx.core.eventbus.{DeliveryOptions, Message, ReplyException}
 import io.vertx.core.{AsyncResult, Handler}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -24,10 +24,8 @@ trait GatewayProcessor extends LazyLogging {
   protected val FLAG_PROXY: String = "X-Forwarded-For"
 
   protected def execute(body: String, context: EZAPIContext, resultFun: Resp[(EZAPIContext, Map[String, Any])] => Unit): Unit = {
-    if (!EZ.isDebug) {
-      logger.info(s"Execute a request from ${context.remoteIP} to [${context.method}] ${context.realUri}")
-    } else {
-      logger.trace(s"Execute a request from ${context.remoteIP} to [${context.method}] ${context.realUri} | $body")
+    if (EZ.isDebug) {
+      logger.trace(s"Execute a request [${context.method}][${context.realUri}]，from ${context.remoteIP} | $body")
     }
     EZAsyncInterceptorProcessor.process[EZAPIContext](GatewayInterceptor.category, context, {
       (context, param) =>
@@ -38,29 +36,46 @@ trait GatewayProcessor extends LazyLogging {
         cxt.startTime = TimeHelper.msf.format(new Date).toLong
         cxt.sourceIP = EZ.Info.projectIp
         cxt.sourceRPCPath = context.realUri
-        if(context.optInfo.isDefined){
+        if (context.optInfo.isDefined) {
           cxt.token = context.optInfo.get.token
           cxt.optAccCode = context.optInfo.get.accountCode
           cxt.optOrgCode = context.optInfo.get.organizationCode
         }
-        EZContext.setContext(cxt)
         val opt = new DeliveryOptions
-        opt.addHeader(EZ.eb.asInstanceOf[VertxEventBusProcessor].FLAG_CONTEXT, JsonHelper.toJsonString(EZ.context))
+        opt.addHeader(EZ.eb.asInstanceOf[VertxEventBusProcessor].FLAG_CONTEXT, JsonHelper.toJsonString(cxt))
         context.parameters.foreach {
           arg =>
             opt.addHeader(arg._1, arg._2)
         }
-        opt.setSendTimeout(120 * 1000)
+        // 最长10分钟
+        opt.setSendTimeout(600 * 1000)
         EZ.eb.asInstanceOf[VertxEventBusProcessor].eb.send[String](
           RPCProcessor.packageAddress(context.channel, context.method, context.templateUri),
           msg, opt, new Handler[AsyncResult[Message[String]]] {
             override def handle(event: AsyncResult[Message[String]]): Unit = {
               if (event.succeeded()) {
-                context.executeResult = event.result().body()
+                context.executeResult =
+                  if (event.result().headers().contains(RPCProcessor.FLAG_RESP_TYPE)) {
+                    event.result().headers().get(RPCProcessor.FLAG_RESP_TYPE) match {
+                      case "DownloadFile" => JsonHelper.toObject[Resp[DownloadFile]](event.result().body())
+                      case "ReqFile" => JsonHelper.toObject[Resp[ReqFile]](event.result().body())
+                      case "Raw" => JsonHelper.toObject[Resp[Raw]](event.result().body())
+                      case "RespRedirect" => JsonHelper.toObject[Resp[RespRedirect]](event.result().body())
+                      case _ => event.result().body()
+                    }
+                  } else {
+                    event.result().body()
+                  }
                 p.success(Resp.success(context))
               } else {
-                logger.error(s"[Gateway] API send error : [${context.templateUri}] : ${event.cause().getMessage} ", event.cause())
-                p.success(Resp.serverError(s"[Gateway] API send error : [${context.templateUri}] : ${event.cause().getMessage} "))
+                event.cause() match {
+                  case e: ReplyException =>
+                    logger.warn(s"[Gateway] API send error : [${context.templateUri}] : ${event.cause().getMessage} ")
+                    p.success(Resp.badRequest(s"[Gateway] API send error : [${context.templateUri}] : not implementation"))
+                  case e: Throwable =>
+                    logger.error(s"[Gateway] API send error : [${context.templateUri}] : ${event.cause().getMessage} ", event.cause())
+                    p.success(Resp.serverError(s"[Gateway] API send error : [${context.templateUri}] : ${event.cause().getMessage} "))
+                }
               }
             }
           })

@@ -1,4 +1,4 @@
-package com.ecfront.ez.framework.gateway
+package com.ecfront.ez.framework.service.gateway
 
 import com.ecfront.common.JsonHelper
 import com.typesafe.scalalogging.slf4j.LazyLogging
@@ -16,7 +16,7 @@ object WebSocketMessagePushManager extends LazyLogging {
   private val webSocketContainer = collection.mutable.Map[String, ListBuffer[ServerWebSocket]]()
 
   // 注册新的WebSocket客户端
-  private[websocket] def createWS(path: String, webSocket: ServerWebSocket): Unit = {
+  private[gateway] def createWS(path: String, webSocket: ServerWebSocket): Unit = {
     if (!webSocketContainer.contains(path)) {
       webSocketContainer += path -> ListBuffer[ServerWebSocket]()
     }

@@ -1,7 +1,6 @@
-package com.ecfront.ez.framework.gateway.interceptor
+package com.ecfront.ez.framework.service.gateway.interceptor
 
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptor
-import com.ecfront.ez.framework.service.rpc.foundation.EZRPCContext
 
 trait GatewayInterceptor extends EZAsyncInterceptor[EZAPIContext] {
 

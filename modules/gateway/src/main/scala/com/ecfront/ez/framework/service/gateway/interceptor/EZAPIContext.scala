@@ -1,7 +1,6 @@
-package com.ecfront.ez.framework.gateway.interceptor
+package com.ecfront.ez.framework.service.gateway.interceptor
 
 import com.ecfront.ez.framework.core.rpc.OptInfo
-import com.ecfront.ez.framework.gateway.OptInfo
 
 import scala.beans.BeanProperty
 import scala.language.implicitConversions

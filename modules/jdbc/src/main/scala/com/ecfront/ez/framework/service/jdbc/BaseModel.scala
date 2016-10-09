@@ -12,7 +12,7 @@ import scala.reflect.runtime._
 /**
   * 实体基类，所有实体都应继承此类
   */
-trait BaseModel extends Serializable {
+abstract class BaseModel extends Serializable {
 
   @Id("seq")
   @BeanProperty var id: String = _
@@ -966,7 +966,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     */
   protected def doFind(condition: String, parameters: List[Any]): Resp[List[M]] = {
     JDBCProcessor.find(
-      s"SELECT * FROM $tableName WHERE ${packageCondition(condition)} ",
+      s"SELECT * FROM $tableName WHERE ${packageCondition(condition)}",
       parameters,
       _modelClazz
     )

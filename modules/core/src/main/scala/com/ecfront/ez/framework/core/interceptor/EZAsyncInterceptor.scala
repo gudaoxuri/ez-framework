@@ -26,14 +26,12 @@ trait EZAsyncInterceptor[E] extends LazyLogging {
 
   private[core] def before(obj: E, context: collection.mutable.Map[String, Any]): Future[Resp[E]] = {
     val p = Promise[Resp[E]]()
-    logger.trace(s"EZ Interceptor [$category - $name - before ] execute.")
     before(obj, context, AsyncResp(p))
     p.future
   }
 
   private[core] def after(obj: E, context: collection.mutable.Map[String, Any]): Future[Resp[E]] = {
     val p = Promise[Resp[E]]()
-    logger.trace(s"EZ Interceptor [$category - $name - after ] execute.")
     after(obj, context, AsyncResp(p))
     p.future
   }

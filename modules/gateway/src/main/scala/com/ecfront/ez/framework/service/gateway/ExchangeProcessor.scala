@@ -1,4 +1,4 @@
-package com.ecfront.ez.framework.gateway
+package com.ecfront.ez.framework.service.gateway
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.rpc.{APIDTO, RPC, SUB}

@@ -42,12 +42,18 @@ object EZManager extends LazyLogging {
     val opt = new VertxOptions()
     if (perf.contains(FLAG_PERF_EVENT_LOOP_POOL_SIZE)) {
       opt.setEventLoopPoolSize(perf(FLAG_PERF_EVENT_LOOP_POOL_SIZE).asInstanceOf[Int])
+    }else{
+      opt.setEventLoopPoolSize(20)
     }
     if (perf.contains(FLAG_PERF_WORKER_POOL_SIZE)) {
       opt.setWorkerPoolSize(perf(FLAG_PERF_WORKER_POOL_SIZE).asInstanceOf[Int])
+    }else{
+      opt.setWorkerPoolSize(100)
     }
     if (perf.contains(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE)) {
       opt.setInternalBlockingPoolSize(perf(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE).asInstanceOf[Int])
+    }else{
+      opt.setInternalBlockingPoolSize(100)
     }
     if (perf.contains(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME)) {
       opt.setMaxEventLoopExecuteTime(perf(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).asInstanceOf[Int] * 1000000L)

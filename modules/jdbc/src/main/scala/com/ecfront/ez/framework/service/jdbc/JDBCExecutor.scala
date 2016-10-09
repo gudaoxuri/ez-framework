@@ -18,7 +18,7 @@ private[jdbc] object JDBCExecutor extends LazyLogging {
     if (entityInfo.idStrategy == Id.STRATEGY_SEQ && richValueInfo.contains(idFieldName) && richValueInfo(idFieldName) == 0) {
       richValueInfo -= idFieldName
     }
-    if (!richValueInfo.contains(uuidFieldName)) {
+    if (uuidFieldName != null && !richValueInfo.contains(uuidFieldName)) {
       richValueInfo += uuidFieldName -> EZ.createUUID
     }
     if (entityInfo.uniqueFieldNames.nonEmpty && (entityInfo.uniqueFieldNames.toSet & richValueInfo.keys.toSet).nonEmpty) {
