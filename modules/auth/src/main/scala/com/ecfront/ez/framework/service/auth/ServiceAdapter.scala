@@ -25,7 +25,6 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   val EB_FLUSH_FLAG = "/ez/auth/flush/"
 
   var customLogin: Boolean = _
-  var defaultRoleFlag: String = _
   var defaultOrganizationCode: String = _
   var loginKeepSeconds: Int = _
   var loginLimit_showCaptcha: Int = _
@@ -56,7 +55,6 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
       }
     }
     defaultOrganizationCode = parameter.getString("defaultOrganizationCode", "")
-    defaultRoleFlag = parameter.getString("defaultRoleFlag", EZ_Role.USER_ROLE_FLAG)
     loginKeepSeconds = parameter.getInteger("loginKeepSeconds", 0)
     encrypt_algorithm =
       if (parameter.containsKey("encrypt") && parameter.getJsonObject("encrypt").containsKey("algorithm")) {

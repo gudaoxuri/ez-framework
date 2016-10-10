@@ -37,6 +37,7 @@
         <module>modules/email</module>
         <module>modules/auth</module>
         <module>modules/scheduler</module>
+        <module>modules/message</module>
     </modules>
 
     <dependencies>

@@ -11,9 +11,9 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>ezf-scheduler</artifactId>
-    <name>EZ Framework Scheduler</name>
-    <description>EZ框架调度模块</description>
+    <artifactId>ezf-message</artifactId>
+    <name>EZ Framework Message</name>
+    <description>EZ消息通知模块</description>
     <url>https://github.com/gudaoxuri/ez-framework</url>
     <packaging>jar</packaging>
     <version>${ezf-version}</version>
@@ -34,19 +34,16 @@
             <version>${ezf-version}</version>
         </dependency>
         <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz</artifactId>
-            <version>2.2.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>c3p0</groupId>
-                    <artifactId>c3p0</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-gateway</artifactId>
+            <version>${ezf-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-auth</artifactId>
+            <version>${ezf-version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

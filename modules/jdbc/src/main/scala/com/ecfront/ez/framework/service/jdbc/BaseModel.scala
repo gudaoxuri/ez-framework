@@ -42,7 +42,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     .asInstanceOf[ParameterizedType].getActualTypeArguments()(0).asInstanceOf[Class[M]]
 
   // 表名
-  protected var tableName = _modelClazz.getSimpleName.toLowerCase
+  var tableName = _modelClazz.getSimpleName.toLowerCase
 
   if (!EntityContainer.CONTAINER.contains(tableName)) {
     EntityContainer.buildingEntityInfo(_modelClazz, tableName)
