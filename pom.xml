@@ -36,6 +36,7 @@
         <module>modules/jdbc</module>
         <module>modules/email</module>
         <module>modules/auth</module>
+        <module>modules/scheduler</module>
     </modules>
 
     <dependencies>

@@ -1,0 +1,27 @@
+{
+  "ez": {
+    "app": "",
+    "module": "scheduler",
+    "cache": {
+      "address": "127.0.0.1:6379"
+    },
+    "rpc":{
+      "package":"com.ecfront.ez"
+    },
+    "services": {
+      "scheduler":{
+        /* "customTables": {
+            "scheduler": "sys_scheduler",
+            "scheduler_Log": "sys_scheduler_Log"
+          },*/
+      },
+      "jdbc": {
+        "url": "jdbc:mysql://127.0.0.1:3306/ez?characterEncoding=UTF-8&autoReconnect=true",
+        "userName": "root",
+        "password": "123456"
+      }
+    }
+  },
+  "args": {
+  }
+}
