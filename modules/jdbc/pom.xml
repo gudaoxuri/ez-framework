@@ -13,7 +13,7 @@
 
     <artifactId>ezf-jdbc</artifactId>
     <name>EZ Framework JDBC</name>
-    <description>EZ框架存储服务基础模块</description>
+    <description>EZ框架存储模块</description>
     <url>https://github.com/gudaoxuri/ez-framework</url>
     <packaging>jar</packaging>
     <version>${ezf-version}</version>

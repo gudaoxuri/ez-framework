@@ -50,13 +50,13 @@ trait GatewayProcessor extends LazyLogging {
         // 最长10分钟
         opt.setSendTimeout(600 * 1000)
         EZ.eb.asInstanceOf[VertxEventBusProcessor].eb.send[String](
-          RPCProcessor.packageAddress(context.channel, context.method, context.templateUri),
+          EZ.eb.packageAddress(context.method, context.templateUri),
           msg, opt, new Handler[AsyncResult[Message[String]]] {
             override def handle(event: AsyncResult[Message[String]]): Unit = {
               if (event.succeeded()) {
                 context.executeResult =
-                  if (event.result().headers().contains(RPCProcessor.FLAG_RESP_TYPE)) {
-                    event.result().headers().get(RPCProcessor.FLAG_RESP_TYPE) match {
+                  if (event.result().headers().contains(RPCProcessor.RESP_TYPE_FLAG)) {
+                    event.result().headers().get(RPCProcessor.RESP_TYPE_FLAG) match {
                       case "DownloadFile" => JsonHelper.toObject[Resp[DownloadFile]](event.result().body())
                       case "ReqFile" => JsonHelper.toObject[Resp[ReqFile]](event.result().body())
                       case "Raw" => JsonHelper.toObject[Resp[Raw]](event.result().body())

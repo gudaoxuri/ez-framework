@@ -32,9 +32,10 @@
 
     <modules>
         <module>modules/core</module>
+        <module>modules/gateway</module>
         <module>modules/jdbc</module>
         <module>modules/email</module>
-        <module>modules/gateway</module>
+        <module>modules/auth</module>
     </modules>
 
     <dependencies>

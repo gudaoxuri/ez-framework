@@ -3,7 +3,7 @@ package com.ecfront.ez.framework.service.gateway
 import java.net.URLDecoder
 
 import com.ecfront.common.JsonHelper
-import com.ecfront.ez.framework.core.rpc.{Channel, Method}
+import com.ecfront.ez.framework.core.rpc.Method
 import com.ecfront.ez.framework.service.gateway.interceptor.EZAPIContext
 import io.vertx.core.Handler
 import io.vertx.core.http._
@@ -41,12 +41,11 @@ class WebSocketServerProcessor extends Handler[ServerWebSocket] with GatewayProc
       } else {
         Map[String, String]()
       }
-    val result = LocalCacheContainer.getRouter(Channel.WS.toString, Method.WS.toString, request.path(), parameters, ip)
+    val result = LocalCacheContainer.getRouter(Method.WS.toString, request.path(), parameters, ip)
     WebSocketMessagePushManager.createWS(result._3, request)
     if (result._1) {
       val context = new EZAPIContext()
       context.remoteIP = ip
-      context.channel = Channel.WS.toString
       context.method = Method.WS.toString
       context.templateUri = result._3
       context.realUri = request.uri()

@@ -13,9 +13,6 @@ import scala.collection.mutable
   */
 object AuthInterceptor extends GatewayInterceptor {
 
-  // 前端传入的token标识
-  val VIEW_TOKEN_FLAG = "__ez_token__"
-
   var publicUriPrefix: String = _
 
   def init(_publicUriPrefix: String): Unit = {
@@ -24,8 +21,8 @@ object AuthInterceptor extends GatewayInterceptor {
 
   override def before(obj: EZAPIContext, context: mutable.Map[String, Any], p: AsyncResp[EZAPIContext]): Unit = {
     obj.token =
-      if (obj.parameters.contains(VIEW_TOKEN_FLAG)) {
-        Some(obj.parameters(VIEW_TOKEN_FLAG))
+      if (obj.parameters.contains(RPCProcessor.VIEW_TOKEN_FLAG)) {
+        Some(obj.parameters(RPCProcessor.VIEW_TOKEN_FLAG))
       } else {
         None
       }
@@ -35,7 +32,7 @@ object AuthInterceptor extends GatewayInterceptor {
     } else {
       if (obj.token.isEmpty) {
         // token不存在
-        p.unAuthorized(s"【token】not exist，Request parameter must include【$VIEW_TOKEN_FLAG】")
+        p.unAuthorized(s"【token】not exist，Request parameter must include【${RPCProcessor.VIEW_TOKEN_FLAG}】")
       } else {
         // 根据token获取EZ_Token_Info
         AsyncRedisProcessor.client().get(RPCProcessor.TOKEN_INFO_FLAG + obj.token.get, new Handler[AsyncResult[String]] {
@@ -44,7 +41,7 @@ object AuthInterceptor extends GatewayInterceptor {
               if (event.result() != null) {
                 obj.optInfo = Some(JsonHelper.toObject[OptInfo](event.result()))
                 // 要访问的资源编码
-                val resCode = LocalCacheContainer.getResourceCode(obj.channel, obj.method, obj.templateUri)
+                val resCode = LocalCacheContainer.getResourceCode(obj.method, obj.templateUri)
                 if (resCode != null) {
                   // 此资源需要认证
                   if (LocalCacheContainer.existOrganization(obj.optInfo.get.organizationCode)) {
@@ -54,7 +51,7 @@ object AuthInterceptor extends GatewayInterceptor {
                       p.success(obj)
                     } else {
                       p.unAuthorized(s"Account【${obj.optInfo.get.name}】in【${obj.optInfo.get.organizationCode}】" +
-                        s" no access to ${obj.channel}:${obj.method}:${obj.realUri}")
+                        s" no access to ${obj.method}:${obj.realUri}")
                     }
                   } else {
                     p.unAuthorized(s"Organization【${obj.optInfo.get.organizationCode}】 not found")

@@ -3,6 +3,7 @@ package com.ecfront.ez.framework.service.jdbc
 import java.lang.reflect.ParameterizedType
 
 import com.ecfront.common.{BeanHelper, Resp}
+import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.i18n.I18NProcessor._
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
@@ -22,7 +23,9 @@ abstract class BaseModel extends Serializable {
 object BaseModel {
 
   val Id_FLAG = "id"
-  val SPLIT = "@"
+  val SPLIT = EZ.eb.ADDRESS_SPLIT_FLAG
+  val SYSTEM_ACCOUNT_LOGIN_ID = "sysadmin"
+  val ORG_ADMIN_ACCOUNT_LOGIN_ID = "admin"
 
 }
 
@@ -291,9 +294,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 更新前处理
     *
-    * @param newValues  新值，SQL (相当于SET中的条件)或Json
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param newValues  新值，SQL (相当于SET中的条件)
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 是否允许更新
     */
   def preUpdateByCond(
@@ -303,9 +306,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 更新后处理
     *
-    * @param newValues  新值，SQL (相当于SET中的条件)或Json
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param newValues  新值，SQL (相当于SET中的条件)
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 是否成功
     */
   def postUpdateByCond(newValues: String, condition: String, parameters: List[Any]): Resp[Void] = Resp.success(null)
@@ -313,9 +316,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 更新
     *
-    * @param newValues  新值，SQL (相当于SET中的条件)或Json
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param newValues  新值，SQL (相当于SET中的条件)
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 是否成功
     */
   def updateByCond(newValues: String, condition: String, parameters: List[Any] = List()): Resp[Void] = {
@@ -340,9 +343,9 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 更新实现方法
     *
-    * @param newValues  新值，SQL (相当于SET中的条件)或Json
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param newValues  新值，SQL (相当于SET中的条件)
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 是否成功
     */
   protected def doUpdateByCond(newValues: String, condition: String, parameters: List[Any]): Resp[Void] = {
@@ -473,8 +476,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 删除前处理
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 是否允许删除
     */
   def preDeleteByCond(
@@ -484,8 +487,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 删除后处理
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 是否成功
     */
   def postDeleteByCond(condition: String, parameters: List[Any]): Resp[Void] = Resp.success(null)
@@ -493,8 +496,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 删除
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 是否成功
     */
   def deleteByCond(condition: String, parameters: List[Any] = List()): Resp[Void] = {
@@ -524,8 +527,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 删除实现方法
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 是否成功
     */
   protected def doDeleteByCond(condition: String, parameters: List[Any]): Resp[Void] = {
@@ -661,8 +664,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 获取一条记录前处理
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 是否允许获取这条记录
     */
   def preGetByCond(condition: String,
@@ -672,8 +675,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 获取一条记录后处理
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @param getResult  获取到的记录
     * @return 处理后的记录
     */
@@ -682,8 +685,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 获取一条记录
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 获取到的记录
     */
   def getByCond(condition: String, parameters: List[Any] = List()): Resp[M] = {
@@ -713,8 +716,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 获取一条记录实现方法
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 获取到的记录
     */
   protected def doGetByCond(condition: String, parameters: List[Any]): Resp[M] = {
@@ -848,8 +851,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 判断是否存在前处理
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 是否允许判断是否存在
     */
   def preExistByCond(condition: String, parameters: List[Any]): Resp[(String, List[Any])] =
@@ -858,8 +861,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 判断是否存在后处理
     *
-    * @param condition   条件，SQL (相当于Where中的条件)或Json
-    * @param parameters  参数 ，Mongo不需要
+    * @param condition   条件，SQL (相当于Where中的条件)
+    * @param parameters  参数
     * @param existResult 是否存在
     * @return 处理后的结果
     */
@@ -870,8 +873,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 判断是否存在
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 是否存在
     */
   def existByCond(condition: String, parameters: List[Any] = List()): Resp[Boolean] = {
@@ -901,8 +904,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 判断是否存在实现方法
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 是否存在
     */
   protected def doExistByCond(condition: String, parameters: List[Any]): Resp[Boolean] = {
@@ -915,8 +918,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 查找前处理
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 是否允许查找
     */
   def preFind(condition: String, parameters: List[Any]): Resp[(String, List[Any])] = Resp.success((condition, parameters))
@@ -924,8 +927,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 查找后处理
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @param findResult 是否存在
     * @return 处理后的结果
     */
@@ -934,8 +937,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 查找
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 查找结果
     */
   def find(condition: String, parameters: List[Any] = List()): Resp[List[M]] = {
@@ -960,8 +963,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 查找实现方法
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 查找结果
     */
   protected def doFind(condition: String, parameters: List[Any]): Resp[List[M]] = {
@@ -975,8 +978,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 分页前处理
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @param pageNumber 当前页，从1开始
     * @param pageSize   每页条数
     * @return 是否允许分页
@@ -986,8 +989,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 分页后处理
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @param pageNumber 当前页，从1开始
     * @param pageSize   每页条数
     * @param pageResult 是否存在
@@ -999,8 +1002,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 分页
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @param pageNumber 当前页，从1开始
     * @param pageSize   每页条数
     * @return 分页结果
@@ -1027,8 +1030,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 分页实现方法
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @param pageNumber 当前页，从1开始
     * @param pageSize   每页条数
     * @return 分页结果
@@ -1045,8 +1048,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 计数前处理
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 是否允许计数
     */
   def preCount(condition: String, parameters: List[Any]): Resp[(String, List[Any])] = Resp.success((condition, parameters))
@@ -1054,8 +1057,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 计数后处理
     *
-    * @param condition   条件，SQL (相当于Where中的条件)或Json
-    * @param parameters  参数 ，Mongo不需要
+    * @param condition   条件，SQL (相当于Where中的条件)
+    * @param parameters  参数
     * @param countResult 是否存在
     * @return 处理后的结果
     */
@@ -1064,8 +1067,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 计数
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 条数
     */
   def count(condition: String, parameters: List[Any] = List()): Resp[Long] = {
@@ -1090,8 +1093,8 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   /**
     * 计数实现方法
     *
-    * @param condition  条件，SQL (相当于Where中的条件)或Json
-    * @param parameters 参数 ，Mongo不需要
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
     * @return 条数
     */
   protected def doCount(condition: String, parameters: List[Any]): Resp[Long] = {
@@ -1102,7 +1105,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
   }
 
 
-  private def packageCondition(condition: String): String = {
+  protected def packageCondition(condition: String): String = {
     if (condition == null || condition.trim == "") {
       "1=1"
     } else {
@@ -1124,16 +1127,16 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     }
   }
 
-  def setIdValue(idValue:String,model:BaseModel):Unit={
-    setValueByField(model,_entityInfo.idFieldName,idValue)
+  def setIdValue(idValue: String, model: BaseModel): Unit = {
+    setValueByField(model, _entityInfo.idFieldName, idValue)
   }
 
   protected def getUUIDValue(model: BaseModel): String = {
     getValueByField(model, _entityInfo.uuidFieldName).asInstanceOf[String]
   }
 
-  def setUUIDValue(uuidValue:String,model:BaseModel):Unit={
-    setValueByField(model,_entityInfo.uuidFieldName,uuidValue)
+  def setUUIDValue(uuidValue: String, model: BaseModel): Unit = {
+    setValueByField(model, _entityInfo.uuidFieldName, uuidValue)
   }
 
   protected def getValueByField(model: AnyRef, fieldName: String): Any = {

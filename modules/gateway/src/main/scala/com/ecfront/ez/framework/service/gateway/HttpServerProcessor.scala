@@ -56,11 +56,10 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
       } else {
         "application/json; charset=utf-8"
       }
-    val result = LocalCacheContainer.getRouter(Channel.HTTP.toString, request.method().name(), request.path(),
+    val result = LocalCacheContainer.getRouter(request.method().name(), request.path(),
       request.params().map(entry => entry.getKey -> entry.getValue).toMap, ip)
     val context = new EZAPIContext()
     context.remoteIP = ip
-    context.channel = Channel.HTTP.toString
     context.method = request.method().name()
     context.templateUri = result._3
     context.realUri = request.uri()

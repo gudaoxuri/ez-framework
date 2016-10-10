@@ -78,10 +78,10 @@ class GatewaySpec extends BasicSpec {
          |}
        """.stripMargin)
     addAuthInfo()
-    /*simpleRPCTest()
+    simpleRPCTest()
     xmlTest()
     fileTest()
-    authTest()*/
+    authTest()
     // httpsTest("127.0.0.1", 8081)
     println("====================\r\n性能测试\r\n====================")
     // performanceTest()
@@ -93,7 +93,7 @@ class GatewaySpec extends BasicSpec {
       * http://127.0.0.1:8080/test/downfile/?__ez_token_=testToken
       * WS
       * 打开ws.html
-      */
+      **/
   }
 
   def U(path: String): String = {
@@ -101,7 +101,7 @@ class GatewaySpec extends BasicSpec {
   }
 
   def addAuthInfo(): Unit = {
-    val opt = OptInfo("testToken", "testAccCode", "testLoginId", "testName", "", "", "", "testOrg", "", Set("user"), new Date(), Map("ext1" -> "aaa"))
+    val opt = OptInfo("testToken", "testAccCode", "testLoginId", "testName", "", "", "", "testOrg", "", Set("user"), new Date(), "", "")
     EZ.cache.set(RPCProcessor.TOKEN_INFO_FLAG + "testToken", JsonHelper.toJsonString(opt))
   }
 
@@ -213,23 +213,23 @@ class GatewaySpec extends BasicSpec {
     assert(RespHttpClientProcessor.get[EZ_Test]("http://127.0.0.1:8080/test/1/?__ez_token__=abc").message.contains("Token NOT exist"))
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")))
 
-    EZ.eb.publish("/ez/gateway/resource/add/", Map("channel" -> "HTTP", "method" -> "*", "path" -> "/test/*"))
+    EZ.eb.publish("/ez/auth/rbac/resource/add/", Map("method" -> "*", "uri" -> "/test/*"))
     Thread.sleep(100)
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")).message.contains("Organization"))
-    EZ.eb.publish("/ez/gateway/organization/add/", s"""{"code":""}""")
+    EZ.eb.publish("/ez/auth/rbac/organization/add/", s"""{"code":""}""")
     Thread.sleep(100)
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")).message.contains("no access to"))
-    EZ.eb.publish("/ez/gateway/role/add/", s"""{"code":"user","resources":["HTTP@*@/test/*"]}""")
+    EZ.eb.publish("/ez/auth/rbac/role/add/", s"""{"code":"user","resource_codes":["*@/test/*"]}""")
     Thread.sleep(100)
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")))
 
-    EZ.eb.publish("/ez/gateway/role/remove/", s"""{"code":"user"}""")
+    EZ.eb.publish("/ez/auth/rbac/role/remove/", s"""{"code":"user"}""")
     Thread.sleep(100)
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")).message.contains("no access to"))
-    EZ.eb.publish("/ez/gateway/organization/remove/", s"""{"code":""}""")
+    EZ.eb.publish("/ez/auth/rbac/organization/remove/", s"""{"code":""}""")
     Thread.sleep(100)
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")).message.contains("Organization"))
-    EZ.eb.publish("/ez/gateway/resource/remove/", Map("channel" -> "HTTP", "method" -> "*", "path" -> "/test/*"))
+    EZ.eb.publish("/ez/auth/rbac/resource/remove/", Map("code" -> "*@/test/*"))
     Thread.sleep(100)
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")))
   }

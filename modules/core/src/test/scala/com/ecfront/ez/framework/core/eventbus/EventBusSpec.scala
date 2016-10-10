@@ -51,9 +51,10 @@ class EventBusSpec extends MockStartupSpec {
     }
     EZ.eb.request("b", "456")
     EZ.eb.request("bb", TestObj("字段1", 0.1))
+    Thread.sleep(100)
     EZ.eb.request("bb", TestObj("字段1", 0.2))
-    var executingMessages = EZ.cache.hgetAll("ez:eb:executing:bb")
-    assert(executingMessages.size == 2 && executingMessages.head._2 == """{"f1":"字段1","f2":0.1}""")
+    var executingMessages = EZ.cache.hgetAll(s"ez:eb:executing:${EZ.eb.packageAddress("REQ_RESP","bb")}")
+    assert(executingMessages.size == 2 && executingMessages.head._2 == """{"f1":"字段1","f2":0.2}""")
     new Thread(new Runnable {
       override def run(): Unit = {
         EZ.eb.response[TestObj]("bb") {

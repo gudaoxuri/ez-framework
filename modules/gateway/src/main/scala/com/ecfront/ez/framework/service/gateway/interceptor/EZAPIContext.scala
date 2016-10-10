@@ -10,8 +10,6 @@ import scala.language.implicitConversions
   */
 class EZAPIContext {
 
-  // 请求通道
-  @BeanProperty var channel: String = _
   // 请求方法
   @BeanProperty var method: String = _
   // 请求对应的模块URI（可能带通配符）

@@ -51,24 +51,24 @@ object AutoBuildingProcessor extends LazyLogging {
             }
           val annInfo = methodInfo.annotation match {
             case ann: GET =>
-              (Channel.HTTP, Method.GET, ann.uri, null)
+              (Method.GET, ann.uri, null)
             case ann: POST =>
-              (Channel.HTTP, Method.POST, ann.uri, getClassFromMethodInfo(methodInfo))
+              (Method.POST, ann.uri, getClassFromMethodInfo(methodInfo))
             case ann: PUT =>
-              (Channel.HTTP, Method.PUT, ann.uri, getClassFromMethodInfo(methodInfo))
+              (Method.PUT, ann.uri, getClassFromMethodInfo(methodInfo))
             case ann: DELETE =>
-              (Channel.HTTP, Method.DELETE, ann.uri, null)
+              (Method.DELETE, ann.uri, null)
             case ann: WS =>
-              (Channel.WS, Method.WS, ann.uri, getClassFromMethodInfo(methodInfo))
+              (Method.WS, ann.uri, getClassFromMethodInfo(methodInfo))
             case ann: SUB =>
-              (Channel.EB, Method.PUB_SUB, ann.uri, getClassFromMethodInfo(methodInfo))
+              (Method.PUB_SUB, ann.uri, getClassFromMethodInfo(methodInfo))
             case ann: RESP =>
-              (Channel.EB, Method.REQ_RESP, ann.uri, getClassFromMethodInfo(methodInfo))
+              (Method.REQ_RESP, ann.uri, getClassFromMethodInfo(methodInfo))
             case ann: REPLY =>
-              (Channel.EB, Method.REPLY, ann.uri, getClassFromMethodInfo(methodInfo))
+              (Method.ACK, ann.uri, getClassFromMethodInfo(methodInfo))
           }
-          RPCProcessor.add(annInfo._1, annInfo._2,
-            if (annInfo._3.startsWith("/")) annInfo._3 else baseUri + annInfo._3, annInfo._4, respType,fun(annInfo._2, methodMirror))
+          RPCProcessor.add(annInfo._1,
+            if (annInfo._2.startsWith("/")) annInfo._2 else baseUri + annInfo._2, annInfo._3, respType, fun(annInfo._1, methodMirror))
       }
     } catch {
       case e: Throwable =>

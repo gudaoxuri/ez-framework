@@ -70,8 +70,8 @@
  </check>
  <check class="org.scalastyle.scalariform.NoWhitespaceBeforeLeftBracketChecker" level="warning" enabled="true"></check>
  <check class="org.scalastyle.scalariform.NoWhitespaceAfterLeftBracketChecker" level="warning" enabled="true"></check>
- <check class="org.scalastyle.scalariform.ReturnChecker" level="warning" enabled="true"></check>
  <!--ez-->
+ <!--<check class="org.scalastyle.scalariform.ReturnChecker" level="warning" enabled="true"></check>-->
  <check class="org.scalastyle.scalariform.NullChecker" level="warning" enabled="false"></check>
  <check class="org.scalastyle.scalariform.NoCloneChecker" level="warning" enabled="true"></check>
  <check class="org.scalastyle.scalariform.NoFinalizeChecker" level="warning" enabled="true"></check>

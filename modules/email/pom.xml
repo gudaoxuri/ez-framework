@@ -13,7 +13,7 @@
 
     <artifactId>ezf-email</artifactId>
     <name>EZ Framework Email</name>
-    <description>EZ框架Email服务</description>
+    <description>EZ框架Email模块</description>
     <url>https://github.com/gudaoxuri/ez-framework</url>
     <packaging>jar</packaging>
     <version>${ezf-version}</version>

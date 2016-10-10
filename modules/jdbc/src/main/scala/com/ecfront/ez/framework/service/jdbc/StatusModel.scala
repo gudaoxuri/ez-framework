@@ -193,9 +193,7 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
     * @return 分页结果
     */
   def pageEnabled(
-                   condition: String,
-                   parameters: List[Any] = List(),
-                   pageNumber: Long = 1, pageSize: Int = 10): Resp[Page[M]] = {
+                   condition: String, parameters: List[Any] = List(), pageNumber: Long = 1, pageSize: Int = 10): Resp[Page[M]] = {
     val preR = prePageEnabled(condition, parameters, pageNumber, pageSize)
     if (preR) {
       val filterR = filterByCond(preR.body._1, preR.body._2)
@@ -614,6 +612,119 @@ trait StatusStorage[M <: StatusModel] extends BaseStorage[M] {
   protected def doDisableByUUID(uuid: String): Resp[Void] = {
     doUpdateByCond(" enable = false ", s"${_entityInfo.uuidFieldName} = ?", List(uuid))
   }
+
+  /**
+    * 禁用前处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
+    * @return 是否允许禁用
+    */
+  def preDisableByCond(condition: String, parameters: List[Any]): Resp[(String, List[Any])] =
+  Resp.success((condition, parameters))
+
+  /**
+    * 禁用后处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
+    * @return 是否成功
+    */
+  def postDisableByCond(condition: String, parameters: List[Any]): Resp[Void] = Resp.success(null)
+
+  /**
+    * 禁用
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
+    * @return 是否成功
+    */
+  def disableByCond(condition: String, parameters: List[Any] = List()): Resp[Void] = {
+    val preR = preDisableByCond(condition, parameters)
+    if (preR) {
+      val filterR = filterByCond(preR.body._1, preR.body._2)
+      if (filterR) {
+        val doR = doDisableByCond(preR.body._1, filterR.body._2)
+        if (doR) {
+          postDisableByCond(preR.body._1, filterR.body._2)
+        } else {
+          doR
+        }
+      } else {
+        filterR
+      }
+    } else {
+      preR
+    }
+  }
+
+  /**
+    * 禁用实现方法
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
+    * @return 是否成功
+    */
+  protected def doDisableByCond(condition: String, parameters: List[Any]): Resp[Void] = {
+    doUpdateByCond("enable = false", condition, parameters)
+  }
+
+  /**
+    * 启用前处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
+    * @return 是否允许启用
+    */
+  def preEnableByCond(condition: String, parameters: List[Any]): Resp[(String, List[Any])] =
+  Resp.success((condition, parameters))
+
+  /**
+    * 启用后处理
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
+    * @return 是否成功
+    */
+  def postEnableByCond(condition: String, parameters: List[Any]): Resp[Void] = Resp.success(null)
+
+  /**
+    * 启用
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
+    * @return 是否成功
+    */
+  def enableByCond(condition: String, parameters: List[Any] = List()): Resp[Void] = {
+    val preR = preEnableByCond(condition, parameters)
+    if (preR) {
+      val filterR = filterByCond(preR.body._1, preR.body._2)
+      if (filterR) {
+        val doR = doEnableByCond(preR.body._1, filterR.body._2)
+        if (doR) {
+          postEnableByCond(preR.body._1, filterR.body._2)
+        } else {
+          doR
+        }
+      } else {
+        filterR
+      }
+    } else {
+      preR
+    }
+  }
+
+  /**
+    * 启用实现方法
+    *
+    * @param condition  条件，SQL (相当于Where中的条件)
+    * @param parameters 参数
+    * @return 是否成功
+    */
+  protected def doEnableByCond(condition: String, parameters: List[Any]): Resp[Void] = {
+    doUpdateByCond("enable = true", condition, parameters)
+  }
+
 
 }
 

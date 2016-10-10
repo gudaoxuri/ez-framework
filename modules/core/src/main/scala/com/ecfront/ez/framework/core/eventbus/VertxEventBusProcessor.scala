@@ -53,23 +53,19 @@ class VertxEventBusProcessor extends EventBusProcessor {
     resp
   }
 
-  override def publish(address: String, message: Any, args: Map[String, String] = Map()): Unit = {
-    val msg = toAllowedMessage(message)
-    logger.trace(s"[EB] Publish a message [$address] : $args > $msg ")
+  override protected def doPublish(address: String, message: Any, args: Map[String, String]): Unit = {
     val opt = new DeliveryOptions
     opt.addHeader(FLAG_CONTEXT, JsonHelper.toJsonString(EZ.context))
     args.foreach {
       arg =>
         opt.addHeader(arg._1, arg._2)
     }
-    eb.publish(address, msg, opt)
+    eb.publish(address, message, opt)
   }
 
-  override def request(address: String, message: Any, args: Map[String, String] = Map(), ha: Boolean = true): Unit = {
-    val msg = toAllowedMessage(message)
-    logger.trace(s"[EB] Request a message [$address] : $args > $msg ")
+  override protected def doRequest(address: String, message: Any, args: Map[String, String], ha: Boolean): Unit = {
     if (ha) {
-      EZ.cache.hset(FLAG_QUEUE_EXECUTING + address, (address + msg).hashCode + "", msg.toString)
+      EZ.cache.hset(FLAG_QUEUE_EXECUTING + address, (address + message).hashCode + "", message.toString)
     }
     val opt = new DeliveryOptions
     opt.addHeader(FLAG_CONTEXT, JsonHelper.toJsonString(EZ.context))
@@ -77,13 +73,11 @@ class VertxEventBusProcessor extends EventBusProcessor {
       arg =>
         opt.addHeader(arg._1, arg._2)
     }
-    eb.send(address, msg)
+    eb.send(address, message)
   }
 
-  override def ack[E: Manifest](address: String, message: Any, args: Map[String, String] = Map(), timeout: Long = 30 * 1000): (E, Map[String, String]) = {
+  override protected def doAck[E: Manifest](address: String, message: Any, args: Map[String, String], timeout: Long): (E, Map[String, String]) = {
     val p = Promise[(E, Map[String, String])]()
-    val msg = toAllowedMessage(message)
-    logger.trace(s"[EB] Ack send a message [$address] : $args > $msg ")
     val opt = new DeliveryOptions
     opt.addHeader(FLAG_CONTEXT, JsonHelper.toJsonString(EZ.context))
     args.foreach {
@@ -91,7 +85,7 @@ class VertxEventBusProcessor extends EventBusProcessor {
         opt.addHeader(arg._1, arg._2)
     }
     opt.setSendTimeout(timeout)
-    eb.send[String](address, msg, opt, new Handler[AsyncResult[Message[String]]] {
+    eb.send[String](address, message, opt, new Handler[AsyncResult[Message[String]]] {
       override def handle(event: AsyncResult[Message[String]]): Unit = {
         if (event.succeeded()) {
           logger.trace(s"[EB] Ack reply a message [$address] : ${event.result().body()} ")
@@ -114,29 +108,30 @@ class VertxEventBusProcessor extends EventBusProcessor {
     Await.result(p.future, Duration.Inf)
   }
 
-  override def subscribe[E: Manifest](address: String, reqClazz: Class[E] = null)(receivedFun: (E, Map[String, String]) => Unit): Unit = {
-    consumer("subscribe", address, {
+  override protected def doSubscribe[E: Manifest](address: String, reqClazz: Class[E])(receivedFun: (E, Map[String, String]) => Unit): Unit = {
+    consumer[E]("subscribe", address, {
       (message: E, args) =>
         receivedFun(message, args)
         null
     }, needReply = false, reqClazz)
   }
 
-  override def response[E: Manifest](address: String, reqClazz: Class[E] = null)(receivedFun: (E, Map[String, String]) => Unit): Unit = {
+  override protected def doResponse[E: Manifest](address: String, reqClazz: Class[E])(receivedFun: (E, Map[String, String]) => Unit): Unit = {
     EZ.cache.hgetAll(FLAG_QUEUE_EXECUTING + address).foreach {
       message =>
         logger.trace(s"[EB] Request executing a message [$address] : ${message._2} ")
         eb.send(address, message._2)
     }
-    consumer("response", address, {
+    consumer[E]("response", address, {
       (message: E, args) =>
         receivedFun(message, args)
         null
     }, needReply = false, reqClazz)
   }
 
-  override def reply[E: Manifest](address: String, reqClazz: Class[E] = null)(receivedFun: (E, Map[String, String]) => (Any, Map[String, String])): Unit = {
-    consumer("reply", address, receivedFun, needReply = true, reqClazz)
+  override protected def doReply[E: Manifest](address: String, reqClazz: Class[E])
+                                             (receivedFun: (E, Map[String, String]) => (Any, Map[String, String])): Unit = {
+    consumer[E]("reply", address, receivedFun, needReply = true, reqClazz)
   }
 
   private def consumer[E: Manifest](method: String, address: String, receivedFun: (E, Map[String, String]) => (Any, Map[String, String]),
@@ -156,7 +151,7 @@ class VertxEventBusProcessor extends EventBusProcessor {
             logger.trace(s"[EB] Received a $method message [$address] : $headers > ${event.body()} ")
             try {
               EZ.cache.hdel(FLAG_QUEUE_EXECUTING + address, (address + event.body()).hashCode + "")
-              val message = toObject(event.body(), reqClazz)
+              val message = toObject[E](event.body(), reqClazz)
               val replyData = receivedFun(message, headers.toMap)
               if (needReply) {
                 val opt = new DeliveryOptions()
@@ -197,33 +192,6 @@ class VertxEventBusProcessor extends EventBusProcessor {
         throw event.getCause
       }
     })
-  }
-
-  private[ecfront] def toAllowedMessage(message: Any): Any = {
-    message match {
-      case m if m.isInstanceOf[String] || m.isInstanceOf[Int] ||
-        m.isInstanceOf[Long] || m.isInstanceOf[Double] || m.isInstanceOf[Float] ||
-        m.isInstanceOf[Boolean] || m.isInstanceOf[BigDecimal] || m.isInstanceOf[Short] => message
-      case _ => JsonHelper.toJsonString(message)
-    }
-  }
-
-  private def toObject[E: Manifest](message: Any, reqClazz: Class[E]): E = {
-    if (reqClazz != null) {
-      reqClazz match {
-        case m if classOf[String].isAssignableFrom(m) ||
-          classOf[Int].isAssignableFrom(m) ||
-          classOf[Long].isAssignableFrom(m) ||
-          classOf[Double].isAssignableFrom(m) ||
-          classOf[Float].isAssignableFrom(m) ||
-          classOf[Boolean].isAssignableFrom(m) ||
-          classOf[BigDecimal].isAssignableFrom(m) ||
-          classOf[Short].isAssignableFrom(m) => message.asInstanceOf[E]
-        case _ => JsonHelper.toObject(message, reqClazz)
-      }
-    } else {
-      JsonHelper.toObject[E](message)
-    }
   }
 
 }

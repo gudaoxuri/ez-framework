@@ -1,46 +1,55 @@
 package com.ecfront.ez.framework.service.gateway
 
 import com.ecfront.common.Resp
-import com.ecfront.ez.framework.core.rpc.{APIDTO, RPC, SUB}
+import com.ecfront.ez.framework.core.EZ
+import com.ecfront.ez.framework.core.rpc._
 import com.fasterxml.jackson.databind.JsonNode
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import collection.JavaConversions._
 
-@RPC("/ez/gateway/")
+import scala.collection.JavaConversions._
+
+@RPC("/ez/auth/")
 object ExchangeProcessor extends LazyLogging {
 
-  @SUB("address/add/")
+  @SUB("/ez/gateway/address/add/")
   def subscribeAddAddress(args: Map[String, String], apiDTO: APIDTO): Resp[Void] = {
-    LocalCacheContainer.addRouter(apiDTO.channel, apiDTO.method, apiDTO.path)
+    LocalCacheContainer.addRouter(apiDTO.method, apiDTO.path)
   }
 
-  @SUB("resource/add/")
+  @REPLY("/ez/gateway/auth/flush/")
+  def flushCache(args: Map[String, String],body: Map[String,String]): Resp[Void] = {
+    LocalCacheContainer.flushAuth()
+  }
+
+  @SUB("rbac/organization/add/")
+  def subscribeAddOrganization(args: Map[String, String], org: Map[String, String]): Resp[Void] = {
+    LocalCacheContainer.addOrganization(org("code"))
+  }
+
+  @SUB("rbac/organization/remove/")
+  def subscribeRemoveOrganization(args: Map[String, String], org: Map[String, String]): Resp[Void] = {
+    LocalCacheContainer.removeOrganization(org("code"))
+  }
+
+  @SUB("rbac/resource/add/")
   def subscribeAddResource(args: Map[String, String], res: Map[String, String]): Resp[Void] = {
-    LocalCacheContainer.addResource(res("channel"), res("method"), res("path"))
+    LocalCacheContainer.addResource(res("method"), res("uri"))
   }
 
-  @SUB("resource/remove/")
+  @SUB("rbac/resource/remove/")
   def subscribeRemoveResource(args: Map[String, String], res: Map[String, String]): Resp[Void] = {
-    LocalCacheContainer.removeResource(res("channel"), res("method"), res("path"))
+    val code = res("code")
+    val Array(method, uri) = code.split(EZ.eb.ADDRESS_SPLIT_FLAG)
+    LocalCacheContainer.removeResource(method, uri)
   }
 
-  @SUB("organization/add/")
-  def subscribeAddOrganization(args: Map[String, String], res: Map[String, String]): Resp[Void] = {
-    LocalCacheContainer.addOrganization(res("code"))
+  @SUB("rbac/role/add/")
+  def subscribeAddRole(args: Map[String, String], res: JsonNode): Resp[Void] = {
+    LocalCacheContainer.addRole(res.get("code").asText(), res.get("resource_codes").map(_.asText()).toSet)
   }
 
-  @SUB("organization/remove/")
-  def subscribeRemoveOrganization(args: Map[String, String], res: Map[String, String]): Resp[Void] = {
-    LocalCacheContainer.removeOrganization(res("code"))
-  }
-
-  @SUB("role/add/")
-  def subscribeAddRole(args: Map[String, String], res:JsonNode): Resp[Void] = {
-    LocalCacheContainer.addRole(res.get("code").asText(),res.get("resources").map(_.asText()).toSet)
-  }
-
-  @SUB("role/remove/")
-  def subscribeRemoveRole(args: Map[String, String], res:JsonNode): Resp[Void] = {
+  @SUB("rbac/role/remove/")
+  def subscribeRemoveRole(args: Map[String, String], res: JsonNode): Resp[Void] = {
     LocalCacheContainer.removeRole(res.get("code").asText())
   }
 

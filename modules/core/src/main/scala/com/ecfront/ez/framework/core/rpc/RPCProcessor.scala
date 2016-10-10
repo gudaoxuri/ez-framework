@@ -3,17 +3,18 @@ package com.ecfront.ez.framework.core.rpc
 import com.ecfront.common.{BeanHelper, FieldAnnotationInfo, Resp}
 import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
-import com.ecfront.ez.framework.core.rpc.Channel.Channel
 import com.ecfront.ez.framework.core.rpc.Method.Method
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.Vertx
 
 object RPCProcessor extends LazyLogging {
 
-  private val FLAG_RPC_API_URL = "/ez/gateway/address/add/"
-  val FLAG_RESP_TYPE = "__respType__"
+  private val RPC_API_URL_FLAG = "/ez/gateway/address/add/"
+  val RESP_TYPE_FLAG = "__respType__"
   // Token信息 key : ez:auth:token:info:<token Id> value : <token info>
   val TOKEN_INFO_FLAG = "ez:auth:token:info:"
+  // 前端传入的token标识
+  val VIEW_TOKEN_FLAG = "__ez_token__"
 
   private val address = collection.mutable.Set[String]()
 
@@ -32,43 +33,40 @@ object RPCProcessor extends LazyLogging {
     Resp.success(null)
   }
 
-  private[core] def add[E: Manifest](channel: Channel, method: Method, path: String,
-                                     bodyClass: Class[E], respType:String, fun: => (Map[String, String], E) => Any): Unit = {
+  private[core] def add[E: Manifest](method: Method, path: String,
+                                     bodyClass: Class[E], respType: String, fun: => (Map[String, String], E) => Any): Unit = {
     // 格式化path
-    val formatPath = packageAddress(channel.toString, method.toString, path)
+    val formatPath = EZ.eb.packageAddress(method.toString, path)
     address += formatPath
     addClazzInfo(bodyClass)
-    channel match {
-      case Channel.HTTP =>
-        EZ.eb.publish(FLAG_RPC_API_URL, APIDTO(channel.toString, method.toString, path))
+    method match {
+      case m if m == Method.GET || m == Method.POST || m == Method.PUT || m == Method.DELETE =>
+        EZ.eb.publish(RPC_API_URL_FLAG, APIDTO(method.toString, path))
         (formatPath, EZ.eb.reply[E](formatPath, bodyClass) {
           (message, args) =>
-            (execute[E](bodyClass, fun, message, args),Map(FLAG_RESP_TYPE -> respType))
+            (execute[E](bodyClass, fun, message, args), Map(RESP_TYPE_FLAG -> respType))
         })
-      case Channel.WS =>
-        EZ.eb.publish(FLAG_RPC_API_URL, APIDTO(channel.toString, method.toString, path))
+      case Method.WS =>
+        EZ.eb.publish(RPC_API_URL_FLAG, APIDTO(method.toString, path))
         (formatPath, EZ.eb.reply[E](formatPath, bodyClass) {
           (message, args) =>
-            (execute[E](bodyClass, fun, message, args),Map(FLAG_RESP_TYPE -> respType))
+            (execute[E](bodyClass, fun, message, args), Map(RESP_TYPE_FLAG -> respType))
         })
-      case Channel.EB =>
-        method match {
-          case Method.PUB_SUB =>
-            (formatPath, EZ.eb.subscribe[E](formatPath, bodyClass) {
-              (message, args) =>
-                execute[E](bodyClass, fun, message, args)
-            })
-          case Method.REQ_RESP =>
-            (formatPath, EZ.eb.response[E](formatPath, bodyClass) {
-              (message, args) =>
-                execute[E](bodyClass, fun, message, args)
-            })
-          case Method.REPLY =>
-            (formatPath, EZ.eb.reply[E](formatPath, bodyClass) {
-              (message, args) =>
-                (execute[E](bodyClass, fun, message, args),Map(FLAG_RESP_TYPE -> respType))
-            })
-        }
+      case Method.PUB_SUB =>
+        (formatPath, EZ.eb.subscribe[E](formatPath, bodyClass) {
+          (message, args) =>
+            execute[E](bodyClass, fun, message, args)
+        })
+      case Method.REQ_RESP =>
+        (formatPath, EZ.eb.response[E](formatPath, bodyClass) {
+          (message, args) =>
+            execute[E](bodyClass, fun, message, args)
+        })
+      case Method.ACK =>
+        (formatPath, EZ.eb.reply[E](formatPath, bodyClass) {
+          (message, args) =>
+            (execute[E](bodyClass, fun, message, args), Map(RESP_TYPE_FLAG -> respType))
+        })
     }
   }
 
@@ -110,12 +108,4 @@ object RPCProcessor extends LazyLogging {
     }
   }
 
-  def packageAddress(channel: String, method: String, path: String): String = {
-    val formatPath = if (path.endsWith("/")) path else path + "/"
-    if (channel != Channel.EB.toString) {
-      channel.toString + "@" + method + "@" + formatPath
-    } else {
-      formatPath
-    }
-  }
 }
