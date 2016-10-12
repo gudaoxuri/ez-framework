@@ -8,6 +8,7 @@ import com.ecfront.ez.framework.core.rpc.Method
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 object LocalCacheContainer extends LazyLogging {
 
@@ -27,69 +28,139 @@ object LocalCacheContainer extends LazyLogging {
     Method.WS.toString -> collection.mutable.Set[RouterRContent]()
   )
 
-  private val resources = Map[String, collection.mutable.Set[(String, String)]](
-    "*" -> collection.mutable.Set[(String, String)](),
-    Method.GET.toString -> collection.mutable.Set[(String, String)](),
-    Method.POST.toString -> collection.mutable.Set[(String, String)](),
-    Method.PUT.toString -> collection.mutable.Set[(String, String)](),
-    Method.DELETE.toString -> collection.mutable.Set[(String, String)](),
-    Method.WS.toString -> collection.mutable.Set[(String, String)]()
+  private val resources = Map[String, collection.mutable.Map[String, ArrayBuffer[String]]](
+    Method.GET.toString -> collection.mutable.Map[String, ArrayBuffer[String]](),
+    Method.POST.toString -> collection.mutable.Map[String, ArrayBuffer[String]](),
+    Method.PUT.toString -> collection.mutable.Map[String, ArrayBuffer[String]](),
+    Method.DELETE.toString -> collection.mutable.Map[String, ArrayBuffer[String]](),
+    Method.WS.toString -> collection.mutable.Map[String, ArrayBuffer[String]]()
   )
 
-  private val resourcesR = Map[String, collection.mutable.Set[(String, String)]](
-    "*" -> collection.mutable.Set[(String, String)](),
-    Method.GET.toString -> collection.mutable.Set[(String, String)](),
-    Method.POST.toString -> collection.mutable.Set[(String, String)](),
-    Method.PUT.toString -> collection.mutable.Set[(String, String)](),
-    Method.DELETE.toString -> collection.mutable.Set[(String, String)](),
-    Method.WS.toString -> collection.mutable.Set[(String, String)]()
+  val resourceROrderByPathDepth = Ordering.by[(String, ArrayBuffer[String]), Int](_._1.split("/").length * -1)
+  private val resourcesR = Map[String, collection.mutable.SortedSet[(String, ArrayBuffer[String])]](
+    Method.GET.toString -> collection.mutable.SortedSet[(String, ArrayBuffer[String])]()(resourceROrderByPathDepth),
+    Method.POST.toString -> collection.mutable.SortedSet[(String, ArrayBuffer[String])]()(resourceROrderByPathDepth),
+    Method.PUT.toString -> collection.mutable.SortedSet[(String, ArrayBuffer[String])]()(resourceROrderByPathDepth),
+    Method.DELETE.toString -> collection.mutable.SortedSet[(String, ArrayBuffer[String])]()(resourceROrderByPathDepth),
+    Method.WS.toString -> collection.mutable.SortedSet[(String, ArrayBuffer[String])]()(resourceROrderByPathDepth)
   )
 
   private val organizations = collection.mutable.Set[String]()
-  private val roles = collection.mutable.Map[String, Set[String]]()
 
-  def addResource(method: String, path: String): Resp[Void] = {
-    if (path.endsWith("*")) {
-      if (!resourcesR(method).exists(_._1 == path.substring(0, path.length - 1))) {
-        resourcesR(method) += ((path.substring(0, path.length - 1), EZ.eb.packageAddress(method, path)))
-      }
+  private def formatResourcePath(path: String): String = {
+    if (!path.endsWith("*") && !path.endsWith("/")) {
+      path + "/"
     } else {
-      if (!resources(method).exists(_._1 == path)) {
-        resources(method) += ((path, EZ.eb.packageAddress(method, path)))
-      }
+      path
     }
-    Resp.success(null)
   }
 
-  def removeResource(method: String, path: String): Resp[Void] = {
+  def addResource(method: String, _path: String): Resp[Void] = {
+    val path = formatResourcePath(_path)
     if (path.endsWith("*")) {
-      resourcesR(method) -= ((path.substring(0, path.length - 1), EZ.eb.packageAddress(method, path)))
-    } else {
-      resources(method) -= ((path, EZ.eb.packageAddress(method, path)))
-    }
-    Resp.success(null)
-  }
-
-  def getResourceCode(method: String, path: String): String = {
-    var res = resourcesR("*").find(i => path.startsWith(i._1))
-    if (res.isDefined) {
-      res.get._2
-    } else {
-      res = resourcesR(method).find(i => path.startsWith(i._1))
-      if (res.isDefined) {
-        res.get._2
-      } else {
-        res = resources("*").find(_._1 == path)
-        if (res.isDefined) {
-          res.get._2
-        } else {
-          res = resources(method).find(_._1 == path)
-          if (res.isDefined) {
-            res.get._2
-          } else {
-            null
-          }
+      def add(m: String): Unit = {
+        if (!resourcesR(m).exists(_._1 == path.substring(0, path.length - 1))) {
+          resourcesR(m) += ((path.substring(0, path.length - 1), ArrayBuffer()))
         }
+      }
+      if (method == "*") {
+        add(Method.GET.toString)
+        add(Method.POST.toString)
+        add(Method.PUT.toString)
+        add(Method.DELETE.toString)
+        add(Method.WS.toString)
+      } else {
+        add(method)
+      }
+    } else {
+      def add(m: String): Unit = {
+        if (!resources(m).contains(path)) {
+          resources(m) += path -> ArrayBuffer()
+        }
+      }
+      if (method == "*") {
+        add(Method.GET.toString)
+        add(Method.POST.toString)
+        add(Method.PUT.toString)
+        add(Method.DELETE.toString)
+        add(Method.WS.toString)
+      } else {
+        add(method)
+      }
+    }
+    Resp.success(null)
+  }
+
+  def removeResource(method: String, _path: String): Resp[Void] = {
+    val path = formatResourcePath(_path)
+    if (path.endsWith("*")) {
+      def remove(m: String): Unit = {
+        val removeRes = resourcesR(m).find(_._1 == path.substring(0, path.length - 1))
+        if (removeRes.nonEmpty) {
+          resourcesR(m) -= removeRes.get
+        }
+      }
+      if (method == "*") {
+        remove(Method.GET.toString)
+        remove(Method.POST.toString)
+        remove(Method.PUT.toString)
+        remove(Method.DELETE.toString)
+        remove(Method.WS.toString)
+      } else {
+        remove(method)
+      }
+    } else {
+      if (resources(method).contains(path)) {
+        resources(method) -= path
+      }
+    }
+    Resp.success(null)
+  }
+
+  def existResourceByRoles(method: String, _path: String, roleCodes: Set[String]): Boolean = {
+    val path = formatResourcePath(_path)
+    roleCodes.exists(existResourceByRoles(method, path, _))
+  }
+
+  /**
+    * 逻辑：
+    * 1）先找正常的资源表，找到资源且匹配到角色返回true，找不到资源或对应的资源没有匹配到角色则进入下一步
+    * 2）再找模糊资源表，
+    * 找到资源且匹配到角色返回true
+    * 找到资源但没有匹配到角色返回false
+    * 第一步找不资源且这一步也找不到资源且返回true
+    * 第一步找到资源但没有匹配到角色，这一步找不到资源返回false
+    *
+    * @return
+    * true: 1）找不资源，表示此资源不需要认证，2）找到资源且匹配到角色
+    * false: 找到资源但没有匹配到角色
+    */
+  private def existResourceByRoles(method: String, path: String, roleCode: String): Boolean = {
+    if (resources(method).contains(path)) {
+      // found resource
+      if (!resources(method).get(path).exists(_.contains(roleCode))) {
+        // not found role
+        val resR = resourcesR(method).filter(i => path.startsWith(i._1))
+        if (resR.nonEmpty) {
+          // match resource by regex
+          resR.exists(_._2.contains(roleCode))
+        } else {
+          // found resource but not matched role and resourceR not found
+          false
+        }
+      } else {
+        // matched role
+        true
+      }
+    } else {
+      // not found resource
+      val resR = resourcesR(method).filter(i => path.startsWith(i._1))
+      if (resR.nonEmpty) {
+        // match resource by regex
+        resR.exists(_._2.contains(roleCode))
+      } else {
+        // not found resource & resourceR
+        true
       }
     }
   }
@@ -109,37 +180,63 @@ object LocalCacheContainer extends LazyLogging {
   }
 
   def addRole(code: String, resourceCodes: Set[String]): Resp[Void] = {
-    roles += code -> resourceCodes.map {
-      resCode =>
-        if (!resCode.endsWith("/")) {
-          resCode + "/"
+    resourceCodes.foreach {
+      _resCode =>
+        val resCode = formatResourcePath(_resCode)
+        val Array(method, path) = resCode.split(EZ.eb.ADDRESS_SPLIT_FLAG)
+        if (path.endsWith("*")) {
+          def add(m: String): Unit = {
+            val resR = resourcesR(m.toString).find(_._1 == path.substring(0, path.length - 1))
+            if (resR.isDefined) {
+              resR.get._2 += code
+            } else {
+              resourcesR(m.toString) += ((path.substring(0, path.length - 1), ArrayBuffer(code)))
+            }
+          }
+          if (method == "*") {
+            add(Method.GET.toString)
+            add(Method.POST.toString)
+            add(Method.PUT.toString)
+            add(Method.DELETE.toString)
+            add(Method.WS.toString)
+          } else {
+            add(method)
+          }
         } else {
-          resCode
+          def add(m: String): Unit = {
+            val resR = resources(Method.GET.toString).get(path)
+            if (resR.isDefined) {
+              resR.get += code
+            } else {
+              resources(m.toString) += path -> ArrayBuffer(code)
+            }
+          }
+          if (method == "*") {
+            add(Method.GET.toString)
+            add(Method.POST.toString)
+            add(Method.PUT.toString)
+            add(Method.DELETE.toString)
+            add(Method.WS.toString)
+          } else {
+            add(method)
+          }
         }
     }
     Resp.success(null)
   }
 
   def removeRole(code: String): Resp[Void] = {
-    roles -= code
+    resourcesR.values.flatten.foreach(_._2 -= code)
+    resources.values.flatten.foreach(_._2 -= code)
     Resp.success(null)
-  }
-
-  def existResourceByRoles(roleCodes: Set[String], resCode: String): Boolean = {
-    roleCodes.exists {
-      roleCode =>
-        roles.contains(roleCode) && roles(roleCode).contains(resCode)
-    }
   }
 
   def flushAuth(): Resp[Void] = {
     resourcesR.foreach(_._2.empty)
     resources.foreach(_._2.empty)
     organizations.empty
-    roles.foreach(_._2.empty)
     Resp.success(null)
   }
-
 
   def addRouter(method: String, path: String): Resp[Void] = {
     logger.info(s"Register method [$method] path : $path")

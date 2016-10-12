@@ -11,7 +11,7 @@ import scala.beans.BeanProperty
   * 组织（租户）实体
   */
 @Entity("Organization")
-case class EZ_Organization() extends BaseModel with SecureModel with StatusModel {
+case class EZ_Organization() extends SecureModel with StatusModel {
 
   @Unique
   @Require
@@ -35,7 +35,39 @@ object EZ_Organization extends SecureStorage[EZ_Organization] with StatusStorage
     org.name = name.x
     org.category = category
     org.enable = true
+    org.image = ""
     org
+  }
+
+
+  override def preSave(model: EZ_Organization): Resp[EZ_Organization] = {
+    if (model.category == null) {
+      model.category = ""
+    }
+    if (model.image == null) {
+      model.image = ""
+    }
+    super.preSave(model)
+  }
+
+  override def preUpdate(model: EZ_Organization): Resp[EZ_Organization] = {
+    if (model.category == null) {
+      model.category = ""
+    }
+    if (model.image == null) {
+      model.image = ""
+    }
+    super.preUpdate(model)
+  }
+
+  override def preSaveOrUpdate(model: EZ_Organization): Resp[EZ_Organization] = {
+    if (model.category == null) {
+      model.category = ""
+    }
+    if (model.image == null) {
+      model.image = ""
+    }
+    super.preSaveOrUpdate(model)
   }
 
   override def postSave(saveResult: EZ_Organization, preResult: EZ_Organization): Resp[EZ_Organization] = {
@@ -60,7 +92,7 @@ object EZ_Organization extends SecureStorage[EZ_Organization] with StatusStorage
       if (saveOrUpdateResult.enable) {
         postAddExt(saveOrUpdateResult)
       }
-    }else {
+    } else {
       if (saveOrUpdateResult.enable) {
         postAddExt(saveOrUpdateResult)
       } else {

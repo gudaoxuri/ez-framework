@@ -6,7 +6,7 @@
       "address": "127.0.0.1:6379"
     },
     "rpc": {
-      "package": "com.ecfront.ez"
+      "package": "com.ecfront.ez.framework.service.auth.test"
     },
     "services": {
       "auth": {
@@ -15,7 +15,7 @@
           "showCaptcha": 3
         },
         "defaultOrganizationCode": "",
-        "loginKeepSeconds": 0,
+        "loginKeepSeconds": 0
         /* "customTables": {
             "organization": "soa_organization",
             "account": "soa_account",

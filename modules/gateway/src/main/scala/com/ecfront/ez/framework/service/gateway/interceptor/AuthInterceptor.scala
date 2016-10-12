@@ -40,25 +40,18 @@ object AuthInterceptor extends GatewayInterceptor {
             if (event.succeeded()) {
               if (event.result() != null) {
                 obj.optInfo = Some(JsonHelper.toObject[OptInfo](event.result()))
-                // 要访问的资源编码
-                val resCode = LocalCacheContainer.getResourceCode(obj.method, obj.templateUri)
-                if (resCode != null) {
-                  // 此资源需要认证
-                  if (LocalCacheContainer.existOrganization(obj.optInfo.get.organizationCode)) {
-                    // 用户所属组织状态正常
-                    if (LocalCacheContainer.existResourceByRoles(obj.optInfo.get.roleCodes, resCode)) {
-                      // 登录用户所属角色列表中存在此资源
-                      p.success(obj)
-                    } else {
-                      p.unAuthorized(s"Account【${obj.optInfo.get.name}】in【${obj.optInfo.get.organizationCode}】" +
-                        s" no access to ${obj.method}:${obj.realUri}")
-                    }
+                // 此资源需要认证
+                if (LocalCacheContainer.existOrganization(obj.optInfo.get.organizationCode)) {
+                  // 用户所属组织状态正常
+                  if (LocalCacheContainer.existResourceByRoles(obj.method, obj.templateUri, obj.optInfo.get.roleCodes)) {
+                    // 登录用户所属角色列表中存在此资源
+                    p.success(obj)
                   } else {
-                    p.unAuthorized(s"Organization【${obj.optInfo.get.organizationCode}】 not found")
+                    p.unAuthorized(s"Account【${obj.optInfo.get.name}】in【${obj.optInfo.get.organizationCode}】" +
+                      s" no access to ${obj.method}:${obj.realUri}")
                   }
                 } else {
-                  // 所有登录用户都可以访问
-                  p.success(obj)
+                  p.unAuthorized(s"Organization【${obj.optInfo.get.organizationCode}】 not found")
                 }
               } else {
                 logger.warn("Token NOT exist")

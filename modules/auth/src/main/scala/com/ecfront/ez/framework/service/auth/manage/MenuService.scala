@@ -9,7 +9,7 @@ import com.ecfront.ez.framework.service.jdbc.scaffold.SimpleRPCService
 /**
   * 菜单管理
   */
-@RPC("/auth/manage/menu/")
+@RPC("/ez/auth/manage/menu/")
 object MenuService extends SimpleRPCService[EZ_Menu] {
 
   /**

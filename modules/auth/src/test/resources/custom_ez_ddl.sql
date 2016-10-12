@@ -89,7 +89,6 @@ CREATE TABLE IF NOT EXISTS soa_resource
     method varchar(200) NOT NULL COMMENT '访问方法' ,
     uri varchar(1000) NOT NULL COMMENT '资源URL' ,
     name varchar(200) NOT NULL COMMENT '资源名称' ,
-    enable BOOLEAN NOT NULL COMMENT '是否启用' ,
     create_user varchar(100) NOT NULL COMMENT '创建用户' ,
     create_org varchar(100) NOT NULL COMMENT '创建组织' ,
     create_time BIGINT NOT NULL COMMENT '创建时间(yyyyMMddHHmmssSSS)' ,
@@ -99,7 +98,6 @@ CREATE TABLE IF NOT EXISTS soa_resource
     PRIMARY KEY(id) ,
     INDEX idx_method(method) ,
     INDEX idx_name(name) ,
-    INDEX idx_enable(enable) ,
     INDEX idx_update_user(update_user) ,
     INDEX idx_update_org(update_org) ,
     INDEX idx_update_time(update_time)

@@ -40,6 +40,12 @@
             <artifactId>cage</artifactId>
             <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-gateway</artifactId>
+            <version>${ezf-version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

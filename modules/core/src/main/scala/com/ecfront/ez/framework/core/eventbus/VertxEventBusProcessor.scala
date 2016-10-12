@@ -76,7 +76,8 @@ class VertxEventBusProcessor extends EventBusProcessor {
     eb.send(address, message)
   }
 
-  override protected def doAck[E: Manifest](address: String, message: Any, args: Map[String, String], timeout: Long): (E, Map[String, String]) = {
+  override protected def doAck[E](address: String, message: Any, args: Map[String, String], timeout: Long)
+                                 (implicit e: Manifest[E]): (E, Map[String, String]) = {
     val p = Promise[(E, Map[String, String])]()
     val opt = new DeliveryOptions
     opt.addHeader(FLAG_CONTEXT, JsonHelper.toJsonString(EZ.context))
@@ -89,16 +90,26 @@ class VertxEventBusProcessor extends EventBusProcessor {
       override def handle(event: AsyncResult[Message[String]]): Unit = {
         if (event.succeeded()) {
           logger.trace(s"[EB] Ack reply a message [$address] : ${event.result().body()} ")
-          val msg = JsonHelper.toObject[E](event.result().body())
-          val headers = collection.mutable.Map[String, String]()
-          EZContext.setContext(JsonHelper.toObject[EZContext](event.result().headers().get(FLAG_CONTEXT)))
-          event.result().headers().remove(FLAG_CONTEXT)
-          val it = event.result().headers().names().iterator()
-          while (it.hasNext) {
-            val key = it.next()
-            headers += key -> event.result().headers().get(key)
+          try {
+            val msg =
+              if (e != manifest[Nothing]) {
+              JsonHelper.toObject[E](event.result().body())
+            } else {
+              null.asInstanceOf[E]
+            }
+            val headers = collection.mutable.Map[String, String]()
+            EZContext.setContext(JsonHelper.toObject[EZContext](event.result().headers().get(FLAG_CONTEXT)))
+            event.result().headers().remove(FLAG_CONTEXT)
+            val it = event.result().headers().names().iterator()
+            while (it.hasNext) {
+              val key = it.next()
+              headers += key -> event.result().headers().get(key)
+            }
+            p.success(msg, headers.toMap)
+          } catch {
+            case e: Throwable =>
+              logger.error(s"[EB] Ack reply a message error : [$address] : ${event.cause().getMessage} ", event.cause())
           }
-          p.success(msg, headers.toMap)
         } else {
           logger.error(s"[EB] Ack reply a message error : [$address] : ${event.cause().getMessage} ", event.cause())
           throw event.cause()

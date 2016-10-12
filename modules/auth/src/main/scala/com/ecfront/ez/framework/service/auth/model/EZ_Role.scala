@@ -4,7 +4,6 @@ import com.ecfront.common.{Ignore, Resp}
 import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 import com.ecfront.ez.framework.service.auth.{CacheManager, ServiceAdapter}
 import com.ecfront.ez.framework.service.jdbc._
-import io.vertx.core.json.JsonObject
 
 import scala.beans.BeanProperty
 
@@ -12,7 +11,7 @@ import scala.beans.BeanProperty
   * 角色实体
   */
 @Entity("Role")
-case class EZ_Role() extends BaseModel with SecureModel with StatusModel with OrganizationModel {
+case class EZ_Role() extends SecureModel with StatusModel with OrganizationModel {
 
   @Unique
   @Require
@@ -29,7 +28,7 @@ case class EZ_Role() extends BaseModel with SecureModel with StatusModel with Or
 
 }
 
-object EZ_Role extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] {
+object EZ_Role extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] with OrganizationStorage[EZ_Role] {
 
   // 资源关联表
   var TABLE_REL_ROLE_RESOURCE = "ez_rel_role_resource"
@@ -248,9 +247,9 @@ object EZ_Role extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] {
   def getRelRoleData(roleCode: String): Resp[Set[String]] = {
     val resp = JDBCProcessor.find(
       s"""SELECT resource_code FROM ${EZ_Role.TABLE_REL_ROLE_RESOURCE} WHERE role_code  = ? """,
-      List(roleCode), classOf[JsonObject])
+      List(roleCode))
     if (resp) {
-      Resp.success(resp.body.map(_.getString("resource_code")))
+      Resp.success(resp.body.map(_ ("resource_code").asInstanceOf[String]).toSet)
     } else {
       resp
     }

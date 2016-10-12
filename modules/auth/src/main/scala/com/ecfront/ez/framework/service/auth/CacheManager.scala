@@ -100,8 +100,8 @@ object CacheManager extends LazyLogging {
 
   object RBAC {
 
-    def initOrganization(org: EZ_Organization):Unit = {
-     Initiator.initOrganization(org)
+    def initOrganization(org: EZ_Organization): Unit = {
+      Initiator.initOrganization(org)
     }
 
 
@@ -158,9 +158,9 @@ object CacheManager extends LazyLogging {
 
     def removeCaptcha(accountLoginIdOrEmailAndOrg: String): Unit = {
       EZ.cache.hdel(LOGIN_CAPTCHA_TEXT_FLAG, accountLoginIdOrEmailAndOrg)
-      val file = new File(getCaptchaFile(accountLoginIdOrEmailAndOrg))
-      if (file.exists()) {
-        file.delete()
+      val file = getCaptchaFile(accountLoginIdOrEmailAndOrg)
+      if (file != null && new File(file).exists()) {
+        new File(file).delete()
       }
       EZ.cache.hdel(LOGIN_CAPTCHA_FILE_FLAG, accountLoginIdOrEmailAndOrg)
     }

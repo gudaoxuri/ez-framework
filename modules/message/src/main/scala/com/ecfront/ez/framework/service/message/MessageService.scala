@@ -14,7 +14,7 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 /**
   * 消息服务
   */
-@RPC("/message/")
+@RPC("/ez/message/")
 object MessageService extends LazyLogging {
 
   /**

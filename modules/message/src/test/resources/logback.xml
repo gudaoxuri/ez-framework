@@ -7,10 +7,10 @@
         </encoder>
     </appender>
 
-    <root level="TRACE">
+    <root level="WARN">
         <appender-ref ref="STDOUT"/>
     </root>
 
-    <logger name="io.netty" level="WARN"/>
+    <logger name="com.ecfront.ez.framework" level="TRACE"/>
 
 </configuration>

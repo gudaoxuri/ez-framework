@@ -15,18 +15,18 @@ object Initiator extends LazyLogging {
 
   def init(): Unit = {
     updateCache()
-    val exist = EZ_Resource.existByCond(s"""code = ?""", List(EZ_Resource.assembleCode(Method.GET.toString, "/auth/manage/organization/")))
+    val exist = EZ_Resource.existByCond(s"""code = ?""", List(EZ_Resource.assembleCode(Method.GET.toString, "/ez/auth/manage/organization/")))
     if (!exist.body) {
-      EZ_Resource.save(EZ_Resource("*", "/auth/manage/*", s"Manage ALL"))
-      EZ_Resource.save(EZ_Resource("*", "/auth/manage/organization/*", s"Organization CRUD"))
-      EZ_Resource.save(EZ_Resource(Method.GET.toString, "/auth/manage/organization/:id/", s"Fetch Organization By Id"))
-      EZ_Resource.save(EZ_Resource("*", "/auth/manage/account/", s"Account CRUD"))
-      EZ_Resource.save(EZ_Resource(Method.GET.toString, "/auth/manage/account/:id/", s"Fetch Account By Id"))
-      EZ_Resource.save(EZ_Resource("*", "/auth/manage/role/", s"Role CRUD"))
-      EZ_Resource.save(EZ_Resource("*", "/auth/manage/resource/", s"Resource CRUD"))
-      EZ_Resource.save(EZ_Resource("*", "/auth/manage/menu/", s"Menu CRUD"))
-      EZ_Resource.save(EZ_Resource(Method.GET.toString, "/auth/manage/menu/", s"Fetch Menus"))
-      EZ_Role.save(EZ_Role(EZ_Role.SYSTEM_ROLE_FLAG, "System", Set(EZ_Resource.assembleCode("*", "/auth/manage/*")), ""))
+      EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/*", s"Manage ALL"))
+      EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/organization/*", s"Organization CRUD"))
+      EZ_Resource.save(EZ_Resource(Method.GET.toString, "/ez/auth/manage/organization/:id/", s"Fetch Organization By Id"))
+      EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/account/", s"Account CRUD"))
+      EZ_Resource.save(EZ_Resource(Method.GET.toString, "/ez/auth/manage/account/:id/", s"Fetch Account By Id"))
+      EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/role/", s"Role CRUD"))
+      EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/resource/", s"Resource CRUD"))
+      EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/menu/", s"Menu CRUD"))
+      EZ_Resource.save(EZ_Resource(Method.GET.toString, "/ez/auth/manage/menu/", s"Fetch Menus"))
+      EZ_Role.save(EZ_Role(EZ_Role.SYSTEM_ROLE_FLAG, "System", Set(EZ_Resource.assembleCode("*", "/ez/auth/manage/*")), ""))
 
       val org = EZ_Organization(ServiceAdapter.defaultOrganizationCode, "default")
       EZ_Organization.save(org)
@@ -40,11 +40,11 @@ object Initiator extends LazyLogging {
   }
 
   def initOrganization(org: EZ_Organization): Unit = {
-    EZ_Role.save(EZ_Role(EZ_Role.ORG_ADMIN_ROLE_FLAG, "Admin", Set(EZ_Resource.assembleCode("*", "/auth/manage/*")), org.code))
+    EZ_Role.save(EZ_Role(EZ_Role.ORG_ADMIN_ROLE_FLAG, "Admin", Set(EZ_Resource.assembleCode("*", "/ez/auth/manage/*")), org.code), skipFilter = true)
     val account = EZ_Account(EZ_Account.ORG_ADMIN_ACCOUNT_LOGIN_ID, "admin" + EZ_Account.VIRTUAL_EMAIL, "Admin", "admin", Set(
       EZ_Role.assembleCode(EZ_Role.ORG_ADMIN_ROLE_FLAG, org.code)
     ), org.code)
-    EZ_Account.save(account)
+    EZ_Account.save(account, skipFilter = true)
     EZ.eb.pubReq(ServiceAdapter.EB_ORG_INIT_FLAG, org)
   }
 

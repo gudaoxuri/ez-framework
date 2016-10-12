@@ -3,7 +3,6 @@ package com.ecfront.ez.framework.service.auth.model
 import com.ecfront.common.{Ignore, Resp}
 import com.ecfront.ez.framework.service.auth.ServiceAdapter
 import com.ecfront.ez.framework.service.jdbc._
-import io.vertx.core.json.JsonObject
 
 import scala.beans.BeanProperty
 
@@ -185,7 +184,7 @@ object EZ_Menu extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] with O
     super.preDeleteById(id)
   }
 
-  override def preDeleteByUUID(uuid: String): Resp[Any] = {
+  override def preDeleteByUUID(uuid: String): Resp[String] = {
     val objR = doGetByUUID(uuid)
     if (objR && objR.body != null) {
       deleteRelRoleData(objR.body.code)
@@ -243,9 +242,9 @@ object EZ_Menu extends SecureStorage[EZ_Menu] with StatusStorage[EZ_Menu] with O
   def getRelRoleData(menuCode: String): Resp[List[String]] = {
     val resp = JDBCProcessor.find(
       s"""SELECT role_code FROM ${EZ_Menu.TABLE_REL_MENU_ROLE} WHERE menu_code  = ? """,
-      List(menuCode), classOf[JsonObject])
+      List(menuCode))
     if (resp) {
-      Resp.success(resp.body.map(_.getString("role_code")))
+      Resp.success(resp.body.map(_ ("role_code").asInstanceOf[String]))
     } else {
       resp
     }

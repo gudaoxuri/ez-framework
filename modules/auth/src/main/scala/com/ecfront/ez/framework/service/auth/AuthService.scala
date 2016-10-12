@@ -8,12 +8,12 @@ import com.ecfront.ez.framework.service.auth.model._
 import com.ecfront.ez.framework.service.jdbc.BaseModel
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
-@RPC("/auth/")
+@RPC("/ez/auth/")
 object AuthService extends LazyLogging {
 
   private val random = new scala.util.Random
 
-  @POST("/public/auth/login/")
+  @POST("/public/ez/auth/login/")
   def login(parameter: Map[String, String], body: Map[String, String]): Resp[OptInfo] = {
     if (!ServiceAdapter.customLogin) {
       // id 可以是 login_id 或 email
@@ -125,7 +125,12 @@ object AuthService extends LazyLogging {
 
   @GET("logout/")
   def logout(parameter: Map[String, String]): Resp[Void] = {
-    doLogout(parameter(RPCProcessor.VIEW_TOKEN_FLAG))
+    val token = parameter.getOrElse(RPCProcessor.VIEW_TOKEN_FLAG, "")
+    if (token.nonEmpty) {
+      doLogout(token)
+    } else {
+      Resp.badRequest(null)
+    }
   }
 
   /**
@@ -136,9 +141,11 @@ object AuthService extends LazyLogging {
     val tokenInfo = CacheManager.Token.getTokenInfo(token)
     if (tokenInfo != null) {
       EZ.eb.pubReq(ServiceAdapter.EB_LOGOUT_FLAG, tokenInfo)
+      CacheManager.Token.removeToken(token)
+      Resp.success(null)
+    }else{
+      Resp.unAuthorized(null)
     }
-    CacheManager.Token.removeToken(token)
-    Resp.success(null)
   }
 
   @GET("logininfo/")
@@ -150,7 +157,7 @@ object AuthService extends LazyLogging {
     Resp.success(CacheManager.Token.getTokenInfo(token))
   }
 
-  @GET("/public/menu/")
+  @GET("/public/ez/menu/")
   def getMenus(parameter: Map[String, String]): Resp[List[EZ_Menu]] = {
     if (parameter.contains(RPCProcessor.VIEW_TOKEN_FLAG)) {
       val tokenInfo = CacheManager.Token.getTokenInfo(parameter(RPCProcessor.VIEW_TOKEN_FLAG))

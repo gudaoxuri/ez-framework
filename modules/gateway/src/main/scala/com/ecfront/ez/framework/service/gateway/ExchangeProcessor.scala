@@ -17,7 +17,7 @@ object ExchangeProcessor extends LazyLogging {
   }
 
   @REPLY("/ez/gateway/auth/flush/")
-  def flushCache(args: Map[String, String],body: Map[String,String]): Resp[Void] = {
+  def flushCache(args: Map[String, String],body: String): Resp[Void] = {
     LocalCacheContainer.flushAuth()
   }
 

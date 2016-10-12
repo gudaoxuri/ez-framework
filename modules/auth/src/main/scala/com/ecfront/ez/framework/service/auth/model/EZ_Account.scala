@@ -5,7 +5,6 @@ import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 import com.ecfront.ez.framework.service.auth.{CacheManager, ServiceAdapter}
 import com.ecfront.ez.framework.service.jdbc._
-import io.vertx.core.json.JsonObject
 
 import scala.beans.BeanProperty
 
@@ -43,7 +42,7 @@ case class EZ_Account() extends SecureModel with StatusModel with OrganizationMo
   @Label("Ext Info")
   @BeanProperty var ext_info: String = _
   @Label("OAuth Info") // key=oauth服务标记，value=openid
-  @BeanProperty var oauth: Map[String, String] = _
+  @BeanProperty var oauth: String = _
 
 }
 
@@ -101,7 +100,7 @@ object EZ_Account extends SecureStorage[EZ_Account] with StatusStorage[EZ_Accoun
       model.organization_code = ServiceAdapter.defaultOrganizationCode
     }
     if (model.oauth == null) {
-      model.oauth = Map()
+      model.oauth = ""
     }
     if (model.ext_id == null) {
       model.ext_id = ""
@@ -235,7 +234,7 @@ object EZ_Account extends SecureStorage[EZ_Account] with StatusStorage[EZ_Accoun
     super.preDeleteById(id)
   }
 
-  override def preDeleteByUUID(uuid: String): Resp[Any] = {
+  override def preDeleteByUUID(uuid: String): Resp[String] = {
     preRemoveExt(doGetByUUID(uuid).body, isDelete = true)
     super.preDeleteByUUID(uuid)
   }
@@ -368,9 +367,9 @@ object EZ_Account extends SecureStorage[EZ_Account] with StatusStorage[EZ_Accoun
   def getRelRoleData(accountCode: String): Resp[Set[String]] = {
     val resp = JDBCProcessor.find(
       s"""SELECT role_code FROM ${EZ_Account.TABLE_REL_ACCOUNT_ROLE} WHERE account_code  = ? """,
-      List(accountCode), classOf[JsonObject])
+      List(accountCode))
     if (resp) {
-      Resp.success(resp.body.map(_.getString("role_code")))
+      Resp.success(resp.body.map(_ ("role_code").asInstanceOf[String]).toSet)
     } else {
       resp
     }

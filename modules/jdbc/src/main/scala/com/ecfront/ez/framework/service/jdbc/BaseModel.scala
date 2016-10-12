@@ -122,12 +122,17 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param model 实体对象
     * @return 保存后的实体对象
     */
-  def save(model: M): Resp[M] = {
+  def save(model: M, skipFilter: Boolean = false): Resp[M] = {
     val _model = _modelClazz.newInstance()
     BeanHelper.copyProperties(_model, model)
     val preR = preSave(_model)
     if (preR) {
-      val filterR = filterByModel(preR.body)
+      val filterR =
+        if (!skipFilter) {
+          filterByModel(preR.body)
+        } else {
+          Resp.success(preR.body)
+        }
       if (filterR) {
         val doR = doSave(filterR.body)
         if (doR) {
@@ -184,13 +189,20 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param model 实体对象
     * @return 更新后的实体对象
     */
-  def update(model: M): Resp[M] = {
+  def update(model: M, skipFilter: Boolean = false): Resp[M] = {
     val _model = _modelClazz.newInstance()
     BeanHelper.copyProperties(_model, model)
-    _model.id = _model.id.trim
+    if (_model.id == null) {
+      _model.id = doGetByUUID(getUUIDValue(_model)).body.id
+    }
     val preR = preUpdate(_model)
     if (preR) {
-      val filterR = filterByModel(preR.body)
+      val filterR =
+        if (!skipFilter) {
+          filterByModel(preR.body)
+        } else {
+          Resp.success(preR.body)
+        }
       if (filterR) {
         val doR = doUpdate(filterR.body)
         if (doR) {
@@ -248,7 +260,7 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     * @param model 实体对象
     * @return 保存或更新后的实体对象
     */
-  def saveOrUpdate(model: M): Resp[M] = {
+  def saveOrUpdate(model: M, skipFilter: Boolean = false): Resp[M] = {
     val _model = _modelClazz.newInstance()
     BeanHelper.copyProperties(_model, model)
     if (_model.id != null) {
@@ -256,7 +268,12 @@ trait BaseStorage[M <: BaseModel] extends LazyLogging {
     }
     val preR = preSaveOrUpdate(_model)
     if (preR) {
-      val filterR = filterByModel(preR.body)
+      val filterR =
+        if (!skipFilter) {
+          filterByModel(preR.body)
+        } else {
+          Resp.success(preR.body)
+        }
       if (filterR) {
         val doR = doSaveOrUpdate(filterR.body)
         if (doR) {

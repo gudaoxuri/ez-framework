@@ -8,7 +8,7 @@ import com.ecfront.ez.framework.service.jdbc.scaffold.SimpleRPCService
 /**
   * 组织（租户）管理
   */
-@RPC("/auth/manage/organization/")
+@RPC("/ez/auth/manage/organization/")
 object OrganizationService extends SimpleRPCService[EZ_Organization] {
 
   override protected val storageObj: BaseStorage[EZ_Organization] = EZ_Organization

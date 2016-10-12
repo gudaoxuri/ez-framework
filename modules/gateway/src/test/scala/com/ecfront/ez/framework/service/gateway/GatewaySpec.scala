@@ -103,6 +103,9 @@ class GatewaySpec extends BasicSpec {
   def addAuthInfo(): Unit = {
     val opt = OptInfo("testToken", "testAccCode", "testLoginId", "testName", "", "", "", "testOrg", "", Set("user"), new Date(), "", "")
     EZ.cache.set(RPCProcessor.TOKEN_INFO_FLAG + "testToken", JsonHelper.toJsonString(opt))
+    assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")).message.contains("Organization"))
+    EZ.eb.publish("/ez/auth/rbac/organization/add/", s"""{"code":""}""")
+    Thread.sleep(100)
   }
 
   def simpleRPCTest(): Unit = {
@@ -215,9 +218,6 @@ class GatewaySpec extends BasicSpec {
 
     EZ.eb.publish("/ez/auth/rbac/resource/add/", Map("method" -> "*", "uri" -> "/test/*"))
     Thread.sleep(100)
-    assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")).message.contains("Organization"))
-    EZ.eb.publish("/ez/auth/rbac/organization/add/", s"""{"code":""}""")
-    Thread.sleep(100)
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")).message.contains("no access to"))
     EZ.eb.publish("/ez/auth/rbac/role/add/", s"""{"code":"user","resource_codes":["*@/test/*"]}""")
     Thread.sleep(100)
@@ -226,9 +226,6 @@ class GatewaySpec extends BasicSpec {
     EZ.eb.publish("/ez/auth/rbac/role/remove/", s"""{"code":"user"}""")
     Thread.sleep(100)
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")).message.contains("no access to"))
-    EZ.eb.publish("/ez/auth/rbac/organization/remove/", s"""{"code":""}""")
-    Thread.sleep(100)
-    assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")).message.contains("Organization"))
     EZ.eb.publish("/ez/auth/rbac/resource/remove/", Map("code" -> "*@/test/*"))
     Thread.sleep(100)
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")))

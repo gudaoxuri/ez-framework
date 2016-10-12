@@ -77,12 +77,12 @@ object EZ_Resource extends SecureStorage[EZ_Resource] {
     super.postSaveOrUpdate(saveOrUpdateResult, preResult)
   }
 
-  override def preDeleteById(id: Any): Resp[Void] = {
+  override def preDeleteById(id: Any): Resp[Any] = {
     preRemoveExt(doGetById(id).body)
     super.preDeleteById(id)
   }
 
-  override def preDeleteByUUID(uuid: String): Resp[Void] = {
+  override def preDeleteByUUID(uuid: String): Resp[String] = {
     preRemoveExt(doGetByUUID(uuid).body)
     super.preDeleteByUUID(uuid)
   }

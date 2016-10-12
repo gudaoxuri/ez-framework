@@ -54,14 +54,16 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
           if (slow.has("excludes")) slow.path("excludes").map(_.asInstanceOf[String]).toSet else Set()
         )
         EZAsyncInterceptorProcessor.register(GatewayInterceptor.category, SlowMonitorInterceptor)
-        AuthInterceptor.init(publicUriPrefix)
-        EZAsyncInterceptorProcessor.register(GatewayInterceptor.category, AuthInterceptor)
-        val address = EZ.Info.config.ez.cache("address").asInstanceOf[String].split(";")
-        val db = EZ.Info.config.ez.cache.getOrElse("db", 0).asInstanceOf[Int]
-        val auth = EZ.Info.config.ez.cache.getOrElse("auth", "").asInstanceOf[String]
-        AsyncRedisProcessor.init(EZ.vertx, address.toList, db, auth)
       }
     }
+    AuthInterceptor.init(publicUriPrefix)
+    EZAsyncInterceptorProcessor.register(GatewayInterceptor.category, AuthInterceptor)
+
+    val address = EZ.Info.config.ez.cache("address").asInstanceOf[String].split(";")
+    val db = EZ.Info.config.ez.cache.getOrElse("db", 0).asInstanceOf[Int]
+    val auth = EZ.Info.config.ez.cache.getOrElse("auth", "").asInstanceOf[String]
+    AsyncRedisProcessor.init(EZ.vertx, address.toList, db, auth)
+
     val c = new CountDownLatch(2)
     EZ.vertx
       .createHttpServer(opt)

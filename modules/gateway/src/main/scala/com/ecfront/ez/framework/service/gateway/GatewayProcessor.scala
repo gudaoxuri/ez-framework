@@ -71,7 +71,7 @@ trait GatewayProcessor extends LazyLogging {
                 event.cause() match {
                   case e: ReplyException =>
                     logger.warn(s"[Gateway] API send error : [${context.templateUri}] : ${event.cause().getMessage} ")
-                    p.success(Resp.badRequest(s"[Gateway] API send error : [${context.templateUri}] : not implementation"))
+                    p.success(Resp.notImplemented(s"[Gateway] API send error : [${context.templateUri}] : not implementation"))
                   case e: Throwable =>
                     logger.error(s"[Gateway] API send error : [${context.templateUri}] : ${event.cause().getMessage} ", event.cause())
                     p.success(Resp.serverError(s"[Gateway] API send error : [${context.templateUri}] : ${event.cause().getMessage} "))

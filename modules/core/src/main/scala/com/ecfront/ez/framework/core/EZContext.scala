@@ -52,6 +52,15 @@ object EZContext {
   }
 
   private[core] def setContext(context: EZContext): Unit = {
+    if (context.token == null) {
+      context.token = ""
+    }
+    if (context.optAccCode == null) {
+      context.optAccCode = ""
+    }
+    if (context.optOrgCode == null) {
+      context.optOrgCode = ""
+    }
     _context.set(context)
   }
 

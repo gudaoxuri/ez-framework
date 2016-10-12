@@ -22,7 +22,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   val EB_LOGIN_SUCCESS_FLAG = "/ez/auth/loginSuccess/"
   val EB_LOGOUT_FLAG = "/ez/auth/logout/"
 
-  val EB_FLUSH_FLAG = "/ez/auth/flush/"
+  val EB_FLUSH_FLAG = "/ez/gateway/auth/flush/"
 
   var customLogin: Boolean = _
   var defaultOrganizationCode: String = _
