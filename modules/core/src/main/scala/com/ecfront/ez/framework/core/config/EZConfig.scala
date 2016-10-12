@@ -1,4 +1,4 @@
-package com.ecfront.ez.framework.core
+package com.ecfront.ez.framework.core.config
 
 import com.fasterxml.jackson.databind.JsonNode
 
@@ -8,27 +8,27 @@ import com.fasterxml.jackson.databind.JsonNode
   * @param ez   EZ服务配置项
   * @param args APP级配置参数
   */
-private[core] case class EZConfig(ez: EZInfo, args: JsonNode)
+private[core] case class EZConfig(ez: EZInfo, var args: JsonNode)
 
 // EZ服务配置项
 private[core] case class EZInfo(
                    // APP名称
-                   app: String,
+                   var app: String,
                    // 模块名称
-                   module: String,
+                   var module: String,
                    // 实例名称
                    var instance: String,
                    // 缓存服务地址
-                   cache: Map[String, Any],
+                   var cache: Map[String, Any],
                    // RPC信息
-                   rpc: Map[String, Any],
+                   var rpc: Map[String, Any],
                    // 时区
-                   timezone: String,
+                   var timezone: String,
                    // 语言
                    var language: String,
                    var isDebug: Boolean,
                    // 性能设置
                    var perf: collection.mutable.Map[String, Any],
                    // 服务配置项
-                   services: Map[String, Any]
+                   var services: Map[String, Any]
                  )

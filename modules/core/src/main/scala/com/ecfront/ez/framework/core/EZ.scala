@@ -4,6 +4,7 @@ import java.net.InetAddress
 import java.util.UUID
 
 import com.ecfront.ez.framework.core.cache.CacheProcessor
+import com.ecfront.ez.framework.core.config.EZConfig
 import com.ecfront.ez.framework.core.eventbus.EventBusProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.Vertx

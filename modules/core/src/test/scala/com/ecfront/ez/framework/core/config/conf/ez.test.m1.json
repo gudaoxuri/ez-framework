@@ -1,0 +1,20 @@
+{
+  "ez": {
+    "rpc":{
+      "package":"com.xx"
+    },
+    "services": {
+      "test1": {},
+      "test2": {
+        "field1": "1"
+      },
+      "test3.sub1": {
+        "field1": "1"
+      }
+    }
+  },
+  "args": {
+    "global_b":"global.c",
+    "app_c":"app.c"
+  }
+}
