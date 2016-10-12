@@ -24,11 +24,10 @@ class VertxEventBusProcessor extends EventBusProcessor {
   private var vertx: Vertx = _
   private val consumerEBs = ArrayBuffer[MessageConsumer[_]]()
 
-  private[core] def init(_vertx: Vertx): Resp[Void] = {
+  private[core] def init(_vertx: Vertx, mgr: HazelcastClusterManager): Resp[Void] = {
     vertx = _vertx
     val c = new CountDownLatch(1)
     var resp: Resp[Void] = null
-    val mgr = new HazelcastClusterManager()
     val options = new VertxOptions().setClusterManager(mgr)
     Vertx.clusteredVertx(options, new Handler[AsyncResult[Vertx]] {
       override def handle(res: AsyncResult[Vertx]): Unit = {
@@ -93,10 +92,10 @@ class VertxEventBusProcessor extends EventBusProcessor {
           try {
             val msg =
               if (e != manifest[Nothing]) {
-              JsonHelper.toObject[E](event.result().body())
-            } else {
-              null.asInstanceOf[E]
-            }
+                JsonHelper.toObject[E](event.result().body())
+              } else {
+                null.asInstanceOf[E]
+              }
             val headers = collection.mutable.Map[String, String]()
             EZContext.setContext(JsonHelper.toObject[EZContext](event.result().headers().get(FLAG_CONTEXT)))
             event.result().headers().remove(FLAG_CONTEXT)

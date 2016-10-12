@@ -5,6 +5,7 @@ import java.util.UUID
 
 import com.ecfront.ez.framework.core.cache.CacheProcessor
 import com.ecfront.ez.framework.core.config.EZConfig
+import com.ecfront.ez.framework.core.dist.DistributedServiceProcessor
 import com.ecfront.ez.framework.core.eventbus.EventBusProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.Vertx
@@ -64,6 +65,8 @@ object EZ extends LazyLogging {
   var isDebug: Boolean = _
 
   var eb: EventBusProcessor = _
+
+  var dist: DistributedServiceProcessor = _
 
   var cache: CacheProcessor[JedisCommands] = _
 

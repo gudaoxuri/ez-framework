@@ -3,11 +3,13 @@ package com.ecfront.ez.framework.core
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.cache.RedisCacheProcessor
 import com.ecfront.ez.framework.core.config.{ConfigProcessor, EZConfig}
+import com.ecfront.ez.framework.core.dist.HazelcastDistributedServiceProcessor
 import com.ecfront.ez.framework.core.eventbus.VertxEventBusProcessor
 import com.ecfront.ez.framework.core.i18n.I18NProcessor
 import com.ecfront.ez.framework.core.rpc.RPCProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.{Vertx, VertxOptions}
+import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager
 
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.runtime._
@@ -25,6 +27,7 @@ object EZManager extends LazyLogging {
   System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
   System.setProperty("vertx.disableFileCaching", "true")
   System.setProperty("vertx.disableFileCPResolving", "true")
+  System.setProperty("hazelcast.logging.type", "slf4j")
 
   private[core] val FLAG_PERF_EVENT_LOOP_POOL_SIZE = "eventLoopPoolSize"
   private[core] val FLAG_PERF_WORKER_POOL_SIZE = "workerPoolSize"
@@ -72,10 +75,16 @@ object EZManager extends LazyLogging {
     ConfigProcessor.init(specialConfig)
   }
 
-  private def initEB(vertx: Vertx): Resp[Void] = {
+  private def initEB(vertx: Vertx,mgr:HazelcastClusterManager): Resp[Void] = {
     val eb = new VertxEventBusProcessor()
     EZ.eb = eb
-    eb.init(vertx)
+    eb.init(vertx,mgr)
+  }
+
+  private def initDistService(mgr:HazelcastClusterManager): Resp[Void] = {
+    val dist = new HazelcastDistributedServiceProcessor()
+    EZ.dist = dist
+    dist.init(mgr)
   }
 
   private def initCache(args: Map[String, Any]): Resp[Void] = {
@@ -176,7 +185,8 @@ object EZManager extends LazyLogging {
       val ezConfig = ezConfigR.body
       EZ.Info.config = ezConfig
       EZ.vertx = initVertx(ezConfig.ez.perf.toMap, ezConfig.ez.isDebug)
-      if (initEB(EZ.vertx) && initCache(ezConfig.ez.cache) && I18NProcessor.init()) {
+      val mgr=new HazelcastClusterManager()
+      if (initEB(EZ.vertx,mgr) && initDistService(mgr) && initCache(ezConfig.ez.cache) && I18NProcessor.init()) {
         EZ.Info.app = ezConfig.ez.app
         EZ.Info.module = ezConfig.ez.module
         EZ.Info.timezone = ezConfig.ez.timezone
