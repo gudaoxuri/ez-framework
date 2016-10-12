@@ -30,12 +30,8 @@ object ConfigProcessor extends LazyLogging {
           val unifyConfigPath = if (path.endsWith("/")) path else path + "/"
           val basicConfig = parseConfig(Source.fromFile(unifyConfigPath + "ez.json", "UTF-8").mkString)
           val moduleConfig = parseConfig(Source.fromFile(unifyConfigPath + s"ez.$app.$module.json", "UTF-8").mkString)
-          if (moduleConfig.ez.app == null) {
-            moduleConfig.ez.app = basicConfig.ez.app
-          }
-          if (moduleConfig.ez.module == null) {
-            moduleConfig.ez.module = basicConfig.ez.module
-          }
+          moduleConfig.ez.app = app
+          moduleConfig.ez.module = module
           moduleConfig.ez.instance = moduleConfig.ez.instance + System.nanoTime()
           if (moduleConfig.ez.cache == null) {
             moduleConfig.ez.cache = basicConfig.ez.cache
@@ -57,7 +53,7 @@ object ConfigProcessor extends LazyLogging {
           moduleConfig.ez.services =
             moduleConfig.ez.services.map {
               service =>
-                if (JsonHelper.toJson(service._2).size() == 0) {
+                if (service._2 == null) {
                   // 使用基础配置
                   service._1 -> basicConfig.ez.services(service._1)
                 } else {

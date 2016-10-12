@@ -4,7 +4,7 @@
       "package":"com.xx"
     },
     "services": {
-      "test1": {},
+      "test1": null,
       "test2": {
         "field1": "1"
       },
