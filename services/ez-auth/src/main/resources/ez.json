@@ -1,0 +1,26 @@
+{
+  "ez": {
+    "app": "",
+    "module": "auth",
+    "cache": {
+      "address": "127.0.0.1:6379"
+    },
+    "rpc": {
+      "package": "com.ecfront.ez.framework.service.auth"
+    },
+    "services": {
+      "auth": {
+        "customLogin": false,
+        "defaultOrganizationCode": "",
+        "loginKeepSeconds": 0
+      },
+      "jdbc": {
+        "url": "jdbc:mysql://127.0.0.1:3306/ez?characterEncoding=UTF-8&autoReconnect=true",
+        "userName": "root",
+        "password": "123456"
+      }
+    }
+  },
+  "args": {
+  }
+}

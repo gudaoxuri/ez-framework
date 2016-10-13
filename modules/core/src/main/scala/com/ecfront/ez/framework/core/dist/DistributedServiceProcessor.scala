@@ -8,6 +8,8 @@ trait DistributedServiceProcessor extends LazyLogging {
 
   def lock(key: String): ILock
 
+  def map[E](key: String): IMap[E]
+
 }
 
 trait ILock {
@@ -25,5 +27,27 @@ trait ILock {
   def isLock: Boolean
 
   def delete(): this.type
+
+}
+
+trait IMap[M]{
+
+  def put(key: String, value: M): this.type
+
+  def putAsync(key: String, value: M): this.type
+
+  def putIfAbsent(key: String, value: M): this.type
+
+  def contains(key: String): Boolean
+
+  def foreach(fun: (String, M) => Unit): this.type
+
+  def get(key: String): M
+
+  def remove(key: String): this.type
+
+  def removeAsync(key: String): this.type
+
+  def clear(): this.type
 
 }

@@ -27,7 +27,6 @@
         <ezf-version>4.0</ezf-version>
         <ez-common.version>1.2.2</ez-common.version>
         <vertx.version>3.3.3</vertx.version>
-
     </properties>
 
     <modules>
@@ -38,6 +37,7 @@
         <module>modules/auth</module>
         <module>modules/scheduler</module>
         <module>modules/message</module>
+        <module>services/</module>
     </modules>
 
     <dependencies>

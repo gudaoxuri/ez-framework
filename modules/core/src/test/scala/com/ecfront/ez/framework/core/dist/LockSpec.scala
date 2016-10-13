@@ -4,7 +4,7 @@ import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.test.MockStartupSpec
 
 
-class LockServiceSpec extends MockStartupSpec {
+class LockSpec extends MockStartupSpec {
 
   test("lock test") {
 
