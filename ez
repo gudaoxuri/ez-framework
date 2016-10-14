@@ -11,16 +11,25 @@ start(){
         start_app="\-Dez.flag=ez_sh -jar ./app/$app_code/$app_code.jar"
     fi
 
+   if [ `(ps -ef |grep "\-Dez.flag=ez_sh -jar ./app/gateway/gateway.jar" ) | grep -v grep | wc -l ` -eq 0 ] ; then
+        echo "Starting gateway"
+         mkdir -p  $log_path/gateway/
+         nohup java -Dez.flag=ez_sh -jar ./app/gateway/gateway.jar  > $log_path/gateway/out.log &
+		 sleep 10s
+         echo "Started gateway"
+   fi
     if [ `(ps -ef |grep "$start_app" ) | grep -v grep | wc -l ` -eq 0 ] ; then
         files=`ls ./app/`
         for file in $files
         do
             app=`echo $file|cut -d "." -f1`
-            if [ $1 = 'all' ] || [ "$1" = $app ]; then
-                mkdir -p  $log_path/$app/
-                nohup java -Dlog4j.configuration=file:"./app/$app/config/log4j.properties" -Dez.flag=ez_sh -jar ./app/$app/$app.jar  > $log_path/$app/out.log &
-                echo "Started $app"
-            fi
+            if [ $app != 'gateway' ] ; then
+                if [ $1 = 'all' ] || [ "$1" = $app ]; then
+                    mkdir -p  $log_path/$app/
+                    nohup java -Dez.flag=ez_sh -jar ./app/$app/$app.jar  > $log_path/$app/out.log &
+                    echo "Started $app"
+                fi
+             fi
         done
     else
         echo "Start $app_code fail,App Not Stopped."
@@ -72,7 +81,7 @@ restart(){
 
 tailf(){
     app_code=$1
-	exec tailf -n 100 $log_path/$app_code/out.log
+	exec tailf -n 200 $log_path/$app_code/out.log
 }
 
 trace(){

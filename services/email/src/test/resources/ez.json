@@ -1,0 +1,26 @@
+{
+  "ez": {
+    "app": "",
+    "module": "",
+    "cache": {
+      "address": "127.0.0.1:6379"
+    },
+    "rpc":{
+      "package":"com.ecfront.ez"
+    },
+    "services": {
+      "email": {
+        "host": "smtp.exmail.qq.com",
+        "port": 465,
+        "userName": "test@ecfront.com",
+        "password": "Ez1234",
+        "protocol": "ssl",
+        "poolSize": 2,
+        "defaultSender": "蒋震宇",
+        "defaultSendAddress": "test@ecfront.com"
+      }
+    }
+  },
+  "args": {
+  }
+}

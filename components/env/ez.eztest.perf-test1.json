@@ -1,0 +1,12 @@
+{
+  "ez": {
+    "rpc": {
+      "package": "com.ecfront.ez.framework.component.perf.test1"
+    },
+    "services": {
+      "jdbc": null
+    }
+  },
+  "args": {
+  }
+}

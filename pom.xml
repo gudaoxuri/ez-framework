@@ -30,14 +30,15 @@
     </properties>
 
     <modules>
-        <module>modules/core</module>
-        <module>modules/gateway</module>
-        <module>modules/jdbc</module>
-        <module>modules/email</module>
-        <module>modules/auth</module>
-        <module>modules/scheduler</module>
-        <module>modules/message</module>
-        <module>services/</module>
+        <module>services/core</module>
+        <module>services/gateway</module>
+        <module>services/jdbc</module>
+        <module>services/email</module>
+        <module>services/auth</module>
+        <module>services/scheduler</module>
+        <module>services/message</module>
+        <module>services/test</module>
+        <module>components/</module>
     </modules>
 
     <dependencies>
@@ -98,24 +99,6 @@
                     <artifactId>junit</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_${scala.major.version}</artifactId>
-            <version>${scalatest.version}</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.scala-lang</groupId>
-                    <artifactId>scala-library</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

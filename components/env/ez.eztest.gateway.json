@@ -1,0 +1,12 @@
+{
+  "ez": {
+    "rpc": {
+      "package": "com.ecfront.ez.framework.service.gateway"
+    },
+    "services": {
+      "gateway": null
+    }
+  },
+  "args": {
+  }
+}
