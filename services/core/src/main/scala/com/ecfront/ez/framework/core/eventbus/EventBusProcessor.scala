@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.core.eventbus
 
 import com.ecfront.common.JsonHelper
-import com.ecfront.ez.framework.core.rpc.Method
+import com.ecfront.ez.framework.core.rpc.{Method, RPCProcessor}
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
 trait EventBusProcessor extends LazyLogging {
@@ -11,7 +11,7 @@ trait EventBusProcessor extends LazyLogging {
   def publish(address: String, message: Any, args: Map[String, String] = Map()): Unit = {
     val addr = packageAddress(Method.PUB_SUB.toString, address)
     val msg = toAllowedMessage(message)
-    logger.trace(s"[EB] Publish a message [$addr] : $args > $msg ")
+    logger.trace(s"[EB] Publish a message [$addr] : $args > ${RPCProcessor.cutPrintShow(msg.toString)} ")
     doPublish(addr, msg, args)
   }
 
@@ -20,7 +20,7 @@ trait EventBusProcessor extends LazyLogging {
   def request(address: String, message: Any, args: Map[String, String] = Map(), ha: Boolean = true): Unit = {
     val addr = packageAddress(Method.REQ_RESP.toString, address)
     val msg = toAllowedMessage(message)
-    logger.trace(s"[EB] Request a message [$addr] : $args > $msg ")
+    logger.trace(s"[EB] Request a message [$addr] : $args > ${RPCProcessor.cutPrintShow(msg.toString)} ")
     doRequest(addr, msg, args, ha)
   }
 
@@ -34,7 +34,7 @@ trait EventBusProcessor extends LazyLogging {
   def ack[E: Manifest](address: String, message: Any, args: Map[String, String] = Map(), timeout: Long = 30 * 1000): (E, Map[String, String]) = {
     val addr = packageAddress(Method.ACK.toString, address)
     val msg = toAllowedMessage(message)
-    logger.trace(s"[EB] ACK a message [$addr] : $args > $msg ")
+    logger.trace(s"[EB] ACK a message [$addr] : $args > ${RPCProcessor.cutPrintShow(msg.toString)} ")
     doAck[E](addr, msg, args, timeout)
   }
 

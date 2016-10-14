@@ -3,6 +3,7 @@ package com.ecfront.ez.framework.core.eventbus
 import java.util.concurrent.CountDownLatch
 
 import com.ecfront.common.{JsonHelper, Resp}
+import com.ecfront.ez.framework.core.rpc.RPCProcessor
 import com.ecfront.ez.framework.core.{EZ, EZContext}
 import io.vertx.core._
 import io.vertx.core.eventbus.{DeliveryOptions, EventBus, Message, MessageConsumer}
@@ -88,7 +89,7 @@ class VertxEventBusProcessor extends EventBusProcessor {
     eb.send[String](address, message, opt, new Handler[AsyncResult[Message[String]]] {
       override def handle(event: AsyncResult[Message[String]]): Unit = {
         if (event.succeeded()) {
-          logger.trace(s"[EB] Ack reply a message [$address] : ${event.result().body()} ")
+          logger.trace(s"[EB] Ack reply a message [$address] : ${RPCProcessor.cutPrintShow(event.result().body())} ")
           try {
             val msg =
               if (e != manifest[Nothing]) {
@@ -158,7 +159,7 @@ class VertxEventBusProcessor extends EventBusProcessor {
               val key = it.next()
               headers += key -> event.headers().get(key)
             }
-            logger.trace(s"[EB] Received a $method message [$address] : $headers > ${event.body()} ")
+            logger.trace(s"[EB] Received a $method message [$address] : $headers > ${RPCProcessor.cutPrintShow(event.body())} ")
             try {
               EZ.cache.hdel(FLAG_QUEUE_EXECUTING + address, (address + event.body()).hashCode + "")
               val message = toObject[E](event.body(), reqClazz)

@@ -11,14 +11,14 @@ start(){
         start_app="\-Dez.flag=ez_sh -jar ./app/$app_code/$app_code.jar"
     fi
 
-   if [ `(ps -ef |grep "\-Dez.flag=ez_sh -jar ./app/gateway/gateway.jar" ) | grep -v grep | wc -l ` -eq 0 ] ; then
-        echo "Starting gateway"
-         mkdir -p  $log_path/gateway/
-         nohup java -Dez.flag=ez_sh -jar ./app/gateway/gateway.jar  > $log_path/gateway/out.log &
-		 sleep 10s
-         echo "Started gateway"
-   fi
     if [ `(ps -ef |grep "$start_app" ) | grep -v grep | wc -l ` -eq 0 ] ; then
+        if [ `(ps -ef |grep "\-Dez.flag=ez_sh -jar ./app/gateway/gateway.jar" ) | grep -v grep | wc -l ` -eq 0 ] ; then
+            echo "Starting gateway"
+            mkdir -p  $log_path/gateway/
+            nohup java -Dez.flag=ez_sh -jar ./app/gateway/gateway.jar  > $log_path/gateway/out.log &
+		    sleep 10s
+            echo "Started gateway"
+        fi
         files=`ls ./app/`
         for file in $files
         do

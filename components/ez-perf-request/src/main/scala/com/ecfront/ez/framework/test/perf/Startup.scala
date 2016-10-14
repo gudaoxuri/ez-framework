@@ -1,5 +1,7 @@
 package com.ecfront.ez.framework.test.perf
 
+import java.util.concurrent.atomic.AtomicLong
+
 import com.ecfront.common.{JsonHelper, StandardCode}
 import com.mdataset.excavator.Excavator
 
@@ -20,10 +22,16 @@ object Startup extends App {
        |}
      """.stripMargin)).get("body").get("token").asText()
 
+  val counter=new AtomicLong(0)
+
   val threads = for (i <- 0 until 1000)
     yield new Thread(new Runnable {
       override def run(): Unit = {
         while (true) {
+
+          println(">>>>>>>"+counter.incrementAndGet())
+
+          assert(JsonHelper.toJson(excavator.getHttpClient.get(u("test1/longtime/"))).get("code").asText() == StandardCode.SUCCESS)
           var saved = JsonHelper.toJson(excavator.getHttpClient.post(u("test1/"),
             s"""
                |{
@@ -33,7 +41,7 @@ object Startup extends App {
              """.stripMargin))
           assert(saved.get("code").asText() == StandardCode.SUCCESS)
           var uuid = saved.get("body").get("bus_uuid").asText()
-          assert(JsonHelper.toJson(excavator.getHttpClient.get(u("test1/"))).get("code").asText() == StandardCode.SUCCESS)
+          assert(JsonHelper.toJson(excavator.getHttpClient.get(u("test1/page/1/10/"))).get("code").asText() == StandardCode.SUCCESS)
           assert(JsonHelper.toJson(excavator.getHttpClient.get(u(s"test1/uuid/$uuid"))).get("code").asText() == StandardCode.SUCCESS)
           assert(JsonHelper.toJson(excavator.getHttpClient.delete(u(s"test1/uuid/$uuid"))).get("code").asText() == StandardCode.SUCCESS)
 
@@ -46,7 +54,7 @@ object Startup extends App {
              """.stripMargin))
           assert(saved.get("code").asText() == StandardCode.SUCCESS)
           uuid = saved.get("body").get("bus_uuid").asText()
-          assert(JsonHelper.toJson(excavator.getHttpClient.get(u("test2/"))).get("code").asText() == StandardCode.SUCCESS)
+          assert(JsonHelper.toJson(excavator.getHttpClient.get(u("test2/page/1/10/"))).get("code").asText() == StandardCode.SUCCESS)
           assert(JsonHelper.toJson(excavator.getHttpClient.get(u(s"test2/uuid/$uuid"))).get("code").asText() == StandardCode.SUCCESS)
           assert(JsonHelper.toJson(excavator.getHttpClient.delete(u(s"test2/uuid/$uuid"))).get("code").asText() == StandardCode.SUCCESS)
         }

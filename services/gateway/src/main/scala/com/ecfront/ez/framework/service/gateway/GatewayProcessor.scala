@@ -25,7 +25,7 @@ trait GatewayProcessor extends LazyLogging {
 
   protected def execute(body: String, context: EZAPIContext, resultFun: Resp[(EZAPIContext, Map[String, Any])] => Unit): Unit = {
     if (EZ.isDebug) {
-      logger.trace(s"Execute a request [${context.method}][${context.realUri}]，from ${context.remoteIP} | $body")
+      logger.trace(s"Execute a request [${context.method}][${context.realUri}]，from ${context.remoteIP} | ${RPCProcessor.cutPrintShow(body)}")
     }
     EZAsyncInterceptorProcessor.process[EZAPIContext](GatewayInterceptor.category, context, {
       (context, param) =>

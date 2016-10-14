@@ -75,13 +75,13 @@ object EZManager extends LazyLogging {
     ConfigProcessor.init(specialConfig)
   }
 
-  private def initEB(vertx: Vertx,mgr:HazelcastClusterManager): Resp[Void] = {
+  private def initEB(vertx: Vertx, mgr: HazelcastClusterManager): Resp[Void] = {
     val eb = new VertxEventBusProcessor()
     EZ.eb = eb
-    eb.init(vertx,mgr)
+    eb.init(vertx, mgr)
   }
 
-  private def initDistService(mgr:HazelcastClusterManager): Resp[Void] = {
+  private def initDistService(mgr: HazelcastClusterManager): Resp[Void] = {
     val dist = new HazelcastDistributedServiceProcessor()
     EZ.dist = dist
     dist.init(mgr)
@@ -97,7 +97,7 @@ object EZManager extends LazyLogging {
   }
 
   private def initRPC(args: Map[String, Any], vertx: Vertx): Resp[Void] = {
-    RPCProcessor.init(vertx, args("package").asInstanceOf[String])
+    RPCProcessor.init(vertx, args("package").asInstanceOf[String], args.getOrElse("printBodyLimit", 4000).asInstanceOf[Int])
   }
 
   /**
@@ -185,8 +185,8 @@ object EZManager extends LazyLogging {
       val ezConfig = ezConfigR.body
       EZ.Info.config = ezConfig
       EZ.vertx = initVertx(ezConfig.ez.perf.toMap, ezConfig.ez.isDebug)
-      val mgr=new HazelcastClusterManager()
-      if (initEB(EZ.vertx,mgr) && initDistService(mgr) && initCache(ezConfig.ez.cache) && I18NProcessor.init()) {
+      val mgr = new HazelcastClusterManager()
+      if (initEB(EZ.vertx, mgr) && initDistService(mgr) && initCache(ezConfig.ez.cache) && I18NProcessor.init()) {
         EZ.Info.app = ezConfig.ez.app
         EZ.Info.module = ezConfig.ez.module
         EZ.Info.timezone = ezConfig.ez.timezone

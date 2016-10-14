@@ -13,5 +13,6 @@
 
     <logger name="io.netty" level="WARN"/>
     <logger name="com.hazelcast" level="WARN"/>
+    <logger name="com.mchange" level="WARN"/>
 
 </configuration>

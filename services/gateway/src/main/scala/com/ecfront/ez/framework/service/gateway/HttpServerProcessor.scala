@@ -20,7 +20,8 @@ import scala.collection.JavaConversions._
   * @param resourcePath             路径根路径
   * @param accessControlAllowOrigin 允许跨域的域名
   */
-class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String = "*") extends Handler[HttpServerRequest] with GatewayProcessor {
+class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String)
+  extends Handler[HttpServerRequest] with GatewayProcessor {
 
   override def handle(request: HttpServerRequest): Unit = {
     if (request.method().name() == "OPTIONS") {
@@ -199,7 +200,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
   }
 
   private def returnContent(response: HttpServerResponse, accept: String, res: String): Unit = {
-    logger.trace("Response: \r\n" + res)
+    logger.trace("Response: \r\n" + RPCProcessor.cutPrintShow(res))
     // 支持CORS
     response.setStatusCode(HTTP_STATUS_200).putHeader("Content-Type", accept)
       .putHeader("Cache-Control", "no-cache")
