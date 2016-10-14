@@ -5,7 +5,7 @@ import com.ecfront.ez.framework.core.rpc._
 import com.ecfront.ez.framework.service.jdbc.BaseStorage
 import com.ecfront.ez.framework.service.jdbc.scaffold.SimpleRPCService
 
-@RPC("/test1/")
+@RPC("/test2/")
 object TestService extends SimpleRPCService[EZ_Test] {
 
   @POST("longtime/")

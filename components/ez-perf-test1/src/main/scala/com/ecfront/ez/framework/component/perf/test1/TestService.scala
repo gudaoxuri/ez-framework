@@ -10,7 +10,7 @@ object TestService extends SimpleRPCService[EZ_Test] {
 
   @POST("longtime/")
   def longTimeReq(args: Map[String, String], body: String): Resp[Void] = {
-    Thread.sleep(5000)
+    Thread.sleep(1000)
     Resp.success(null)
   }
 
