@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.ecfront</groupId>
+        <artifactId>ez-runnable-parent</artifactId>
+        <version>1.2.2</version>
+    </parent>
+
+    <artifactId>ezf-component-perf-request</artifactId>
+    <name>EZ Framework Perf request Component</name>
+    <version>${wzs-version}</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <mainClass>com.ecfront.ez.framework.test.perf.Startup</mainClass>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.mdataset</groupId>
+            <artifactId>excavator</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    </dependencies>
+
+</project>

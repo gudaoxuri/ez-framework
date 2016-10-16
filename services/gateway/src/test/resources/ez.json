@@ -20,6 +20,7 @@
             "excludes": []
           }
         },
+        "metrics":{},
         "publicUriPrefix":"/public/",
         "resourcePath": "c:/tmp/",
         "accessControlAllowOrigin": "*"

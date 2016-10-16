@@ -7,6 +7,7 @@ import com.ecfront.ez.framework.core.cache.CacheProcessor
 import com.ecfront.ez.framework.core.config.EZConfig
 import com.ecfront.ez.framework.core.dist.DistributedServiceProcessor
 import com.ecfront.ez.framework.core.eventbus.EventBusProcessor
+import com.ecfront.ez.framework.core.metrics.MetricsProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.Vertx
 import redis.clients.jedis.JedisCommands
@@ -69,6 +70,8 @@ object EZ extends LazyLogging {
   var dist: DistributedServiceProcessor = _
 
   var cache: CacheProcessor[JedisCommands] = _
+
+  var metrics: MetricsProcessor= _
 
   def context:EZContext = EZContext.getContext
 

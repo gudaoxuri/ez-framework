@@ -34,6 +34,7 @@ trait GatewayStartupSpec extends MockStartupSpec{
          |        "host": "0.0.0.0",
          |        "port": $gatewayPort,
          |        "wsPort": $gatewayWSPort,
+         |        "metrics":{},
          |        "publicUriPrefix":"/public/",
          |        "resourcePath": "c:/tmp/",
          |        "accessControlAllowOrigin": "*"

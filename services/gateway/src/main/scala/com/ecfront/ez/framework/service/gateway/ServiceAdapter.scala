@@ -65,9 +65,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
     AsyncRedisProcessor.init(EZ.vertx, address.toList, db, auth)
 
     val c = new CountDownLatch(2)
-    EZ.vertx
-      .createHttpServer(opt)
-      .requestHandler(new HttpServerProcessor(resourcePath, parameter.path("accessControlAllowOrigin").asText("*")))
+    val httpServer = EZ.vertx.createHttpServer(opt)
+    httpServer.requestHandler(new HttpServerProcessor(resourcePath, parameter.path("accessControlAllowOrigin").asText("*")))
       .listen(port, host, new Handler[AsyncResult[HttpServer]] {
         override def handle(event: AsyncResult[HttpServer]): Unit = {
           if (event.succeeded()) {
@@ -80,8 +79,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
           }
         }
       })
-    EZ.vertx
-      .createHttpServer(opt).websocketHandler(new WebSocketServerProcessor)
+    val wsServer = EZ.vertx.createHttpServer(opt)
+    wsServer.websocketHandler(new WebSocketServerProcessor)
       .listen(wsPort, host, new Handler[AsyncResult[HttpServer]] {
         override def handle(event: AsyncResult[HttpServer]): Unit = {
           if (event.succeeded()) {
@@ -94,6 +93,11 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
           }
         }
       })
+    if (parameter.has("metrics")) {
+      val intervalSec = parameter.get("metrics").path("intervalSec").asInt(60 * 60)
+      EZ.metrics.statistics(intervalSec, httpServer)
+      EZ.metrics.statistics(intervalSec, wsServer)
+    }
     c.await()
     Resp.success(null)
   }

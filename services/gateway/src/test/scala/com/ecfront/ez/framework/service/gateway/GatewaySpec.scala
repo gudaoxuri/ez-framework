@@ -39,6 +39,7 @@ class GatewaySpec extends BasicSpec {
          |            "excludes": []
          |          }
          |        },
+         |        "metrics":{},
          |        "publicUriPrefix":"/public/",
          |        "resourcePath": "c:/tmp/",
          |        "accessControlAllowOrigin": "*"

@@ -6,9 +6,11 @@ import com.ecfront.ez.framework.core.config.{ConfigProcessor, EZConfig}
 import com.ecfront.ez.framework.core.dist.HazelcastDistributedServiceProcessor
 import com.ecfront.ez.framework.core.eventbus.VertxEventBusProcessor
 import com.ecfront.ez.framework.core.i18n.I18NProcessor
+import com.ecfront.ez.framework.core.metrics.DefaultMetricsProcessor
 import com.ecfront.ez.framework.core.rpc.RPCProcessor
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.{Vertx, VertxOptions}
+import io.vertx.ext.dropwizard.DropwizardMetricsOptions
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager
 
 import scala.collection.mutable.ArrayBuffer
@@ -68,6 +70,7 @@ object EZManager extends LazyLogging {
       opt.setWarningExceptionTime(perf(FLAG_PERF_WARNING_EXCEPTION_TIME).asInstanceOf[Int] * 1000000L)
     }
     if (isDebug) opt.setWarningExceptionTime(600L * 1000 * 1000000)
+    opt.setMetricsOptions(new DropwizardMetricsOptions().setEnabled(true))
     Vertx.vertx(opt)
   }
 
@@ -79,6 +82,11 @@ object EZManager extends LazyLogging {
     val eb = new VertxEventBusProcessor()
     EZ.eb = eb
     eb.init(vertx, mgr)
+  }
+
+  private def initMetrics(vertx: Vertx): Resp[Void] = {
+    EZ.metrics = DefaultMetricsProcessor
+    EZ.metrics.register(vertx)
   }
 
   private def initDistService(mgr: HazelcastClusterManager): Resp[Void] = {
@@ -186,7 +194,7 @@ object EZManager extends LazyLogging {
       EZ.Info.config = ezConfig
       EZ.vertx = initVertx(ezConfig.ez.perf.toMap, ezConfig.ez.isDebug)
       val mgr = new HazelcastClusterManager()
-      if (initEB(EZ.vertx, mgr) && initDistService(mgr) && initCache(ezConfig.ez.cache) && I18NProcessor.init()) {
+      if (initEB(EZ.vertx, mgr) && initMetrics(EZ.vertx) && initDistService(mgr) && initCache(ezConfig.ez.cache) && I18NProcessor.init()) {
         EZ.Info.app = ezConfig.ez.app
         EZ.Info.module = ezConfig.ez.module
         EZ.Info.timezone = ezConfig.ez.timezone
