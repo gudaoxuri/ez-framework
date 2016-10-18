@@ -2,14 +2,14 @@ package com.ecfront.ez.framework.service.auth
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZ
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc._
 import com.ecfront.ez.framework.service.auth.helper.CaptchaHelper
 import com.ecfront.ez.framework.service.auth.model._
 import com.ecfront.ez.framework.service.jdbc.BaseModel
-import com.typesafe.scalalogging.slf4j.LazyLogging
 
 @RPC("/ez/auth/")
-object AuthService extends LazyLogging {
+object AuthService extends Logging {
 
   private val random = new scala.util.Random
 

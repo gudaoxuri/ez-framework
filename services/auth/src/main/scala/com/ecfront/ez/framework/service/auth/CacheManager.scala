@@ -6,11 +6,11 @@ import java.util.concurrent.locks.ReentrantLock
 
 import com.ecfront.common.JsonHelper
 import com.ecfront.ez.framework.core.EZ
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.{OptInfo, RPCProcessor}
 import com.ecfront.ez.framework.service.auth.model._
-import com.typesafe.scalalogging.slf4j.LazyLogging
 
-object CacheManager extends LazyLogging {
+object CacheManager extends Logging {
 
   object Token {
 

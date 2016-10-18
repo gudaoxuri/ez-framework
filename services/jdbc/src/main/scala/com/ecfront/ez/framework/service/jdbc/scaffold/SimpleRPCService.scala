@@ -4,16 +4,16 @@ import java.lang.reflect.ParameterizedType
 import java.util.regex.Pattern
 
 import com.ecfront.common.{JsonHelper, Resp}
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.{DELETE, GET, POST, PUT}
 import com.ecfront.ez.framework.service.jdbc._
-import com.typesafe.scalalogging.slf4j.LazyLogging
 
 /**
   * 简单RPC服务
   *
   * @tparam M 对应的实体类型
   */
-trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
+trait SimpleRPCService[M <: BaseModel] extends Logging {
 
   // 持久化对象
   protected val storageObj: BaseStorage[M]
@@ -33,7 +33,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     */
   @POST("")
   def rpcSave(parameter: Map[String, String], body: String): Resp[M] = {
-    logger.trace(s" RPC simple save : $body")
+    logger.trace(s"RPC simple save : $body")
     val model = JsonHelper.toObject(body, modelClazz)
     storageObj.save(model)
   }
@@ -51,7 +51,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
       logger.warn(s"【id】not null")
       Resp.badRequest("【id】not null")
     } else {
-      logger.trace(s" RPC simple update : $body")
+      logger.trace(s"RPC simple update : $body")
       val model = JsonHelper.toObject(body, modelClazz)
       storageObj.setIdValue(parameter("id"), model)
       storageObj.update(model)
@@ -71,7 +71,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
       logger.warn(s"【uuid】not null")
       Resp.badRequest("【uuid】not null")
     } else {
-      logger.trace(s" RPC simple update : $body")
+      logger.trace(s"RPC simple update : $body")
       val model = JsonHelper.toObject(body, modelClazz)
       storageObj.setUUIDValue(parameter("uuid"), model)
       storageObj.update(model)
@@ -86,7 +86,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     */
   @GET("enable/")
   def rpcFindEnable(parameter: Map[String, String]): Resp[List[M]] = {
-    logger.trace(s" RPC simple find enable : $parameter")
+    logger.trace(s"RPC simple find enable : $parameter")
     if (classOf[StatusModel].isAssignableFrom(modelClazz)) {
       val conditionR = if (parameter.contains("condition")) conditionCheck(parameter("condition")) else Resp.success("")
      if (conditionR) {
@@ -107,7 +107,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     */
   @GET("")
   def rpcFind(parameter: Map[String, String]): Resp[List[M]] = {
-    logger.trace(s" RPC simple find : $parameter")
+    logger.trace(s"RPC simple find : $parameter")
     val conditionR = if (parameter.contains("condition")) conditionCheck(parameter("condition")) else Resp.success("")
     if (conditionR) {
       storageObj.find(conditionR.body, List())
@@ -127,7 +127,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     */
   @GET("page/:pageNumber/:pageSize/")
   def rpcPage(parameter: Map[String, String]): Resp[Page[M]] = {
-    logger.trace(s" RPC simple page : $parameter")
+    logger.trace(s"RPC simple page : $parameter")
     val pageNumber = if (parameter.contains("pageNumber")) parameter("pageNumber").toLong else 1L
     val pageSize = if (parameter.contains("pageSize")) parameter("pageSize").toInt else DEFAULT_PAGE_SIZE
     val conditionR = if (parameter.contains("condition")) conditionCheck(parameter("condition")) else Resp.success("")
@@ -149,7 +149,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     */
   @GET("enable/page/:pageNumber/:pageSize/")
   def rpcPageEnable(parameter: Map[String, String]): Resp[Page[M]] = {
-    logger.trace(s" RPC simple page : $parameter")
+    logger.trace(s"RPC simple page : $parameter")
     val pageNumber = if (parameter.contains("pageNumber")) parameter("pageNumber").toLong else 1L
     val pageSize = if (parameter.contains("pageSize")) parameter("pageSize").toInt else DEFAULT_PAGE_SIZE
     val conditionR = if (parameter.contains("condition")) conditionCheck(parameter("condition")) else Resp.success("")
@@ -173,7 +173,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
       Resp.badRequest("【id】not null")
     } else {
       val id = parameter("id")
-      logger.trace(s" RPC simple get : $id")
+      logger.trace(s"RPC simple get : $id")
       storageObj.getById(id)
     }
   }
@@ -191,7 +191,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
       Resp.badRequest("【uuid】not null")
     } else {
       val uuid = parameter("uuid")
-      logger.trace(s" RPC simple getByUUID : $uuid")
+      logger.trace(s"RPC simple getByUUID : $uuid")
       storageObj.getByUUID(uuid)
     }
   }
@@ -209,7 +209,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
       Resp.badRequest("【id】not null")
     } else {
       val id = parameter("id")
-      logger.trace(s" RPC simple delete : $id")
+      logger.trace(s"RPC simple delete : $id")
       storageObj.deleteById(id)
     }
   }
@@ -227,7 +227,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
       Resp.badRequest("【uuid】not null")
     } else {
       val uuid = parameter("uuid")
-      logger.trace(s" RPC simple deleteByUUID : $uuid")
+      logger.trace(s"RPC simple deleteByUUID : $uuid")
       storageObj.deleteByUUID(uuid)
     }
   }
@@ -246,7 +246,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     } else {
       if (classOf[StatusModel].isAssignableFrom(modelClazz)) {
         val id = parameter("id")
-        logger.trace(s" RPC simple enable : $id")
+        logger.trace(s"RPC simple enable : $id")
         storageObj.asInstanceOf[StatusStorage[_]].enableById(id)
       } else {
         Resp.notImplemented("")
@@ -268,7 +268,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     } else {
       if (classOf[StatusModel].isAssignableFrom(modelClazz)) {
         val uuid = parameter("uuid")
-        logger.trace(s" RPC simple enableByUUID : $uuid")
+        logger.trace(s"RPC simple enableByUUID : $uuid")
         storageObj.asInstanceOf[StatusStorage[_]].enableByUUID(uuid)
       } else {
         Resp.notImplemented("")
@@ -290,7 +290,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     } else {
       if (classOf[StatusModel].isAssignableFrom(modelClazz)) {
         val id = parameter("id")
-        logger.trace(s" RPC simple enable : $id")
+        logger.trace(s"RPC simple enable : $id")
         storageObj.asInstanceOf[StatusStorage[_]].disableById(id)
       } else {
         Resp.notImplemented("")
@@ -312,7 +312,7 @@ trait SimpleRPCService[M <: BaseModel] extends LazyLogging {
     } else {
       if (classOf[StatusModel].isAssignableFrom(modelClazz)) {
         val uuid = parameter("uuid")
-        logger.trace(s" RPC simple enableByUUID : $uuid")
+        logger.trace(s"RPC simple enableByUUID : $uuid")
         storageObj.asInstanceOf[StatusStorage[_]].disableByUUID(uuid)
       } else {
         Resp.notImplemented("")

@@ -7,15 +7,15 @@ import com.ecfront.ez.framework.core.cache.CacheProcessor
 import com.ecfront.ez.framework.core.config.EZConfig
 import com.ecfront.ez.framework.core.dist.DistributedServiceProcessor
 import com.ecfront.ez.framework.core.eventbus.EventBusProcessor
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.metrics.MetricsProcessor
-import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.Vertx
 import redis.clients.jedis.JedisCommands
 
 /**
   * EZ容器，用于放置全局属性
   */
-object EZ extends LazyLogging {
+object EZ extends Logging {
 
   object Info {
     // APP名称，来自配置文件

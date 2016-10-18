@@ -3,11 +3,11 @@ package com.ecfront.ez.framework.core.rpc
 import com.ecfront.common.{BeanHelper, FieldAnnotationInfo, Resp}
 import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.Method.Method
-import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.Vertx
 
-object RPCProcessor extends LazyLogging {
+object RPCProcessor extends Logging {
 
   private val RPC_API_URL_FLAG = "/ez/gateway/address/add/"
   val RESP_TYPE_FLAG = "__respType__"

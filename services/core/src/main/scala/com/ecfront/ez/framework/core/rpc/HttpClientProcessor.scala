@@ -6,7 +6,7 @@ import java.nio.file.Files
 import java.util.Date
 
 import com.ecfront.common.JsonHelper
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.file.{AsyncFile, FileProps, OpenOptions}
 import io.vertx.core.http._
@@ -24,7 +24,7 @@ import scala.concurrent.{Await, Future, Promise}
   * 包含了对HTTP GET POST PUT DELETE 四类常用操作
   *
   */
-object HttpClientProcessor extends LazyLogging {
+object HttpClientProcessor extends Logging {
 
   private val FLAG_PERF_MAX_POOL_SIZE = "maxPoolSize"
 

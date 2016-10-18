@@ -5,14 +5,14 @@ import java.util.regex.Pattern
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZ
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 
 import scala.io.Source
 
 /**
   * I18N处理器
   */
-object I18NProcessor extends LazyLogging {
+object I18NProcessor extends Logging {
 
   // 正则信息 -> 语言 -> 翻译后的信息
   private val i18nInfo = collection.mutable.Map[Pattern, Map[String, String]]()

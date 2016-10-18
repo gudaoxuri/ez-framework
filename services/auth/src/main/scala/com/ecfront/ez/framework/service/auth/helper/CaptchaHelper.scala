@@ -2,13 +2,13 @@ package com.ecfront.ez.framework.service.auth.helper
 
 import java.io.{File, FileOutputStream}
 
+import com.ecfront.ez.framework.core.logger.Logging
 import com.github.cage.GCage
-import com.typesafe.scalalogging.slf4j.LazyLogging
 
 /**
   * 验证码生成
   */
-object CaptchaHelper extends LazyLogging {
+object CaptchaHelper extends Logging {
 
   def generate(text: String): File = {
     val temp = File.createTempFile("ez_captcha_", ".jpg")

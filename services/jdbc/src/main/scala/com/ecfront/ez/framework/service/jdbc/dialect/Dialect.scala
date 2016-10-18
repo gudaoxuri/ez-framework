@@ -2,8 +2,8 @@ package com.ecfront.ez.framework.service.jdbc.dialect
 
 import java.sql.SQLException
 
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.service.jdbc.dialect.DialectType.DialectType
-import com.typesafe.scalalogging.slf4j.LazyLogging
 
 trait Dialect {
 
@@ -24,7 +24,7 @@ object DialectType extends Enumeration {
   val MYSQL, POSTGRE, H2 = Value
 }
 
-object DialectFactory extends LazyLogging {
+object DialectFactory extends Logging {
 
   def parseDialect(url: String): Dialect = {
     url match {

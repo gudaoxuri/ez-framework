@@ -5,7 +5,7 @@ import java.lang.reflect.ParameterizedType
 import com.ecfront.common.{BeanHelper, Resp}
 import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.i18n.I18NProcessor._
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 
 import scala.beans.BeanProperty
 import scala.reflect.runtime._
@@ -34,7 +34,7 @@ object BaseModel {
   *
   * @tparam M 实体类型
   */
-trait BaseStorage[M <: BaseModel] extends LazyLogging {
+trait BaseStorage[M <: BaseModel] extends Logging {
 
   protected val _runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
 

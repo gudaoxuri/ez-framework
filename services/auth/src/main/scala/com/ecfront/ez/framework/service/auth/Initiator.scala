@@ -1,9 +1,9 @@
 package com.ecfront.ez.framework.service.auth
 
 import com.ecfront.ez.framework.core.EZ
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.Method
 import com.ecfront.ez.framework.service.auth.model._
-import com.typesafe.scalalogging.slf4j.LazyLogging
 
 /**
   * RBAC 实体初始化器
@@ -11,7 +11,7 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
   * 添加默认的多个资源，2个角色、1号系统管理员账号、1个组织
   *
   */
-object Initiator extends LazyLogging {
+object Initiator extends Logging {
 
   def init(): Unit = {
     updateCache()

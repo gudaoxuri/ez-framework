@@ -1,14 +1,14 @@
 package com.ecfront.ez.framework.core.interceptor
 
 import com.ecfront.common.Resp
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 
 /**
   * EZ拦截器定义，用于拦截器栈处理
   *
   * @tparam E 拦截参数类型
   */
-trait EZInterceptor[E] extends Serializable with LazyLogging {
+trait EZInterceptor[E] extends Serializable with Logging {
 
   // 拦截器类型
   val category: String

@@ -3,12 +3,12 @@ package com.ecfront.ez.framework.service.gateway.helper
 import java.util.concurrent.CountDownLatch
 
 import com.ecfront.common.Resp
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 import io.vertx.core.{AsyncResult, Handler, Vertx}
 import io.vertx.redis.{RedisClient, RedisOptions}
 
 
-object AsyncRedisProcessor extends LazyLogging {
+object AsyncRedisProcessor extends Logging {
 
   private var simpleRedis: RedisClient = _
 

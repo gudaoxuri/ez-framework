@@ -3,13 +3,13 @@ package com.ecfront.ez.framework.core.metrics
 import java.lang.Long
 
 import com.ecfront.common.Resp
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 import io.vertx.core.json.JsonObject
 import io.vertx.core.metrics.Measured
 import io.vertx.core.{Handler, Vertx}
 import io.vertx.ext.dropwizard.MetricsService
 
-trait MetricsProcessor extends LazyLogging {
+trait MetricsProcessor extends Logging {
 
   private var metricsService: MetricsService = _
   private var vertx: Vertx = _

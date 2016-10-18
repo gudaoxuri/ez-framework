@@ -2,9 +2,9 @@ package com.ecfront.ez.framework.core.dist
 
 import java.util.concurrent.TimeUnit
 
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 
-trait DistributedServiceProcessor extends LazyLogging {
+trait DistributedServiceProcessor extends Logging {
 
   def lock(key: String): ILock
 

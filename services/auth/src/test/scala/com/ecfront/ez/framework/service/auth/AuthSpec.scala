@@ -7,7 +7,7 @@ import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.rpc.{Method, OptInfo, RespHttpClientProcessor}
 import com.ecfront.ez.framework.service.auth.model._
 import com.ecfront.ez.framework.service.jdbc.{BaseModel, Page}
-import com.ecfront.ez.framework.test.{GatewayStartupSpec, MockStartupSpec}
+import com.ecfront.ez.framework.test.GatewayStartupSpec
 import io.vertx.core.http.HttpClientResponse
 import io.vertx.core.{Handler, Vertx}
 

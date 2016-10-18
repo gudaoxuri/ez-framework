@@ -1,11 +1,11 @@
 package com.ecfront.ez.framework.service.auth.test
 
 import com.ecfront.common.Resp
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.{GET, RPC}
-import com.typesafe.scalalogging.slf4j.LazyLogging
 
 @RPC("/public/test/")
-object TestService extends LazyLogging {
+object TestService extends Logging {
 
   @GET("wait/")
   def waiting(parameter: Map[String, String]): Resp[String] = {

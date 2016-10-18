@@ -6,17 +6,17 @@ import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.eventbus.VertxEventBusProcessor
 import com.ecfront.ez.framework.core.helper.TimeHelper
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc._
 import com.ecfront.ez.framework.core.{EZ, EZContext}
 import com.ecfront.ez.framework.service.gateway.interceptor.{EZAPIContext, GatewayInterceptor}
-import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.eventbus.{DeliveryOptions, Message, ReplyException}
 import io.vertx.core.{AsyncResult, Handler}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Promise
 
-trait GatewayProcessor extends LazyLogging {
+trait GatewayProcessor extends Logging {
 
   protected val HTTP_STATUS_200: Int = 200
   protected val HTTP_STATUS_302: Int = 302

@@ -4,7 +4,7 @@ import java.util.Date
 
 import com.ecfront.common.JsonHelper
 import com.ecfront.ez.framework.core.helper.TimeHelper
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 import org.quartz.{Job, JobExecutionContext}
 
 import scala.reflect.runtime._
@@ -12,7 +12,7 @@ import scala.reflect.runtime._
 /**
   * 调度回调处理代理类
   */
-class ScheduleJobProxy extends Job with LazyLogging {
+class ScheduleJobProxy extends Job with Logging {
 
   private val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
 

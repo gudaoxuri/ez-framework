@@ -1,13 +1,13 @@
 package com.ecfront.ez.framework.core.config
 
 import com.ecfront.common.{JsonHelper, Resp}
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.{EZ, EZManager}
-import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.collection.JavaConversions._
 import scala.io.Source
 
-object ConfigProcessor extends LazyLogging {
+object ConfigProcessor extends Logging {
 
   /**
     * 解析服务配置 , 默认情况下加载classpath根路径下的`ez.json`文件

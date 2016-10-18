@@ -3,11 +3,11 @@ package com.ecfront.ez.framework.service.jdbc
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 
 import scala.collection.mutable
 
-private[jdbc] object JDBCExecutor extends LazyLogging {
+private[jdbc] object JDBCExecutor extends Logging {
 
   def save[M](entityInfo: EntityInfo, valueInfo: Map[String, Any], clazz: Class[M]): Resp[M] = {
     val tableName = entityInfo.tableName

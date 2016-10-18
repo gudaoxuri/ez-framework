@@ -1,8 +1,8 @@
 package com.ecfront.ez.framework.core.cache
 
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 
-trait CacheProcessor[T] extends LazyLogging {
+trait CacheProcessor[T] extends Logging {
 
   /**
     * 暴露redis client ，用于自定义操作

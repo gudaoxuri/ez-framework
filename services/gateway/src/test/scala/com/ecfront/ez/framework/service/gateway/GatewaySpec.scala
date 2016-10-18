@@ -6,10 +6,10 @@ import java.util.concurrent.CountDownLatch
 
 import com.ecfront.common.{JsonHelper, StandardCode}
 import com.ecfront.ez.framework.core.rpc._
-import com.ecfront.ez.framework.test.BasicSpec
 import com.ecfront.ez.framework.core.{EZ, EZManager}
 import com.ecfront.ez.framework.service.jdbc.Page
 import com.ecfront.ez.framework.service.other.EZ_Test
+import com.ecfront.ez.framework.test.BasicSpec
 import org.joox.JOOX._
 
 class GatewaySpec extends BasicSpec {

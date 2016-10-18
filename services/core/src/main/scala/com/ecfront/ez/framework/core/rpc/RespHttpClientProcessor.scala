@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.core.rpc
 
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 import io.vertx.core.http._
 import io.vertx.core.json.{JsonArray, JsonObject}
 
@@ -15,7 +15,7 @@ import scala.concurrent.{Await, Future, Promise}
   * 包含了对HTTP GET POST PUT DELETE 四类常用操作
   *
   */
-object RespHttpClientProcessor extends LazyLogging {
+object RespHttpClientProcessor extends Logging {
 
   /**
     * GET 请求

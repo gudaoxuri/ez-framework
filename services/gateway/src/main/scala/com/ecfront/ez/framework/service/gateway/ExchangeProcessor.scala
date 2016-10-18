@@ -2,14 +2,14 @@ package com.ecfront.ez.framework.service.gateway
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZ
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc._
 import com.fasterxml.jackson.databind.JsonNode
-import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.collection.JavaConversions._
 
 @RPC("/ez/auth/")
-object ExchangeProcessor extends LazyLogging {
+object ExchangeProcessor extends Logging {
 
   @SUB("/ez/gateway/address/add/")
   def subscribeAddAddress(args: Map[String, String], apiDTO: APIDTO): Resp[Void] = {

@@ -1,12 +1,12 @@
 package com.ecfront.ez.framework.core.interceptor
 
 import com.ecfront.common.{AsyncResp, Resp}
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 
-object EZAsyncInterceptorProcessor extends LazyLogging {
+object EZAsyncInterceptorProcessor extends Logging {
 
   private val interceptor_container = collection.mutable.Map[String, List[EZAsyncInterceptor[_]]]()
 

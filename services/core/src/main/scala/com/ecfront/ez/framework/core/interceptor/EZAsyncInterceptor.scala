@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.core.interceptor
 
 import com.ecfront.common.{AsyncResp, Resp}
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 
 import scala.concurrent.{Future, Promise}
 
@@ -10,7 +10,7 @@ import scala.concurrent.{Future, Promise}
   *
   * @tparam E 拦截参数类型
   */
-trait EZAsyncInterceptor[E] extends LazyLogging {
+trait EZAsyncInterceptor[E] extends Logging {
 
   // 拦截器类型
   val category: String

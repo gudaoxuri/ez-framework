@@ -2,7 +2,7 @@ package com.ecfront.ez.framework.service.message.helper
 
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.EZ
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 
 import scala.beans.BeanProperty
 import scala.io.Source
@@ -10,7 +10,7 @@ import scala.io.Source
 /**
   * Mustache模板引擎辅助类
   */
-object TemplateEngineHelper extends LazyLogging {
+object TemplateEngineHelper extends Logging {
 
   /**
     * 渲染模板，返回结果

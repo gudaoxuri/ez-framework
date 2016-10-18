@@ -6,9 +6,9 @@ import com.ecfront.ez.framework.core.config.{ConfigProcessor, EZConfig}
 import com.ecfront.ez.framework.core.dist.HazelcastDistributedServiceProcessor
 import com.ecfront.ez.framework.core.eventbus.VertxEventBusProcessor
 import com.ecfront.ez.framework.core.i18n.I18NProcessor
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.metrics.DefaultMetricsProcessor
 import com.ecfront.ez.framework.core.rpc.RPCProcessor
-import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.{Vertx, VertxOptions}
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager
@@ -19,7 +19,7 @@ import scala.reflect.runtime._
 /**
   * EZ服务管理类，用于管理服务启动停止及依赖
   */
-object EZManager extends LazyLogging {
+object EZManager extends Logging {
 
   // EZ服务配置项容器
   private var ezServiceConfig: Map[String, Any] = _

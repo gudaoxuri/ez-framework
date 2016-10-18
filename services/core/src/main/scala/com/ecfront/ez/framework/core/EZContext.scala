@@ -17,6 +17,8 @@ class EZContext {
   @BeanProperty var token: String = _
   @BeanProperty var optAccCode: String = _
   @BeanProperty var optOrgCode: String = _
+  @BeanProperty var trace:collection.mutable.Map[String,String] = _
+
   lazy val optInfo: Option[OptInfo] = {
     if (token != null && token.nonEmpty) {
       val result = EZ.cache.get(RPCProcessor.TOKEN_INFO_FLAG + token)

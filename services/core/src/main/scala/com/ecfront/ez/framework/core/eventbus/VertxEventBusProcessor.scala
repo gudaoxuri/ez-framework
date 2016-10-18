@@ -89,6 +89,8 @@ class VertxEventBusProcessor extends EventBusProcessor {
     eb.send[String](address, message, opt, new Handler[AsyncResult[Message[String]]] {
       override def handle(event: AsyncResult[Message[String]]): Unit = {
         if (event.succeeded()) {
+          EZContext.setContext(JsonHelper.toObject[EZContext](event.result().headers().get(FLAG_CONTEXT)))
+          event.result().headers().remove(FLAG_CONTEXT)
           logger.trace(s"[EB] Ack reply a message [$address] : ${RPCProcessor.cutPrintShow(event.result().body())} ")
           try {
             val msg =
@@ -98,8 +100,6 @@ class VertxEventBusProcessor extends EventBusProcessor {
                 null.asInstanceOf[E]
               }
             val headers = collection.mutable.Map[String, String]()
-            EZContext.setContext(JsonHelper.toObject[EZContext](event.result().headers().get(FLAG_CONTEXT)))
-            event.result().headers().remove(FLAG_CONTEXT)
             val it = event.result().headers().names().iterator()
             while (it.hasNext) {
               val key = it.next()

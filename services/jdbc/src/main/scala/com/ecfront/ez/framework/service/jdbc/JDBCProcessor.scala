@@ -7,9 +7,9 @@ import java.util.Date
 import java.util.concurrent.atomic.AtomicLong
 
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.service.jdbc.dialect.DialectFactory
 import com.mchange.v2.c3p0.ComboPooledDataSource
-import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.apache.commons.dbutils.QueryRunner
 import org.apache.commons.dbutils.handlers._
 
@@ -18,7 +18,7 @@ import scala.collection.JavaConversions._
 /**
   * JDBC 操作
   */
-object JDBCProcessor extends LazyLogging {
+object JDBCProcessor extends Logging {
 
   private var defaultProcessor: JDBCProcessor = _
 
@@ -123,7 +123,7 @@ object JDBCProcessor extends LazyLogging {
 
 }
 
-case class JDBCProcessor(url: String, userName: String, password: String) extends LazyLogging {
+case class JDBCProcessor(url: String, userName: String, password: String) extends Logging {
 
   logger.info(s"Load JDBC client : $url")
 

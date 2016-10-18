@@ -1,12 +1,12 @@
 package com.ecfront.ez.framework.core.interceptor
 
 import com.ecfront.common.Resp
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 
 /**
   * 拦截器栈处理类
   */
-object EZInterceptorProcessor extends LazyLogging {
+object EZInterceptorProcessor extends Logging {
 
   private val interceptor_container = collection.mutable.Map[String, List[EZInterceptor[_]]]()
 

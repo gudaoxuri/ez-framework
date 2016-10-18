@@ -1,13 +1,13 @@
 package com.ecfront.ez.framework.service.jdbc
 
 import com.ecfront.common.{BeanHelper, ClassScanHelper, Ignore}
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 
 /**
   * 基础实体信息容器
   *
   */
-object EntityContainer extends LazyLogging {
+object EntityContainer extends Logging {
 
   // Entity容器
   val CONTAINER = collection.mutable.Map[String, EntityInfo]()

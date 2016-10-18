@@ -4,13 +4,13 @@ import java.util.regex.Pattern
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZ
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.Method
-import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-object LocalCacheContainer extends LazyLogging {
+object LocalCacheContainer extends Logging {
 
   private val routerContainer = Map[String, collection.mutable.Set[String]](
     Method.GET.toString -> collection.mutable.Set[String](),

@@ -1,10 +1,10 @@
 package com.ecfront.ez.framework.core.eventbus
 
 import com.ecfront.common.JsonHelper
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.{Method, RPCProcessor}
-import com.typesafe.scalalogging.slf4j.LazyLogging
 
-trait EventBusProcessor extends LazyLogging {
+trait EventBusProcessor extends Logging {
 
   val ADDRESS_SPLIT_FLAG = "@"
 

@@ -5,17 +5,17 @@ import java.util.Date
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.helper.TimeHelper
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc._
 import com.ecfront.ez.framework.service.jdbc.Page
 import com.ecfront.ez.framework.service.message.entity.{EZ_Message, EZ_Message_Log}
 import com.ecfront.ez.framework.service.message.helper.TemplateEngineHelper
-import com.typesafe.scalalogging.slf4j.LazyLogging
 
 /**
   * 消息服务
   */
 @RPC("/ez/message/")
-object MessageService extends LazyLogging {
+object MessageService extends Logging {
 
   /**
     * 根据登录信息获取未读消息条数

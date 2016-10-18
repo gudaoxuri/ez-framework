@@ -2,12 +2,12 @@ package com.ecfront.ez.framework.core.rpc
 
 import com.ecfront.common._
 import com.ecfront.ez.framework.core.EZ
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.Method.Method
-import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import scala.reflect.runtime._
 
-object AutoBuildingProcessor extends LazyLogging {
+object AutoBuildingProcessor extends Logging {
 
   private val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
 

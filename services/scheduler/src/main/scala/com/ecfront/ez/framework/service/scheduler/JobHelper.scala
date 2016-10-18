@@ -1,6 +1,6 @@
 package com.ecfront.ez.framework.service.scheduler
 
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 import org.quartz.impl.JobDetailImpl
 import org.quartz.impl.triggers.CronTriggerImpl
 import org.quartz.{Job, JobDataMap, JobKey, Scheduler}
@@ -8,7 +8,7 @@ import org.quartz.{Job, JobDataMap, JobKey, Scheduler}
 /**
   * quartz辅助类
   */
-object JobHelper extends LazyLogging {
+object JobHelper extends Logging {
 
   /**
     * 添加任务

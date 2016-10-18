@@ -3,7 +3,7 @@ package com.ecfront.ez.framework.core
 import java.lang.reflect.ParameterizedType
 
 import com.ecfront.common.{JsonHelper, Resp}
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 
 import scala.reflect.runtime._
 
@@ -13,7 +13,7 @@ import scala.reflect.runtime._
   *
   * @tparam E 服务配置项类型
   */
-trait EZServiceAdapter[E] extends Serializable with LazyLogging {
+trait EZServiceAdapter[E] extends Serializable with Logging {
 
   // 服务名称，框架会使用`服务标识`做为默认服务名称
   var serviceName: String

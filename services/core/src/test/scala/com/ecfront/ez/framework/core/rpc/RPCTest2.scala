@@ -1,10 +1,10 @@
 package com.ecfront.ez.framework.core.rpc
 
 import com.ecfront.common.Resp
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 
 @RPC("/test2/")
-class RPCTest2 extends LazyLogging {
+class RPCTest2 extends Logging {
 
   @SUB("")
   def t1(args: Map[String, String], body: String): Resp[Void] = {

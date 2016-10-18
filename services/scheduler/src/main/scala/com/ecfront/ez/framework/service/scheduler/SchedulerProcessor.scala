@@ -1,14 +1,14 @@
 package com.ecfront.ez.framework.service.scheduler
 
 import com.ecfront.common.JsonHelper
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.service.jdbc.Page
-import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.quartz.impl.StdSchedulerFactory
 
 /**
   * 调度处理
   */
-object SchedulerProcessor extends LazyLogging {
+object SchedulerProcessor extends Logging {
 
   private val quartzScheduler = StdSchedulerFactory.getDefaultScheduler
 

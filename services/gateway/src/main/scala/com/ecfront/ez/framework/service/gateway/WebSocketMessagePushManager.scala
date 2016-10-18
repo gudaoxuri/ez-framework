@@ -1,7 +1,7 @@
 package com.ecfront.ez.framework.service.gateway
 
 import com.ecfront.common.JsonHelper
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.ecfront.ez.framework.core.logger.Logging
 import io.vertx.core.Handler
 import io.vertx.core.http._
 
@@ -11,7 +11,7 @@ import scala.collection.mutable.ListBuffer
   * WebSocket 消息推送管理
   *
   */
-object WebSocketMessagePushManager extends LazyLogging {
+object WebSocketMessagePushManager extends Logging {
 
   private val webSocketContainer = collection.mutable.Map[String, ListBuffer[ServerWebSocket]]()
 

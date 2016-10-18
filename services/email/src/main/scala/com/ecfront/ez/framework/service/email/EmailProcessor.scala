@@ -4,8 +4,8 @@ import javax.activation.FileDataSource
 import javax.mail.Message.RecipientType
 
 import com.ecfront.common.Resp
+import com.ecfront.ez.framework.core.logger.Logging
 import com.sun.xml.internal.messaging.saaj.packaging.mime.internet.MimeUtility
-import com.typesafe.scalalogging.slf4j.LazyLogging
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator
 import org.simplejavamail.email.Email
 import org.simplejavamail.mailer.Mailer
@@ -14,7 +14,7 @@ import org.simplejavamail.mailer.config.{ServerConfig, TransportStrategy}
 /**
   * Email处理类
   */
-object EmailProcessor extends LazyLogging {
+object EmailProcessor extends Logging {
 
   private var mailer: Mailer = _
 

@@ -15,7 +15,7 @@
     <description>EZ框架Parent Component POM</description>
     <url>https://github.com/gudaoxuri/ez-framework</url>
     <packaging>pom</packaging>
-    <version>4.0</version>
+    <version>4.0-SNAPSHOT</version>
 
     <scm>
         <connection>scm:git:git@github.com:gudaoxuri/ez-framework.git</connection>
