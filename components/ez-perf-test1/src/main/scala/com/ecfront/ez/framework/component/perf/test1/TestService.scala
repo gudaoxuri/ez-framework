@@ -14,6 +14,12 @@ object TestService extends SimpleRPCService[EZ_Test] {
     Resp.success(null)
   }
 
+  @POST("normal/")
+  def normal(args: Map[String, String], body: String): Resp[String] = {
+    Thread.sleep(500)
+    Resp.success(body)
+  }
+
   override protected val storageObj: BaseStorage[EZ_Test] = EZ_Test
 
 }
