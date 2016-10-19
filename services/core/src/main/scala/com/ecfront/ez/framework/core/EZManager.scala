@@ -53,12 +53,12 @@ object EZManager extends Logging {
     if (perf.contains(FLAG_PERF_WORKER_POOL_SIZE)) {
       opt.setWorkerPoolSize(perf(FLAG_PERF_WORKER_POOL_SIZE).asInstanceOf[Int])
     } else {
-      opt.setWorkerPoolSize(100)
+      opt.setWorkerPoolSize(200)
     }
     if (perf.contains(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE)) {
       opt.setInternalBlockingPoolSize(perf(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE).asInstanceOf[Int])
     } else {
-      opt.setInternalBlockingPoolSize(100)
+      opt.setInternalBlockingPoolSize(200)
     }
     if (perf.contains(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME)) {
       opt.setMaxEventLoopExecuteTime(perf(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).asInstanceOf[Int] * 1000000L)
