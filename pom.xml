@@ -37,6 +37,7 @@
         <module>services/auth</module>
         <module>services/scheduler</module>
         <module>services/message</module>
+        <module>services/tpsi</module>
         <module>services/test</module>
         <module>components/</module>
     </modules>

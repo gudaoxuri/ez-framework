@@ -4,12 +4,12 @@ import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZServiceAdapter
 import com.ecfront.ez.framework.core.rpc.AutoBuildingProcessor
 import com.ecfront.ez.framework.service.auth.model._
-import io.vertx.core.json.JsonObject
+import com.fasterxml.jackson.databind.JsonNode
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 
-object ServiceAdapter extends EZServiceAdapter[JsonObject] {
+object ServiceAdapter extends EZServiceAdapter[JsonNode] {
 
   val EB_ORG_ADD_FLAG = "/ez/auth/rbac/organization/add/"
   val EB_ORG_REMOVE_FLAG = "/ez/auth/rbac/organization/remove/"
@@ -31,16 +31,18 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   var encrypt_algorithm: String = _
   var encrypt_salt: String = _
 
-  override def init(parameter: JsonObject): Resp[String] = {
-    customLogin = parameter.getBoolean("customLogin", false)
-    val loginLimit = parameter.getJsonObject("loginLimit", new JsonObject())
-    if (loginLimit.containsKey("showCaptcha")) {
-      loginLimit_showCaptcha = loginLimit.getInteger("showCaptcha")
+  override def init(parameter: JsonNode): Resp[String] = {
+    customLogin = parameter.path("customLogin").asBoolean(false)
+    if (parameter.has("loginLimit")) {
+      val loginLimit = parameter.get("loginLimit")
+      if (loginLimit.has("showCaptcha")) {
+        loginLimit_showCaptcha = loginLimit.get("showCaptcha").asInt()
+      }
     } else {
       loginLimit_showCaptcha = Int.MaxValue
     }
-    if (parameter.containsKey("customTables")) {
-      parameter.getJsonObject("customTables").foreach {
+    if (parameter.has("customTables")) {
+      parameter.get("customTables").fields().foreach {
         item =>
           item.getKey match {
             case "organization" => EZ_Organization.customTableName(item.getValue.asInstanceOf[String])
@@ -54,17 +56,17 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
           }
       }
     }
-    defaultOrganizationCode = parameter.getString("defaultOrganizationCode", "")
-    loginKeepSeconds = parameter.getInteger("loginKeepSeconds", 0)
+    defaultOrganizationCode = parameter.path("defaultOrganizationCode").asText("")
+    loginKeepSeconds = parameter.path("loginKeepSeconds").asInt(0)
     encrypt_algorithm =
-      if (parameter.containsKey("encrypt") && parameter.getJsonObject("encrypt").containsKey("algorithm")) {
-        parameter.getJsonObject("encrypt").getString("algorithm")
+      if (parameter.has("encrypt") && parameter.get("encrypt").has("algorithm")) {
+        parameter.get("encrypt").get("algorithm").asText()
       } else {
         "SHA-256"
       }
     encrypt_salt =
-      if (parameter.containsKey("encrypt") && parameter.getJsonObject("encrypt").containsKey("salt")) {
-        parameter.getJsonObject("encrypt").getString("salt")
+      if (parameter.has("encrypt") && parameter.get("encrypt").has("salt")) {
+        parameter.get("encrypt").get("salt").asText()
       } else {
         ""
       }
@@ -74,7 +76,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
   }
 
 
-  override def destroy(parameter: JsonObject): Resp[String] = {
+  override def destroy(parameter: JsonNode): Resp[String] = {
     Resp.success("")
   }
 

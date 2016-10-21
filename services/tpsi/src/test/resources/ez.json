@@ -1,0 +1,22 @@
+{
+  "ez": {
+    "app": "",
+    "module": "tpsi",
+    "cache": {
+      "address": "127.0.0.1:6379"
+    },
+    "rpc":{
+      "package":"com.ecfront.ez"
+    },
+    "services": {
+      "tpsi":{
+        /* "customTables": {
+            "scheduler": "sys_scheduler",
+            "scheduler_Log": "sys_scheduler_Log"
+          },*/
+      }
+    }
+  },
+  "args": {
+  }
+}

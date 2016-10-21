@@ -4,16 +4,16 @@ import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZServiceAdapter
 import com.ecfront.ez.framework.core.rpc.AutoBuildingProcessor
 import com.ecfront.ez.framework.service.message.entity.{EZ_Message, EZ_Message_Log}
-import io.vertx.core.json.JsonObject
+import com.fasterxml.jackson.databind.JsonNode
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 
-object ServiceAdapter extends EZServiceAdapter[JsonObject] {
+object ServiceAdapter extends EZServiceAdapter[JsonNode] {
 
-  override def init(parameter: JsonObject): Resp[String] = {
-    if (parameter.containsKey("customTables")) {
-      parameter.getJsonObject("customTables").foreach {
+  override def init(parameter: JsonNode): Resp[String] = {
+    if (parameter.has("customTables")) {
+      parameter.get("customTables").fields().foreach {
         item =>
           item.getKey match {
             case "message" => EZ_Message.customTableName(item.getValue.asInstanceOf[String])
@@ -25,7 +25,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonObject] {
     Resp.success("")
   }
 
-  override def destroy(parameter: JsonObject): Resp[String] = {
+  override def destroy(parameter: JsonNode): Resp[String] = {
     Resp.success("")
   }
 
