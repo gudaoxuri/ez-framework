@@ -104,8 +104,8 @@ object EZManager extends Logging {
     cache.init(address, db, auth)
   }
 
-  private def initRPC(args: Map[String, Any], vertx: Vertx): Resp[Void] = {
-    RPCProcessor.init(vertx, args("package").asInstanceOf[String], args.getOrElse("printBodyLimit", 4000).asInstanceOf[Int])
+  private def initRPC(config: Map[String, Any], vertx: Vertx): Resp[Void] = {
+    RPCProcessor.init(vertx, config)
   }
 
   /**
@@ -194,7 +194,11 @@ object EZManager extends Logging {
       EZ.Info.config = ezConfig
       EZ.vertx = initVertx(ezConfig.ez.perf.toMap, ezConfig.ez.isDebug)
       val mgr = new HazelcastClusterManager()
-      if (initEB(EZ.vertx, mgr) && initMetrics(EZ.vertx) && initDistService(mgr) && initCache(ezConfig.ez.cache) && I18NProcessor.init()) {
+      if (initEB(EZ.vertx, mgr)
+        && initMetrics(EZ.vertx)
+        && initDistService(mgr)
+        && initCache(ezConfig.ez.cache)
+        && I18NProcessor.init()) {
         EZ.Info.app = ezConfig.ez.app
         EZ.Info.module = ezConfig.ez.module
         EZ.Info.timezone = ezConfig.ez.timezone

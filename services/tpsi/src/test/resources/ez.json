@@ -1,19 +1,22 @@
 {
   "ez": {
-    "app": "",
+    "app": "test",
     "module": "tpsi",
     "cache": {
       "address": "127.0.0.1:6379"
     },
-    "rpc":{
-      "package":"com.ecfront.ez"
+    "rpc": {
+      "package": "com.ecfront.ez.framework.service.tpsi"
     },
     "services": {
-      "tpsi":{
-        /* "customTables": {
-            "scheduler": "sys_scheduler",
-            "scheduler_Log": "sys_scheduler_Log"
-          },*/
+      "tpsi": {
+        "ratePerMinute": 0,
+        "expireMinutes": 0,
+        "needLogin": false,
+        "isMock": false,
+        "args": {
+          "tt": "字段"
+        }
       }
     }
   },

@@ -23,8 +23,9 @@ object RPCProcessor extends Logging {
   private val fieldLabels = collection.mutable.Map[String, Map[String, String]]()
   private val requireFieldNames = collection.mutable.Map[String, List[String]]()
 
-  private[core] def init(vertx: Vertx, basePackage: String, _printBodyLimit: Int): Resp[Void] = {
-    printBodyLimit = _printBodyLimit
+  private[core] def init(vertx: Vertx, config: Map[String, Any]): Resp[Void] = {
+    val basePackage = config("package").asInstanceOf[String]
+    printBodyLimit = config.getOrElse("printBodyLimit", 4000).asInstanceOf[Int]
     AutoBuildingProcessor.autoBuilding(basePackage)
     address.foreach {
       addr =>

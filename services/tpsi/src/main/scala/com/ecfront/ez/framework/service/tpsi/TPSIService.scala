@@ -7,6 +7,7 @@ import javax.xml.ws.WebServiceException
 
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
 import com.ecfront.ez.framework.core.EZ
+import com.fasterxml.jackson.databind.JsonNode
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.Handler
 
@@ -15,106 +16,118 @@ trait TPSIService extends LazyLogging {
   private val FLAG_LIMIT = "ez:tpsi:limit:"
   private val FLAG_TOKEN = "ez:tpsi:token:"
 
-  protected var config: TPSIServiceConfig = _
+  protected var config: TPSIConfig = _
 
-  protected def register(_config: TPSIServiceConfig): Unit = {
-    config = _config
-    init(config)
+  protected def register(): Unit = {
+    config = ServiceAdapter.config
+    init(config.args)
     sys.addShutdownHook {
-      shutdown(config)
+      shutdown(config.args)
     }
   }
 
-  protected def init(config: TPSIServiceConfig): Unit
+  register()
 
-  protected def shutdown(config: TPSIServiceConfig): Unit = {}
+  protected def init(args: JsonNode): Unit
 
-  protected def login(config: TPSIServiceConfig): Resp[String] = {
-    Resp.success("")
-  }
+  protected def shutdown(args: JsonNode): Unit = {}
 
-  protected def execute[R](config: TPSIServiceConfig, id: String, funName: String, execFun: => Resp[R], reTryTimes: Int = 0): Resp[R] = {
+  protected def login(args: JsonNode): Resp[String] = Resp.success("")
+
+  protected def execute[R](id: String, funName: String, execFun: => Any, execPostFun: Any => Resp[R], reTryTimes: Int = 0): Resp[R] = {
     var traceId: String = ""
     try {
-      logger.info(s"tpsi prepare [$funName]:[${config.code}][$id]")
+      logger.debug(s"[TPSI] prepare [$funName]:[${config.code}][$id]")
       limitFilter(config)
       traceId = id + System.nanoTime()
       if (!currEXInfo.contains(funName + "@" + config.code)) {
         currEXInfo += funName + "@" + config.code -> collection.mutable.Map[String, (Date, String)]()
       }
       currEXInfo(funName + "@" + config.code) += traceId -> (new Date(), id)
-      logger.info(s"tpsi start [$funName]:[$config.code][$id]")
-      val resp = execFun
-      if (currEXInfo.contains(funName + "@" + config.code) && currEXInfo(funName + "@" + config.code).contains(traceId)) {
-        val trace = currEXInfo(funName + "@" + config.code)(traceId)
-        logger.trace(s"tpsi execute [$funName]:[${config.code}][$id] times: ${new Date().getTime - trace._1.getTime} ms")
-      }
+      logger.info(s"[TPSI] start [$funName]:[${config.code}][$id]")
+      val execResult = execFun
+      val useTimes =
+        if (currEXInfo.contains(funName + "@" + config.code) && currEXInfo(funName + "@" + config.code).contains(traceId)) {
+          val trace = currEXInfo(funName + "@" + config.code)(traceId)
+          new Date().getTime - trace._1.getTime
+        } else {
+          -1
+        }
       currEXInfo(funName + "@" + config.code) -= traceId
-      logger.info(s"tpsi finish [$funName]:[${config.code}][$id] return data:" + JsonHelper.toJsonString(resp))
+      logger.debug(s"[TPSI] finish [$funName]:[${config.code}][$id] use ${useTimes}ms , return data:" + JsonHelper.toJsonString(execResult))
+      val resp = execPostFun(execResult)
       resp.code match {
         case StandardCode.SUCCESS =>
-          logger.info(s"tpsi success [$funName]:[${config.code}][$id]")
+          logger.info(s"[TPSI] success [$funName]:[${config.code}][$id]")
           resp
         case StandardCode.SERVICE_UNAVAILABLE =>
           if (reTryTimes <= 5) {
-            logger.warn(s"tpsi service unavailable [$funName]:[${config.code}][$id],retry it")
+            logger.warn(s"[TPSI] service unavailable [$funName]:[${config.code}][$id],retry it")
             Thread.sleep(10000)
-            execute[R](config, id, funName, execFun, reTryTimes + 1)
+            execute[R](id, funName, execFun, execPostFun, reTryTimes + 1)
           } else {
             currEXInfo(funName + "@" + config.code) -= traceId
-            logger.error(s"tpsi service unavailable [$funName]:[${config.code}][$id]")
-            Resp.serverUnavailable(s"tpsi service unavailable and retry fail")
+            logger.error(s"[TPSI] service unavailable [$funName]:[${config.code}][$id]")
+            Resp.serverUnavailable(s"[TPSI] service unavailable and retry fail")
           }
         case StandardCode.UNAUTHORIZED =>
           if (config.needLogin) {
-            logger.info(s"tpsi token expire [$funName]:[${config.code}][$id],re-login it")
+            logger.info(s"[TPSI] token expire [$funName]:[${config.code}][$id],re-login it")
             tryLogin(config)
-            execute[R](config, id, funName, execFun)
+            execute[R](id, funName, execFun, execPostFun)
           } else {
-            logger.error(s"tpsi auth error [$funName]:[${config.code}][$id]")
+            logger.error(s"[TPSI] auth error [$funName]:[${config.code}][$id]")
             resp
           }
         case _ =>
-          logger.warn(s"tpsi fail [$funName]:[${config.code}][$id]")
+          logger.warn(s"[TPSI] fail [$funName]:[${config.code}][$id]")
           resp
       }
     } catch {
       case e: Throwable if e.isInstanceOf[WebServiceException] || e.isInstanceOf[SocketTimeoutException] =>
         if (reTryTimes <= 5) {
-          logger.warn(s"tpsi timeout [$funName]:[${config.code}][$id],retry it")
+          logger.warn(s"[TPSI] timeout [$funName]:[${config.code}][$id],retry it")
           Thread.sleep(10000)
-          execute[R](config, id, funName, execFun, reTryTimes + 1)
+          execute[R](id, funName, execFun, execPostFun, reTryTimes + 1)
         } else {
           currEXInfo(funName + "@" + config.code) -= traceId
-          logger.error(s"tpsi timeout [$funName]:[${config.code}][$id]", e)
-          Resp.serverUnavailable(s"tpsi timeout and retry fail")
+          logger.error(s"[TPSI] timeout [$funName]:[${config.code}][$id]", e)
+          Resp.serverUnavailable(s"[TPSI] timeout and retry fail")
         }
       case e: Throwable =>
         currEXInfo(funName + "@" + config.code) -= traceId
-        logger.warn(s"tpsi fail [$funName]:[${config.code}][$id]", e)
-        Resp.serverError(s"tpsi fail ${e.getMessage}")
+        logger.warn(s"[TPSI] fail [$funName]:[${config.code}][$id]", e)
+        Resp.serverError(s"[TPSI] fail ${e.getMessage}")
     }
   }
 
-  private def limitFilter(config: TPSIServiceConfig): Unit = {
-    val currCount = EZ.cache.incr(FLAG_LIMIT + config.code, 0)
-    if (currCount == 0) {
-      EZ.cache.expire(FLAG_LIMIT + config.code, 60)
-    }
-    if (currCount >= config.ratePerMinute) {
-      logger.info(s"[${config.code}] limit waiting")
-      Thread.sleep(5000)
-      limitFilter(config)
-    } else {
-      EZ.cache.incr(FLAG_LIMIT + config.code)
+  private def limitFilter(config: TPSIConfig): Unit = {
+    if (config.ratePerMinute != 0) {
+      val currCount = EZ.cache.incr(FLAG_LIMIT + config.code, 0)
+      if (currCount == 0) {
+        EZ.cache.expire(FLAG_LIMIT + config.code, 60)
+      }
+      if (currCount >= config.ratePerMinute) {
+        logger.info(s"[${config.code}] limit waiting")
+        Thread.sleep(5000)
+        limitFilter(config)
+      } else {
+        EZ.cache.incr(FLAG_LIMIT + config.code)
+      }
     }
   }
 
-  private def tryLogin(config: TPSIServiceConfig, forceReFetch: Boolean = false): String = {
+  private def tryLogin(config: TPSIConfig, forceReFetch: Boolean = false): String = {
     if (!EZ.cache.exists(FLAG_TOKEN + config.code) || forceReFetch) {
-      val resp = execute[String](config, "", "login", login(config))
+      val resp = execute[String]("", "login", login(config.args), {
+        _.asInstanceOf[Resp[String]]
+      })
       if (resp) {
-        EZ.cache.set(FLAG_TOKEN + config.code, resp.body, config.expireMinutes)
+        if (config.expireMinutes != 0) {
+          EZ.cache.set(FLAG_TOKEN + config.code, resp.body, config.expireMinutes)
+        } else {
+          EZ.cache.set(FLAG_TOKEN + config.code, resp.body)
+        }
       }
     }
     EZ.cache.get(FLAG_TOKEN + config.code)

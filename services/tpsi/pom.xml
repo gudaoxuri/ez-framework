@@ -26,6 +26,11 @@
             <artifactId>ezf-core</artifactId>
             <version>${ezf-version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-test</artifactId>
+            <version>${ezf-version}</version>
+        </dependency>
     </dependencies>
 
 </project>

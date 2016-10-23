@@ -16,7 +16,6 @@ class RPCSpec extends MockStartupSpec {
     EZ.eb.publish("/test2/", "sub")
     EZ.eb.request("/test2/resp/", BodyTest("resp"))
     assert(EZ.eb.ack[Resp[BodyTest]]("/reply/", BodyTest("ack"))._1.body.a == "ack")
-
   }
 
 }

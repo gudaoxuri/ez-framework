@@ -73,7 +73,7 @@ class VertxEventBusProcessor extends EventBusProcessor {
       arg =>
         opt.addHeader(arg._1, arg._2)
     }
-    eb.send(address, message)
+    eb.send(address, message,opt)
   }
 
   override protected def doAck[E](address: String, message: Any, args: Map[String, String], timeout: Long)
