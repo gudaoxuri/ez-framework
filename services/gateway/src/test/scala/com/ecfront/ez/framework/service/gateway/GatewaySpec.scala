@@ -39,6 +39,10 @@ class GatewaySpec extends BasicSpec {
          |            "excludes": []
          |          }
          |        },
+         |        "antiDDoS":{
+         |          "reqRatePerMinute":1,
+         |          "illegalReqRatePerMinute":1
+         |        },
          |        "metrics":{},
          |        "publicUriPrefix":"/public/",
          |        "resourcePath": "c:/tmp/",

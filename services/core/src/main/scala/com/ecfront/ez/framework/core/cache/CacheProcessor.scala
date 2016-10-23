@@ -168,12 +168,17 @@ trait CacheProcessor[T] extends Logging {
   /**
     * 原子减操作
     *
-    * @param key       key key，key不存在时会自动创建值为0的对象
+    * @param key       key不存在时会自动创建值为0的对象
     * @param decrValue 要减少的值，必须是Long  或 Int
     * @return 操作后的值
     */
   def decr(key: String, decrValue: Long = 1): Long
 
+  /**
+    * 设置过期时间
+    * @param key  key
+    * @param expire 过期时间，单位秒
+    */
   def expire(key: String, expire: Int = 0): Unit
 
   def flushdb(): Unit

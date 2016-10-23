@@ -7,7 +7,7 @@ import java.nio.file.Files
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.helper.FileType
 import com.ecfront.ez.framework.core.rpc._
-import com.ecfront.ez.framework.service.gateway.interceptor.EZAPIContext
+import com.ecfront.ez.framework.service.gateway.interceptor.{AntiDDoSInterceptor, EZAPIContext}
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpServerFileUpload, HttpServerRequest, HttpServerResponse}
@@ -35,7 +35,11 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
         }
       logger.trace(s"Receive a request [${request.method().name()}][${request.uri()}] , from $ip ")
       try {
-        router(request, ip)
+        if (!AntiDDoSInterceptor.isLimit(ip)) {
+          router(request, ip)
+        } else {
+          returnContent("Too frequent requests, please try again later", request, "application/json", "application/json; charset=utf-8")
+        }
       } catch {
         case ex: Throwable =>
           logger.error("Http process error.", ex)

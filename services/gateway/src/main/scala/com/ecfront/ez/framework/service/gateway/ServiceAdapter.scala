@@ -6,7 +6,7 @@ import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
 import com.ecfront.ez.framework.core.{EZ, EZServiceAdapter}
 import com.ecfront.ez.framework.service.gateway.helper.AsyncRedisProcessor
-import com.ecfront.ez.framework.service.gateway.interceptor.{AuthInterceptor, GatewayInterceptor, SlowMonitorInterceptor}
+import com.ecfront.ez.framework.service.gateway.interceptor.{AntiDDoSInterceptor, AuthInterceptor, GatewayInterceptor, SlowMonitorInterceptor}
 import com.fasterxml.jackson.databind.JsonNode
 import io.vertx.core.http.{HttpServer, HttpServerOptions}
 import io.vertx.core.net.JksOptions
@@ -63,6 +63,13 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
     val db = EZ.Info.config.ez.cache.getOrElse("db", 0).asInstanceOf[Int]
     val auth = EZ.Info.config.ez.cache.getOrElse("auth", "").asInstanceOf[String]
     AsyncRedisProcessor.init(EZ.vertx, address.toList, db, auth)
+
+    if (parameter.has("antiDDoS")) {
+      val antiDDoS = parameter.get("antiDDoS")
+      val reqRatePerMinute = antiDDoS.get("reqRatePerMinute").asInt()
+      val illegalReqRatePerMinute = antiDDoS.get("illegalReqRatePerMinute").asInt()
+      AntiDDoSInterceptor.init(reqRatePerMinute, illegalReqRatePerMinute)
+    }
 
     val c = new CountDownLatch(2)
     val httpServer = EZ.vertx.createHttpServer(opt)
