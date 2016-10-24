@@ -2,6 +2,7 @@ package com.ecfront.ez.framework.core
 
 import java.net.InetAddress
 import java.util.UUID
+import java.util.concurrent.Executors
 
 import com.ecfront.ez.framework.core.cache.CacheProcessor
 import com.ecfront.ez.framework.core.config.EZConfig
@@ -76,5 +77,7 @@ object EZ extends Logging {
   def context:EZContext = EZContext.getContext
 
   def createUUID: String = UUID.randomUUID().toString.replace("-", "")
+
+  val execute = Executors.newCachedThreadPool()
 
 }

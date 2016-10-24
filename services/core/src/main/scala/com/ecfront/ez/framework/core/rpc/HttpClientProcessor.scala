@@ -54,8 +54,8 @@ object HttpClientProcessor extends Logging {
     * @param contentType 请求类型，默认为 application/json; charset=utf-8
     * @return 请求结果，string类型
     */
-  def get(url: String, contentType: String = "application/json; charset=utf-8"): String = {
-    Await.result(Async.get(url, contentType), Duration.Inf)
+  def get(url: String, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map()): String = {
+    Await.result(Async.get(url, contentType, header), Duration.Inf)
   }
 
   /**
@@ -66,8 +66,8 @@ object HttpClientProcessor extends Logging {
     * @param contentType 请求类型，默认为 application/json; charset=utf-8
     * @return 请求结果，string类型
     */
-  def post(url: String, body: Any, contentType: String = "application/json; charset=utf-8"): String = {
-    Await.result(Async.post(url, body, contentType), Duration.Inf)
+  def post(url: String, body: Any, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map()): String = {
+    Await.result(Async.post(url, body, contentType, header), Duration.Inf)
   }
 
   /**
@@ -78,8 +78,8 @@ object HttpClientProcessor extends Logging {
     * @param contentType 请求类型，默认为 application/json; charset=utf-8
     * @return 请求结果，string类型
     */
-  def put(url: String, body: Any, contentType: String = "application/json; charset=utf-8"): String = {
-    Await.result(Async.put(url, body, contentType), Duration.Inf)
+  def put(url: String, body: Any, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map()): String = {
+    Await.result(Async.put(url, body, contentType, header), Duration.Inf)
   }
 
   /**
@@ -89,8 +89,8 @@ object HttpClientProcessor extends Logging {
     * @param contentType 请求类型，默认为 application/json; charset=utf-8
     * @return 请求结果，string类型
     */
-  def delete(url: String, contentType: String = "application/json; charset=utf-8"): String = {
-    Await.result(Async.delete(url, contentType), Duration.Inf)
+  def delete(url: String, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map()): String = {
+    Await.result(Async.delete(url, contentType, header), Duration.Inf)
   }
 
   object Async {
@@ -102,8 +102,8 @@ object HttpClientProcessor extends Logging {
       * @param contentType 请求类型，默认为 application/json; charset=utf-8
       * @return 请求结果，string类型
       */
-    def get(url: String, contentType: String = "application/json; charset=utf-8"): Future[String] = {
-      request(HttpMethod.GET, url, null, contentType)
+    def get(url: String, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map()): Future[String] = {
+      request(HttpMethod.GET, url, null, contentType, header)
     }
 
     /**
@@ -114,8 +114,8 @@ object HttpClientProcessor extends Logging {
       * @param contentType 请求类型，默认为 application/json; charset=utf-8
       * @return 请求结果，string类型
       */
-    def post(url: String, body: Any, contentType: String = "application/json; charset=utf-8"): Future[String] = {
-      request(HttpMethod.POST, url, body, contentType)
+    def post(url: String, body: Any, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map()): Future[String] = {
+      request(HttpMethod.POST, url, body, contentType, header)
     }
 
     /**
@@ -126,8 +126,8 @@ object HttpClientProcessor extends Logging {
       * @param contentType 请求类型，默认为 application/json; charset=utf-8
       * @return 请求结果，string类型
       */
-    def put(url: String, body: Any, contentType: String = "application/json; charset=utf-8"): Future[String] = {
-      request(HttpMethod.PUT, url, body, contentType)
+    def put(url: String, body: Any, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map()): Future[String] = {
+      request(HttpMethod.PUT, url, body, contentType, header)
     }
 
     /**
@@ -137,11 +137,11 @@ object HttpClientProcessor extends Logging {
       * @param contentType 请求类型，默认为 application/json; charset=utf-8
       * @return 请求结果，string类型
       */
-    def delete(url: String, contentType: String = "application/json; charset=utf-8"): Future[String] = {
-      request(HttpMethod.DELETE, url, null, contentType)
+    def delete(url: String, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map()): Future[String] = {
+      request(HttpMethod.DELETE, url, null, contentType, header)
     }
 
-    private[core] def request(method: HttpMethod, url: String, body: Any, contentType: String): Future[String] = {
+    private[core] def request(method: HttpMethod, url: String, body: Any, contentType: String, header: Map[String, String]): Future[String] = {
       val realContextType = getRealContextType(body, contentType)
       val p = Promise[String]()
       val clientChannel =
@@ -164,6 +164,10 @@ object HttpClientProcessor extends Logging {
           })
         }
       }).putHeader("content-type", realContextType)
+      header.foreach {
+        header =>
+          client.putHeader(header._1, header._2)
+      }
       if (body != null) {
         realContextType.toLowerCase match {
           case t if t.toLowerCase.contains("application/x-www-form-urlencoded") && body.isInstanceOf[Map[_, _]] =>

@@ -113,7 +113,7 @@ object RespHttpClientProcessor extends Logging {
 
     private def request[E](method: HttpMethod, url: String, body: Any, contentType: String)(implicit m: Manifest[E]): Future[Resp[E]] = {
       val p = Promise[Resp[E]]()
-      HttpClientProcessor.Async.request(method, url, body, contentType).onSuccess {
+      HttpClientProcessor.Async.request(method, url, body, contentType,Map()).onSuccess {
         case resp =>
           val json = new JsonObject(resp)
           val code = json.getString("code")

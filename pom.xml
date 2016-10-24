@@ -24,7 +24,7 @@
     </scm>
 
     <properties>
-        <ezf-version>4.0</ezf-version>
+        <ezf-version>4.0-SNAPSHOT</ezf-version>
         <ez-common.version>1.2.2</ez-common.version>
         <vertx.version>3.3.3</vertx.version>
     </properties>
