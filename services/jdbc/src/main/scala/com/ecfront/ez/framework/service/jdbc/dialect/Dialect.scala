@@ -17,6 +17,9 @@ trait Dialect {
 
   def getDialectType: DialectType
 
+  def createTableIfNotExist(tableName: String, tableDesc: String, field: Map[String, String],
+                            fieldDesc: Map[String, String], indexFields: Set[String], uniqueFields: Set[String], pkField: String): Unit
+
 }
 
 object DialectType extends Enumeration {

@@ -40,6 +40,10 @@ object EntityContainer extends Logging {
         field.fieldName -> field.annotation.asInstanceOf[Label].label
     }.toMap
     val uuidFieldInfo = allAnnotations.find(_.annotation.isInstanceOf[UUID]).orNull
+    val indexFieldNames = allAnnotations.filter(_.annotation.isInstanceOf[Index]).map {
+      field =>
+        field.fieldName
+    }
     val uniqueFieldNames = allAnnotations.filter(_.annotation.isInstanceOf[Unique]).map {
       field =>
         field.fieldName
@@ -80,6 +84,7 @@ object EntityContainer extends Logging {
     model.tableName = tableName
     model.tableDesc = tableDesc
     model.fieldLabel = fieldLabel
+    model.indexFieldNames = indexFieldNames
     model.uniqueFieldNames =
       if (uuidFieldInfo != null) {
         uniqueFieldNames :+ uuidFieldInfo.fieldName
@@ -107,6 +112,7 @@ class EntityInfo() {
   var tableDesc: String = _
   var fieldLabel: Map[String, String] = _
   var uniqueFieldNames: List[String] = _
+  var indexFieldNames: List[String] = _
   var requireFieldNames: List[String] = _
   var nowBySaveFieldNames: List[String] = _
   var nowByUpdateFieldNames: List[String] = _

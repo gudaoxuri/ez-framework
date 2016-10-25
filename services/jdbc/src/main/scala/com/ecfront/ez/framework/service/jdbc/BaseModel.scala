@@ -46,13 +46,16 @@ trait BaseStorage[M <: BaseModel] extends Logging {
 
   if (!EntityContainer.CONTAINER.contains(tableName)) {
     EntityContainer.buildingEntityInfo(_modelClazz, tableName)
+    EntityContainer.createTable(tableName)
   }
   protected var _entityInfo = EntityContainer.CONTAINER(tableName)
 
   def customTableName(newName: String): Unit = {
+    val oldName=tableName
     EntityContainer.CONTAINER.remove(tableName)
     tableName = newName
     EntityContainer.buildingEntityInfo(_modelClazz, tableName)
+    EntityContainer.mvTable(oldName,tableName)
     _entityInfo = EntityContainer.CONTAINER(tableName)
   }
 

@@ -22,6 +22,12 @@ case class Unique() extends StaticAnnotation
 case class Require() extends StaticAnnotation
 
 /**
+  * 索引
+  */
+@scala.annotation.meta.field
+case class Index() extends StaticAnnotation
+
+/**
   * 字段描述
   *
   * @param label 描述
