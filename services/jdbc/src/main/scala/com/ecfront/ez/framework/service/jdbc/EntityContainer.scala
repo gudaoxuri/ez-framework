@@ -39,6 +39,7 @@ object EntityContainer extends Logging {
       field =>
         field.fieldName -> field.annotation.asInstanceOf[Label].label
     }.toMap
+    val uuidFieldInfo = allAnnotations.find(_.annotation.isInstanceOf[UUID]).orNull
     val uniqueFieldNames = allAnnotations.filter(_.annotation.isInstanceOf[Unique]).map {
       field =>
         field.fieldName
@@ -55,7 +56,6 @@ object EntityContainer extends Logging {
       field =>
         field.fieldName
     }
-    val uuidFieldInfo = allAnnotations.find(_.annotation.isInstanceOf[UUID]).orNull
     val idFieldInfo = allAnnotations.find(_.annotation.isInstanceOf[Id]).orNull
     val idStrategy = if (idFieldInfo != null) idFieldInfo.annotation.asInstanceOf[Id].strategy else "seq"
     val allFields = BeanHelper.findFields(clazz, excludeAnnotations = Seq()).map {
@@ -80,7 +80,12 @@ object EntityContainer extends Logging {
     model.tableName = tableName
     model.tableDesc = tableDesc
     model.fieldLabel = fieldLabel
-    model.uniqueFieldNames = uniqueFieldNames
+    model.uniqueFieldNames =
+      if (uuidFieldInfo != null) {
+        uniqueFieldNames :+ uuidFieldInfo.fieldName
+      } else {
+        uniqueFieldNames
+      }
     model.requireFieldNames = requireFieldNames
     model.nowBySaveFieldNames = nowBySaveFieldNames
     model.nowByUpdateFieldNames = nowByUpdateFieldNames

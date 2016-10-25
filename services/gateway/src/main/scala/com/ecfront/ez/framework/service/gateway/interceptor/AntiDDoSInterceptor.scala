@@ -3,14 +3,14 @@ package com.ecfront.ez.framework.service.gateway.interceptor
 import java.lang.Long
 import java.util.concurrent.ConcurrentSkipListSet
 
+import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.service.gateway.helper.AsyncRedisProcessor
-import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.{AsyncResult, Handler}
 
 /**
   * 反DDoS攻击拦截器
   */
-object AntiDDoSInterceptor extends LazyLogging {
+object AntiDDoSInterceptor extends Logging {
 
   private val limitIPs = new ConcurrentSkipListSet[String]()
 

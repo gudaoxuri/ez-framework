@@ -7,11 +7,11 @@ import javax.xml.ws.WebServiceException
 
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
 import com.ecfront.ez.framework.core.EZ
+import com.ecfront.ez.framework.core.logger.Logging
 import com.fasterxml.jackson.databind.JsonNode
-import com.typesafe.scalalogging.slf4j.LazyLogging
 import io.vertx.core.Handler
 
-trait TPSIService extends LazyLogging {
+trait TPSIService extends Logging {
 
   private val FLAG_LIMIT = "ez:tpsi:limit:"
   private val FLAG_TOKEN = "ez:tpsi:token:"
