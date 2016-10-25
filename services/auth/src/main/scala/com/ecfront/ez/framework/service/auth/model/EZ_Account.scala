@@ -1,5 +1,7 @@
 package com.ecfront.ez.framework.service.auth.model
 
+import java.util.Date
+
 import com.ecfront.common._
 import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
@@ -57,6 +59,8 @@ object EZ_Account extends SecureStorage[EZ_Account] with StatusStorage[EZ_Accoun
 
   val VIRTUAL_EMAIL = "@virtual.is"
 
+  val LAST_CHANGE_PWD = "last_change_pwd"
+
   def apply(loginId: String, email: String, name: String, password: String,
             roleCodes: Set[String], organizationCode: String = ServiceAdapter.defaultOrganizationCode): EZ_Account = {
     val account = EZ_Account()
@@ -68,7 +72,7 @@ object EZ_Account extends SecureStorage[EZ_Account] with StatusStorage[EZ_Accoun
     account.enable = true
     account.role_codes = roleCodes
     account.ext_id = ""
-    account.ext_info = ""
+    account.ext_info = "{}"
     account
   }
 
@@ -106,7 +110,7 @@ object EZ_Account extends SecureStorage[EZ_Account] with StatusStorage[EZ_Accoun
       model.ext_id = ""
     }
     if (model.ext_info == null) {
-      model.ext_info = ""
+      model.ext_info = "{}"
     }
     model.exchange_role_codes = model.role_codes
     model.role_codes = null
@@ -143,7 +147,10 @@ object EZ_Account extends SecureStorage[EZ_Account] with StatusStorage[EZ_Accoun
     if (model.exchange_pwd != null && model.exchange_pwd.trim.nonEmpty) {
       model.password = model.exchange_pwd
     } else if (model.password != null && model.password.trim.nonEmpty) {
+      // 修改了密码
       model.password = packageEncryptPwd(oldModel.code, model.password)
+      val extInfo = JsonHelper.toObject[Map[String, Any]](model.ext_info) + LAST_CHANGE_PWD -> new Date().getTime
+      model.ext_info = JsonHelper.toJsonString(extInfo)
     }
     super.preUpdate(model)
   }
@@ -170,7 +177,7 @@ object EZ_Account extends SecureStorage[EZ_Account] with StatusStorage[EZ_Accoun
       saveOrUpdateResult.role_codes = preResult.exchange_role_codes
       super.postSave(saveOrUpdateResult, preResult)
     } else {
-      if (preResult.login_id != null || preResult.password != null || preResult.email != null) {
+      if (preResult.login_id != null || preResult.exchange_pwd == null || preResult.email != null) {
         // 修改登录Id、密码或邮箱需要重新登录
         CacheManager.Token.removeTokenByAccountCode(saveOrUpdateResult.code)
       } else {
