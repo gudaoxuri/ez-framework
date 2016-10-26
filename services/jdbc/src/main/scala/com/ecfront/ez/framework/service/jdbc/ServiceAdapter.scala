@@ -7,26 +7,30 @@ import com.fasterxml.jackson.databind.JsonNode
 object ServiceAdapter extends EZServiceAdapter[JsonNode] {
 
   override def init(parameter: JsonNode): Resp[String] = {
-    val processor=JDBCProcessor(
+    val processor = JDBCProcessor(
       parameter.path("url").asText(),
       parameter.path("userName").asText(),
       parameter.path("password").asText()
     )
-    if(parameter.has("initialSize")){
+    if (parameter.has("initialSize")) {
       processor.setInitialSize(parameter.path("initialSize").asInt())
     }
-    if(parameter.has("minSize")){
+    if (parameter.has("minSize")) {
       processor.setMinSize(parameter.path("minSize").asInt())
     }
-    if(parameter.has("maxSize")){
+    if (parameter.has("maxSize")) {
       processor.setMaxSize(parameter.path("maxSize").asInt())
     }
-    if(parameter.has("maxIdleTime")){
+    if (parameter.has("maxIdleTime")) {
       processor.setMaxIdleTime(parameter.path("maxIdleTime").asInt())
-    }else{
+    } else {
       processor.setMaxIdleTime(18000)
     }
-    JDBCProcessor.initDS(processor)
+    val result = JDBCProcessor.initDS(processor)
+    if (parameter.has("package")) {
+      EntityContainer.autoBuilding(parameter.get("package").asText())
+    }
+    result
   }
 
   override def destroy(parameter: JsonNode): Resp[String] = {
