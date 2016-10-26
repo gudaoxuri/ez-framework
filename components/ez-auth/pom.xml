@@ -13,7 +13,7 @@
 
     <artifactId>ezf-component-auth</artifactId>
     <name>EZ Framework Auth Component</name>
-    <version>${wzs-version}</version>
+    <version>${ezf-version}</version>
     <packaging>jar</packaging>
 
     <properties>

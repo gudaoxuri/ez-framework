@@ -12,7 +12,7 @@
 
     <artifactId>ezf-component-perf-request</artifactId>
     <name>EZ Framework Perf request Component</name>
-    <version>${wzs-version}</version>
+    <version>${ezf-version}</version>
     <packaging>jar</packaging>
 
     <properties>

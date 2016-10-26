@@ -13,7 +13,7 @@
 
     <artifactId>ezf-component-gateway</artifactId>
     <name>EZ Framework Gateway Component</name>
-    <version>${wzs-version}</version>
+    <version>${ezf-version}</version>
     <packaging>jar</packaging>
 
     <properties>
