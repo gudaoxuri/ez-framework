@@ -44,19 +44,16 @@ trait BaseStorage[M <: BaseModel] extends Logging {
   // 表名
   var tableName = _modelClazz.getSimpleName.toLowerCase
 
-  if (!EntityContainer.CONTAINER.contains(tableName)) {
-    EntityContainer.buildingEntityInfo(_modelClazz, tableName)
-    EntityContainer.createTable(tableName)
-  }
-  protected var _entityInfo = EntityContainer.CONTAINER(tableName)
+  protected var _entityInfo =
+    if (!EntityContainer.CONTAINER.contains(tableName)) {
+      EntityContainer.buildingEntityInfo(_modelClazz, tableName)
+    } else {
+      EntityContainer.CONTAINER(tableName)
+    }
 
   def customTableName(newName: String): Unit = {
-    val oriTableName = tableName
-    EntityContainer.CONTAINER.remove(tableName)
+    _entityInfo = EntityContainer.buildingEntityInfo(_modelClazz, newName, tableName)
     tableName = newName
-    EntityContainer.buildingEntityInfo(_modelClazz, tableName)
-    EntityContainer.mvTable(oriTableName, tableName)
-    _entityInfo = EntityContainer.CONTAINER(tableName)
   }
 
   def filterByModel(model: M): Resp[M] = Resp.success(model)

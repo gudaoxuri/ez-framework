@@ -43,7 +43,7 @@ object MySQLDialect extends Dialect {
           case "bigdecimal" => s"""DECIMAL${if (len == 0) "" else "(" + len + "," + scale + ")"} NOT NULL DEFAULT "0""""
           case "java.util.date" => s"""DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"""
           case t =>
-            throw new SQLException("Not support data type:" + t)
+            throw new SQLException(s"Not support data type: $t at $tableName")
         }
         ddl.append("\r\n    `" + columnName + "` " + columnExt + " " + desc + ",")
     }

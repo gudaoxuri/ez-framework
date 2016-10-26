@@ -18,6 +18,8 @@ object AutoBuildingProcessor extends Logging {
     * @return 当前实例
     */
   def autoBuilding(rootPackage: String): this.type = {
+    logger.info(s"auto building rpc at $rootPackage")
+
     ClassScanHelper.scan[RPC](rootPackage).foreach {
       clazz =>
         if (clazz.getSimpleName.endsWith("$")) {
