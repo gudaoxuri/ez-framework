@@ -2,7 +2,7 @@ package com.ecfront.ez.framework.service.email
 
 import com.ecfront.ez.framework.test.MockStartupSpec
 
-class EMailSpec extends MockStartupSpec {
+class EmailSpec extends MockStartupSpec {
 
   test("Email Test") {
     val sendResp = EmailProcessor.send(

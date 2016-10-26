@@ -15,13 +15,14 @@ case class EZ_Role() extends SecureModel with StatusModel with OrganizationModel
 
   @Unique
   @Require
-  @Label("Code") // organization_code@flag
+  @Desc("Code", 350, 0) // organization_code@flag
   @BeanProperty var code: String = _
+  @Index
   @Require
-  @Label("Flag")
+  @Desc("Flag", 150, 0)
   @BeanProperty var flag: String = _
   @Require
-  @Label("Name")
+  @Desc("Name", 200, 0)
   @BeanProperty var name: String = _
   @Ignore var exchange_resource_codes: Set[String] = _
   @BeanProperty var resource_codes: Set[String] = _

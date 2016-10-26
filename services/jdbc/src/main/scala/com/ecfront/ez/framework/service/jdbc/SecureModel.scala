@@ -14,12 +14,22 @@ import scala.beans.BeanProperty
   */
 trait SecureModel extends BaseModel {
 
-  @BeanProperty var create_user: String = _
+  @Desc("Create Organization", 200, 0)
   @BeanProperty var create_org: String = _
+  @Index
+  @Desc("Create User", 200, 0)
+  @BeanProperty var create_user: String = _
+  @Index
+  @Desc("Create Time", 20, 0)
   @BeanProperty var create_time: Long = _
-  @BeanProperty var update_user: String = _
-  @BeanProperty var update_time: Long = _
+  @Desc("Update Organization", 200, 0)
   @BeanProperty var update_org: String = _
+  @Index
+  @Desc("Update User", 200, 0)
+  @BeanProperty var update_user: String = _
+  @Index
+  @Desc("Update Time", 20, 0)
+  @BeanProperty var update_time: Long = _
 
 }
 

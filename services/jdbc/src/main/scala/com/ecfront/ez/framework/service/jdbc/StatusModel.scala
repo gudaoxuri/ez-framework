@@ -9,6 +9,8 @@ import scala.beans.BeanProperty
   */
 trait StatusModel extends BaseModel {
 
+  @Index
+  @Desc("Enable", 0, 0)
   @BeanProperty var enable: Boolean = true
 
 }

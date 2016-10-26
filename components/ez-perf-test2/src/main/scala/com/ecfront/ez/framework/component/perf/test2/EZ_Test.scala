@@ -10,10 +10,10 @@ case class EZ_Test() extends BaseModel with SecureModel with StatusModel {
   @UUID
   @BeanProperty var bus_uuid: String = _
   @Require @Unique
-  @Label("code")
+  @Desc("code",100,0)
   @BeanProperty var code: String = _
   @Require
-  @Label("name")
+  @Desc("name",100,0)
   @BeanProperty var name: String = _
 
 }

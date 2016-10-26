@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
 import com.ecfront.ez.framework.core.logger.Logging
-import com.ecfront.ez.framework.service.jdbc.dialect.DialectFactory
+import com.ecfront.ez.framework.service.jdbc.dialect.{DialectFactory, FiledInfo}
 import com.mchange.v2.c3p0.ComboPooledDataSource
 import org.apache.commons.dbutils.QueryRunner
 import org.apache.commons.dbutils.handlers._
@@ -21,6 +21,23 @@ import scala.collection.JavaConversions._
 object JDBCProcessor extends Logging {
 
   private var defaultProcessor: JDBCProcessor = _
+
+  def createTableIfNotExist(tableName: String, tableDesc: String, fields: List[FiledInfo],
+                            indexFields: List[String], uniqueFields: List[String], pkField: String): Resp[Void] = {
+    if (defaultProcessor != null) {
+      defaultProcessor.createTableIfNotExist(tableName, tableDesc, fields, indexFields, uniqueFields, pkField)
+    } else {
+      Resp.notFound("JDBC Process not found")
+    }
+  }
+
+  def changeTableName(oriTableName: String, newTableName: String): Resp[Void] = {
+    if (defaultProcessor != null) {
+      defaultProcessor.changeTableName(oriTableName, newTableName)
+    } else {
+      Resp.notFound("JDBC Process not found")
+    }
+  }
 
   def ddl(ddl: String): Resp[Void] = {
     defaultProcessor.ddl(ddl)
@@ -253,6 +270,15 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
         rollback()
         throw e
     }
+  }
+
+  def createTableIfNotExist(tableName: String, tableDesc: String, fields: List[FiledInfo],
+                            indexFields: List[String], uniqueFields: List[String], pkField: String): Resp[Void] = {
+    ddl(dialect.createTableIfNotExist(tableName, tableDesc, fields, indexFields, uniqueFields, pkField))
+  }
+
+  def changeTableName(oriTableName: String, newTableName: String): Resp[Void] = {
+    ddl(dialect.changeTableName(oriTableName, newTableName))
   }
 
   def ddl(ddl: String): Resp[Void] = {

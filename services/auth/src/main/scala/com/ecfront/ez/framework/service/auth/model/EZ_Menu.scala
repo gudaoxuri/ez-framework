@@ -13,19 +13,23 @@ import scala.beans.BeanProperty
 case class EZ_Menu() extends SecureModel with StatusModel with OrganizationModel {
 
   @Unique
-  @Label("Code") // organization_code@uri
+  @Desc("Code", 200, 0) // organization_code@uri
   @BeanProperty var code: String = _
   @Require
-  @Label("URI")
+  @Desc("URI", 100, 0)
   @BeanProperty var uri: String = _
   @Require
-  @Label("Name")
+  @Desc("Name", 200, 0)
   @BeanProperty var name: String = _
+  @Desc("Icon", 100, 0)
   @BeanProperty var icon: String = _
+  @Desc("Translate", 200, 0)
   @BeanProperty var translate: String = _
   @Ignore var exchange_role_codes: List[String] = _
   @BeanProperty var role_codes: List[String] = _
+  @Desc("Parent Code", 200, 0)
   @BeanProperty var parent_code: String = _
+  @Desc("Sort", 0, 0)
   @BeanProperty var sort: Int = 0
 
 }

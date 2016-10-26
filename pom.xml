@@ -25,7 +25,7 @@
 
     <properties>
         <ezf-version>4.0-SNAPSHOT</ezf-version>
-        <ez-common.version>1.2.2</ez-common.version>
+        <ez-common.version>1.2.3</ez-common.version>
         <vertx.version>3.3.3</vertx.version>
     </properties>
 
@@ -105,6 +105,12 @@
                     <artifactId>junit</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 

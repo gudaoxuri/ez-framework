@@ -11,6 +11,8 @@ import scala.beans.BeanProperty
   */
 trait OrganizationModel extends BaseModel {
 
+  @Index
+  @Desc("Organization Code", 200, 0)
   @BeanProperty var organization_code: String = _
 
 }

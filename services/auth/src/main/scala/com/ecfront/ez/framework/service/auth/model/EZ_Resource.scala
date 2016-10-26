@@ -15,16 +15,18 @@ case class EZ_Resource() extends BaseModel with SecureModel {
 
   @Unique
   @Require
-  @Label("Code") // method@uri
+  @Desc("Code", 1000, 0) // method@uri
   @BeanProperty var code: String = _
+  @Index
   @Require
-  @Label("Method")
+  @Desc("Method", 10, 0)
   @BeanProperty var method: String = _
+  @Index
   @Require
-  @Label("URI")
+  @Desc("URI", 800, 0)
   @BeanProperty var uri: String = _
   @Require
-  @Label("Name")
+  @Desc("Name", 200, 0)
   @BeanProperty var name: String = _
 
 }

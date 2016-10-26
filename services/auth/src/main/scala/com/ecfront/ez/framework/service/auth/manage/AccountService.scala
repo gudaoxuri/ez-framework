@@ -108,9 +108,18 @@ object AccountService extends SimpleRPCService[EZ_Account] {
     resp
   }
 
-  @GET("enable/")
-  override def rpcFindEnable(parameter: Map[String, String]): Resp[List[EZ_Account]] = {
-    val resp = super.rpcFindEnable(parameter)
+  @PUT("uuid/:uuid/")
+  override def rpcUpdateByUUID(parameter: Map[String, String], body: String): Resp[EZ_Account] = {
+    val resp = super.rpcUpdateByUUID(parameter, body)
+    if (resp && resp.body != null) {
+      resp.body.password = null
+    }
+    resp
+  }
+
+  @GET("")
+  override def rpcFind(parameter: Map[String, String]): Resp[List[EZ_Account]] = {
+    val resp = super.rpcFind(parameter)
     if (resp && resp.body.nonEmpty) {
       resp.body.foreach {
         _.password = null
@@ -119,9 +128,9 @@ object AccountService extends SimpleRPCService[EZ_Account] {
     resp
   }
 
-  @GET("")
-  override def rpcFind(parameter: Map[String, String]): Resp[List[EZ_Account]] = {
-    val resp = super.rpcFind(parameter)
+  @GET("enable/")
+  override def rpcFindEnable(parameter: Map[String, String]): Resp[List[EZ_Account]] = {
+    val resp = super.rpcFindEnable(parameter)
     if (resp && resp.body.nonEmpty) {
       resp.body.foreach {
         _.password = null
@@ -141,9 +150,29 @@ object AccountService extends SimpleRPCService[EZ_Account] {
     resp
   }
 
+  @GET("enable/page/:pageNumber/:pageSize/")
+  override def rpcPageEnable(parameter: Map[String, String]): Resp[Page[EZ_Account]] = {
+    val resp = super.rpcPageEnable(parameter)
+    if (resp && resp.body.objects.nonEmpty) {
+      resp.body.objects.foreach {
+        _.password = null
+      }
+    }
+    resp
+  }
+
   @GET(":id/")
   override def rpcGet(parameter: Map[String, String]): Resp[EZ_Account] = {
     val resp = super.rpcGet(parameter)
+    if (resp && resp.body != null) {
+      resp.body.password = null
+    }
+    resp
+  }
+
+  @GET("uuid/:uuid/")
+  override def rpcGetByUUID(parameter: Map[String, String]): Resp[EZ_Account] = {
+    val resp = super.rpcGetByUUID(parameter)
     if (resp && resp.body != null) {
       resp.body.password = null
     }

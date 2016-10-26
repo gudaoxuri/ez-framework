@@ -16,34 +16,35 @@ import scala.beans.BeanProperty
 @Entity("Account")
 case class EZ_Account() extends SecureModel with StatusModel with OrganizationModel {
 
-  @Unique
-  @Require
   @UUID
-  @Label("Code")
+  @Desc("Code", 50, 0)
   @BeanProperty var code: String = _
   @Require
-  @Label("Login Id")
+  @Index
+  @Desc("Login Id", 200, 0)
   @BeanProperty var login_id: String = _
   @Require
-  @Label("Name")
+  @Desc("Name", 200, 0)
   @BeanProperty var name: String = _
-  @Label("Image")
+  @Desc("Image", 200, 0)
   @BeanProperty var image: String = _
   @Require
-  @Label("Password")
+  @Desc("Password", 500, 0)
   @BeanProperty var password: String = _
   // 此字段不为空时保存或更新账户时不对密码做加密
   @Ignore var exchange_pwd: String = _
   @Require
-  @Label("Email")
+  @Index
+  @Desc("Email", 100, 0)
   @BeanProperty var email: String = _
   @Ignore var exchange_role_codes: Set[String] = _
   @BeanProperty var role_codes: Set[String] = _
-  @Label("Ext Id") // 用于关联其它对象以扩展属性，扩展Id多为业务系统用户信息表的主键
+  @Index
+  @Desc("Ext Id", 100, 0) // 用于关联其它对象以扩展属性，扩展Id多为业务系统用户信息表的主键
   @BeanProperty var ext_id: String = _
-  @Label("Ext Info")
+  @Desc("Ext Info", 0, 0)
   @BeanProperty var ext_info: String = _
-  @Label("OAuth Info") // key=oauth服务标记，value=openid
+  @Desc("OAuth Info", 0, 0) // key=oauth服务标记，value=openid
   @BeanProperty var oauth: String = _
 
 }
@@ -149,9 +150,19 @@ object EZ_Account extends SecureStorage[EZ_Account] with StatusStorage[EZ_Accoun
     } else if (model.password != null && model.password.trim.nonEmpty) {
       // 修改了密码
       model.password = packageEncryptPwd(oldModel.code, model.password)
-      val extInfo = JsonHelper.toObject[Map[String, Any]](model.ext_info) + LAST_CHANGE_PWD -> new Date().getTime
-      model.ext_info = JsonHelper.toJsonString(extInfo)
     }
+    val extInfo =
+      if (oldModel.ext_info == null || oldModel.ext_info.isEmpty) {
+        Map(LAST_CHANGE_PWD -> new Date().getTime)
+      } else {
+        JsonHelper.toObject[Map[String, Any]](oldModel.ext_info) + (LAST_CHANGE_PWD -> new Date().getTime)
+      }
+    model.ext_info =
+      if (model.ext_info != null && model.ext_info.nonEmpty) {
+        JsonHelper.toJsonString(extInfo ++ JsonHelper.toObject[Map[String, Any]](model.ext_info))
+      } else {
+        JsonHelper.toJsonString(extInfo)
+      }
     super.preUpdate(model)
   }
 
@@ -177,7 +188,7 @@ object EZ_Account extends SecureStorage[EZ_Account] with StatusStorage[EZ_Accoun
       saveOrUpdateResult.role_codes = preResult.exchange_role_codes
       super.postSave(saveOrUpdateResult, preResult)
     } else {
-      if (preResult.login_id != null || preResult.exchange_pwd == null || preResult.email != null) {
+      if (preResult.login_id != null || preResult.password != null || preResult.email != null) {
         // 修改登录Id、密码或邮箱需要重新登录
         CacheManager.Token.removeTokenByAccountCode(saveOrUpdateResult.code)
       } else {

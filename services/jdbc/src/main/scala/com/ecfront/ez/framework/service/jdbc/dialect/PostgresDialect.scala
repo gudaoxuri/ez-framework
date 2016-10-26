@@ -19,4 +19,8 @@ object PostgresDialect extends Dialect {
   def getDriver: String = "org.postgresql.Driver"
 
   def getDialectType: DialectType = DialectType.POSTGRE
+
+  override def createTableIfNotExist(tableName: String, tableDesc: String, fields: List[FiledInfo], indexFields: List[String], uniqueFields: List[String], pkField: String): String = ???
+
+  override def changeTableName(oriTableName: String, newTableName: String): String = ???
 }

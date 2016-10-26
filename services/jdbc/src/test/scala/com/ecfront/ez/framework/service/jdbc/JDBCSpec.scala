@@ -15,29 +15,34 @@ class JDBCSpec extends MockStartupSpec {
     entityTest()
     intTest()
     txTest()
+    Loan_app.customTableName("biz_app")
+    assert(Loan_app.find("").body.isEmpty)
   }
 
   def baseTest(): Unit = {
-    JDBCProcessor.ddl(
-      """
-        |CREATE TABLE IF NOT EXISTS test_entity
-        |(
-        | id INT NOT NULL AUTO_INCREMENT ,
-        | name varchar(100) NOT NULL ,
-        | age INT NOT NULL ,
-        | time timestamp NOT NULL default CURRENT_TIMESTAMP,
-        | time_auto_create timestamp NOT NULL default now(),
-        | time_auto_update timestamp NOT NULL default now(),
-        | create_user varchar(100) NOT NULL COMMENT '创建用户' ,
-        | create_org varchar(100) NOT NULL COMMENT '创建组织' ,
-        | create_time BIGINT NOT NULL COMMENT '创建时间(yyyyMMddHHmmssSSS)' ,
-        | update_user varchar(100) NOT NULL COMMENT '更新用户' ,
-        | update_org varchar(100) NOT NULL COMMENT '更新组织' ,
-        | update_time BIGINT NOT NULL COMMENT '更新时间(yyyyMMddHHmmssSSS)' ,
-        | enable BOOLEAN NOT NULL COMMENT '是否启用' ,
-        | PRIMARY KEY(id)
-        |)ENGINE=innodb DEFAULT CHARSET=utf8
-      """.stripMargin)
+    /* JDBCProcessor.ddl(
+       """
+         |CREATE TABLE IF NOT EXISTS test_entity
+         |(
+         | id INT NOT NULL AUTO_INCREMENT ,
+         | name varchar(100) NOT NULL ,
+         | age INT NOT NULL ,
+         | time timestamp NOT NULL default CURRENT_TIMESTAMP,
+         | time_auto_create timestamp NOT NULL default now(),
+         | time_auto_update timestamp NOT NULL default now(),
+         | create_user varchar(100) NOT NULL COMMENT '创建用户' ,
+         | create_org varchar(100) NOT NULL COMMENT '创建组织' ,
+         | create_time BIGINT NOT NULL COMMENT '创建时间(yyyyMMddHHmmssSSS)' ,
+         | update_user varchar(100) NOT NULL COMMENT '更新用户' ,
+         | update_org varchar(100) NOT NULL COMMENT '更新组织' ,
+         | update_time BIGINT NOT NULL COMMENT '更新时间(yyyyMMddHHmmssSSS)' ,
+         | enable BOOLEAN NOT NULL COMMENT '是否启用' ,
+         | PRIMARY KEY(id)
+         |)ENGINE=innodb DEFAULT CHARSET=utf8
+       """.stripMargin)*/
+
+    JDBC_Test_Entity.deleteByCond("", List()).body
+
     JDBCProcessor.ddl(
       s"""TRUNCATE test_entity""".stripMargin)
 
@@ -168,19 +173,19 @@ class JDBCSpec extends MockStartupSpec {
   }
 
   def intTest(): Unit = {
-    JDBCProcessor.ddl(
-      """
-        |CREATE TABLE IF NOT EXISTS jdbc_test_int
-        |(
-        | id INT NOT NULL AUTO_INCREMENT ,
-        | status INT(1) NOT NULL ,
-        | enabled INT(1) NOT NULL ,
-        | gender INT(1),
-        | age INT ,
-        | PRIMARY KEY(id)
-        |)ENGINE=innodb DEFAULT CHARSET=utf8
-      """.stripMargin
-    )
+    /* JDBCProcessor.ddl(
+       """
+         |CREATE TABLE IF NOT EXISTS jdbc_test_int
+         |(
+         | id INT NOT NULL AUTO_INCREMENT ,
+         | status INT(1) NOT NULL ,
+         | enabled INT(1) NOT NULL ,
+         | gender INT(1),
+         | age INT ,
+         | PRIMARY KEY(id)
+         |)ENGINE=innodb DEFAULT CHARSET=utf8
+       """.stripMargin
+     )*/
     JDBCProcessor.ddl(s"TRUNCATE test_entity")
 
     var obj = JDBC_Test_Int()
@@ -302,7 +307,7 @@ class JDBCSpec extends MockStartupSpec {
 case class JDBC_Test_Entity() extends SecureModel with StatusModel {
   @Unique
   @Require
-  @Label("姓名")
+  @Desc("姓名",40,0)
   @BeanProperty var name: String = _
   @BeanProperty var age: Int = _
   @NowBySave

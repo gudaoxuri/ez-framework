@@ -4,19 +4,19 @@ import java.util.Date
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.helper.TimeHelper
-import com.ecfront.ez.framework.service.jdbc.{BaseModel, BaseStorage, Entity, Label}
+import com.ecfront.ez.framework.service.jdbc.{BaseModel, BaseStorage, Desc, Entity}
 
 import scala.beans.BeanProperty
 
 @Entity("消息")
 case class EZ_Message_Log() extends BaseModel {
 
-  @Label("消息Id")
+  @Desc("消息Id", 200, 0)
   @BeanProperty var message_id: String = _
-  @Label("阅读账号")
+  @Desc("阅读账号", 200, 0)
   // 用于角色和公共消息
   @BeanProperty var read_account_code: String = _
-  @Label("阅读时间,yyyyMMddHHmmss")
+  @Desc("阅读时间,yyyyMMddHHmmss", 0, 0)
   @BeanProperty var read_time: Long = _
 
 }

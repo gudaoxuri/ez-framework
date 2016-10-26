@@ -8,21 +8,20 @@ import scala.beans.BeanProperty
 @Entity("调度任务")
 case class EZ_Scheduler() extends SecureModel with StatusModel {
 
-  // 调度名称
   @Unique
-  @Label("调度名称")
+  @Desc("调度名称", 200, 0)
   @BeanProperty var name: String = _
-  // 调度周期
+  @Desc("调度周期", 50, 0)
   @BeanProperty var cron: String = _
-  // 回调执行的类
+  @Desc("回调执行的类", 500, 0)
   @BeanProperty var clazz: String = _
   // 任务参数
   @BeanProperty
   @Ignore var parameters: Map[String, Any] = _
-  // 任务参数(Map to JsonString)
+  @Desc("任务参数", 0, 0)
   @BeanProperty
   var parameterstr: String = _
-  // 使用的模块
+  @Desc("使用的模块", 200, 0)
   @BeanProperty var module: String = _
 
 }

@@ -9,18 +9,19 @@ case class EZ_Test() extends BaseModel with SecureModel with StatusModel {
 
   @UUID
   @BeanProperty var bus_uuid: String = _
-  @Require @Unique
-  @Label("code")
+  @Require
+  @Unique
+  @Desc("code", 200, 0)
   @BeanProperty var code: String = _
   @Require
-  @Label("name")
+  @Desc("name", 200, 0)
   @BeanProperty var name: String = _
 
 }
 
 object EZ_Test extends BaseStorage[EZ_Test] with SecureStorage[EZ_Test] with StatusStorage[EZ_Test] {
 
-  def apply(code: String, name: String,enable:Boolean=true): EZ_Test = {
+  def apply(code: String, name: String, enable: Boolean = true): EZ_Test = {
     val res = EZ_Test()
     res.code = code
     res.name = name

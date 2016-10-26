@@ -15,16 +15,17 @@ case class EZ_Organization() extends SecureModel with StatusModel {
 
   @Unique
   @Require
-  @Label("Code")
+  @Desc("Code",200,0)
   @BeanProperty var code: String = _
   @Unique
   @Require
-  @Label("Name")
+  @Desc("Name",200,0)
   @BeanProperty var name: String = _
-  @Label("Image")
+  @Desc("Image",200,0)
   @BeanProperty var image: String = _
-  @Label("Category")
+  @Desc("Category",200,0)
   @BeanProperty var category: String = _
+
 }
 
 object EZ_Organization extends SecureStorage[EZ_Organization] with StatusStorage[EZ_Organization] {

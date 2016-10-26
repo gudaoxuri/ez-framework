@@ -40,8 +40,8 @@ class GatewaySpec extends BasicSpec {
          |          }
          |        },
          |        "antiDDoS":{
-         |          "reqRatePerMinute":1,
-         |          "illegalReqRatePerMinute":1
+         |          "reqRatePerMinute":100,
+         |          "illegalReqRatePerMinute":100
          |        },
          |        "metrics":{},
          |        "publicUriPrefix":"/public/",

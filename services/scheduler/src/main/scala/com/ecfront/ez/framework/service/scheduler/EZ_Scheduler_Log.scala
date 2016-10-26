@@ -8,15 +8,16 @@ import scala.beans.BeanProperty
 @Entity("调度任务日志")
 case class EZ_Scheduler_Log() extends BaseModel {
 
-  @Label("调度名称")
+  @Index
+  @Desc("调度名称",200,0)
   @BeanProperty var scheduler_name: String = _
-  @Label("开始时间")
+  @Desc("开始时间",0,0)
   @BeanProperty var start_time: Long = _
-  @Label("结束时间")
+  @Desc("结束时间",0,0)
   @BeanProperty var end_time: Long = _
-  @Label("是否成功")
+  @Desc("是否成功",0,0)
   @BeanProperty var success: Boolean = _
-  @Label("结果描述")
+  @Desc("结果描述",500,0)
   @BeanProperty var message: String = _
 
 }

@@ -51,11 +51,11 @@ trait BaseStorage[M <: BaseModel] extends Logging {
   protected var _entityInfo = EntityContainer.CONTAINER(tableName)
 
   def customTableName(newName: String): Unit = {
-    val oldName=tableName
+    val oriTableName = tableName
     EntityContainer.CONTAINER.remove(tableName)
     tableName = newName
     EntityContainer.buildingEntityInfo(_modelClazz, tableName)
-    EntityContainer.mvTable(oldName,tableName)
+    EntityContainer.mvTable(oriTableName, tableName)
     _entityInfo = EntityContainer.CONTAINER(tableName)
   }
 
@@ -82,8 +82,8 @@ trait BaseStorage[M <: BaseModel] extends Logging {
         // 必填项检查
         val errorFields = entityInfo.requireFieldNames.filter(BeanHelper.getValue(model, _).get == null).map {
           requireField =>
-            if (entityInfo.fieldLabel.contains(requireField)) {
-              entityInfo.fieldLabel(requireField).x
+            if (entityInfo.fieldDesc.contains(requireField)) {
+              entityInfo.fieldDesc(requireField)._1.x
             } else {
               requireField.x
             }
@@ -1135,7 +1135,7 @@ trait BaseStorage[M <: BaseModel] extends Logging {
 
   protected def getMapValue(model: BaseModel): Map[String, Any] = {
     // 获取对象要持久化字段的值，忽略为null的id字段（由seq控制）
-    BeanHelper.findValues(model, _entityInfo.ignoreFieldNames)
+    BeanHelper.findValues(model, _entityInfo.ignoreFieldNames).toMap
       .filterNot(item => item._1 == _entityInfo.idFieldName && (item._2 == null || item._2.toString.trim == ""))
   }
 

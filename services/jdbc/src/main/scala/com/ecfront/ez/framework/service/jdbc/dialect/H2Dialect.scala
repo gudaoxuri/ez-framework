@@ -2,7 +2,6 @@ package com.ecfront.ez.framework.service.jdbc.dialect
 
 import com.ecfront.ez.framework.service.jdbc.dialect.DialectType.DialectType
 
-
 object H2Dialect extends Dialect {
 
   def paging(sql: String, pageNumber: Long, pageSize: Long): String = {
@@ -21,4 +20,7 @@ object H2Dialect extends Dialect {
 
   def getDialectType: DialectType = DialectType.H2
 
+  override def createTableIfNotExist(tableName: String, tableDesc: String, fields: List[FiledInfo], indexFields: List[String], uniqueFields: List[String], pkField: String): String = ???
+
+  override def changeTableName(oriTableName: String, newTableName: String): String = ???
 }

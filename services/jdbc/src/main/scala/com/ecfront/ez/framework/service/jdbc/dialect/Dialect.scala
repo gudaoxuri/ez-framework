@@ -17,8 +17,10 @@ trait Dialect {
 
   def getDialectType: DialectType
 
-  def createTableIfNotExist(tableName: String, tableDesc: String, field: Map[String, String],
-                            fieldDesc: Map[String, String], indexFields: Set[String], uniqueFields: Set[String], pkField: String): Unit
+  def createTableIfNotExist(tableName: String, tableDesc: String, fields: List[FiledInfo],
+                            indexFields: List[String], uniqueFields: List[String], pkField: String): String
+
+  def changeTableName(oriTableName: String, newTableName: String): String
 
 }
 
@@ -26,6 +28,8 @@ object DialectType extends Enumeration {
   type DialectType = Value
   val MYSQL, POSTGRE, H2 = Value
 }
+
+case class FiledInfo(name: String, dType: String, desc: String, len: Int, scale: Int)
 
 object DialectFactory extends Logging {
 

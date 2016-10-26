@@ -11,23 +11,23 @@ import scala.beans.BeanProperty
 @Entity("消息")
 case class EZ_Message() extends SecureModel {
 
-  @Label("个人消息")
+  @Desc("个人消息",200,0)
   @BeanProperty var to_account: String = _
-  @Label("角色消息")
+  @Desc("角色消息",200,0)
   @BeanProperty var to_role: String = _
-  @Label("类型")
+  @Desc("类型",200,0)
   @BeanProperty var category: String = _
-  @Label("级别")
+  @Desc("级别",200,0)
   @BeanProperty var level: String = _
-  @Label("模板Code")
+  @Desc("模板Code",200,0)
   @BeanProperty var template_code: String = _
-  @Label("内容")
+  @Desc("内容",0,0)
   @BeanProperty var content: String = _
-  @Label("标题")
+  @Desc("标题",500,0)
   @BeanProperty var title: String = _
-  @Label("开始时间,yyyyMMddHHmmss")
+  @Desc("开始时间,yyyyMMddHHmmss",0,0)
   @BeanProperty var start_time: Long = _
-  @Label("结束时间,yyyyMMddHHmmss")
+  @Desc("结束时间,yyyyMMddHHmmss",0,0)
   @BeanProperty var end_time: Long = _
 
 }

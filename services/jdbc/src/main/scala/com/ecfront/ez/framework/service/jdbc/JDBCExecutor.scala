@@ -36,8 +36,8 @@ private[jdbc] object JDBCExecutor extends Logging {
         if (existR.body) {
           val badRequest = entityInfo.uniqueFieldNames.map {
             field =>
-              if (entityInfo.fieldLabel.contains(field)) {
-                entityInfo.fieldLabel(field).x
+              if (entityInfo.fieldDesc.contains(field)) {
+                entityInfo.fieldDesc(field)._1.x
               } else {
                 field.x
               }
@@ -89,8 +89,8 @@ private[jdbc] object JDBCExecutor extends Logging {
           if (existR.body) {
             val badRequest = entityInfo.uniqueFieldNames.map {
               field =>
-                if (entityInfo.fieldLabel.contains(field)) {
-                  entityInfo.fieldLabel(field).x
+                if (entityInfo.fieldDesc.contains(field)) {
+                  entityInfo.fieldDesc(field)._1.x
                 } else {
                   field.x
                 }

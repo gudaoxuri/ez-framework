@@ -7,7 +7,7 @@ import scala.annotation.StaticAnnotation
   *
   * @param desc 表注释
   */
-case class Entity(desc: String = "") extends StaticAnnotation
+case class Entity(desc: String) extends StaticAnnotation
 
 /**
   * 唯一性
@@ -33,7 +33,7 @@ case class Index() extends StaticAnnotation
   * @param label 描述
   */
 @scala.annotation.meta.field
-case class Label(label: String) extends StaticAnnotation
+case class Desc(label: String, len: Int, scale: Int) extends StaticAnnotation
 
 /**
   * 插入时使用当前时间函数
@@ -58,7 +58,7 @@ case class UUID() extends StaticAnnotation
   * @param strategy 主键策略
   */
 @scala.annotation.meta.field
-case class Id(strategy: String = "uuid") extends StaticAnnotation
+case class Id(strategy: String) extends StaticAnnotation
 
 object Id {
   val STRATEGY_SEQ = "seq"

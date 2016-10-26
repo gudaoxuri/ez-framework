@@ -109,10 +109,10 @@ class AuthSpec extends GatewayStartupSpec {
     RespHttpClientProcessor.put[EZ_Account](u(s"manage/account/uuid/${account.code}/"), Map("password" -> "456", "login_id" -> "sysadmin1"))
     // 改密码，已修改过账号，需要重新登录
     assert(RespHttpClientProcessor.put[EZ_Account](u(s"manage/account/uuid/${account.code}/"),
-      Map("password" -> "456", "ext_info" -> "aaaaa")).code == StandardCode.UNAUTHORIZED)
+      Map("password" -> "456", "ext_info" -> Map("a" -> "aaaaa"))).code == StandardCode.UNAUTHORIZED)
     // 重新登录
     token = RespHttpClientProcessor.post[OptInfo]("http://127.0.0.1:8080/public/ez/auth/login/", Map("id" -> "sysadmin1", "password" -> "456")).body.token
-    RespHttpClientProcessor.put[EZ_Account](u(s"manage/account/uuid/${account.code}/"), Map("password" -> "123", "ext_info" -> "aaaaa")).body
+    RespHttpClientProcessor.put[EZ_Account](u(s"manage/account/uuid/${account.code}/"), Map("password" -> "123", "ext_info" -> """{"a":"aaaaa"}""")).body
     // 改密成功
     loginInfoResp =
       RespHttpClientProcessor.post[OptInfo]("http://127.0.0.1:8080/public/ez/auth/login/", Map("id" -> "sysadmin1", "password" -> "123"))
@@ -125,7 +125,7 @@ class AuthSpec extends GatewayStartupSpec {
       Map("login_id" -> "sysadmin", "name" -> "Sys Admin", "password" -> "admin")).body
     loginInfoResp =
       RespHttpClientProcessor.post[OptInfo]("http://127.0.0.1:8080/public/ez/auth/login/", Map("id" -> "sysadmin", "password" -> "admin"))
-    assert(loginInfoResp.body.name == "Sys Admin" && loginInfoResp.body.extInfo == "aaaaa")
+    assert(loginInfoResp.body.name == "Sys Admin" && loginInfoResp.body.extInfo.nonEmpty)
     token = loginInfoResp.body.token
     RespHttpClientProcessor.get[Void](u(s"manage/account/${account.id}/disable/"))
     assert(!EZ_Account.getByLoginId("sysadmin", "").body.enable)
