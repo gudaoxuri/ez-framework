@@ -224,8 +224,6 @@ object EZManager extends Logging {
                     if (!initR) {
                       message = s"Init [${service.serviceName}] Service error : [${initR.code}] [${initR.message}]"
                       isSuccess = false
-                    } else {
-                      logger.info(s"\r\n>>> ${initR.body}")
                     }
                   } catch {
                     case e: Throwable =>
