@@ -42,7 +42,7 @@ trait BaseStorage[M <: BaseModel] extends Logging {
     .asInstanceOf[ParameterizedType].getActualTypeArguments()(0).asInstanceOf[Class[M]]
 
   // 表名
-  var tableName = _modelClazz.getSimpleName.toLowerCase
+  lazy val tableName = _modelClazz.getSimpleName.toLowerCase
 
   protected var _entityInfo =
     if (!EntityContainer.CONTAINER.contains(tableName)) {
@@ -50,11 +50,6 @@ trait BaseStorage[M <: BaseModel] extends Logging {
     } else {
       EntityContainer.CONTAINER(tableName)
     }
-
-  def customTableName(newName: String): Unit = {
-    _entityInfo = EntityContainer.buildingEntityInfo(_modelClazz, newName, tableName)
-    tableName = newName
-  }
 
   def filterByModel(model: M): Resp[M] = Resp.success(model)
 

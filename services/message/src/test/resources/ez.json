@@ -10,10 +10,6 @@
     },
     "services": {
       "message": {
-       /* "customTables": {
-          "message": "biz_message",
-          "message_log": "biz_message_log"
-        }*/
       },
       "jdbc": {
         "url": "jdbc:mysql://127.0.0.1:3306/ez?characterEncoding=UTF-8&autoReconnect=true",

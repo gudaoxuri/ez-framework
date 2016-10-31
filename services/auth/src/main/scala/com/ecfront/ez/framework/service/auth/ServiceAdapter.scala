@@ -3,10 +3,8 @@ package com.ecfront.ez.framework.service.auth
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZServiceAdapter
 import com.ecfront.ez.framework.core.rpc.AutoBuildingProcessor
-import com.ecfront.ez.framework.service.auth.model._
 import com.fasterxml.jackson.databind.JsonNode
 
-import scala.collection.JavaConversions._
 import scala.collection.mutable
 
 object ServiceAdapter extends EZServiceAdapter[JsonNode] {
@@ -40,21 +38,6 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
       }
     } else {
       loginLimit_showCaptcha = Int.MaxValue
-    }
-    if (parameter.has("customTables")) {
-      parameter.get("customTables").fields().foreach {
-        item =>
-          item.getKey match {
-            case "organization" => EZ_Organization.customTableName(item.getValue.asInstanceOf[String])
-            case "account" => EZ_Account.customTableName(item.getValue.asInstanceOf[String])
-            case "resource" => EZ_Resource.customTableName(item.getValue.asInstanceOf[String])
-            case "role" => EZ_Role.customTableName(item.getValue.asInstanceOf[String])
-            case "menu" => EZ_Menu.customTableName(item.getValue.asInstanceOf[String])
-            case "rel_account_role" => EZ_Account.TABLE_REL_ACCOUNT_ROLE = item.getValue.asInstanceOf[String]
-            case "rel_role_resource" => EZ_Role.TABLE_REL_ROLE_RESOURCE = item.getValue.asInstanceOf[String]
-            case "rel_menu_role" => EZ_Menu.TABLE_REL_MENU_ROLE = item.getValue.asInstanceOf[String]
-          }
-      }
     }
     defaultOrganizationCode = parameter.path("defaultOrganizationCode").asText("")
     loginKeepSeconds = parameter.path("loginKeepSeconds").asInt(0)

@@ -54,7 +54,9 @@ class Loan_app extends SecureModel with StatusModel {
   @BeanProperty var finance_status: String = _
 }
 
-object Loan_app extends SecureStorage[Loan_app] with StatusStorage[Loan_app]
+object Loan_app extends SecureStorage[Loan_app] with StatusStorage[Loan_app]{
+  override lazy val tableName: String = "biz_app"
+}
 
 
 

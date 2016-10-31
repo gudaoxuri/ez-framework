@@ -10,10 +10,6 @@
     },
     "services": {
       "scheduler":{
-        /* "customTables": {
-            "scheduler": "sys_scheduler",
-            "scheduler_Log": "sys_scheduler_Log"
-          },*/
       },
       "jdbc": {
         "url": "jdbc:mysql://127.0.0.1:3306/ez?characterEncoding=UTF-8&autoReconnect=true",

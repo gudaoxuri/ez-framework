@@ -35,7 +35,7 @@ object EntityContainer extends Logging {
     * @param clazz     实体类型
     * @param tableName 表名
     */
-  def buildingEntityInfo(clazz: Class[_], tableName: String,oriTableName:String=null): EntityInfo = {
+  def buildingEntityInfo(clazz: Class[_], tableName: String): EntityInfo = {
     val entityAnnotation = BeanHelper.getClassAnnotation[Entity](clazz).get
     val tableDesc = entityAnnotation.desc
     val allAnnotations = BeanHelper.findFieldAnnotations(clazz).toList
@@ -107,12 +107,7 @@ object EntityContainer extends Logging {
     model.persistentFields = persistentFields
     CONTAINER += tableName -> model
     logger.info( """Create model: %s""".format(clazz.getSimpleName))
-    if(oriTableName!=null){
-      CONTAINER-=oriTableName
-      mvTable(oriTableName,tableName)
-    }else{
-      createTable(model)
-    }
+    createTable(model)
     model
   }
 

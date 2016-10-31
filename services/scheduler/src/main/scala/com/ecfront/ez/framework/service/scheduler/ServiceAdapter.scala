@@ -4,21 +4,11 @@ import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.{EZ, EZServiceAdapter}
 import com.fasterxml.jackson.databind.JsonNode
 
-import scala.collection.JavaConversions._
 import scala.collection.mutable
 
 object ServiceAdapter extends EZServiceAdapter[JsonNode] {
 
   override def init(parameter: JsonNode): Resp[String] = {
-    if (parameter.has("customTables")) {
-      parameter.get("customTables").fields().foreach {
-        item =>
-          item.getKey match {
-            case "scheduler" => EZ_Scheduler.customTableName(item.getValue.asInstanceOf[String])
-            case "scheduler_log" => EZ_Scheduler_Log.customTableName(item.getValue.asInstanceOf[String])
-          }
-      }
-    }
     SchedulerProcessor.init(EZ.Info.module)
     Resp.success("")
   }
