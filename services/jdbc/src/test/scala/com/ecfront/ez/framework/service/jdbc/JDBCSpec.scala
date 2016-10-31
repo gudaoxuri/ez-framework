@@ -11,10 +11,6 @@ import scala.beans.BeanProperty
 class JDBCSpec extends MockStartupSpec {
 
   test("JDBC Test") {
-    val app = new Loan_app
-    app.deposit_payment_amount = 1.1
-    Loan_app.save(app)
-    assert(Loan_app.find("").body.nonEmpty)
     baseTest()
     entityTest()
     intTest()
@@ -327,7 +323,9 @@ case class JDBC_Test_Entity() extends SecureModel with StatusModel {
   @BeanProperty var date2: Date = _
 }
 
-object JDBC_Test_Entity extends SecureStorage[JDBC_Test_Entity] with StatusStorage[JDBC_Test_Entity]
+object JDBC_Test_Entity extends SecureStorage[JDBC_Test_Entity] with StatusStorage[JDBC_Test_Entity] {
+  override lazy val tableName: String = "test_entity"
+}
 
 @Entity("")
 case class JDBC_Test_Int() extends BaseModel {
