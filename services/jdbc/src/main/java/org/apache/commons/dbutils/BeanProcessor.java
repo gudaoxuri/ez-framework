@@ -257,7 +257,7 @@ public class BeanProcessor {
                 if ("java.sql.Date".equals(targetType)) {
                     value = new java.sql.Date(((java.util.Date) value).getTime());
                 } else if ("java.sql.Time".equals(targetType)) {
-                    value = new java.sql.Time(((java.util.Date) value).getTime());
+                    value = new Time(((java.util.Date) value).getTime());
                 } else if ("java.sql.Timestamp".equals(targetType)) {
                     Timestamp tsValue = (Timestamp) value;
                     int nanos = tsValue.getNanos();
