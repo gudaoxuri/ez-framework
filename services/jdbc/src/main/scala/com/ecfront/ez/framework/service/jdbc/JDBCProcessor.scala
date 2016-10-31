@@ -10,7 +10,7 @@ import com.ecfront.common.{JsonHelper, Resp, StandardCode}
 import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.service.jdbc.dialect.{DialectFactory, FiledInfo}
 import com.mchange.v2.c3p0.ComboPooledDataSource
-import org.apache.commons.dbutils.QueryRunner
+import org.apache.commons.dbutils.{BasicRowProcessor, QueryRunner}
 import org.apache.commons.dbutils.handlers._
 
 import scala.collection.JavaConversions._

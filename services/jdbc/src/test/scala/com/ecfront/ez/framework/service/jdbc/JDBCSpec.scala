@@ -11,12 +11,15 @@ import scala.beans.BeanProperty
 class JDBCSpec extends MockStartupSpec {
 
   test("JDBC Test") {
+    Loan_app.customTableName("biz_app")
+    val app = new Loan_app
+    app.deposit_payment_amount = 1.1
+    Loan_app.save(app)
+    assert(Loan_app.find("").body.nonEmpty)
     baseTest()
     entityTest()
     intTest()
     txTest()
-    Loan_app.customTableName("biz_app")
-    assert(Loan_app.find("").body.isEmpty)
   }
 
   def baseTest(): Unit = {
@@ -170,6 +173,12 @@ class JDBCSpec extends MockStartupSpec {
     JDBC_Test_Entity.deleteByCond("1=1", List()).body
     findResult = JDBC_Test_Entity.find("1=1").body
     assert(findResult.isEmpty)
+
+    Loan_app.customTableName("biz_app")
+    val app = new Loan_app
+    app.deposit_payment_amount = 1.1
+    Loan_app.save(app)
+    assert(Loan_app.find("").body.isEmpty)
   }
 
   def intTest(): Unit = {
@@ -307,7 +316,7 @@ class JDBCSpec extends MockStartupSpec {
 case class JDBC_Test_Entity() extends SecureModel with StatusModel {
   @Unique
   @Require
-  @Desc("姓名",40,0)
+  @Desc("姓名", 40, 0)
   @BeanProperty var name: String = _
   @BeanProperty var age: Int = _
   @NowBySave

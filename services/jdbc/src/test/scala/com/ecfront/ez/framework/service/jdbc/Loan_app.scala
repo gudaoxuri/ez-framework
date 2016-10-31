@@ -52,8 +52,6 @@ class Loan_app extends SecureModel with StatusModel {
   @BeanProperty var apply_date: Date = _
   @Desc("资金状态", 48, 0)
   @BeanProperty var finance_status: String = _
-  @Desc("资金状态", 0, 0)
-  @BeanProperty var ext: String = _
 }
 
 object Loan_app extends SecureStorage[Loan_app] with StatusStorage[Loan_app]
