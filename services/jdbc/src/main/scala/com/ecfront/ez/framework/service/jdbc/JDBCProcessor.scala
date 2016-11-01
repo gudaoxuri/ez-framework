@@ -335,7 +335,7 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
       execute[Void]("batch", {
         queryRunner.batch(_conn, sql, finalParameters)
         Resp.success(null)
-      }, sql, finalParameterR, _conn, _autoClose)
+      }, sql, finalParameters.toList, _conn, _autoClose)
     }
   }
 
