@@ -3,6 +3,7 @@ package com.ecfront.ez.framework.core.rpc.apidoc
 import java.io.{File, FileWriter}
 
 import com.ecfront.common.BeanHelper
+import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.{Label, Require}
 
@@ -99,7 +100,7 @@ object APIDocProcessor extends Logging {
               BeanHelper.getValue(labelInfo.annotation.asInstanceOf[AnyRef], "label").get.asInstanceOf[String]
             }
           val dType = fieldsInfo(labelInfo.fieldName)
-          s"""|${if (isList || isPage) "-" else ""}$fieldName|$dType|$labelName"""
+          s"""|${if (isList || isPage) "-" else ""}$fieldName|$dType|${labelName.x}"""
       }
     }
     body.mkString("\r\n") + (if (respExt.trim.nonEmpty) s"\r\n${respExt.split("\r\n").map(_.trim).mkString("r\n")}\r\n|===" else "\r\n|===")
@@ -127,7 +128,7 @@ object APIDocProcessor extends Logging {
               }
             val isRequire = requiresInfo.exists(_.fieldName == fieldName)
             val dType = fieldsInfo(labelInfo.fieldName)
-            s"""|$fieldName|$dType|$labelName|$isRequire"""
+            s"""|$fieldName|$dType|${labelName.x}|$isRequire"""
         }
       body.mkString("\r\n") + (if (item.reqExt.trim.nonEmpty) s"\r\n${item.reqExt.split("\r\n").map(_.trim).mkString("\r\n")}\r\n|===" else "\r\n|===")
     }
