@@ -8,42 +8,42 @@ import scala.annotation.StaticAnnotation
   *
   * @param baseUri 此类的根路径
   */
-case class RPC(baseUri: String) extends StaticAnnotation
+case class RPC(baseUri: String, docName: String, docDesc: String) extends StaticAnnotation
 
 /**
   * 注册用于接收HTTP(s) Get请求，用于Auto Building特性
   *
   * @param uri 请求路径（http:get:baseUri+uri）
   */
-case class GET(uri: String) extends StaticAnnotation
+case class GET(uri: String, docName: String, docDesc: String, docRespExt: String) extends StaticAnnotation
 
 /**
   * 注册用于接收HTTP(s) Post请求，用于Auto Building特性
   *
   * @param uri 请求路径（http:post:baseUri+uri）
   */
-case class POST(uri: String) extends StaticAnnotation
+case class POST(uri: String, docName: String, docDesc: String, docReqExt: String, docRespExt: String) extends StaticAnnotation
 
 /**
   * 注册用于接收HTTP(s) Put请求，用于Auto Building特性
   *
   * @param uri 请求路径（http:put:baseUri+uri）
   */
-case class PUT(uri: String) extends StaticAnnotation
+case class PUT(uri: String, docName: String, docDesc: String, docReqExt: String, docRespExt: String) extends StaticAnnotation
 
 /**
   * 注册用于接收HTTP(s) Delete请求，用于Auto Building特性
   *
   * @param uri 请求路径（http:delete:baseUri+uri）
   */
-case class DELETE(uri: String) extends StaticAnnotation
+case class DELETE(uri: String, docName: String, docDesc: String, docRespExt: String) extends StaticAnnotation
 
 /**
   * 注册用于接收WebSocket请求，用于Auto Building特性
   *
   * @param uri 请求路径（ws:baseUri+uri）
   */
-case class WS(uri: String) extends StaticAnnotation
+case class WS(uri: String, docName: String, docDesc: String, docReqExt: String, docRespExt: String) extends StaticAnnotation
 
 /**
   * 注册用于接收Publish请求，用于Auto Building特性

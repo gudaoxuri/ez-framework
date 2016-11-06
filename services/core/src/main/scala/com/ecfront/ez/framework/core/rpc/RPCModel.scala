@@ -44,19 +44,19 @@ object Method extends Enumeration {
   * @param extInfo              扩展信息
   */
 case class OptInfo(
-                    token: String,
-                    accountCode: String,
-                    loginId: String,
-                    name: String,
-                    email: String,
-                    image: String,
-                    organizationCode: String,
-                    organizationName: String,
-                    organizationCategory: String,
-                    roleCodes: Set[String],
-                    lastLoginTime: Date,
-                    extId: String,
-                    extInfo: String)
+                  @Label("token")  token: String,
+                  @Label("账号编码") accountCode: String,
+                  @Label("登录Id")  loginId: String,
+                  @Label("姓名")  name: String,
+                  @Label("email")  email: String,
+                  @Label("头像")  image: String,
+                  @Label("组织编码")  organizationCode: String,
+                  @Label("组织名称")  organizationName: String,
+                  @Label("组织类型")  organizationCategory: String,
+                  @Label("角色编码列表")  roleCodes: Set[String],
+                  @Label("最后一次登录时间")  lastLoginTime: Date,
+                  @Label("扩展Id")  extId: String,
+                  @Label("扩展信息")  extInfo: String)
 
 /**
   * 重定向VO

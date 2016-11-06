@@ -14,7 +14,7 @@ import com.ecfront.ez.framework.service.message.helper.TemplateEngineHelper
 /**
   * 消息服务
   */
-@RPC("/ez/message/")
+@RPC("/ez/message/", "消息服务", "")
 object MessageService extends Logging {
 
   /**
@@ -23,7 +23,7 @@ object MessageService extends Logging {
     * @param parameter 参数
     * @return 未读消息条数
     */
-  @GET("unRead/number/")
+  @GET("unRead/number/", "获取当前登录人的未读消息条数", "", "||Long|未读消息条数")
   def fetchUnReadMessageNumber(parameter: Map[String, String]): Resp[Long] = {
     EZ_Message.fetchUnReadMessageNumber(EZ.context.optInfo.get.accountCode, EZ.context.optInfo.get.roleCodes)
   }
@@ -34,7 +34,7 @@ object MessageService extends Logging {
     * @param parameter 参数，markRead=true时表示获取并标记为已读
     * @return 未读消息
     */
-  @GET("unRead/")
+  @GET("unRead/", "获取当前登录人的未读消息", "TIP: url参数`markRead=true`时表示获取并标记为已读", "")
   def fetchUnReadMessages(parameter: Map[String, String]): Resp[List[EZ_Message]] = {
     val markRead = if (parameter.contains("markRead")) parameter("markRead").toBoolean else false
     EZ_Message.fetchUnReadMessages(EZ.context.optInfo.get.accountCode, EZ.context.optInfo.get.roleCodes, markRead)
@@ -46,7 +46,7 @@ object MessageService extends Logging {
     * @param parameter 参数
     * @return 已读消息
     */
-  @GET("read/:pageNumber/:pageSize/")
+  @GET("read/:pageNumber/:pageSize/", "分页获取当前登录人的未读消息", "TIP: url参数`pageNumber`表示当前页，从1开始，`pageSize`表示每页条数", "")
   def fetchReadMessages(parameter: Map[String, String]): Resp[Page[EZ_Message]] = {
     val pageNumber = if (parameter.contains("pageNumber")) parameter("pageNumber").toLong else 1L
     val pageSize = if (parameter.contains("pageSize")) parameter("pageSize").toInt else 10
@@ -59,7 +59,7 @@ object MessageService extends Logging {
     * @param parameter 参数
     * @return 已读消息
     */
-  @GET(":messageId/markRead/")
+  @GET(":messageId/markRead/", "标记消息已读", "", "")
   def markReadMessage(parameter: Map[String, String]): Resp[Void] = {
     val messageId = parameter("messageId")
     EZ_Message_Log.save(EZ_Message_Log(messageId, EZ.context.optInfo.get.accountCode))
@@ -72,7 +72,7 @@ object MessageService extends Logging {
     * @param body      消息体
     * @return 保存后的消息
     */
-  @POST("")
+  @POST("", "保存消息", "", "", "")
   def addMessage(parameter: Map[String, String], body: EZ_Message): Resp[EZ_Message] = {
     EZ_Message.save(body)
   }
@@ -84,7 +84,7 @@ object MessageService extends Logging {
     * @param body      消息体
     * @return 更新后的消息
     */
-  @PUT(":messageId/")
+  @PUT(":messageId/", "更新消息", "", "", "")
   def updateMessage(parameter: Map[String, String], body: EZ_Message): Resp[Void] = {
     body.id = parameter("messageId")
     EZ_Message.update(body)
@@ -96,7 +96,7 @@ object MessageService extends Logging {
     * @param parameter 参数
     * @return 是否成功
     */
-  @DELETE(":messageId/")
+  @DELETE(":messageId/", "删除消息", "", "")
   def deleteMessage(parameter: Map[String, String]): Resp[Void] = {
     EZ_Message.deleteById(parameter("messageId"))
   }

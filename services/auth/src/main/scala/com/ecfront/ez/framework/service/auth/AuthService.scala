@@ -8,12 +8,17 @@ import com.ecfront.ez.framework.service.auth.helper.CaptchaHelper
 import com.ecfront.ez.framework.service.auth.model._
 import com.ecfront.ez.framework.service.jdbc.BaseModel
 
-@RPC("/ez/auth/")
+@RPC("/ez/auth/", "权限组件", "")
 object AuthService extends Logging {
 
   private val random = new scala.util.Random
 
-  @POST("/public/ez/auth/login/")
+  @POST("/public/ez/auth/login/", "登录", "",
+    """
+      |id|String|Id，可以是登录Id或email|true
+      |password|String|密码|true
+      |organizationCode|String|对应的组织编码|false
+    """, "")
   def login(parameter: Map[String, String], body: Map[String, String]): Resp[OptInfo] = {
     if (!ServiceAdapter.customLogin) {
       // id 可以是 login_id 或 email
@@ -103,7 +108,7 @@ object AuthService extends Logging {
     }
   }
 
-  @GET("/public/auth/captcha/:organizationCode/:id/")
+  @GET("/public/auth/captcha/:organizationCode/:id/", "获取验证码", "", "||File|验证码图片文件")
   def getCaptcha(parameter: Map[String, String]): Resp[DownloadFile] = {
     val id = parameter.getOrElse("id", "")
     val organizationCode = parameter.getOrElse("organizationCode", ServiceAdapter.defaultOrganizationCode)
@@ -123,7 +128,7 @@ object AuthService extends Logging {
     }
   }
 
-  @GET("logout/")
+  @GET("logout/", "注销", "", "")
   def logout(parameter: Map[String, String]): Resp[Void] = {
     val token = parameter.getOrElse(RPCProcessor.VIEW_TOKEN_FLAG, "")
     if (token.nonEmpty) {
@@ -143,12 +148,12 @@ object AuthService extends Logging {
       EZ.eb.pubReq(ServiceAdapter.EB_LOGOUT_FLAG, tokenInfo)
       CacheManager.Token.removeToken(token)
       Resp.success(null)
-    }else{
+    } else {
       Resp.unAuthorized(null)
     }
   }
 
-  @GET("logininfo/")
+  @GET("logininfo/", "获取当前登录信息", "", "")
   def getLoginInfo(parameter: Map[String, String]): Resp[OptInfo] = {
     goGetLoginInfo(parameter(RPCProcessor.VIEW_TOKEN_FLAG))
   }
@@ -157,7 +162,7 @@ object AuthService extends Logging {
     Resp.success(CacheManager.Token.getTokenInfo(token))
   }
 
-  @GET("/public/ez/menu/")
+  @GET("/public/ez/menu/", "获取菜单列表", "", "")
   def getMenus(parameter: Map[String, String]): Resp[List[EZ_Menu]] = {
     if (parameter.contains(RPCProcessor.VIEW_TOKEN_FLAG)) {
       val tokenInfo = CacheManager.Token.getTokenInfo(parameter(RPCProcessor.VIEW_TOKEN_FLAG))

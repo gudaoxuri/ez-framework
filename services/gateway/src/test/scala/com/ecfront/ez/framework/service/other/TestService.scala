@@ -5,10 +5,10 @@ import com.ecfront.ez.framework.core.rpc._
 import com.ecfront.ez.framework.service.jdbc.BaseStorage
 import com.ecfront.ez.framework.service.jdbc.scaffold.SimpleRPCService
 
-@RPC("/test/")
+@RPC("/test/", "", "")
 object TestService extends SimpleRPCService[EZ_Test] {
 
-  @GET("xml/str")
+  @GET("xml/str", "", "", "")
   def testgetXmlStr(parameter: Map[String, String]): Resp[String] = {
     Resp.success(
       s"""
@@ -19,33 +19,33 @@ object TestService extends SimpleRPCService[EZ_Test] {
        """.stripMargin)
   }
 
-  @POST("xml/str/")
+  @POST("xml/str/", "", "", "", "")
   def testPostXmlStr(parameter: Map[String, String], body: String): Resp[String] = {
     Resp.success(body)
   }
 
-  @POST("xml/str/error/")
+  @POST("xml/str/error/", "", "", "", "")
   def testPostXmlStrError(parameter: Map[String, String], body: String): Resp[String] = {
     Resp.badRequest("some error")
   }
 
-  @POST("file/")
+  @POST("file/", "", "", "", "")
   def uploadFile(parameter: Map[String, String], body: String): Resp[String] = {
     Resp.success(body)
   }
 
-  @GET("downfile/")
+  @GET("downfile/", "", "", "")
   def downFile(parameter: Map[String, String]): Resp[DownloadFile] = {
     Resp.success(DownloadFile(this.getClass.getResource("/").getPath + "logback.xml", "logback.xml"))
   }
 
-  @GET("longtime/")
+  @GET("longtime/", "", "", "")
   def longTime(parameter: Map[String, String]): Resp[String] = {
     Thread.sleep(10000)
     Resp.success("ok")
   }
 
-  @WS("")
+  @WS("", "", "", "", "")
   def save(parameter: Map[String, String], body: EZ_Test): Resp[EZ_Test] = {
     Resp.success(body)
   }

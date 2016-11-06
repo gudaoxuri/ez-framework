@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode
 
 import scala.collection.JavaConversions._
 
-@RPC("/ez/auth/")
+@RPC("/ez/auth/","","")
 object ExchangeProcessor extends Logging {
 
   @SUB("/ez/gateway/address/add/")

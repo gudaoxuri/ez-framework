@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode
 
 import scala.beans.BeanProperty
 
-@RPC("/tpsi/")
+@RPC("/tpsi/","","")
 object TPSITestService extends TPSIService {
 
   val counter = new CountDownLatch(3)

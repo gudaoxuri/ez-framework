@@ -3,7 +3,7 @@ package com.ecfront.ez.framework.core.rpc
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.logger.Logging
 
-@RPC("/test2/")
+@RPC("/test2/","测试2","")
 class RPCTest2 extends Logging {
 
   @SUB("")

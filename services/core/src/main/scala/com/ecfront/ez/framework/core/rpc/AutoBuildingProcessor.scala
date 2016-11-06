@@ -4,6 +4,7 @@ import com.ecfront.common._
 import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.Method.Method
+import com.ecfront.ez.framework.core.rpc.apidoc.{APIDocItemVO, APIDocProcessor, APIDocSectionVO}
 
 import scala.reflect.runtime._
 
@@ -34,10 +35,12 @@ object AutoBuildingProcessor extends Logging {
   private def process(instance: AnyRef): Unit = {
     val clazz = instance.getClass
     // 根路径
-    var baseUri = BeanHelper.getClassAnnotation[RPC](clazz).get.baseUri
+    val rpc = BeanHelper.getClassAnnotation[RPC](clazz).get
+    var baseUri = rpc.baseUri
     if (!baseUri.endsWith("/")) {
       baseUri += "/"
     }
+    val apiDoc = APIDocSectionVO(clazz.getSimpleName, rpc.docName, rpc.docDesc)
     try {
       BeanHelper.findMethodAnnotations(clazz,
         Seq(classOf[GET], classOf[POST], classOf[PUT], classOf[DELETE], classOf[WS], classOf[SUB], classOf[RESP], classOf[REPLY])).foreach {
@@ -53,25 +56,29 @@ object AutoBuildingProcessor extends Logging {
             }
           val annInfo = methodInfo.annotation match {
             case ann: GET =>
-              (Method.GET, ann.uri, null)
+              (Method.GET, ann.uri, null, ann.docName, ann.docDesc, "", ann.docRespExt)
             case ann: POST =>
-              (Method.POST, ann.uri, getClassFromMethodInfo(methodInfo))
+              (Method.POST, ann.uri, getBodyClassByMethodInfo(methodInfo), ann.docName, ann.docDesc, ann.docReqExt, ann.docRespExt)
             case ann: PUT =>
-              (Method.PUT, ann.uri, getClassFromMethodInfo(methodInfo))
+              (Method.PUT, ann.uri, getBodyClassByMethodInfo(methodInfo), ann.docName, ann.docDesc, ann.docReqExt, ann.docRespExt)
             case ann: DELETE =>
-              (Method.DELETE, ann.uri, null)
+              (Method.DELETE, ann.uri, null, ann.docName, ann.docDesc, "", ann.docRespExt)
             case ann: WS =>
-              (Method.WS, ann.uri, getClassFromMethodInfo(methodInfo))
+              (Method.WS, ann.uri, getBodyClassByMethodInfo(methodInfo), ann.docName, ann.docDesc, ann.docReqExt, ann.docRespExt)
             case ann: SUB =>
-              (Method.PUB_SUB, ann.uri, getClassFromMethodInfo(methodInfo))
+              (Method.PUB_SUB, ann.uri, getBodyClassByMethodInfo(methodInfo), null, null, null, null)
             case ann: RESP =>
-              (Method.REQ_RESP, ann.uri, getClassFromMethodInfo(methodInfo))
+              (Method.REQ_RESP, ann.uri, getBodyClassByMethodInfo(methodInfo), null, null, null, null)
             case ann: REPLY =>
-              (Method.ACK, ann.uri, getClassFromMethodInfo(methodInfo))
+              (Method.ACK, ann.uri, getBodyClassByMethodInfo(methodInfo), null, null, null, null)
           }
-          RPCProcessor.add(annInfo._1,
-            if (annInfo._2.startsWith("/")) annInfo._2 else baseUri + annInfo._2, annInfo._3, respType, fun(annInfo._1, methodMirror))
+          val uri = if (annInfo._2.startsWith("/")) annInfo._2 else baseUri + annInfo._2
+          if (annInfo._1 == Method.GET || annInfo._1 == Method.POST || annInfo._1 == Method.PUT || annInfo._1 == Method.DELETE || annInfo._1 == Method.WS) {
+            apiDoc.items += APIDocItemVO(annInfo._4, annInfo._1.toString, uri, annInfo._3, methodInfo.method.returnType.toString, annInfo._5, annInfo._6, annInfo._7)
+          }
+          RPCProcessor.add(annInfo._1, uri, annInfo._3, respType, fun(annInfo._1, methodMirror))
       }
+      APIDocProcessor.build(apiDoc)
     } catch {
       case e: Throwable =>
         logger.error(s"${instance.getClass} Method reflect error")
@@ -95,7 +102,7 @@ object AutoBuildingProcessor extends Logging {
       }
   }
 
-  private def getClassFromMethodInfo(methodInfo: methodAnnotationInfo): Class[_] = {
+  private def getBodyClassByMethodInfo(methodInfo: methodAnnotationInfo): Class[_] = {
     BeanHelper.getClassByStr(methodInfo.method.paramLists.head(1).info.toString)
   }
 

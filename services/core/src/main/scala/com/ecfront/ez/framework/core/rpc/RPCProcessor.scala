@@ -5,6 +5,7 @@ import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.Method.Method
+import com.ecfront.ez.framework.core.rpc.apidoc.APIDocProcessor
 import io.vertx.core.Vertx
 
 object RPCProcessor extends Logging {
@@ -26,6 +27,7 @@ object RPCProcessor extends Logging {
   private[core] def init(vertx: Vertx, config: Map[String, Any]): Resp[Void] = {
     val basePackage = config("package").asInstanceOf[String]
     printBodyLimit = config.getOrElse("printBodyLimit", 4000).asInstanceOf[Int]
+    APIDocProcessor.init(config.getOrElse("docPath",null).asInstanceOf[String])
     AutoBuildingProcessor.autoBuilding(basePackage)
     address.foreach {
       addr =>
