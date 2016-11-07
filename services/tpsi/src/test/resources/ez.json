@@ -14,9 +14,15 @@
         "expireMinutes": 0,
         "needLogin": false,
         "isMock": false,
+        "isStorage": true,
         "args": {
           "tt": "字段"
         }
+      },
+      "jdbc": {
+        "url": "jdbc:mysql://127.0.0.1:3306/ez?characterEncoding=UTF-8&autoReconnect=true",
+        "userName": "root",
+        "password": "123456"
       }
     }
   },

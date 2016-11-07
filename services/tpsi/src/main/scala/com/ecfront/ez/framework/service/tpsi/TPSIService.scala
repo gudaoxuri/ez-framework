@@ -45,17 +45,28 @@ trait TPSIService extends Logging {
       }
       currEXInfo(funName + "@" + config.code) += traceId -> (new Date(), id)
       logger.info(s"[TPSI] start [$funName]:[${config.code}][$id]")
+      val log = if (config.isStorage) {
+        EZ_TPSI_Log.start(funName, config.code)
+      } else null
       val execResult = execFun
+      val finishTime = new Date()
       val useTimes =
         if (currEXInfo.contains(funName + "@" + config.code) && currEXInfo(funName + "@" + config.code).contains(traceId)) {
           val trace = currEXInfo(funName + "@" + config.code)(traceId)
-          new Date().getTime - trace._1.getTime
+          finishTime.getTime - trace._1.getTime
         } else {
           -1
         }
       currEXInfo(funName + "@" + config.code) -= traceId
       logger.debug(s"[TPSI] finish [$funName]:[${config.code}][$id] use ${useTimes}ms , return data:" + JsonHelper.toJsonString(execResult))
       val resp = execPostFun(execResult)
+      if (log != null) {
+        if (resp) {
+          EZ_TPSI_Log.finish(success = true, "", log, finishTime)
+        } else {
+          EZ_TPSI_Log.finish(success = false, resp.message, log, finishTime)
+        }
+      }
       resp.code match {
         case StandardCode.SUCCESS =>
           logger.info(s"[TPSI] success [$funName]:[${config.code}][$id]")

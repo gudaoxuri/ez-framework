@@ -9,4 +9,5 @@ case class TPSIConfig(
                             expireMinutes: Int,
                             needLogin: Boolean,
                             isMock: Boolean,
+                            isStorage: Boolean,
                             args: JsonNode)
