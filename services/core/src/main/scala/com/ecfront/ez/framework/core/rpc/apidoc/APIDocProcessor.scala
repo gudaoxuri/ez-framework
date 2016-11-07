@@ -27,10 +27,10 @@ object APIDocProcessor extends Logging {
       item =>
         val reqBody = packageReqBody(item)
         val respBody = packageRespBody(item)
-        s"==== ${item.name}\r\n${item.desc.trim}\r\n\r\n*请求*\r\n\r\n [${item.method}] ${item.uri}\r\n$reqBody\r\n\r\n*响应*\r\n\r\n$respBody\r\n"
+        s"==== ${item.name}\r\n${item.desc.split("\r\n").map(_.trim).mkString("\r\n")}\r\n\r\n*请求*\r\n\r\n [${item.method}] ${item.uri}\r\n$reqBody\r\n\r\n*响应*\r\n\r\n$respBody\r\n"
     }.mkString("\r\n")
     if (items.nonEmpty) {
-      val data = s"=== ${apiDoc.name}${apiDoc.desc.trim}\r\n$items"
+      val data = s"=== ${apiDoc.name}${apiDoc.desc.split("\r\n").map(_.trim).mkString("\r\n")}\r\n$items"
       val file = new File(path + (if (apiDoc.fileName.endsWith("$")) apiDoc.fileName.substring(0, apiDoc.fileName.length - 1) else apiDoc.fileName) + ".adoc")
       if (file.exists()) {
         file.delete()
