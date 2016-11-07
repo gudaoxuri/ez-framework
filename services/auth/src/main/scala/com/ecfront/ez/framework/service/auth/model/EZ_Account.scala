@@ -38,7 +38,8 @@ case class EZ_Account() extends SecureModel with StatusModel with OrganizationMo
   @Desc("Email", 100, 0)
   @BeanProperty var email: String = _
   @Ignore var exchange_role_codes: Set[String] = _
-  @BeanProperty var role_codes: Set[String] = _
+  @BeanProperty
+  @Ignore var role_codes: Set[String] = _
   @Index
   @Desc("Ext Id", 100, 0) // 用于关联其它对象以扩展属性，扩展Id多为业务系统用户信息表的主键
   @BeanProperty var ext_id: String = _

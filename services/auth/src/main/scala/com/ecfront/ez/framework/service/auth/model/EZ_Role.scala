@@ -25,7 +25,8 @@ case class EZ_Role() extends SecureModel with StatusModel with OrganizationModel
   @Desc("Name", 200, 0)
   @BeanProperty var name: String = _
   @Ignore var exchange_resource_codes: Set[String] = _
-  @BeanProperty var resource_codes: Set[String] = _
+  @BeanProperty
+  @Ignore var resource_codes: Set[String] = _
 
 }
 

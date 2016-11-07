@@ -26,7 +26,8 @@ case class EZ_Menu() extends SecureModel with StatusModel with OrganizationModel
   @Desc("Translate", 200, 0)
   @BeanProperty var translate: String = _
   @Ignore var exchange_role_codes: List[String] = _
-  @BeanProperty var role_codes: List[String] = _
+  @BeanProperty
+  @Ignore var role_codes: List[String] = _
   @Desc("Parent Code", 200, 0)
   @BeanProperty var parent_code: String = _
   @Desc("Sort", 0, 0)
