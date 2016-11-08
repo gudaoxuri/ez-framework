@@ -22,9 +22,8 @@ object OrganizationModel
 trait OrganizationStorage[M <: OrganizationModel] extends BaseStorage[M] {
 
   override def filterByModel(model: M): Resp[M] = {
-    if (EZ.context.optAccCode.nonEmpty && (
-      EZ.context.optAccCode != BaseModel.SYSTEM_ACCOUNT_LOGIN_ID || EZ.context.optOrgCode.nonEmpty)) {
-      // 非系统管理员
+    if (EZ.context.optAccCode.nonEmpty && !EZ.context.optInfo.get.roleCodes.contains(BaseModel.SPLIT + BaseModel.SYSTEM_ACCOUNT_LOGIN_ID)) {
+      // 操作信息存在且是非系统管理员
       if (model.id == null || model.id.isEmpty) {
         // 新建,只能创建自己组织的信息
         model.organization_code = EZ.context.optOrgCode
@@ -53,8 +52,7 @@ trait OrganizationStorage[M <: OrganizationModel] extends BaseStorage[M] {
   }
 
   override def filterByCond(condition: String, parameters: List[Any]): Resp[(String, List[Any])] = {
-    val result = if (EZ.context.optAccCode.isEmpty || (
-      EZ.context.optAccCode == BaseModel.SYSTEM_ACCOUNT_LOGIN_ID && EZ.context.optOrgCode.isEmpty)) {
+    val result = if (EZ.context.optAccCode.isEmpty || EZ.context.optInfo.get.roleCodes.contains(BaseModel.SPLIT + BaseModel.SYSTEM_ACCOUNT_LOGIN_ID)) {
       // 没有登录(内部逻辑处理) 或 登录为sysadmin 时不需要过滤
       if (condition != null && condition.nonEmpty) {
         (condition, parameters)
