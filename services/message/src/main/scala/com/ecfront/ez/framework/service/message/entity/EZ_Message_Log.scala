@@ -8,7 +8,7 @@ import com.ecfront.ez.framework.service.jdbc.{BaseModel, BaseStorage, Desc, Enti
 
 import scala.beans.BeanProperty
 
-@Entity("消息")
+@Entity("消息日志")
 case class EZ_Message_Log() extends BaseModel {
 
   @Desc("消息Id", 200, 0)
