@@ -18,8 +18,10 @@ private[core] case class EZInfo(
                    var module: String,
                    // 实例名称
                    var instance: String,
-                   // 缓存服务地址
-                   var cache: Map[String, Any],
+                   // 集群信息
+                   var cluster:Map[String,Any],
+                   // 缓存信息
+                   var cache:Map[String,Any],
                    // RPC信息
                    var rpc: Map[String, Any],
                    // 时区

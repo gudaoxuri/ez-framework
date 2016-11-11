@@ -9,8 +9,7 @@ import com.ecfront.ez.framework.core.config.EZConfig
 import com.ecfront.ez.framework.core.dist.DistributedServiceProcessor
 import com.ecfront.ez.framework.core.eventbus.EventBusProcessor
 import com.ecfront.ez.framework.core.logger.Logging
-import com.ecfront.ez.framework.core.metrics.MetricsProcessor
-import io.vertx.core.Vertx
+import com.ecfront.ez.framework.service.gateway.metrics.MetricsProcessor
 import redis.clients.jedis.JedisCommands
 
 /**
@@ -32,7 +31,7 @@ object EZ extends Logging {
     // 配置文件路径
     lazy val confPath: String = findConfPath()
 
-    private[ecfront] var config:EZConfig=_
+    private[ecfront] var config: EZConfig = _
 
     // 项目主机IP
     val projectIp = InetAddress.getLocalHost.getHostAddress
@@ -61,8 +60,6 @@ object EZ extends Logging {
 
   }
 
-  private[ecfront] var vertx:Vertx=_
-
   // 是否调试模式
   var isDebug: Boolean = _
 
@@ -72,9 +69,7 @@ object EZ extends Logging {
 
   var cache: CacheProcessor[JedisCommands] = _
 
-  var metrics: MetricsProcessor= _
-
-  def context:EZContext = EZContext.getContext
+  def context: EZContext = EZContext.getContext
 
   def createUUID: String = UUID.randomUUID().toString.replace("-", "")
 

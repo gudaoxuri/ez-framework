@@ -18,10 +18,16 @@
     <version>${ezf-version}</version>
 
     <properties>
+        <rabbitmq.version>3.6.5</rabbitmq.version>
         <redis.version>2.8.1</redis.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>${rabbitmq.version}</version>
+        </dependency>
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>

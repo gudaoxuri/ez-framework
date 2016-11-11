@@ -2,16 +2,12 @@ package com.ecfront.ez.framework.core
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.cache.RedisCacheProcessor
+import com.ecfront.ez.framework.core.cluster.ClusterManager
 import com.ecfront.ez.framework.core.config.{ConfigProcessor, EZConfig}
-import com.ecfront.ez.framework.core.dist.HazelcastDistributedServiceProcessor
 import com.ecfront.ez.framework.core.eventbus.VertxEventBusProcessor
 import com.ecfront.ez.framework.core.i18n.I18NProcessor
 import com.ecfront.ez.framework.core.logger.Logging
-import com.ecfront.ez.framework.core.metrics.DefaultMetricsProcessor
 import com.ecfront.ez.framework.core.rpc.RPCProcessor
-import io.vertx.core.{Vertx, VertxOptions}
-import io.vertx.ext.dropwizard.DropwizardMetricsOptions
-import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager
 
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.runtime._
@@ -26,73 +22,28 @@ object EZManager extends Logging {
   // EZ服务容器
   private var ezServices: List[EZServiceAdapter[_]] = _
 
-  System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
-  System.setProperty("vertx.disableFileCaching", "true")
-  System.setProperty("vertx.disableFileCPResolving", "true")
-  System.setProperty("hazelcast.logging.type", "slf4j")
-
-  private[core] val FLAG_PERF_EVENT_LOOP_POOL_SIZE = "eventLoopPoolSize"
-  private[core] val FLAG_PERF_WORKER_POOL_SIZE = "workerPoolSize"
-  private[core] val FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE = "internalBlockingPoolSize"
-  private[core] val FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME = "maxEventLoopExecuteTime"
-  private[core] val FLAG_PERF_WORKER_EXECUTE_TIME = "maxWorkerExecuteTime"
-  private[core] val FLAG_PERF_WARNING_EXCEPTION_TIME = "warningExceptionTime"
-
-  /**
-    * 初始Vertx
-    *
-    * @return vertx实例
-    */
-  private def initVertx(perf: Map[String, Any], isDebug: Boolean): Vertx = {
-    val opt = new VertxOptions()
-    if (perf.contains(FLAG_PERF_EVENT_LOOP_POOL_SIZE)) {
-      opt.setEventLoopPoolSize(perf(FLAG_PERF_EVENT_LOOP_POOL_SIZE).asInstanceOf[Int])
-    } else {
-      opt.setEventLoopPoolSize(20)
-    }
-    if (perf.contains(FLAG_PERF_WORKER_POOL_SIZE)) {
-      opt.setWorkerPoolSize(perf(FLAG_PERF_WORKER_POOL_SIZE).asInstanceOf[Int])
-    } else {
-      opt.setWorkerPoolSize(200)
-    }
-    if (perf.contains(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE)) {
-      opt.setInternalBlockingPoolSize(perf(FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE).asInstanceOf[Int])
-    } else {
-      opt.setInternalBlockingPoolSize(200)
-    }
-    if (perf.contains(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME)) {
-      opt.setMaxEventLoopExecuteTime(perf(FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).asInstanceOf[Int] * 1000000L)
-    }
-    if (perf.contains(FLAG_PERF_WORKER_EXECUTE_TIME)) {
-      opt.setMaxWorkerExecuteTime(perf(FLAG_PERF_WORKER_EXECUTE_TIME).asInstanceOf[Int] * 1000000L)
-    }
-    if (perf.contains(FLAG_PERF_WARNING_EXCEPTION_TIME)) {
-      opt.setWarningExceptionTime(perf(FLAG_PERF_WARNING_EXCEPTION_TIME).asInstanceOf[Int] * 1000000L)
-    }
-    if (isDebug) opt.setWarningExceptionTime(600L * 1000 * 1000000)
-    opt.setMetricsOptions(new DropwizardMetricsOptions().setEnabled(true))
-    Vertx.vertx(opt)
-  }
-
   private def initConfig(specialConfig: String = null): Resp[EZConfig] = {
     ConfigProcessor.init(specialConfig)
   }
 
-  private def initEB(vertx: Vertx, mgr: HazelcastClusterManager): Resp[Void] = {
+  private def initMgr(config: Map[String, Any]): Resp[Void] = {
+    ClusterManager.init(config)
+  }
+
+  private def initEB(): Resp[Void] = {
     val eb = new VertxEventBusProcessor()
     EZ.eb = eb
-    eb.init(vertx, mgr)
+    eb.init()
   }
 
-  private def initMetrics(vertx: Vertx): Resp[Void] = {
-    EZ.metrics = DefaultMetricsProcessor
-    EZ.metrics.register(vertx)
-  }
-
-  private def initDistService(mgr: HazelcastClusterManager): Resp[Void] = {
+  /*private def initDistService(): Resp[Void] = {
     val dist = new HazelcastDistributedServiceProcessor()
     EZ.dist = dist
-    dist.init(mgr)
+    dist.init()
+  }*/
+
+  private def initRPC(config: Map[String, Any]): Resp[Void] = {
+    RPCProcessor.init(config)
   }
 
   private def initCache(args: Map[String, Any]): Resp[Void] = {
@@ -102,10 +53,6 @@ object EZManager extends Logging {
     val cache = new RedisCacheProcessor()
     EZ.cache = cache
     cache.init(address, db, auth)
-  }
-
-  private def initRPC(config: Map[String, Any], vertx: Vertx): Resp[Void] = {
-    RPCProcessor.init(vertx, config)
   }
 
   /**
@@ -192,11 +139,9 @@ object EZManager extends Logging {
     if (ezConfigR) {
       val ezConfig = ezConfigR.body
       EZ.Info.config = ezConfig
-      EZ.vertx = initVertx(ezConfig.ez.perf.toMap, ezConfig.ez.isDebug)
-      val mgr = new HazelcastClusterManager()
-      if (initEB(EZ.vertx, mgr)
-        && initMetrics(EZ.vertx)
-        && initDistService(mgr)
+      if (initMgr(ezConfig.ez.cluster)
+        && initEB()
+        /*&& initDistService()*/
         && initCache(ezConfig.ez.cache)
         && I18NProcessor.init()) {
         EZ.Info.app = ezConfig.ez.app
@@ -235,7 +180,7 @@ object EZManager extends Logging {
             }
             if (isSuccess) {
               ezServices.foreach(_.initPost())
-              if (initRPC(ezConfig.ez.rpc, EZ.vertx)) {
+              if (initRPC(ezConfig.ez.rpc)) {
                 logSuccess("Start Success")
               } else {
                 logError(s"Start Fail : Core services start error")

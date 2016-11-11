@@ -8,6 +8,7 @@ import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager
 
 import scala.collection.JavaConversions._
 
+/*
 class HazelcastDistributedServiceProcessor extends DistributedServiceProcessor {
 
   private var dist: HazelcastInstance = _
@@ -160,3 +161,4 @@ class HazelcastDistributedServiceProcessor extends DistributedServiceProcessor {
   }
 
 }
+*/

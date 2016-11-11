@@ -33,6 +33,9 @@ object ConfigProcessor extends Logging {
           moduleConfig.ez.app = app
           moduleConfig.ez.module = module
           moduleConfig.ez.instance = moduleConfig.ez.instance + System.nanoTime()
+          if (moduleConfig.ez.cluster == null) {
+            moduleConfig.ez.cluster = basicConfig.ez.cluster
+          }
           if (moduleConfig.ez.cache == null) {
             moduleConfig.ez.cache = basicConfig.ez.cache
           }

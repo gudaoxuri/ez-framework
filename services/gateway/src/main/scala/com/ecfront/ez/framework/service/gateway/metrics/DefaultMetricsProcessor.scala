@@ -1,4 +1,4 @@
-package com.ecfront.ez.framework.core.metrics
+package com.ecfront.ez.framework.service.gateway.metrics
 
 import io.vertx.core.metrics.Measured
 
