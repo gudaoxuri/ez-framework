@@ -6,7 +6,7 @@ import com.rabbitmq.client._
 
 import scala.collection.JavaConversions._
 
-object ClusterManager {
+object RabbitMQClusterManager {
 
   private var conn: Connection = _
   private var channel: Channel = _

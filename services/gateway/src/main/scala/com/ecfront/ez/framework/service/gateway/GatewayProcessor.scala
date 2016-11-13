@@ -3,7 +3,7 @@ package com.ecfront.ez.framework.service.gateway
 import java.util.Date
 
 import com.ecfront.common.{JsonHelper, Resp}
-import com.ecfront.ez.framework.core.eventbus.VertxEventBusProcessor
+import com.ecfront.ez.framework.core.eventbus.RabbitMQProcessor
 import com.ecfront.ez.framework.core.helper.TimeHelper
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
 import com.ecfront.ez.framework.core.logger.Logging
@@ -30,7 +30,7 @@ trait GatewayProcessor extends Logging {
     EZAsyncInterceptorProcessor.process[EZAPIContext](GatewayInterceptor.category, context, {
       (context, param) =>
         val p = Promise[Resp[EZAPIContext]]()
-        val msg = EZ.eb.asInstanceOf[VertxEventBusProcessor].toAllowedMessage(body)
+        val msg = EZ.eb.asInstanceOf[RabbitMQProcessor].toAllowedMessage(body)
         val cxt = new EZContext
         cxt.id = EZ.createUUID
         cxt.startTime = TimeHelper.msf.format(new Date).toLong
@@ -42,14 +42,14 @@ trait GatewayProcessor extends Logging {
           cxt.optOrgCode = context.optInfo.get.organizationCode
         }
         val opt = new DeliveryOptions
-        opt.addHeader(EZ.eb.asInstanceOf[VertxEventBusProcessor].FLAG_CONTEXT, JsonHelper.toJsonString(cxt))
+        opt.addHeader(EZ.eb.asInstanceOf[RabbitMQProcessor].FLAG_CONTEXT, JsonHelper.toJsonString(cxt))
         context.parameters.foreach {
           arg =>
             opt.addHeader(arg._1, arg._2)
         }
         // 最长10分钟
         opt.setSendTimeout(600 * 1000)
-        EZ.eb.asInstanceOf[VertxEventBusProcessor].eb.send[String](
+        EZ.eb.asInstanceOf[RabbitMQProcessor].eb.send[String](
           EZ.eb.packageAddress(context.method, context.templateUri),
           msg, opt, new Handler[AsyncResult[Message[String]]] {
             override def handle(event: AsyncResult[Message[String]]): Unit = {

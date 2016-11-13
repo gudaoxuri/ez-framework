@@ -2,9 +2,8 @@ package com.ecfront.ez.framework.core
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.cache.RedisCacheProcessor
-import com.ecfront.ez.framework.core.cluster.ClusterManager
 import com.ecfront.ez.framework.core.config.{ConfigProcessor, EZConfig}
-import com.ecfront.ez.framework.core.eventbus.VertxEventBusProcessor
+import com.ecfront.ez.framework.core.eventbus.RabbitMQProcessor
 import com.ecfront.ez.framework.core.i18n.I18NProcessor
 import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.RPCProcessor
@@ -31,7 +30,7 @@ object EZManager extends Logging {
   }
 
   private def initEB(): Resp[Void] = {
-    val eb = new VertxEventBusProcessor()
+    val eb = new RabbitMQProcessor()
     EZ.eb = eb
     eb.init()
   }

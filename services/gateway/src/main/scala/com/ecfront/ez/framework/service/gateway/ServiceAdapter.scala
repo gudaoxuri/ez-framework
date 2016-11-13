@@ -125,12 +125,12 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
   System.setProperty("vertx.disableFileCPResolving", "true")
   System.setProperty("hazelcast.logging.type", "slf4j")
 
-  private[core] val FLAG_PERF_EVENT_LOOP_POOL_SIZE = "eventLoopPoolSize"
-  private[core] val FLAG_PERF_WORKER_POOL_SIZE = "workerPoolSize"
-  private[core] val FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE = "internalBlockingPoolSize"
-  private[core] val FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME = "maxEventLoopExecuteTime"
-  private[core] val FLAG_PERF_WORKER_EXECUTE_TIME = "maxWorkerExecuteTime"
-  private[core] val FLAG_PERF_WARNING_EXCEPTION_TIME = "warningExceptionTime"
+  private val FLAG_PERF_EVENT_LOOP_POOL_SIZE = "eventLoopPoolSize"
+  private val FLAG_PERF_WORKER_POOL_SIZE = "workerPoolSize"
+  private val FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE = "internalBlockingPoolSize"
+  private val FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME = "maxEventLoopExecuteTime"
+  private val FLAG_PERF_WORKER_EXECUTE_TIME = "maxWorkerExecuteTime"
+  private val FLAG_PERF_WARNING_EXCEPTION_TIME = "warningExceptionTime"
 
 
   /**
