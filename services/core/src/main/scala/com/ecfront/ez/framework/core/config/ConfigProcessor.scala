@@ -101,24 +101,6 @@ object ConfigProcessor extends Logging {
     if (ezConfig.ez.perf == null) {
       ezConfig.ez.perf = collection.mutable.Map[String, Any]()
     }
-    if (System.getProperty(EZManager.FLAG_PERF_EVENT_LOOP_POOL_SIZE) != null) {
-      ezConfig.ez.perf += EZManager.FLAG_PERF_EVENT_LOOP_POOL_SIZE -> System.getProperty(EZManager.FLAG_PERF_EVENT_LOOP_POOL_SIZE).toInt
-    }
-    if (System.getProperty(EZManager.FLAG_PERF_WORKER_POOL_SIZE) != null) {
-      ezConfig.ez.perf += EZManager.FLAG_PERF_WORKER_POOL_SIZE -> System.getProperty(EZManager.FLAG_PERF_WORKER_POOL_SIZE).toInt
-    }
-    if (System.getProperty(EZManager.FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE) != null) {
-      ezConfig.ez.perf += EZManager.FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE -> System.getProperty(EZManager.FLAG_PERF_INTERNAL_BLOCKING_POOL_SIZE).toInt
-    }
-    if (System.getProperty(EZManager.FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME) != null) {
-      ezConfig.ez.perf += EZManager.FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME -> System.getProperty(EZManager.FLAG_PERF_MAX_EVENT_LOOP_EXECUTE_TIME).toLong
-    }
-    if (System.getProperty(EZManager.FLAG_PERF_WORKER_EXECUTE_TIME) != null) {
-      ezConfig.ez.perf += EZManager.FLAG_PERF_WORKER_EXECUTE_TIME -> System.getProperty(EZManager.FLAG_PERF_WORKER_EXECUTE_TIME).toLong
-    }
-    if (System.getProperty(EZManager.FLAG_PERF_WARNING_EXCEPTION_TIME) != null) {
-      ezConfig.ez.perf += EZManager.FLAG_PERF_WARNING_EXCEPTION_TIME -> System.getProperty(EZManager.FLAG_PERF_WARNING_EXCEPTION_TIME).toLong
-    }
     ezConfig
   }
 }

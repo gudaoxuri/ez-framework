@@ -7,9 +7,9 @@ import javax.xml.ws.WebServiceException
 
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
 import com.ecfront.ez.framework.core.EZ
+import com.ecfront.ez.framework.core.helper.TimerHelper
 import com.ecfront.ez.framework.core.logger.Logging
 import com.fasterxml.jackson.databind.JsonNode
-import io.vertx.core.Handler
 
 trait TPSIService extends Logging {
 
@@ -146,20 +146,18 @@ trait TPSIService extends Logging {
 
   private val currEXInfo = collection.mutable.Map[String, collection.mutable.Map[String, (Date, String)]]()
   private val yyyy_MM_dd_HH_mm_ss_SSS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS")
-  EZ.vertx.setPeriodic(60000, new Handler[java.lang.Long] {
-    override def handle(e: java.lang.Long): Unit = {
-      val currExecCount = currEXInfo.map(_._2.size).sum
-      if (currExecCount != 0) {
-        val info = new StringBuffer(s"\r\n--------------Current exchange ($currExecCount) --------------\r\n")
-        currEXInfo.foreach {
-          map =>
-            map._2.foreach {
-              i =>
-                info.append(s"------ ${yyyy_MM_dd_HH_mm_ss_SSS.format(i._2._1)} : ${map._1}-${i._2._2}\r\n")
-            }
-        }
-        logger.info(info.toString)
+  TimerHelper.periodic(60L, {
+    val currExecCount = currEXInfo.map(_._2.size).sum
+    if (currExecCount != 0) {
+      val info = new StringBuffer(s"\r\n--------------Current exchange ($currExecCount) --------------\r\n")
+      currEXInfo.foreach {
+        map =>
+          map._2.foreach {
+            i =>
+              info.append(s"------ ${yyyy_MM_dd_HH_mm_ss_SSS.format(i._2._1)} : ${map._1}-${i._2._2}\r\n")
+          }
       }
+      logger.info(info.toString)
     }
   })
 

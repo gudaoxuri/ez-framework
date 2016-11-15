@@ -32,6 +32,16 @@ trait AuthStartupSpec extends GatewayStartupSpec {
          |  "ez": {
          |    "app": "",
          |    "module": "",
+         |    "cluster":{
+         |      "userName":"user",
+         |      "password":"password",
+         |      "host":"127.0.0.1",
+         |      "port":5672,
+         |      "virtualHost":"ez",
+         |      "defaultTopicExchangeName":"ex_topic",
+         |      "defaultRPCExchangeName":"ex_rpc",
+         |      "defaultQueueExchangeName":"ex_queue"
+         |    },
          |    "cache": $cacheConfig,
          |    "rpc": {
          |      "package": "$authRpcPackage"

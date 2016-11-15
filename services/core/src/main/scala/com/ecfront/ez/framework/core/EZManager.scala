@@ -2,6 +2,7 @@ package com.ecfront.ez.framework.core
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.cache.RedisCacheProcessor
+import com.ecfront.ez.framework.core.cluster.RabbitMQClusterManager
 import com.ecfront.ez.framework.core.config.{ConfigProcessor, EZConfig}
 import com.ecfront.ez.framework.core.eventbus.RabbitMQProcessor
 import com.ecfront.ez.framework.core.i18n.I18NProcessor
@@ -26,7 +27,7 @@ object EZManager extends Logging {
   }
 
   private def initMgr(config: Map[String, Any]): Resp[Void] = {
-    ClusterManager.init(config)
+    RabbitMQClusterManager.init(config)
   }
 
   private def initEB(): Resp[Void] = {

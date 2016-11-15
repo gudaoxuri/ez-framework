@@ -2,6 +2,16 @@
   "ez": {
     "app": "",
     "module": "scheduler",
+    "cluster":{
+      "userName":"user",
+      "password":"password",
+      "host":"127.0.0.1",
+      "port":5672,
+      "virtualHost":"ez",
+      "defaultTopicExchangeName":"ex_topic",
+      "defaultRPCExchangeName":"ex_rpc",
+      "defaultQueueExchangeName":"ex_queue"
+    },
     "cache": {
       "address": "127.0.0.1:6379"
     },

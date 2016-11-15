@@ -7,8 +7,7 @@ object TimerHelper {
 
   private val ex = new ScheduledThreadPoolExecutor(1)
 
-  def periodic(initialDelay: Long,
-               period: Long, fun: => Unit): Unit = {
+  def periodic(initialDelay: Long, period: Long, fun: => Unit): Unit = {
     val task = new Runnable {
       def run() = fun
     }

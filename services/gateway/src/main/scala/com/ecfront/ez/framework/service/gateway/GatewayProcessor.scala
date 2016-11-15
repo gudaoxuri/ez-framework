@@ -10,8 +10,6 @@ import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc._
 import com.ecfront.ez.framework.core.{EZ, EZContext}
 import com.ecfront.ez.framework.service.gateway.interceptor.{EZAPIContext, GatewayInterceptor}
-import io.vertx.core.eventbus.{DeliveryOptions, Message, ReplyException}
-import io.vertx.core.{AsyncResult, Handler}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Promise
@@ -41,44 +39,24 @@ trait GatewayProcessor extends Logging {
           cxt.optAccCode = context.optInfo.get.accountCode
           cxt.optOrgCode = context.optInfo.get.organizationCode
         }
-        val opt = new DeliveryOptions
-        opt.addHeader(EZ.eb.asInstanceOf[RabbitMQProcessor].FLAG_CONTEXT, JsonHelper.toJsonString(cxt))
-        context.parameters.foreach {
-          arg =>
-            opt.addHeader(arg._1, arg._2)
-        }
+        EZContext.setContext(cxt)
         // 最长10分钟
-        opt.setSendTimeout(600 * 1000)
-        EZ.eb.asInstanceOf[RabbitMQProcessor].eb.send[String](
-          EZ.eb.packageAddress(context.method, context.templateUri),
-          msg, opt, new Handler[AsyncResult[Message[String]]] {
-            override def handle(event: AsyncResult[Message[String]]): Unit = {
-              if (event.succeeded()) {
-                context.executeResult =
-                  if (event.result().headers().contains(RPCProcessor.RESP_TYPE_FLAG)) {
-                    event.result().headers().get(RPCProcessor.RESP_TYPE_FLAG) match {
-                      case "DownloadFile" => JsonHelper.toObject[Resp[DownloadFile]](event.result().body())
-                      case "ReqFile" => JsonHelper.toObject[Resp[ReqFile]](event.result().body())
-                      case "Raw" => JsonHelper.toObject[Resp[Raw]](event.result().body())
-                      case "RespRedirect" => JsonHelper.toObject[Resp[RespRedirect]](event.result().body())
-                      case _ => event.result().body()
-                    }
-                  } else {
-                    event.result().body()
-                  }
-                p.success(Resp.success(context))
-              } else {
-                event.cause() match {
-                  case e: ReplyException =>
-                    logger.warn(s"[Gateway] API send error : [${context.templateUri}] : ${event.cause().getMessage} ")
-                    p.success(Resp.notImplemented(s"[Gateway] API send error : [${context.templateUri}] : not implementation"))
-                  case e: Throwable =>
-                    logger.error(s"[Gateway] API send error : [${context.templateUri}] : ${event.cause().getMessage} ", event.cause())
-                    p.success(Resp.serverError(s"[Gateway] API send error : [${context.templateUri}] : ${event.cause().getMessage} "))
+        EZ.eb.ackAsync[Resp[Any]](EZ.eb.packageAddress(context.method, context.templateUri), msg, context.parameters, 600 * 1000) {
+          (replyMessage, replyHeader) =>
+            context.executeResult =
+              if (replyHeader.contains(RPCProcessor.RESP_TYPE_FLAG)) {
+                replyHeader(RPCProcessor.RESP_TYPE_FLAG) match {
+                  case "DownloadFile" => JsonHelper.toObject[Resp[DownloadFile]](replyMessage)
+                  case "ReqFile" => JsonHelper.toObject[Resp[ReqFile]](replyMessage)
+                  case "Raw" => JsonHelper.toObject[Resp[Raw]](replyMessage)
+                  case "RespRedirect" => JsonHelper.toObject[Resp[RespRedirect]](replyMessage)
+                  case _ => replyMessage
                 }
+              } else {
+                replyMessage
               }
-            }
-          })
+            p.success(Resp.success(context))
+        }
         p.future
     }).onSuccess {
       case resp =>

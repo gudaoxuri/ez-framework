@@ -85,7 +85,7 @@ object HttpClientProcessor extends Logging {
   private[core] def request(methodStr: Method, url: String, body: Any, contentType: String, header: Map[String, String], retry: Int = 0): String = {
     val method = methodStr match {
       case Method.GET => new HttpGet(url)
-      case Method.POST => new HttpPost()(url)
+      case Method.POST => new HttpPost(url)
       case Method.PUT => new HttpPut(url)
       case Method.DELETE => new HttpDelete(url)
     }
@@ -125,7 +125,9 @@ object HttpClientProcessor extends Logging {
               } else {
                 reqFile.fileName
               }
-              method.setHeader("Content-Disposition", "form-data; name=\"" + reqFile.fieldName + "\"; filename=\"" + finalFileName + "\"\r\n")
+              method.setHeader("Content-Disposition", "form-data; name=\"" + reqFile.fieldName + "\"; filename=\"" + finalFileName)
+              /*method.setHeader("Content-Type", "application/octet-stream")*/
+              method.setHeader("Content-Transfer-Encoding", "binary")
               /*              buffer.appendString("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + finalFileName + "\"\r\n")
                             buffer.appendString("Content-Type: application/octet-stream\r\n")
                             buffer.appendString("Content-Transfer-Encoding: binary\r\n")*/

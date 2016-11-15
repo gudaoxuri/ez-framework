@@ -2,6 +2,16 @@
   "ez": {
     "app": "",
     "module": "",
+    "cluster":{
+      "userName":"user",
+      "password":"password",
+      "host":"127.0.0.1",
+      "port":5672,
+      "virtualHost":"ez",
+      "defaultTopicExchangeName":"ex_topic",
+      "defaultRPCExchangeName":"ex_rpc",
+      "defaultQueueExchangeName":"ex_queue"
+    },
     "cache": {
       "address": "127.0.0.1:6379"
     },
@@ -15,7 +25,7 @@
         "wsPort": 8081,
         "monitor": {
           "slow": {
-            "time": 10,  // 最慢时间，单位毫秒
+            "time": 100,  // 最慢时间，单位毫秒
             "includes": [],
             "excludes": []
           }

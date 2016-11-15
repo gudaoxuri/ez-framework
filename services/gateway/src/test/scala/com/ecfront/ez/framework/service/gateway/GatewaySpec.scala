@@ -21,6 +21,16 @@ class GatewaySpec extends BasicSpec {
          |  "ez": {
          |    "app": "",
          |    "module": "",
+         |    "cluster":{
+         |      "userName":"user",
+         |      "password":"password",
+         |      "host":"127.0.0.1",
+         |      "port":5672,
+         |      "virtualHost":"ez",
+         |      "defaultTopicExchangeName":"ex_topic",
+         |      "defaultRPCExchangeName":"ex_rpc",
+         |      "defaultQueueExchangeName":"ex_queue"
+         |    },
          |    "cache": {
          |      "address": "127.0.0.1:6379"
          |    },
@@ -64,6 +74,16 @@ class GatewaySpec extends BasicSpec {
          |  "ez": {
          |    "app": "",
          |    "module": "",
+         |    "cluster":{
+         |      "userName":"user",
+         |      "password":"password",
+         |      "host":"127.0.0.1",
+         |      "port":5672,
+         |      "virtualHost":"ez",
+         |      "defaultTopicExchangeName":"ex_topic",
+         |      "defaultRPCExchangeName":"ex_rpc",
+         |      "defaultQueueExchangeName":"ex_queue"
+         |    },
          |    "cache": {
          |      "address": "127.0.0.1:6379"
          |    },
@@ -82,10 +102,10 @@ class GatewaySpec extends BasicSpec {
          |  }
          |}
        """.stripMargin)
-    addAuthInfo()
+   addAuthInfo()
     simpleRPCTest()
     xmlTest()
-    fileTest()
+    /*fileTest()*/
     authTest()
     // httpsTest("127.0.0.1", 8081)
     println("====================\r\n性能测试\r\n====================")

@@ -1,6 +1,9 @@
 package com.ecfront.ez.framework.core.cluster
 
+import java.util.concurrent.CopyOnWriteArrayList
+
 import com.ecfront.common.Resp
+import com.ecfront.ez.framework.core.EZ
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client._
 
@@ -9,7 +12,7 @@ import scala.collection.JavaConversions._
 object RabbitMQClusterManager {
 
   private var conn: Connection = _
-  private var channel: Channel = _
+  private val channels: CopyOnWriteArrayList[Channel] = new CopyOnWriteArrayList[Channel]()
 
   private var defaultTopicExchangeName: String = _
   private var defaultRPCExchangeName: String = _
@@ -36,21 +39,38 @@ object RabbitMQClusterManager {
       defaultQueueExchangeName = config("defaultQueueExchangeName").asInstanceOf[String]
     }
     conn = factory.newConnection()
-    channel = conn.createChannel()
     sys.addShutdownHook {
       close()
     }
     Resp.success(null)
   }
 
+  private def getChannel(): Channel = {
+    val channel = conn.createChannel()
+    channels += channel
+    channel
+  }
+
+  private def closeChannel(): Unit = {
+    channels.foreach {
+      channel =>
+        if (channel.isOpen) {
+          channel.close()
+        }
+    }
+  }
+
   def publish(topic: String, message: String, args: Map[String, String], exchangeName: String = defaultTopicExchangeName): Unit = {
-    channel.exchangeDeclare(exchangeName, "topic")
+    val channel = getChannel()
+    channel.exchangeDeclare(exchangeName, "direct")
     val opt = new AMQP.BasicProperties.Builder().headers(args).build()
     channel.basicPublish(exchangeName, topic, opt, message.getBytes())
+    channel.close()
   }
 
   def subscribe(topic: String, exchangeName: String = defaultTopicExchangeName)(receivedFun: (String, Map[String, String]) => Unit): Unit = {
-    channel.exchangeDeclare(exchangeName, "topic")
+    val channel = getChannel()
+    channel.exchangeDeclare(exchangeName, "direct")
     val queueName = channel.queueDeclare().getQueue()
     channel.queueBind(queueName, exchangeName, topic)
     val consumer = new DefaultConsumer(channel) {
@@ -65,12 +85,23 @@ object RabbitMQClusterManager {
     channel.basicConsume(queueName, true, consumer)
   }
 
-  def request(queueName: String, message: String, args: Map[String, String] = Map(), exchangeName: String = defaultQueueExchangeName): Unit = {
+  def request(address: String, message: String, args: Map[String, String] = Map(), exchangeName: String = defaultQueueExchangeName): Unit = {
+    val channel = getChannel()
+    channel.exchangeDeclare(exchangeName, "direct")
+    channel.queueDeclare(address, true, false, false, null)
     val opt = new AMQP.BasicProperties.Builder().headers(args).build()
-    channel.basicPublish(exchangeName, queueName, opt, message.getBytes())
+    channel.basicPublish("", address, opt, message.getBytes())
+    channel.close()
   }
 
-  def response(queueName: String)(receivedFun: (String, Map[String, String]) => Unit): Unit = {
+  def response(address: String, exchangeName: String = defaultQueueExchangeName)(receivedFun: (String, Map[String, String]) => Unit): Unit = {
+    val channel = getChannel()
+    channel.exchangeDeclare(exchangeName, "direct")
+    channel.queueDeclare(address, true, false, false, null)
+    // TODO queue
+    /*val queueName = channel.queueDeclare().getQueue()
+    channel.queueBind(queueName, exchangeName, address)*/
+    channel.basicQos(1)
     val consumer = new DefaultConsumer(channel) {
       override def handleDelivery(consumerTag: String, envelope: Envelope, properties: BasicProperties, body: Array[Byte]): Unit = {
         val message = new String(body, "UTF-8")
@@ -80,15 +111,14 @@ object RabbitMQClusterManager {
         }.toMap)
       }
     }
-    channel.basicConsume(queueName, true, consumer)
+    channel.basicConsume(address, true, consumer)
   }
 
   def ack(address: String, message: String, args: Map[String, String] = Map(), timeout: Long = 30 * 1000): (String, Map[String, String]) = {
+    val channel = getChannel()
     val replyQueueName = channel.queueDeclare().getQueue
     val consumer = new QueueingConsumer(channel)
     channel.basicConsume(replyQueueName, true, consumer)
-    var message: String = _
-    var header: Map[String, String] = _
     val corrId = java.util.UUID.randomUUID().toString
     val opt = new BasicProperties
     .Builder()
@@ -97,43 +127,93 @@ object RabbitMQClusterManager {
       .replyTo(replyQueueName)
       .build()
     channel.basicPublish("", address, opt, message.getBytes())
-    while (true) {
-      val delivery = consumer.nextDelivery()
+    var replyMessage: String = null
+    var replyHeader: Map[String, String] = null
+    var hasReply = false
+    while (!hasReply) {
+      val delivery = consumer.nextDelivery(timeout)
       if (delivery.getProperties.getCorrelationId.equals(corrId)) {
-        header = delivery.getProperties.getHeaders.map {
+        hasReply = true
+        replyHeader = delivery.getProperties.getHeaders.map {
           header =>
             header._1 -> header._2.toString
         }.toMap
-        message = new String(delivery.getBody)
+        replyMessage = new String(delivery.getBody)
       }
     }
-    (message, header)
+    channel.close()
+    (replyMessage, replyHeader)
+  }
+
+  def ackAsync(address: String, message: String, args: Map[String, String] = Map(), timeout: Long = 30 * 1000)(replyFun: => (String, Map[String, String]) => Unit): Unit = {
+    val channel = getChannel()
+    val replyQueueName = channel.queueDeclare().getQueue
+    val consumer = new QueueingConsumer(channel)
+    channel.basicConsume(replyQueueName, true, consumer)
+    val corrId = java.util.UUID.randomUUID().toString
+    val opt = new BasicProperties
+    .Builder()
+      .correlationId(corrId)
+      .headers(args)
+      .replyTo(replyQueueName)
+      .build()
+    channel.basicPublish("", address, opt, message.getBytes())
+    EZ.execute.execute(new Runnable {
+      override def run(): Unit = {
+        var replyMessage: String = null
+        var replyHeader: Map[String, String] = null
+        var hasReply = false
+        while (!hasReply) {
+          val delivery = consumer.nextDelivery(timeout)
+          if (delivery.getProperties.getCorrelationId.equals(corrId)) {
+            hasReply = true
+            replyHeader = delivery.getProperties.getHeaders.map {
+              header =>
+                header._1 -> header._2.toString
+            }.toMap
+            replyMessage = new String(delivery.getBody)
+          }
+        }
+        replyFun(replyMessage, replyHeader)
+        channel.close()
+      }
+    })
   }
 
   def reply(address: String)(receivedFun: (String, Map[String, String]) => (String, Map[String, String])): Unit = {
+    val channel = getChannel()
     channel.queueDeclare(address, false, false, false, null)
     channel.basicQos(1)
     val consumer = new QueueingConsumer(channel)
     channel.basicConsume(address, false, consumer)
-    while (true) {
-      val delivery = consumer.nextDelivery()
-      val props = delivery.getProperties()
-      val message = new String(delivery.getBody())
-      val result = receivedFun(message, delivery.getProperties.getHeaders.map {
-        header =>
-          header._1 -> header._2.toString
-      }.toMap)
-      channel.basicPublish("", props.getReplyTo(), new BasicProperties
-      .Builder()
-        .headers(result._2)
-        .correlationId(props.getCorrelationId())
-        .build(), result._1.getBytes)
-      channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false)
-    }
+    new Thread(new Runnable {
+      override def run(): Unit = {
+        try {
+          while (true) {
+            val delivery = consumer.nextDelivery()
+            val props = delivery.getProperties()
+            val message = new String(delivery.getBody())
+            val result = receivedFun(message, delivery.getProperties.getHeaders.map {
+              header =>
+                header._1 -> header._2.toString
+            }.toMap)
+            channel.basicPublish("", props.getReplyTo(), new BasicProperties
+            .Builder()
+              .headers(result._2)
+              .correlationId(props.getCorrelationId())
+              .build(), result._1.getBytes)
+            channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false)
+          }
+        } catch {
+          case e: ShutdownSignalException =>
+          case e: Throwable => e.printStackTrace()
+        }
+      }
+    }).start()
   }
 
   def close(): Unit = {
-    channel.close()
+    closeChannel()
     conn.close()
   }
 

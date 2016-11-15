@@ -15,6 +15,7 @@ class JDBCSpec extends MockStartupSpec {
     entityTest()
     intTest()
     txTest()
+    testSP()
   }
 
   def baseTest(): Unit = {
@@ -302,6 +303,19 @@ class JDBCSpec extends MockStartupSpec {
 
   def test3(): Resp[Void] = {
     JDBCProcessor.update(s"""INSERT INTO tx_test (name,age) VALUES (? ,?)""", List("王五", 234))
+  }
+
+  def testSP(): Unit = {
+    JDBCProcessor.ddl("""DROP PROCEDURE IF EXISTS sp_test""")
+    JDBCProcessor.ddl(
+      """
+        |CREATE PROCEDURE sp_test(IN num INT,OUT new_num INT)
+        |BEGIN
+        |	SET new_num := num + 10;
+        |END
+      """.stripMargin)
+    val result = JDBCProcessor.sp("CALL ez.sp_test(?,?)", List((10, 1)), List(("newNum", classOf[Int], 2)))
+    assert(result.body("newNum").asInstanceOf[Int] == 20)
   }
 
 }

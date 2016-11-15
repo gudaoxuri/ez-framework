@@ -6,7 +6,6 @@ import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.Method.Method
 import com.ecfront.ez.framework.core.rpc.apidoc.APIDocProcessor
-import io.vertx.core.Vertx
 
 object RPCProcessor extends Logging {
 
@@ -24,16 +23,15 @@ object RPCProcessor extends Logging {
   private val fieldLabels = collection.mutable.Map[String, Map[String, String]]()
   private val requireFieldNames = collection.mutable.Map[String, List[String]]()
 
-  private[core] def init(vertx: Vertx, config: Map[String, Any]): Resp[Void] = {
+  private[core] def init(config: Map[String, Any]): Resp[Void] = {
     val basePackage = config("package").asInstanceOf[String]
     printBodyLimit = config.getOrElse("printBodyLimit", 4000).asInstanceOf[Int]
-    APIDocProcessor.init(config.getOrElse("docPath",null).asInstanceOf[String])
+    APIDocProcessor.init(config.getOrElse("docPath", null).asInstanceOf[String])
     AutoBuildingProcessor.autoBuilding(basePackage)
     address.foreach {
       addr =>
         logger.info(s"[RPC] Register address : $addr")
     }
-    HttpClientProcessor.init(vertx)
     logger.info("[RPC] Init successful")
     Resp.success(null)
   }
@@ -47,31 +45,31 @@ object RPCProcessor extends Logging {
     method match {
       case m if m == Method.GET || m == Method.POST || m == Method.PUT || m == Method.DELETE =>
         EZ.eb.publish(RPC_API_URL_FLAG, APIDTO(method.toString, path))
-        (formatPath, EZ.eb.reply[E](formatPath, bodyClass) {
+        EZ.eb.reply[E](formatPath, bodyClass) {
           (message, args) =>
             (execute[E](bodyClass, fun, message, args), Map(RESP_TYPE_FLAG -> respType))
-        })
+        }
       case Method.WS =>
         EZ.eb.publish(RPC_API_URL_FLAG, APIDTO(method.toString, path))
-        (formatPath, EZ.eb.reply[E](formatPath, bodyClass) {
+        EZ.eb.reply[E](formatPath, bodyClass) {
           (message, args) =>
             (execute[E](bodyClass, fun, message, args), Map(RESP_TYPE_FLAG -> respType))
-        })
+        }
       case Method.PUB_SUB =>
-        (formatPath, EZ.eb.subscribe[E](formatPath, bodyClass) {
+        EZ.eb.subscribe[E](formatPath, bodyClass) {
           (message, args) =>
             execute[E](bodyClass, fun, message, args)
-        })
+        }
       case Method.REQ_RESP =>
-        (formatPath, EZ.eb.response[E](formatPath, bodyClass) {
+        EZ.eb.response[E](formatPath, bodyClass) {
           (message, args) =>
             execute[E](bodyClass, fun, message, args)
-        })
+        }
       case Method.ACK =>
-        (formatPath, EZ.eb.reply[E](formatPath, bodyClass) {
+        EZ.eb.reply[E](formatPath, bodyClass) {
           (message, args) =>
             (execute[E](bodyClass, fun, message, args), Map(RESP_TYPE_FLAG -> respType))
-        })
+        }
     }
   }
 

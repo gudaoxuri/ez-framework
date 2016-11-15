@@ -14,7 +14,7 @@ trait MetricsProcessor extends Logging {
   private var metricsService: MetricsService = _
   private var vertx: Vertx = _
 
-  private[core] def register(_vertx: Vertx): Resp[Void] = {
+  private[gateway] def register(_vertx: Vertx): Resp[Void] = {
     vertx = _vertx
     metricsService = MetricsService.create(vertx)
     Resp.success(null)

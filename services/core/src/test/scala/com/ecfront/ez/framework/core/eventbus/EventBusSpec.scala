@@ -10,7 +10,7 @@ class EventBusSpec extends MockStartupSpec {
 
   test("EventBus测试") {
     // pub-sub
-    var counter = new CountDownLatch(3)
+    var counter = new CountDownLatch(7)
     EZ.eb.subscribe[String]("a") {
       (message, _) =>
         counter.countDown()
@@ -23,7 +23,7 @@ class EventBusSpec extends MockStartupSpec {
         EZ.eb.subscribe[TestObj]("aa") {
           (message, _) =>
             counter.countDown()
-            logger.info(">>>>>>>>>>>>>>>>>>>> sub")
+            logger.info(">>>>>>>>>>>>>>>>>>>> sub1")
             assert(message.f1 == "字段1" && message.f2 == 0.1)
         }
       }
@@ -33,50 +33,51 @@ class EventBusSpec extends MockStartupSpec {
         EZ.eb.subscribe[TestObj]("aa") {
           (message, _) =>
             counter.countDown()
-            logger.info(">>>>>>>>>>>>>>>>>>>> sub")
+            logger.info(">>>>>>>>>>>>>>>>>>>> sub2")
+            assert(message.f1 == "字段1" && message.f2 == 0.1)
+        }
+      }
+    }).start()
+    new Thread(new Runnable {
+      override def run(): Unit = {
+        EZ.eb.subscribe[TestObj]("aa") {
+          (message, _) =>
+            counter.countDown()
+            logger.info(">>>>>>>>>>>>>>>>>>>> sub3")
             assert(message.f1 == "字段1" && message.f2 == 0.1)
         }
       }
     }).start()
     EZ.eb.publish("aa", TestObj("字段1", 0.1))
+    EZ.eb.publish("aa", TestObj("字段1", 0.1))
     counter.await()
 
     // req-resp
-    counter = new CountDownLatch(3)
-    EZ.eb.response[String]("b") {
-      (message, _) =>
-        assert(message == "456")
-        counter.countDown()
+    counter = new CountDownLatch(100)
+    new Thread(new Runnable {
+      override def run(): Unit = {
+        EZ.eb.response[TestObj]("bb") {
+          (message, _) =>
+            logger.info(">>>>>>>>>>>>>>>>>>>> resp" + message.f2)
+            assert(message.f1 == "字段1")
+            counter.countDown()
+        }
+      }
+    }).start()
+    new Thread(new Runnable {
+      override def run(): Unit = {
+        EZ.eb.response[TestObj]("bb") {
+          (message, _) =>
+            logger.info(">>>>>>>>>>>>>>>>>>>> resp" + message.f2)
+            assert(message.f1 == "字段1")
+            counter.countDown()
+        }
+      }
+    }).start()
+    for (i <- 0 to 99) {
+      EZ.eb.request("bb", TestObj("字段1", i))
     }
-    EZ.eb.request("b", "456")
-    EZ.eb.request("bb", TestObj("字段1", 0.1))
-    Thread.sleep(100)
-    EZ.eb.request("bb", TestObj("字段1", 0.2))
-    var executingMessages = EZ.cache.hgetAll(s"ez:eb:executing:${EZ.eb.packageAddress("REQ_RESP", "bb")}")
-    assert(executingMessages.size == 2 && executingMessages.head._2 == """{"f1":"字段1","f2":0.2}""")
-    new Thread(new Runnable {
-      override def run(): Unit = {
-        EZ.eb.response[TestObj]("bb") {
-          (message, _) =>
-            logger.info(">>>>>>>>>>>>>>>>>>>> resp")
-            assert(message.f1 == "字段1")
-            counter.countDown()
-        }
-      }
-    }).start()
-    new Thread(new Runnable {
-      override def run(): Unit = {
-        EZ.eb.response[TestObj]("bb") {
-          (message, _) =>
-            logger.info(">>>>>>>>>>>>>>>>>>>> resp")
-            assert(message.f1 == "字段1")
-            counter.countDown()
-        }
-      }
-    }).start()
     counter.await()
-    executingMessages = EZ.cache.hgetAll("ez:eb:executing:bb")
-    assert(executingMessages.isEmpty)
 
     // ack
     new Thread(new Runnable {
@@ -90,7 +91,8 @@ class EventBusSpec extends MockStartupSpec {
     new Thread(new Runnable {
       override def run(): Unit = {
         while (true) {
-          assert(EZ.eb.ack[String]("test", "a")._1 == "a")
+          val result = EZ.eb.ack[String]("test", "a")
+          assert(result._1 == "a")
         }
       }
     }).start()

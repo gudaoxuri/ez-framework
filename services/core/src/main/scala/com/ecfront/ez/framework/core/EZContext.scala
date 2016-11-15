@@ -17,7 +17,7 @@ class EZContext {
   @BeanProperty var token: String = _
   @BeanProperty var optAccCode: String = _
   @BeanProperty var optOrgCode: String = _
-  @BeanProperty var trace:collection.mutable.Map[String,String] = _
+  @BeanProperty var trace: collection.mutable.Map[String, String] = _
 
   lazy val optInfo: Option[OptInfo] = {
     if (token != null && token.nonEmpty) {
@@ -53,7 +53,7 @@ object EZContext {
     cxt
   }
 
-  private[core] def setContext(context: EZContext): Unit = {
+  private[ecfront] def setContext(context: EZContext): Unit = {
     if (context.token == null) {
       context.token = ""
     }

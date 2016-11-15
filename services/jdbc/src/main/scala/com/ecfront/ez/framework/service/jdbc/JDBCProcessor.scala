@@ -14,6 +14,7 @@ import org.apache.commons.dbutils.QueryRunner
 import org.apache.commons.dbutils.handlers._
 
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
 
 /**
   * JDBC 操作
@@ -41,6 +42,10 @@ object JDBCProcessor extends Logging {
 
   def ddl(ddl: String): Resp[Void] = {
     defaultProcessor.ddl(ddl)
+  }
+
+  def sp(sql: String, inParameters: List[(Any, Int)], outParameters: List[(String, Class[_], Int)]): Resp[Map[String, Any]] = {
+    defaultProcessor.sp(sql, inParameters, outParameters)
   }
 
   def insert(sql: String, parameters: List[Any]): Resp[String] = {
@@ -288,6 +293,92 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
       Resp.success(null)
     }, ddl, List(), _conn, _autoClose)
   }
+
+  def sp(sql: String, inParameters: List[(Any, Int)], outParameters: List[(String, Class[_], Int)]): Resp[Map[String, Any]] = {
+    val (_conn, _autoClose) = getConnection
+    execute[Map[String, Any]]("sp", {
+      val callStmt = _conn.prepareCall(sql)
+      if (inParameters != null && inParameters.nonEmpty) {
+        inParameters.foreach {
+          param => param._1 match {
+            case p: String => callStmt.setString(param._2, p)
+            case p: Double => callStmt.setDouble(param._2, p)
+            case p: Float => callStmt.setFloat(param._2, p)
+            case p: Boolean => callStmt.setBoolean(param._2, p)
+            case p: BigDecimal => callStmt.setBigDecimal(param._2, p.bigDecimal)
+            case p: Long => callStmt.setLong(param._2, p)
+            case p: Int => callStmt.setInt(param._2, p)
+            case p: Short => callStmt.setShort(param._2, p)
+            case p: Date => callStmt.setDate(param._2, new java.sql.Date(p.getTime))
+            case p: Byte => callStmt.setByte(param._2, p)
+            case _ => logger.error("Not support type " + param._1)
+          }
+        }
+      }
+      if (outParameters != null && outParameters.nonEmpty) {
+        outParameters.foreach {
+          param => param._2 match {
+            case p if p == classOf[String] => callStmt.registerOutParameter(param._3, Types.VARCHAR)
+            case p if p == classOf[Double] => callStmt.registerOutParameter(param._3, Types.DOUBLE)
+            case p if p == classOf[Float] => callStmt.registerOutParameter(param._3, Types.FLOAT)
+            case p if p == classOf[Boolean] => callStmt.registerOutParameter(param._3, Types.BOOLEAN)
+            case p if p == classOf[BigDecimal] => callStmt.registerOutParameter(param._3, Types.DECIMAL)
+            case p if p == classOf[Long] => callStmt.registerOutParameter(param._3, Types.BIGINT)
+            case p if p == classOf[Int] => callStmt.registerOutParameter(param._3, Types.INTEGER)
+            case p if p == classOf[Short] => callStmt.registerOutParameter(param._3, Types.SMALLINT)
+            case p if p == classOf[Date] => callStmt.registerOutParameter(param._3, Types.DATE)
+            case p if p == classOf[List[_]] => callStmt.registerOutParameter(param._3, Types.ARRAY)
+            case p if p == classOf[Object] => callStmt.registerOutParameter(param._3, Types.REF_CURSOR)
+            case _ => logger.error("Not support type " + param._1)
+          }
+        }
+      }
+      callStmt.execute()
+      if (outParameters != null && outParameters.nonEmpty) {
+        val body = outParameters.map {
+          param =>
+            val value = param._2 match {
+              case p if p == classOf[String] => callStmt.getString(param._3)
+              case p if p == classOf[Double] => callStmt.getDouble(param._3)
+              case p if p == classOf[Float] => callStmt.getFloat(param._3)
+              case p if p == classOf[Boolean] => callStmt.getBoolean(param._3)
+              case p if p == classOf[BigDecimal] => callStmt.getBigDecimal(param._3)
+              case p if p == classOf[Long] => callStmt.getLong(param._3)
+              case p if p == classOf[Int] => callStmt.getInt(param._3)
+              case p if p == classOf[Short] => callStmt.getShort(param._3)
+              case p if p == classOf[Date] => new Date(callStmt.getDate(param._3).getTime)
+              case p if p == classOf[Byte] => callStmt.getByte(param._3)
+              case p if p == classOf[List[_]] => callStmt.getArray(param._3)
+              case p if p == classOf[Object] =>
+                val rs = callStmt.getObject(param._3).asInstanceOf[ResultSet]
+                val colunmCount = rs.getMetaData().getColumnCount()
+                val colNameArr = ArrayBuffer[String]()
+                val colTypeArr = ArrayBuffer[String]()
+                for (i <- 0 until colunmCount) {
+                  colNameArr += rs.getMetaData.getColumnName(i + 1)
+                  colTypeArr += rs.getMetaData.getColumnTypeName(i + 1)
+                }
+                val list = ArrayBuffer[collection.mutable.Map[String, Any]]()
+                while (rs.next()) {
+                  val map = collection.mutable.Map[String, Any]()
+                  for (i <- 0 until colunmCount) {
+                    // TODO type
+                    map += colNameArr(i) -> rs.getString(i + 1)
+                  }
+                  list += map
+                }
+                list
+              case _ => logger.error("Not support type " + param._1)
+            }
+            param._1 -> value
+        }.toMap
+        Resp.success(body)
+      } else {
+        Resp.success(null)
+      }
+    }, sql, inParameters, _conn, _autoClose)
+  }
+
 
   def insert(sql: String, parameters: List[Any]): Resp[String] = {
     val (_conn, _autoClose) = getConnection

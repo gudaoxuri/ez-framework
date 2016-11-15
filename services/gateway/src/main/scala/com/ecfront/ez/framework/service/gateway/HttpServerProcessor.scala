@@ -166,35 +166,31 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
             .end()
         case r: Resp[_] if r && r.body.isInstanceOf[Raw] =>
           returnContent(response, accept, r.body.asInstanceOf[Raw].raw.toString)
+        case r: Resp[_] if contentType.contains("xml") =>
+          // Xml
+          val ret = if (r) {
+            if (r.body == null) {
+              ""
+            } else {
+              r.body.asInstanceOf[String]
+            }
+          } else {
+            s"""<?xml version="1.0" encoding="UTF-8"?>
+                |<xml>
+                | <error>
+                |  <code>${r.code}</code>
+                |  <message>${r.message}</message>
+                | </error>
+                |</xml>
+                 """.stripMargin
+          }
+          returnContent(response, accept, ret)
         case r: Resp[_] =>
           // gateway 本身生成的对象，如认证失败
           returnContent(response, accept, JsonHelper.toJsonString(r))
         case _ =>
-          val ret = contentType match {
-            case t if t.contains("xml") =>
-              // Xml
-              val resp = JsonHelper.toObject[Resp[String]](result.asInstanceOf[String])
-              if (resp) {
-                if (resp.body == null) {
-                  ""
-                } else {
-                  resp.body
-                }
-              } else {
-                s"""<?xml version="1.0" encoding="UTF-8"?>
-                    |<xml>
-                    | <error>
-                    |  <code>${resp.code}</code>
-                    |  <message>${resp.message}</message>
-                    | </error>
-                    |</xml>
-                 """.stripMargin
-              }
-            case _ =>
-              // Json
-              result.asInstanceOf[String]
-          }
-          returnContent(response, accept, ret)
+          // Json
+          returnContent(response, accept, result.asInstanceOf[String])
       }
     } catch {
       case e: Throwable =>

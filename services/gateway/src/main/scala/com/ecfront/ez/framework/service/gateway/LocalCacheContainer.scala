@@ -260,7 +260,7 @@ object LocalCacheContainer extends Logging {
     newParameters ++= parameters
     // 格式化path
     val formatPath = if (path.endsWith("/")) path else path + "/"
-    var urlTemplate = formatPath
+    var urlTemplate:String=null
     if (routerContainer.contains(method.toUpperCase)) {
       if (routerContainer(method.toUpperCase).contains(formatPath)) {
         urlTemplate = formatPath

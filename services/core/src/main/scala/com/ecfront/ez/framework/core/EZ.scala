@@ -9,7 +9,6 @@ import com.ecfront.ez.framework.core.config.EZConfig
 import com.ecfront.ez.framework.core.dist.DistributedServiceProcessor
 import com.ecfront.ez.framework.core.eventbus.EventBusProcessor
 import com.ecfront.ez.framework.core.logger.Logging
-import com.ecfront.ez.framework.service.gateway.metrics.MetricsProcessor
 import redis.clients.jedis.JedisCommands
 
 /**

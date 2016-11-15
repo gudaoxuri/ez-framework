@@ -6,6 +6,7 @@ import com.ecfront.ez.framework.core.rpc.{Method, RPCProcessor}
 
 trait EventBusProcessor extends Logging {
 
+  private[ecfront] val FLAG_CONTEXT = "__ez_context__"
   val ADDRESS_SPLIT_FLAG = "@"
 
   def publish(address: String, message: Any, args: Map[String, String] = Map()): Unit = {
@@ -40,6 +41,15 @@ trait EventBusProcessor extends Logging {
 
   protected def doAck[E: Manifest](address: String, message: Any, args: Map[String, String], timeout: Long): (E, Map[String, String])
 
+  def ackAsync[E: Manifest](address: String, message: Any, args: Map[String, String] = Map(), timeout: Long = 30 * 1000)(replyFun: => (E, Map[String, String]) => Unit): Unit = {
+    val addr = packageAddress(Method.ACK.toString, address)
+    val msg = toAllowedMessage(message)
+    logger.trace(s"[EB] ACK async a message [$addr] : $args > ${RPCProcessor.cutPrintShow(msg.toString)} ")
+    doAckAsync[E](replyFun, addr, msg, args, timeout)
+  }
+
+  protected def doAckAsync[E: Manifest](replyFun: => (E, Map[String, String]) => Unit, address: String, message: Any, args: Map[String, String], timeout: Long): Unit
+
   def subscribe[E: Manifest](address: String, reqClazz: Class[E] = null)(receivedFun: (E, Map[String, String]) => Unit): Unit = {
     doSubscribe[E](packageAddress(Method.PUB_SUB.toString, address), reqClazz)(receivedFun)
   }
@@ -66,7 +76,6 @@ trait EventBusProcessor extends Logging {
       defaultMethod + ADDRESS_SPLIT_FLAG + formatPath
     }
   }
-
 
   private[ecfront] def toAllowedMessage(message: Any): Any = {
     message match {
@@ -102,6 +111,5 @@ trait EventBusProcessor extends Logging {
       }
     }
   }
-
 
 }
