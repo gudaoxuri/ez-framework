@@ -49,10 +49,10 @@ class GatewaySpec extends BasicSpec {
          |            "excludes": []
          |          }
          |        },
-         |        "antiDDoS":{
+         |        /*"antiDDoS":{
          |          "reqRatePerMinute":100,
          |          "illegalReqRatePerMinute":100
-         |        },
+         |        },*/
          |        "metrics":{},
          |        "publicUriPrefix":"/public/",
          |        "resourcePath": "c:/tmp/",
@@ -102,14 +102,17 @@ class GatewaySpec extends BasicSpec {
          |  }
          |}
        """.stripMargin)
-   addAuthInfo()
+    /*val result = HttpClientProcessor.post(U("test/file/"),
+      ReqFile(new File(this.getClass.getResource("/").getPath + "IMG_20160403_195547.jpg"), "photo"))
+    println(result)*/
+    addAuthInfo()
     simpleRPCTest()
     xmlTest()
-    /*fileTest()*/
+    /* fileTest()*/
     authTest()
     // httpsTest("127.0.0.1", 8081)
     println("====================\r\n性能测试\r\n====================")
-    // performanceTest()
+    performanceTest()
     println("====================\r\n手工测试\r\n====================")
     new CountDownLatch(1).await()
 
@@ -242,17 +245,17 @@ class GatewaySpec extends BasicSpec {
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")))
 
     EZ.eb.publish("/ez/auth/rbac/resource/add/", Map("method" -> "*", "uri" -> "/test/*"))
-    Thread.sleep(100)
+    Thread.sleep(1000)
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")).message.contains("no access to"))
     EZ.eb.publish("/ez/auth/rbac/role/add/", s"""{"code":"user","resource_codes":["*@/test/*"]}""")
-    Thread.sleep(100)
+    Thread.sleep(1000)
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")))
 
     EZ.eb.publish("/ez/auth/rbac/role/remove/", s"""{"code":"user"}""")
-    Thread.sleep(100)
+    Thread.sleep(1000)
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")).message.contains("no access to"))
     EZ.eb.publish("/ez/auth/rbac/resource/remove/", Map("code" -> "*@/test/*"))
-    Thread.sleep(100)
+    Thread.sleep(1000)
     assert(RespHttpClientProcessor.get[EZ_Test](U("test/1/")))
   }
 

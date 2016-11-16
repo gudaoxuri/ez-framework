@@ -63,6 +63,7 @@ object RabbitMQClusterManager {
   def publish(topic: String, message: String, args: Map[String, String], exchangeName: String = defaultTopicExchangeName): Unit = {
     val channel = getChannel()
     channel.exchangeDeclare(exchangeName, "direct")
+    channel.queueDeclare(topic, false, false, false, null)
     val opt = new AMQP.BasicProperties.Builder().headers(args).build()
     channel.basicPublish(exchangeName, topic, opt, message.getBytes())
     channel.close()
@@ -71,6 +72,7 @@ object RabbitMQClusterManager {
   def subscribe(topic: String, exchangeName: String = defaultTopicExchangeName)(receivedFun: (String, Map[String, String]) => Unit): Unit = {
     val channel = getChannel()
     channel.exchangeDeclare(exchangeName, "direct")
+    channel.queueDeclare(topic, false, false, false, null)
     val queueName = channel.queueDeclare().getQueue()
     channel.queueBind(queueName, exchangeName, topic)
     val consumer = new DefaultConsumer(channel) {
@@ -90,7 +92,7 @@ object RabbitMQClusterManager {
     channel.exchangeDeclare(exchangeName, "direct")
     channel.queueDeclare(address, true, false, false, null)
     val opt = new AMQP.BasicProperties.Builder().headers(args).build()
-    channel.basicPublish("", address, opt, message.getBytes())
+    channel.basicPublish(exchangeName, address, opt, message.getBytes())
     channel.close()
   }
 
@@ -98,24 +100,33 @@ object RabbitMQClusterManager {
     val channel = getChannel()
     channel.exchangeDeclare(exchangeName, "direct")
     channel.queueDeclare(address, true, false, false, null)
-    // TODO queue
-    /*val queueName = channel.queueDeclare().getQueue()
-    channel.queueBind(queueName, exchangeName, address)*/
+    channel.queueBind(address, exchangeName, address)
     channel.basicQos(1)
-    val consumer = new DefaultConsumer(channel) {
-      override def handleDelivery(consumerTag: String, envelope: Envelope, properties: BasicProperties, body: Array[Byte]): Unit = {
-        val message = new String(body, "UTF-8")
-        receivedFun(message, properties.getHeaders.map {
-          header =>
-            header._1 -> header._2.toString
-        }.toMap)
+    val consumer = new QueueingConsumer(channel)
+    new Thread(new Runnable {
+      override def run(): Unit = {
+        try {
+          while (true) {
+            val delivery = consumer.nextDelivery()
+            val message = new String(delivery.getBody(),"UTF-8")
+            receivedFun(message, delivery.getProperties.getHeaders.map {
+              header =>
+                header._1 -> header._2.toString
+            }.toMap)
+          }
+        } catch {
+          case e: ShutdownSignalException =>
+          case e: Throwable => e.printStackTrace()
+        }
       }
-    }
+    }).start()
     channel.basicConsume(address, true, consumer)
   }
 
-  def ack(address: String, message: String, args: Map[String, String] = Map(), timeout: Long = 30 * 1000): (String, Map[String, String]) = {
+  def ack(address: String, message: String, args: Map[String, String] = Map(), timeout: Long = 30 * 1000, exchangeName: String = defaultRPCExchangeName): (String, Map[String, String]) = {
     val channel = getChannel()
+    channel.exchangeDeclare(exchangeName, "direct")
+    channel.queueDeclare(address, false, false, false, null)
     val replyQueueName = channel.queueDeclare().getQueue
     val consumer = new QueueingConsumer(channel)
     channel.basicConsume(replyQueueName, true, consumer)
@@ -145,8 +156,10 @@ object RabbitMQClusterManager {
     (replyMessage, replyHeader)
   }
 
-  def ackAsync(address: String, message: String, args: Map[String, String] = Map(), timeout: Long = 30 * 1000)(replyFun: => (String, Map[String, String]) => Unit): Unit = {
+  def ackAsync(address: String, message: String, args: Map[String, String] = Map(), timeout: Long = 30 * 1000, exchangeName: String = defaultRPCExchangeName)(replyFun: => (String, Map[String, String]) => Unit): Unit = {
     val channel = getChannel()
+    channel.exchangeDeclare(exchangeName, "direct")
+    channel.queueDeclare(address, false, false, false, null)
     val replyQueueName = channel.queueDeclare().getQueue
     val consumer = new QueueingConsumer(channel)
     channel.basicConsume(replyQueueName, true, consumer)
@@ -180,12 +193,13 @@ object RabbitMQClusterManager {
     })
   }
 
-  def reply(address: String)(receivedFun: (String, Map[String, String]) => (String, Map[String, String])): Unit = {
+  def reply(address: String, exchangeName: String = defaultRPCExchangeName)(receivedFun: (String, Map[String, String]) => (String, Map[String, String])): Unit = {
     val channel = getChannel()
+    channel.exchangeDeclare(exchangeName, "direct")
     channel.queueDeclare(address, false, false, false, null)
+    channel.queueBind(address, exchangeName, address)
     channel.basicQos(1)
     val consumer = new QueueingConsumer(channel)
-    channel.basicConsume(address, false, consumer)
     new Thread(new Runnable {
       override def run(): Unit = {
         try {
@@ -193,7 +207,7 @@ object RabbitMQClusterManager {
             val delivery = consumer.nextDelivery()
             val props = delivery.getProperties()
             val message = new String(delivery.getBody())
-            val result = receivedFun(message, delivery.getProperties.getHeaders.map {
+            val result = receivedFun(message,props.getHeaders.map {
               header =>
                 header._1 -> header._2.toString
             }.toMap)
@@ -210,6 +224,7 @@ object RabbitMQClusterManager {
         }
       }
     }).start()
+    channel.basicConsume(address, false, consumer)
   }
 
   def close(): Unit = {

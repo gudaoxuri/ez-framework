@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.core.eventbus
 
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicLong
 
 import com.ecfront.ez.framework.core.{EZ, MockStartupSpec}
 
@@ -58,7 +59,7 @@ class EventBusSpec extends MockStartupSpec {
       override def run(): Unit = {
         EZ.eb.response[TestObj]("bb") {
           (message, _) =>
-            logger.info(">>>>>>>>>>>>>>>>>>>> resp" + message.f2)
+            logger.info(">>>>>>>>>>>>>>>>>>>> resp1 : " + message.f2)
             assert(message.f1 == "字段1")
             counter.countDown()
         }
@@ -68,7 +69,7 @@ class EventBusSpec extends MockStartupSpec {
       override def run(): Unit = {
         EZ.eb.response[TestObj]("bb") {
           (message, _) =>
-            logger.info(">>>>>>>>>>>>>>>>>>>> resp" + message.f2)
+            logger.info(">>>>>>>>>>>>>>>>>>>> resp2 : " + message.f2)
             assert(message.f1 == "字段1")
             counter.countDown()
         }
@@ -84,26 +85,39 @@ class EventBusSpec extends MockStartupSpec {
       override def run(): Unit = {
         EZ.eb.reply[String]("test") {
           (message, _) =>
+            logger.info("==============reply 1 : " + message)
             (message, Map())
         }
       }
     }).start()
     new Thread(new Runnable {
       override def run(): Unit = {
+        EZ.eb.reply[String]("test") {
+          (message, _) =>
+            logger.info("==============reply 2 : " + message)
+            (message, Map())
+        }
+      }
+    }).start()
+    val c = new AtomicLong(0)
+    new Thread(new Runnable {
+      override def run(): Unit = {
         while (true) {
-          val result = EZ.eb.ack[String]("test", "a")
-          assert(result._1 == "a")
+          val result = EZ.eb.ack[String]("test", c.incrementAndGet() + "a")
+          logger.info("==============ack a : " + result._1)
+          assert(result._1.contains("a"))
         }
       }
     }).start()
     new Thread(new Runnable {
       override def run(): Unit = {
         while (true) {
-          assert(EZ.eb.ack[String]("test", "b")._1 == "b")
+          val result = EZ.eb.ack[String]("test", c.incrementAndGet() + "b")
+          logger.info("==============ack b : " + result._1)
+          assert(result._1.contains("b"))
         }
       }
     }).start()
-
     new CountDownLatch(1).await()
   }
 

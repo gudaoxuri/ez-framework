@@ -239,17 +239,18 @@ object LocalCacheContainer extends Logging {
   }
 
   def addRouter(method: String, path: String): Resp[Void] = {
-    logger.info(s"Register method [$method] path : $path")
-    if (path.contains(":")) {
+    val formatPath = if (path.endsWith("/")) path else path + "/"
+    logger.info(s"Register method [$method] path : $formatPath")
+    if (formatPath.contains(":")) {
       // regular
-      val r = getRegex(path)
+      val r = getRegex(formatPath)
       // 注册到正则路由表
-      if (!routerContainerR(method).exists(_.originalPath == path)) {
-        routerContainerR(method) += RouterRContent(path, r._1, r._2)
+      if (!routerContainerR(method).exists(_.originalPath == formatPath)) {
+        routerContainerR(method) += RouterRContent(formatPath, r._1, r._2)
       }
     } else {
       // 注册到非正则路由表
-      routerContainer(method) += path
+      routerContainer(method) += formatPath
     }
     Resp.success(null)
   }

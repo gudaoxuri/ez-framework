@@ -9,7 +9,8 @@ import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.Method.Method
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods._
-import org.apache.http.entity.{FileEntity, StringEntity}
+import org.apache.http.entity.mime.{HttpMultipartMode, MultipartEntityBuilder}
+import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.impl.client.{CloseableHttpClient, HttpClients}
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
 import org.apache.http.message.BasicNameValuePair
@@ -118,23 +119,25 @@ object HttpClientProcessor extends Logging {
               new StringEntity("", "UTF-8")
           }
         case t if t.toLowerCase.contains("multipart/form-data") =>
-          body match {
+          val (fileName, file, fieldName) = body match {
             case reqFile: ReqFile =>
-              val finalFileName = if (reqFile.fileName == null) {
+              val fileName = if (reqFile.fileName == null) {
                 reqFile.file.getName.substring(0, reqFile.file.getName.lastIndexOf(".")) + "_" + System.nanoTime() + "." + reqFile.file.getName.substring(reqFile.file.getName.lastIndexOf(".") + 1)
               } else {
                 reqFile.fileName
               }
-              method.setHeader("Content-Disposition", "form-data; name=\"" + reqFile.fieldName + "\"; filename=\"" + finalFileName)
-              /*method.setHeader("Content-Type", "application/octet-stream")*/
-              method.setHeader("Content-Transfer-Encoding", "binary")
-              /*              buffer.appendString("Content-Disposition: form-data; name=\"" + fieldName + "\"; filename=\"" + finalFileName + "\"\r\n")
-                            buffer.appendString("Content-Type: application/octet-stream\r\n")
-                            buffer.appendString("Content-Transfer-Encoding: binary\r\n")*/
-              new FileEntity(reqFile.file)
+              (fileName, reqFile.file, reqFile.fieldName)
             case _ =>
-              new FileEntity(body.asInstanceOf[File])
+              val file = body.asInstanceOf[File]
+              (file.getName, file, "file")
           }
+          method.addHeader("Content-Transfer-Encoding", "binary")
+          MultipartEntityBuilder.create()
+/*
+            .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+*/
+            .addBinaryBody(fieldName, file, ContentType.APPLICATION_OCTET_STREAM, fileName)
+            .build()
         case _ =>
           val str = body match {
             case b: String =>
@@ -153,7 +156,6 @@ object HttpClientProcessor extends Logging {
       }
       method.asInstanceOf[HttpEntityEnclosingRequestBase].setEntity(entity)
     }
-
     var response: CloseableHttpResponse = null
     try {
       response = httpClient.execute(method)
