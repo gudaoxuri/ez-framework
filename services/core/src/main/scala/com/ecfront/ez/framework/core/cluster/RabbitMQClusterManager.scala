@@ -103,7 +103,7 @@ object RabbitMQClusterManager {
     channel.queueBind(address, exchangeName, address)
     channel.basicQos(1)
     val consumer = new QueueingConsumer(channel)
-    new Thread(new Runnable {
+    EZ.execute.execute(new Runnable {
       override def run(): Unit = {
         try {
           while (true) {
@@ -119,7 +119,7 @@ object RabbitMQClusterManager {
           case e: Throwable => e.printStackTrace()
         }
       }
-    }).start()
+    })
     channel.basicConsume(address, true, consumer)
   }
 
@@ -200,7 +200,7 @@ object RabbitMQClusterManager {
     channel.queueBind(address, exchangeName, address)
     channel.basicQos(1)
     val consumer = new QueueingConsumer(channel)
-    new Thread(new Runnable {
+    EZ.execute.execute(new Runnable {
       override def run(): Unit = {
         try {
           while (true) {
@@ -223,7 +223,7 @@ object RabbitMQClusterManager {
           case e: Throwable => e.printStackTrace()
         }
       }
-    }).start()
+    })
     channel.basicConsume(address, false, consumer)
   }
 
