@@ -1,15 +1,18 @@
 package com.ecfront.ez.framework.core.cluster
 
-import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.{CopyOnWriteArrayList, TimeoutException}
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZ
+import com.ecfront.ez.framework.core.logger.Logging
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConversions._
+import scala.concurrent.Future
 
-object RabbitMQClusterManager {
+object RabbitMQClusterManager extends Logging{
 
   private var conn: Connection = _
   private val channels: CopyOnWriteArrayList[Channel] = new CopyOnWriteArrayList[Channel]()
@@ -108,7 +111,7 @@ object RabbitMQClusterManager {
         try {
           while (true) {
             val delivery = consumer.nextDelivery()
-            val message = new String(delivery.getBody(),"UTF-8")
+            val message = new String(delivery.getBody(), "UTF-8")
             receivedFun(message, delivery.getProperties.getHeaders.map {
               header =>
                 header._1 -> header._2.toString
@@ -143,13 +146,18 @@ object RabbitMQClusterManager {
     var hasReply = false
     while (!hasReply) {
       val delivery = consumer.nextDelivery(timeout)
-      if (delivery.getProperties.getCorrelationId.equals(corrId)) {
-        hasReply = true
-        replyHeader = delivery.getProperties.getHeaders.map {
-          header =>
-            header._1 -> header._2.toString
-        }.toMap
-        replyMessage = new String(delivery.getBody)
+      if(delivery!=null) {
+        if (delivery.getProperties.getCorrelationId.equals(corrId)) {
+          hasReply = true
+          replyHeader = delivery.getProperties.getHeaders.map {
+            header =>
+              header._1 -> header._2.toString
+          }.toMap
+          replyMessage = new String(delivery.getBody)
+        }
+      }else{
+        channel.close()
+        throw new TimeoutException("RabbitMQ ack timeout")
       }
     }
     channel.close()
@@ -178,13 +186,18 @@ object RabbitMQClusterManager {
         var hasReply = false
         while (!hasReply) {
           val delivery = consumer.nextDelivery(timeout)
-          if (delivery.getProperties.getCorrelationId.equals(corrId)) {
-            hasReply = true
-            replyHeader = delivery.getProperties.getHeaders.map {
-              header =>
-                header._1 -> header._2.toString
-            }.toMap
-            replyMessage = new String(delivery.getBody)
+          if(delivery!=null) {
+            if (delivery.getProperties.getCorrelationId.equals(corrId)) {
+              hasReply = true
+              replyHeader = delivery.getProperties.getHeaders.map {
+                header =>
+                  header._1 -> header._2.toString
+              }.toMap
+              replyMessage = new String(delivery.getBody)
+            }
+          }else{
+            channel.close()
+            throw new TimeoutException("RabbitMQ ack timeout")
           }
         }
         replyFun(replyMessage, replyHeader)
@@ -207,7 +220,7 @@ object RabbitMQClusterManager {
             val delivery = consumer.nextDelivery()
             val props = delivery.getProperties()
             val message = new String(delivery.getBody())
-            val result = receivedFun(message,props.getHeaders.map {
+            val result = receivedFun(message, props.getHeaders.map {
               header =>
                 header._1 -> header._2.toString
             }.toMap)
@@ -217,6 +230,41 @@ object RabbitMQClusterManager {
               .correlationId(props.getCorrelationId())
               .build(), result._1.getBytes)
             channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false)
+          }
+        } catch {
+          case e: ShutdownSignalException =>
+          case e: Throwable => e.printStackTrace()
+        }
+      }
+    })
+    channel.basicConsume(address, false, consumer)
+  }
+
+  def replyAsync(address: String, exchangeName: String = defaultRPCExchangeName)(receivedFun: (String, Map[String, String]) => Future[(String, Map[String, String])]): Unit = {
+    val channel = getChannel()
+    channel.exchangeDeclare(exchangeName, "direct")
+    channel.queueDeclare(address, false, false, false, null)
+    channel.queueBind(address, exchangeName, address)
+    val consumer = new QueueingConsumer(channel)
+    EZ.execute.execute(new Runnable {
+      override def run(): Unit = {
+        try {
+          while (true) {
+            val delivery = consumer.nextDelivery()
+            val props = delivery.getProperties()
+            val message = new String(delivery.getBody())
+            receivedFun(message, props.getHeaders.map {
+              header =>
+                header._1 -> header._2.toString
+            }.toMap).onSuccess {
+              case result =>
+                channel.basicPublish("", props.getReplyTo(), new BasicProperties
+                .Builder()
+                  .headers(result._2)
+                  .correlationId(props.getCorrelationId())
+                  .build(), result._1.getBytes)
+                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false)
+            }
           }
         } catch {
           case e: ShutdownSignalException =>

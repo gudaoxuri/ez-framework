@@ -18,6 +18,7 @@
     <version>${ezf-version}</version>
 
     <properties>
+        <vertx.version>3.3.3</vertx.version>
     </properties>
 
     <dependencies>

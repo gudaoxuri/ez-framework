@@ -5,6 +5,9 @@ import com.ecfront.ez.framework.core.cluster.RabbitMQClusterManager
 import com.ecfront.ez.framework.core.rpc.RPCProcessor
 import com.ecfront.ez.framework.core.{EZ, EZContext}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Future, Promise}
+
 /**
   * 事件总线处理器
   */
@@ -120,6 +123,30 @@ class RabbitMQProcessor extends EventBusProcessor {
             logger.error(s"[EB] reply [$address] Execute error", ex)
             (toJsonString(Resp.serverError(s"[EB] reply [$address] Execute error : ${ex.getMessage}")), Map(FLAG_CONTEXT -> JsonHelper.toJsonString(EZ.context)))
         }
+    }
+  }
+
+  override protected def doReplyAsync[E: Manifest](address: String, reqClazz: Class[E])
+                                                  (receivedFun: (E, Map[String, String]) => Future[(Any, Map[String, String])]): Unit = {
+    RabbitMQClusterManager.replyAsync(address) {
+      (message, args) =>
+        val p = Promise[(String, Map[String, String])]()
+        val tmpContent = args(FLAG_CONTEXT)
+        EZContext.setContext(JsonHelper.toObject[EZContext](tmpContent))
+        val headers = args - FLAG_CONTEXT
+        logger.trace(s"[EB] Received a reply message [$address] : $headers > ${RPCProcessor.cutPrintShow(message)} ")
+        try {
+          val msg = toObject[E](message, reqClazz)
+          receivedFun(msg, headers).onSuccess {
+            case result =>
+              p.success((toJsonString(result._1), result._2 + (FLAG_CONTEXT -> tmpContent)))
+          }
+        } catch {
+          case ex: Throwable =>
+            logger.error(s"[EB] reply [$address] Execute error", ex)
+            p.success((toJsonString(Resp.serverError(s"[EB] reply [$address] Execute error : ${ex.getMessage}")), Map(FLAG_CONTEXT -> tmpContent)))
+        }
+        p.future
     }
   }
 

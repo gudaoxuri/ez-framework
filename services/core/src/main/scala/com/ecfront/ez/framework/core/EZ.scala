@@ -9,6 +9,7 @@ import com.ecfront.ez.framework.core.config.EZConfig
 import com.ecfront.ez.framework.core.dist.DistributedServiceProcessor
 import com.ecfront.ez.framework.core.eventbus.EventBusProcessor
 import com.ecfront.ez.framework.core.logger.Logging
+import com.fasterxml.jackson.databind.JsonNode
 import redis.clients.jedis.JedisCommands
 
 /**
@@ -29,8 +30,10 @@ object EZ extends Logging {
     var language: String = _
     // 配置文件路径
     lazy val confPath: String = findConfPath()
-
-    private[ecfront] var config: EZConfig = _
+    // 配置参数
+    lazy val args: JsonNode = config.args
+    // 完整配置信息
+    var config: EZConfig = _
 
     // 项目主机IP
     val projectIp = InetAddress.getLocalHost.getHostAddress

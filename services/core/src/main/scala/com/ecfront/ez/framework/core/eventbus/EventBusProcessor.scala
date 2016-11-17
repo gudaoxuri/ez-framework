@@ -4,6 +4,8 @@ import com.ecfront.common.JsonHelper
 import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.{Method, RPCProcessor}
 
+import scala.concurrent.Future
+
 trait EventBusProcessor extends Logging {
 
   private[ecfront] val FLAG_CONTEXT = "__ez_context__"
@@ -67,6 +69,13 @@ trait EventBusProcessor extends Logging {
   }
 
   protected def doReply[E: Manifest](address: String, reqClazz: Class[E])(receivedFun: (E, Map[String, String]) => (Any, Map[String, String])): Unit
+
+  def replyAsync[E: Manifest](address: String, reqClazz: Class[E] = null)(receivedFun: (E, Map[String, String]) => Future[(Any, Map[String, String])]): Unit = {
+    doReplyAsync[E](packageAddress(Method.ACK.toString, address), reqClazz)(receivedFun)
+  }
+
+  protected def doReplyAsync[E: Manifest](address: String, reqClazz: Class[E])(receivedFun: (E, Map[String, String]) => Future[(Any, Map[String, String])]): Unit
+
 
   def packageAddress(defaultMethod: String, path: String): String = {
     val formatPath = if (path.endsWith("/")) path else path + "/"
