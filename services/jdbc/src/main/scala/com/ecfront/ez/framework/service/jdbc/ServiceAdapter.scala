@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.JsonNode
 
 object ServiceAdapter extends EZServiceAdapter[JsonNode] {
 
+  var createTable:Boolean=false
+
   override def init(parameter: JsonNode): Resp[String] = {
+    createTable=parameter.path("createTable").asBoolean(false)
     val processor = JDBCProcessor(
       parameter.path("url").asText(),
       parameter.path("userName").asText(),

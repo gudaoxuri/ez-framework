@@ -26,7 +26,8 @@
         "initialSize": 1, // 初始化时建立物理连接的个数
         "minSize": 1, // 最小连接池数量
         "maxSize": 1, // 最大连接池数量
-        "maxIdleTime": 60000 // 获取连接时最大等待时间，单位秒
+        "maxIdleTime": 60000, // 获取连接时最大等待时间，单位秒
+        "createTable":false
       }
     }
   },

@@ -107,7 +107,9 @@ object EntityContainer extends Logging {
     model.persistentFields = persistentFields
     CONTAINER += tableName -> model
     logger.info( """Create model: %s""".format(clazz.getSimpleName))
-    createTable(model)
+    if (ServiceAdapter.createTable) {
+      createTable(model)
+    }
     model
   }
 
