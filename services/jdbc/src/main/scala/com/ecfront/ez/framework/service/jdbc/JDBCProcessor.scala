@@ -393,7 +393,7 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
           } else {
             queryRunner.insert(_conn, sql, new ScalarHandler[Object]())
           }
-        Resp.success(result.toString)
+        Resp.success(if (result != null) result.toString else null)
       }, sql, finalParameterR.body, _conn, _autoClose)
     }
   }

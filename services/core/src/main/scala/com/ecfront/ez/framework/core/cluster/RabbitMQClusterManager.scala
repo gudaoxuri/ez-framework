@@ -228,7 +228,7 @@ object RabbitMQClusterManager extends Logging{
               .headers(result._2)
               .correlationId(props.getCorrelationId())
               .build(), result._1.getBytes)
-            channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false)
+            // channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false)
           }
         } catch {
           case e: ShutdownSignalException =>
@@ -236,7 +236,7 @@ object RabbitMQClusterManager extends Logging{
         }
       }
     })
-    channel.basicConsume(address, false, consumer)
+    channel.basicConsume(address, true, consumer)
   }
 
   def replyAsync(address: String, exchangeName: String = defaultRPCExchangeName)(receivedFun: (String, Map[String, String]) => Future[(String, Map[String, String])]): Unit = {
@@ -262,7 +262,7 @@ object RabbitMQClusterManager extends Logging{
                   .headers(result._2)
                   .correlationId(props.getCorrelationId())
                   .build(), result._1.getBytes)
-                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false)
+                // channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false)
             }
           }
         } catch {
@@ -271,7 +271,7 @@ object RabbitMQClusterManager extends Logging{
         }
       }
     })
-    channel.basicConsume(address, false, consumer)
+    channel.basicConsume(address, true, consumer)
   }
 
   def close(): Unit = {
