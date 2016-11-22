@@ -81,7 +81,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
   private def execute(request: HttpServerRequest, context: EZAPIContext): Unit = {
     if (context.contentType.startsWith("multipart/form-data")) {
       // 上传处理
-      request.setExpectMultipart(true)
+     request.setExpectMultipart(true)
       request.uploadHandler(new Handler[HttpServerFileUpload] {
         override def handle(upload: HttpServerFileUpload): Unit = {
           val newName = if (request.params().contains("name")) {

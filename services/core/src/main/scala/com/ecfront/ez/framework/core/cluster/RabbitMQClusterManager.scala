@@ -211,7 +211,6 @@ object RabbitMQClusterManager extends Logging{
     channel.exchangeDeclare(exchangeName, "direct")
     channel.queueDeclare(address, false, false, false, null)
     channel.queueBind(address, exchangeName, address)
-    channel.basicQos(1)
     val consumer = new QueueingConsumer(channel)
     EZ.execute.execute(new Runnable {
       override def run(): Unit = {

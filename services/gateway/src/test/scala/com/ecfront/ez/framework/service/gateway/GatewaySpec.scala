@@ -102,7 +102,7 @@ class GatewaySpec extends BasicSpec {
          |  }
          |}
        """.stripMargin)
-    /*val result = HttpClientProcessor.post(U("test/file/"),
+   /* val result = HttpClientProcessor.post(U("test/file/"),
       ReqFile(new File(this.getClass.getResource("/").getPath + "IMG_20160403_195547.jpg"), "photo"))
     println(result)*/
     addAuthInfo()

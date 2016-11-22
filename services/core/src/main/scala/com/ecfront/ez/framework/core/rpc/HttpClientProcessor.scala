@@ -133,9 +133,7 @@ object HttpClientProcessor extends Logging {
           }
           method.addHeader("Content-Transfer-Encoding", "binary")
           MultipartEntityBuilder.create()
-/*
             .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-*/
             .addBinaryBody(fieldName, file, ContentType.APPLICATION_OCTET_STREAM, fileName)
             .build()
         case _ =>
@@ -173,7 +171,7 @@ object HttpClientProcessor extends Logging {
           logger.warn(s"HTTP [${method.getMethod}] request : ${method.getURI} ERROR.", e)
           throw e
         }
-      case e: Exception =>
+      case e: Throwable =>
         logger.warn(s"HTTP [${method.getMethod}] request : ${method.getURI} ERROR.", e)
         throw e
     } finally {

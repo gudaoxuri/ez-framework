@@ -603,7 +603,11 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
           _conn.close()
         }
       } else {
-        _conn.rollback()
+        try {
+          _conn.rollback()
+        } catch {
+          case e: Throwable =>
+        }
         if (!_conn.isClosed) {
           _conn.close()
         }
@@ -611,7 +615,12 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
       resultR
     } catch {
       case e: Throwable =>
-        _conn.rollback()
+        try {
+          _conn.isReadOnly
+          _conn.rollback()
+        } catch {
+          case e: Throwable =>
+        }
         if (!_conn.isClosed) {
           _conn.close()
         }
