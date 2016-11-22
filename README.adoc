@@ -1,5 +1,7 @@
 = EZ.F - Scala中功能全面、使用简单的服务框架
 
+**4.0版本构建中, https://github.com/gudaoxuri/ez-framework/tree/4.0**
+
 image::https://img.shields.io/travis/gudaoxuri/ez-framework.svg[link="https://travis-ci.org/gudaoxuri/ez-framework"]
 
 == 设计理念
