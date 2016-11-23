@@ -8,11 +8,11 @@ import com.ecfront.ez.framework.core.logger.Logging
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConversions._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object RabbitMQClusterManager extends Logging{
+object RabbitMQClusterManager extends Logging {
 
   private var conn: Connection = _
   private val channels: CopyOnWriteArrayList[Channel] = new CopyOnWriteArrayList[Channel]()
@@ -146,7 +146,7 @@ object RabbitMQClusterManager extends Logging{
     var hasReply = false
     while (!hasReply) {
       val delivery = consumer.nextDelivery(timeout)
-      if(delivery!=null) {
+      if (delivery != null) {
         if (delivery.getProperties.getCorrelationId.equals(corrId)) {
           hasReply = true
           replyHeader = delivery.getProperties.getHeaders.map {
@@ -155,7 +155,7 @@ object RabbitMQClusterManager extends Logging{
           }.toMap
           replyMessage = new String(delivery.getBody)
         }
-      }else{
+      } else {
         channel.close()
         throw new TimeoutException("RabbitMQ ack timeout")
       }
@@ -186,7 +186,7 @@ object RabbitMQClusterManager extends Logging{
         var hasReply = false
         while (!hasReply) {
           val delivery = consumer.nextDelivery(timeout)
-          if(delivery!=null) {
+          if (delivery != null) {
             if (delivery.getProperties.getCorrelationId.equals(corrId)) {
               hasReply = true
               replyHeader = delivery.getProperties.getHeaders.map {
@@ -195,7 +195,7 @@ object RabbitMQClusterManager extends Logging{
               }.toMap
               replyMessage = new String(delivery.getBody)
             }
-          }else{
+          } else {
             channel.close()
             throw new TimeoutException("RabbitMQ ack timeout")
           }
@@ -214,25 +214,26 @@ object RabbitMQClusterManager extends Logging{
     val consumer = new QueueingConsumer(channel)
     EZ.execute.execute(new Runnable {
       override def run(): Unit = {
-        try {
-          while (true) {
-            val delivery = consumer.nextDelivery()
-            val props = delivery.getProperties()
-            val message = new String(delivery.getBody())
-            val result = receivedFun(message, props.getHeaders.map {
-              header =>
-                header._1 -> header._2.toString
-            }.toMap)
-            channel.basicPublish("", props.getReplyTo(), new BasicProperties
-            .Builder()
-              .headers(result._2)
-              .correlationId(props.getCorrelationId())
-              .build(), result._1.getBytes)
-            // channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false)
+        while (true) {
+          val delivery = consumer.nextDelivery()
+          val props = delivery.getProperties()
+          val message = new String(delivery.getBody())
+          EZ.newThread {
+            try {
+              val result = receivedFun(message, props.getHeaders.map {
+                header =>
+                  header._1 -> header._2.toString
+              }.toMap)
+              channel.basicPublish("", props.getReplyTo(), new BasicProperties
+              .Builder()
+                .headers(result._2)
+                .correlationId(props.getCorrelationId())
+                .build(), result._1.getBytes)
+            } catch {
+              case e: ShutdownSignalException =>
+              case e: Throwable => e.printStackTrace()
+            }
           }
-        } catch {
-          case e: ShutdownSignalException =>
-          case e: Throwable => e.printStackTrace()
         }
       }
     })
@@ -247,27 +248,29 @@ object RabbitMQClusterManager extends Logging{
     val consumer = new QueueingConsumer(channel)
     EZ.execute.execute(new Runnable {
       override def run(): Unit = {
-        try {
-          while (true) {
-            val delivery = consumer.nextDelivery()
-            val props = delivery.getProperties()
-            val message = new String(delivery.getBody())
-            receivedFun(message, props.getHeaders.map {
-              header =>
-                header._1 -> header._2.toString
-            }.toMap).onSuccess {
-              case result =>
-                channel.basicPublish("", props.getReplyTo(), new BasicProperties
-                .Builder()
-                  .headers(result._2)
-                  .correlationId(props.getCorrelationId())
-                  .build(), result._1.getBytes)
+        while (true) {
+          val delivery = consumer.nextDelivery()
+          val props = delivery.getProperties()
+          val message = new String(delivery.getBody())
+          EZ.newThread {
+            try {
+              receivedFun(message, props.getHeaders.map {
+                header =>
+                  header._1 -> header._2.toString
+              }.toMap).onSuccess {
+                case result =>
+                  channel.basicPublish("", props.getReplyTo(), new BasicProperties
+                  .Builder()
+                    .headers(result._2)
+                    .correlationId(props.getCorrelationId())
+                    .build(), result._1.getBytes)
                 // channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false)
+              }
+            } catch {
+              case e: ShutdownSignalException =>
+              case e: Throwable => e.printStackTrace()
             }
           }
-        } catch {
-          case e: ShutdownSignalException =>
-          case e: Throwable => e.printStackTrace()
         }
       }
     })

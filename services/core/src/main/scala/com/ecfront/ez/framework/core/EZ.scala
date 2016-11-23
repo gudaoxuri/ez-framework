@@ -77,4 +77,15 @@ object EZ extends Logging {
 
   val execute = Executors.newCachedThreadPool()
 
+  def newThread(fun: => Unit): Unit = {
+    execute.execute(new RunnableWithContext(fun, EZ.context))
+  }
+
+  class RunnableWithContext(fun: => Unit, context: EZContext) extends Runnable {
+    override def run(): Unit = {
+      EZContext.setContext(context)
+      fun
+    }
+  }
+
 }

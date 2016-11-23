@@ -22,18 +22,16 @@ class RabbitMQSpec extends FunSuite with BeforeAndAfter with Logging {
     factory.setHost("127.0.0.1")
     val connection = factory.newConnection()
     // produce
-    val produceThreads = for (i <- 0 until 100)
+    val produceThreads = for (i <- 0 until 50)
       yield new Thread(new Runnable {
         override def run(): Unit = {
           val channel = connection.createChannel()
-          channel.queueDeclare("a", false, false, false, null)
-          channel.queueDeclare("b", false, false, false, null)
           val replyQueueName = channel.queueDeclare().getQueue
           val replyConsumer = new QueueingConsumer(channel)
           channel.basicConsume(replyQueueName, true, replyConsumer)
           val corrId = java.util.UUID.randomUUID().toString
           val opt = new BasicProperties.Builder().correlationId(corrId).replyTo(replyQueueName).build()
-          channel.basicPublish("amq.direct", "a", opt, s"test${p.incrementAndGet()}".getBytes())
+          channel.basicPublish("", "a", opt, s"test${p.incrementAndGet()}".getBytes())
           var delivery = replyConsumer.nextDelivery()
           while (true) {
             if (delivery.getProperties.getCorrelationId.equals(corrId)) {
@@ -51,29 +49,28 @@ class RabbitMQSpec extends FunSuite with BeforeAndAfter with Logging {
       override def run(): Unit = {
         val channel = connection.createChannel()
         channel.queueDeclare("a", false, false, false, null)
-        channel.queueDeclare("b", false, false, false, null)
-        channel.queueBind("a", "amq.direct", "a")
-        channel.queueBind("b", "amq.direct", "b")
         val consumer = new QueueingConsumer(channel)
         channel.basicConsume("a", true, consumer)
         while (true) {
           val delivery = consumer.nextDelivery()
           val props = delivery.getProperties()
           val message = new String(delivery.getBody())
-          logger.info(s"receive 1 [${c.incrementAndGet()}] " + message)
-          channel.basicPublish("", props.getReplyTo(), new BasicProperties.Builder().correlationId(props.getCorrelationId()).build(), message.getBytes)
+          new Thread(new Runnable {
+            override def run(): Unit = {
+              Thread.sleep(10000)
+              logger.info(s"receive 1 [${c.incrementAndGet()}] " + message)
+              channel.basicPublish("", props.getReplyTo(), new BasicProperties.Builder().correlationId(props.getCorrelationId()).build(), message.getBytes)
+            }
+          }).start()
         }
       }
     }).start()
-    new Thread(new Runnable {
+   /* new Thread(new Runnable {
       override def run(): Unit = {
         val channel = connection.createChannel()
         channel.queueDeclare("a", false, false, false, null)
-        channel.queueDeclare("b", false, false, false, null)
-        channel.queueBind("a", "amq.direct", "a")
-        channel.queueBind("b", "amq.direct", "b")
         val consumer = new QueueingConsumer(channel)
-        channel.basicConsume("b", true, consumer)
+        channel.basicConsume("a", true, consumer)
         while (true) {
           val delivery = consumer.nextDelivery()
           val props = delivery.getProperties()
@@ -82,7 +79,7 @@ class RabbitMQSpec extends FunSuite with BeforeAndAfter with Logging {
           channel.basicPublish("", props.getReplyTo(), new BasicProperties.Builder().correlationId(props.getCorrelationId()).build(), message.getBytes)
         }
       }
-    }).start()
+    }).start()*/
 
     new CountDownLatch(1).await()
   }

@@ -5,6 +5,7 @@ import java.util.Date
 import java.util.concurrent.CountDownLatch
 
 import com.ecfront.common.{JsonHelper, StandardCode}
+import com.ecfront.ez.framework.core.helper.TimeHelper
 import com.ecfront.ez.framework.core.rpc._
 import com.ecfront.ez.framework.core.{EZ, EZManager}
 import com.ecfront.ez.framework.service.jdbc.Page
@@ -260,6 +261,8 @@ class GatewaySpec extends BasicSpec {
   }
 
   def performanceTest(): Unit = {
+    val startTime=new Date()
+    logger.info(s"Perf start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     val c = new CountDownLatch(4000 + 500)
     val threads = for (i <- 0 until 2000)
       yield new Thread(new Runnable {
@@ -293,6 +296,8 @@ class GatewaySpec extends BasicSpec {
         }
       }).start()
     c.await()
+    logger.info(s"Perf end >>>>>>>>>>>>>>>>>>>>>>>>>>>>> ${(new Date().getTime-startTime.getTime)/1000}")
+
   }
 
 }
