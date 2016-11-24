@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode
 
 import scala.collection.JavaConversions._
 
-@RPC("/ez/auth/","","")
+@RPC("/ez/auth/", "", "")
 object ExchangeProcessor extends Logging {
 
   @SUB("/ez/gateway/address/add/")
@@ -16,8 +16,8 @@ object ExchangeProcessor extends Logging {
     LocalCacheContainer.addRouter(apiDTO.method, apiDTO.path)
   }
 
-  @REPLY("/ez/gateway/auth/flush/")
-  def flushCache(args: Map[String, String],body: String): Resp[Void] = {
+  @SUB("/ez/gateway/auth/flush/")
+  def flushCache(args: Map[String, String], body: String): Resp[Void] = {
     LocalCacheContainer.flushAuth()
   }
 

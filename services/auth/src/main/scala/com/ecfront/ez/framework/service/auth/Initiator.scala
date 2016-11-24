@@ -49,7 +49,7 @@ object Initiator extends Logging {
   }
 
   def updateCache(): Unit = {
-    EZ.eb.ack(ServiceAdapter.EB_FLUSH_FLAG, "")
+    EZ.eb.publish(ServiceAdapter.EB_FLUSH_FLAG, "")
     EZ_Organization.findEnabled("").body.foreach(CacheManager.RBAC.addOrganization)
     EZ_Resource.find("").body.foreach(CacheManager.RBAC.addResource)
     EZ_Role.findEnabled("").body.foreach(CacheManager.RBAC.addRole)

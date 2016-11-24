@@ -4,9 +4,9 @@ import com.ecfront.ez.framework.core.EZManager
 
 trait AuthStartupSpec extends GatewayStartupSpec {
 
-  def authRpcPackage: String = "com.ecfront.ez"
+  lazy val authRpcPackage: String = "com.ecfront.ez"
 
-  def authConfig: String =
+  lazy val authConfig: String =
     s"""
        | {
        |        "customLogin": false,
@@ -15,7 +15,7 @@ trait AuthStartupSpec extends GatewayStartupSpec {
        | }
      """.stripMargin
 
-  def jdbcConfig: String =
+  lazy val jdbcConfig: String =
     s"""
        | {
        |        "url": "jdbc:mysql://127.0.0.1:3306/ez?characterEncoding=UTF-8&autoReconnect=true",

@@ -5,18 +5,32 @@ import com.ecfront.ez.framework.core.EZManager
 
 trait GatewayStartupSpec extends MockStartupSpec{
 
-  def cacheConfig: String =
+  lazy val cacheConfig =
     s"""
        |{
        |      "address": "127.0.0.1:6379"
        |}
    """.stripMargin
 
-  def gatewayRpcPackage: String = "com.ecfront.ez"
+  lazy val clusterConfig: String =
+    """
+      |{
+      |      "userName":"user",
+      |      "password":"password",
+      |      "host":"127.0.0.1",
+      |      "port":5672,
+      |      "virtualHost":"ez",
+      |      "defaultTopicExchangeName":"ex_topic",
+      |      "defaultRPCExchangeName":"ex_rpc",
+      |      "defaultQueueExchangeName":"ex_queue"
+      |}
+    """.stripMargin
 
-  def gatewayPort: Int = 8080
+  lazy val gatewayRpcPackage: String = "com.ecfront.ez"
 
-  def gatewayWSPort: Int = 8081
+  lazy val gatewayPort: Int = 8080
+
+  lazy val gatewayWSPort: Int = 8081
 
   protected def startGateway: Resp[String] = {
     EZManager.start(
@@ -25,16 +39,7 @@ trait GatewayStartupSpec extends MockStartupSpec{
          |  "ez": {
          |    "app": "",
          |    "module": "",
-         |    "cluster":{
-         |      "userName":"user",
-         |      "password":"password",
-         |      "host":"127.0.0.1",
-         |      "port":5672,
-         |      "virtualHost":"ez",
-         |      "defaultTopicExchangeName":"ex_topic",
-         |      "defaultRPCExchangeName":"ex_rpc",
-         |      "defaultQueueExchangeName":"ex_queue"
-         |    },
+         |    "cluster":$clusterConfig,
          |    "cache": $cacheConfig,
          |    "rpc":{
          |      "package":"$gatewayRpcPackage"

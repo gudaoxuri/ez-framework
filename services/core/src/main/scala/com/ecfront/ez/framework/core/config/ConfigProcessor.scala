@@ -1,8 +1,10 @@
 package com.ecfront.ez.framework.core.config
 
+import java.io.File
+
 import com.ecfront.common.{JsonHelper, Resp}
+import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.logger.Logging
-import com.ecfront.ez.framework.core.{EZ, EZManager}
 
 import scala.collection.JavaConversions._
 import scala.io.Source
@@ -27,8 +29,12 @@ object ConfigProcessor extends Logging {
         if (configContent.startsWith("@")) {
           // 统一配置
           val Array(app, module, path) = configContent.substring(1).split("#")
-          val unifyConfigPath = if (path.endsWith("/")) path else path + "/"
-          val basicConfig = parseConfig(Source.fromFile(unifyConfigPath + "ez.json", "UTF-8").mkString)
+          var unifyConfigPath = if (path.endsWith("/")) path else path + "/"
+          if (unifyConfigPath.startsWith(".")) {
+            unifyConfigPath = this.getClass().getResource("/").getPath + unifyConfigPath
+          }
+          logger.info("[Config] load unify config path :" + unifyConfigPath)
+          val basicConfig = parseConfig(Source.fromFile(new File(unifyConfigPath + "ez.json"), "UTF-8").mkString)
           val moduleConfig = parseConfig(Source.fromFile(unifyConfigPath + s"ez.$app.$module.json", "UTF-8").mkString)
           moduleConfig.ez.app = app
           moduleConfig.ez.module = module
@@ -84,7 +90,7 @@ object ConfigProcessor extends Logging {
       Resp.success(ezConfig)
     } catch {
       case e: Throwable =>
-        logger.error("Config parse error :" + e.getMessage, e)
+        logger.error("[Config ] config parse error :" + e.getMessage, e)
         throw e
     }
   }
