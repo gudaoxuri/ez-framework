@@ -24,6 +24,12 @@ object BaseModel {
 
   val Id_FLAG = "id"
   val SPLIT = EZ.eb.ADDRESS_SPLIT_FLAG
+  // 默认系统管理员角色
+  val SYSTEM_ROLE_FLAG = "system"
+  // 组织管理员角色
+  val ORG_ADMIN_ROLE_FLAG = "org_admin"
+  // 默认普通用户角色
+  val USER_ROLE_FLAG = "user"
   val SYSTEM_ACCOUNT_LOGIN_ID = "sysadmin"
   val ORG_ADMIN_ACCOUNT_LOGIN_ID = "admin"
 

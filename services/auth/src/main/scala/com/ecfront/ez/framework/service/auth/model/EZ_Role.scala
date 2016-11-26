@@ -36,11 +36,11 @@ object EZ_Role extends SecureStorage[EZ_Role] with StatusStorage[EZ_Role] with O
   var TABLE_REL_ROLE_RESOURCE = "ez_rel_role_resource"
 
   // 默认系统管理员角色
-  val SYSTEM_ROLE_FLAG = "system"
+  val SYSTEM_ROLE_FLAG = BaseModel.SYSTEM_ROLE_FLAG
   // 组织管理员角色
-  val ORG_ADMIN_ROLE_FLAG = "org_admin"
+  val ORG_ADMIN_ROLE_FLAG = BaseModel.ORG_ADMIN_ROLE_FLAG
   // 默认普通用户角色
-  val USER_ROLE_FLAG = "user"
+  val USER_ROLE_FLAG = BaseModel.USER_ROLE_FLAG
 
   def apply(flag: String, name: String, resourceCodes: Set[String], organizationCode: String = ServiceAdapter.defaultOrganizationCode): EZ_Role = {
     val role = EZ_Role()
