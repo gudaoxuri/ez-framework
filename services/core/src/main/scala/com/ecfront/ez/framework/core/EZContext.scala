@@ -37,7 +37,7 @@ object EZContext {
 
   val _context = new ThreadLocal[EZContext]
 
-  private[core] def getContext: EZContext = {
+  def getContext: EZContext = {
     var cxt = _context.get()
     if (cxt == null) {
       cxt = new EZContext
@@ -53,7 +53,7 @@ object EZContext {
     cxt
   }
 
-  private[ecfront] def setContext(context: EZContext): Unit = {
+  def setContext(context: EZContext): Unit = {
     if (context.token == null) {
       context.token = ""
     }
