@@ -98,7 +98,6 @@ object HttpClientProcessor extends Logging {
     if (contentType != null) {
       method.setHeader(HttpHeaders.CONTENT_TYPE, realContextType)
     }
-    method.setHeader(HttpHeaders.ACCEPT_ENCODING, "/")
     if (body != null) {
       val entity = realContextType.toLowerCase match {
         case t if t.toLowerCase.contains("application/x-www-form-urlencoded") && body.isInstanceOf[Map[_, _]] =>
