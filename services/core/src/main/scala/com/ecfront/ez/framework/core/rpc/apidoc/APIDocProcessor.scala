@@ -14,7 +14,13 @@ object APIDocProcessor extends Logging {
   private var path: String = _
 
   def init(_path: String): Unit = {
-    path = if (_path != null) _path else "/tmp/docs/"
+    path = if (_path != null) {
+      var path = if (_path.endsWith("/")) _path else _path + "/"
+      if (path.startsWith(".")) {
+        path = this.getClass().getResource("/").getPath + path
+      }
+      path
+    } else "/tmp/docs/"
     logger.info("API Doc path is :" + path)
     val p = new File(path)
     if (!p.exists()) {
