@@ -103,7 +103,7 @@ object APIDocProcessor extends Logging {
           s"""|${if (isList || isPage) "-" else ""}$fieldName|$dType|${labelName.x}"""
       }
     }
-    body.mkString("\r\n") + (if (respExt.trim.nonEmpty) s"\r\n${respExt.split("\r\n").map(_.trim).mkString("r\n")}\r\n|===" else "\r\n|===")
+    body.mkString("\r\n") + (if (respExt.trim.nonEmpty) s"\r\n${respExt.split("\r\n").map(_.trim).mkString("\n")}\r\n|===" else "\r\n|===")
   }
 
   private def packageReqBody(item: APIDocItemVO): String = {
