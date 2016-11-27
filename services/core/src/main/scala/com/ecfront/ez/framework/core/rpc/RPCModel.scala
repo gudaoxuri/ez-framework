@@ -7,7 +7,9 @@ import scala.beans.BeanProperty
 
 class APIDTO {
 
+  @Label("方法")
   @BeanProperty var method: String = _
+  @Label("路径")
   @BeanProperty var path: String = _
 
 }

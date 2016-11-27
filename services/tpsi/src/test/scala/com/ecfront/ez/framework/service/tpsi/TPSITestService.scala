@@ -13,7 +13,7 @@ object TPSITestService extends TPSIService {
 
   val counter = new CountDownLatch(3)
 
-  @REPLY("reply/")
+  @REPLY("reply/","","","","")
   def reply(parameter: Map[String, String], body: TPSITestObj): Resp[TPSITestObj] = {
     assert(parameter("id") == "1")
     assert(body.t == "测试")
@@ -21,7 +21,7 @@ object TPSITestService extends TPSIService {
     exec(parameter("id"), "reply", body)
   }
 
-  @SUB("sub/")
+  @SUB("sub/","","","","")
   def sub(parameter: Map[String, String], body: TPSITestObj): Resp[TPSITestObj] = {
     assert(parameter("id") == "1")
     assert(body.t == "测试")
@@ -29,7 +29,7 @@ object TPSITestService extends TPSIService {
     exec(parameter("id"), "sub", body)
   }
 
-  @RESP("resp/")
+  @RESP("resp/","","","","")
   def resp(parameter: Map[String, String], body: TPSITestObj): Resp[TPSITestObj] = {
     assert(parameter("id") == "1")
     assert(body.t == "测试")

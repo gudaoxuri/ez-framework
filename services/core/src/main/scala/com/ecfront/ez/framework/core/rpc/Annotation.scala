@@ -50,21 +50,21 @@ case class WS(uri: String, docName: String, docDesc: String, docReqExt: String, 
   *
   * @param uri 请求路径（baseUri+uri）
   */
-case class SUB(uri: String) extends StaticAnnotation
+case class SUB(uri: String, docName: String, docDesc: String, docReqExt: String, docRespExt: String) extends StaticAnnotation
 
 /**
   * 注册用于接收Request请求，用于Auto Building特性
   *
   * @param uri 请求路径（baseUri+uri）
   */
-case class RESP(uri: String) extends StaticAnnotation
+case class RESP(uri: String, docName: String, docDesc: String, docReqExt: String, docRespExt: String) extends StaticAnnotation
 
 /**
   * 注册用于接收ACK请求，用于Auto Building特性
   *
   * @param uri 请求路径（baseUri+uri）
   */
-case class REPLY(uri: String) extends StaticAnnotation
+case class REPLY(uri: String, docName: String, docDesc: String, docReqExt: String, docRespExt: String) extends StaticAnnotation
 
 /**
   * 字段描述

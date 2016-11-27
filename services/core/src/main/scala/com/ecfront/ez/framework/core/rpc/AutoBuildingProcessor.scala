@@ -66,16 +66,14 @@ object AutoBuildingProcessor extends Logging {
             case ann: WS =>
               (Method.WS, ann.uri, getBodyClassByMethodInfo(methodInfo), ann.docName, ann.docDesc, ann.docReqExt, ann.docRespExt)
             case ann: SUB =>
-              (Method.PUB_SUB, ann.uri, getBodyClassByMethodInfo(methodInfo), null, null, null, null)
+              (Method.PUB_SUB, ann.uri, getBodyClassByMethodInfo(methodInfo), ann.docName, ann.docDesc, ann.docReqExt, ann.docRespExt)
             case ann: RESP =>
-              (Method.REQ_RESP, ann.uri, getBodyClassByMethodInfo(methodInfo), null, null, null, null)
+              (Method.REQ_RESP, ann.uri, getBodyClassByMethodInfo(methodInfo), ann.docName, ann.docDesc, ann.docReqExt, ann.docRespExt)
             case ann: REPLY =>
-              (Method.ACK, ann.uri, getBodyClassByMethodInfo(methodInfo), null, null, null, null)
+              (Method.ACK, ann.uri, getBodyClassByMethodInfo(methodInfo), ann.docName, ann.docDesc, ann.docReqExt, ann.docRespExt)
           }
           val uri = if (annInfo._2.startsWith("/")) annInfo._2 else baseUri + annInfo._2
-          if (annInfo._1 == Method.GET || annInfo._1 == Method.POST || annInfo._1 == Method.PUT || annInfo._1 == Method.DELETE || annInfo._1 == Method.WS) {
-            apiDoc.items += APIDocItemVO(annInfo._4, annInfo._1.toString, uri, annInfo._3, methodInfo.method.returnType.toString, annInfo._5, annInfo._6, annInfo._7)
-          }
+          apiDoc.items += APIDocItemVO(annInfo._4, annInfo._1.toString, uri, annInfo._3, methodInfo.method.returnType.toString, annInfo._5, annInfo._6, annInfo._7)
           RPCProcessor.add(annInfo._1, uri, annInfo._3, respType, fun(annInfo._1, methodMirror))
       }
       APIDocProcessor.build(apiDoc)
