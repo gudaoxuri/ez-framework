@@ -9,6 +9,7 @@ import com.ecfront.ez.framework.core.config.EZConfig
 import com.ecfront.ez.framework.core.dist.DistributedServiceProcessor
 import com.ecfront.ez.framework.core.eventbus.EventBusProcessor
 import com.ecfront.ez.framework.core.logger.Logging
+import com.ecfront.ez.framework.core.monitor.TaskMonitor
 import com.fasterxml.jackson.databind.JsonNode
 import redis.clients.jedis.JedisCommands
 
@@ -77,14 +78,25 @@ object EZ extends Logging {
 
   val execute = Executors.newCachedThreadPool()
 
-  def newThread(fun: => Unit): Unit = {
-    execute.execute(new RunnableWithContext(fun, EZ.context))
+  def newThread(fun: => Unit, needWait: Boolean = true): Unit = {
+    execute.execute(new RunnableWithContext(fun, needWait, EZ.context))
   }
 
-  class RunnableWithContext(fun: => Unit, context: EZContext) extends Runnable {
+  class RunnableWithContext(fun: => Unit, needWait: Boolean, context: EZContext) extends Runnable {
     override def run(): Unit = {
-      EZContext.setContext(context)
-      fun
+      val taskId = if (needWait) TaskMonitor.add("Async Task") else null
+      try {
+        EZContext.setContext(context)
+        fun
+      } catch {
+        case e: Throwable =>
+          logger.error(s"Execute async task error:${e.getMessage}", e)
+          throw e
+      } finally {
+        if (needWait) {
+          TaskMonitor.remove(taskId)
+        }
+      }
     }
   }
 

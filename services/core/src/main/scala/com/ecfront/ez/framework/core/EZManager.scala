@@ -7,6 +7,7 @@ import com.ecfront.ez.framework.core.config.{ConfigProcessor, EZConfig}
 import com.ecfront.ez.framework.core.eventbus.RabbitMQProcessor
 import com.ecfront.ez.framework.core.i18n.I18NProcessor
 import com.ecfront.ez.framework.core.logger.Logging
+import com.ecfront.ez.framework.core.monitor.TaskMonitor
 import com.ecfront.ez.framework.core.rpc.RPCProcessor
 
 import scala.collection.mutable.ArrayBuffer
@@ -238,6 +239,7 @@ object EZManager extends Logging {
   }
 
   sys.addShutdownHook {
+    TaskMonitor.waitFinish()
     shutdown()
   }
 

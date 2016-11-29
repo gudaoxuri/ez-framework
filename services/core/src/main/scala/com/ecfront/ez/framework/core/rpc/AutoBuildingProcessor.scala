@@ -3,6 +3,7 @@ package com.ecfront.ez.framework.core.rpc
 import com.ecfront.common._
 import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.logger.Logging
+import com.ecfront.ez.framework.core.monitor.TaskMonitor
 import com.ecfront.ez.framework.core.rpc.Method.Method
 import com.ecfront.ez.framework.core.rpc.apidoc.{APIDocItemVO, APIDocProcessor, APIDocSectionVO}
 
@@ -86,6 +87,7 @@ object AutoBuildingProcessor extends Logging {
 
   private def fun(method: Method, methodMirror: universe.MethodMirror): (Map[String, String], Any) => Any = {
     (parameter, body) =>
+      val taskId = TaskMonitor.add(s"RPC [$method] Task")
       try {
         if (method == Method.GET || method == Method.DELETE) {
           methodMirror(parameter)
@@ -97,6 +99,8 @@ object AutoBuildingProcessor extends Logging {
           val context = EZ.context
           logger.error(s"Occurred unchecked exception by ${context.id}:${context.sourceRPCPath} from ${context.sourceIP}", e)
           Resp.serverError(s"Occurred unchecked exception by ${context.id}:${context.sourceRPCPath} from ${context.sourceIP} : ${e.getMessage}")
+      }finally {
+        TaskMonitor.remove(taskId)
       }
   }
 
