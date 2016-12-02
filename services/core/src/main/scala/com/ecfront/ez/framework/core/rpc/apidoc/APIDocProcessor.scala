@@ -12,43 +12,46 @@ import scala.collection.mutable.ArrayBuffer
 object APIDocProcessor extends Logging {
 
   private var path: String = _
+  private var enable: Boolean = false
 
   def init(_path: String): Unit = {
-    path = if (_path != null) {
-      var path = if (_path.endsWith("/")) _path else _path + "/"
+    if (_path != null) {
+      enable = true
+      path = if (_path.endsWith("/")) _path else _path + "/"
       if (path.startsWith(".")) {
         path = this.getClass().getResource("/").getPath + path
       }
-      path
-    } else "/tmp/docs/"
-    logger.info("API Doc path is :" + path)
-    val p = new File(path)
-    if (!p.exists()) {
-      p.mkdirs()
+      val p = new File(path)
+      if (!p.exists()) {
+        p.mkdirs()
+      }
+      logger.info("API Doc path is :" + path)
     }
   }
 
   def build(apiDoc: APIDocSectionVO): Unit = {
-    val items = apiDoc.items.reverse.map {
-      item =>
-        val reqBody = packageReqBody(item)
-        val respBody = packageRespBody(item)
-        s"==== ${item.name}\r\n${item.desc.split("\r\n").map(_.trim).mkString("\r\n")}\r\n\r\n*请求*\r\n\r\n [${item.method}] ${item.uri}\r\n$reqBody\r\n\r\n*响应*\r\n\r\n$respBody\r\n"
-    }.mkString("\r\n")
-    if (items.nonEmpty) {
-      val data = s"=== ${apiDoc.name}${apiDoc.desc.split("\r\n").map(_.trim).mkString("\r\n")}\r\n$items"
-      val file = new File(path + (if (apiDoc.fileName.endsWith("$")) apiDoc.fileName.substring(0, apiDoc.fileName.length - 1) else apiDoc.fileName) + ".adoc")
-      if (file.exists()) {
-        file.delete()
-      }
-      val fw = new FileWriter(file)
-      try {
-        fw.write(data)
-      } catch {
-        case e: Throwable =>
-          throw e
-      } finally {
-        fw.close()
+    if (enable) {
+      val items = apiDoc.items.reverse.map {
+        item =>
+          val reqBody = packageReqBody(item)
+          val respBody = packageRespBody(item)
+          s"==== ${item.name}\r\n${item.desc.split("\r\n").map(_.trim).mkString("\r\n")}\r\n\r\n*请求*\r\n\r\n [${item.method}] ${item.uri}\r\n$reqBody\r\n\r\n*响应*\r\n\r\n$respBody\r\n"
+      }.mkString("\r\n")
+      if (items.nonEmpty) {
+        val data = s"=== ${apiDoc.name}${apiDoc.desc.split("\r\n").map(_.trim).mkString("\r\n")}\r\n$items"
+        val file = new File(path + (if (apiDoc.fileName.endsWith("$")) apiDoc.fileName.substring(0, apiDoc.fileName.length - 1) else apiDoc.fileName) + ".adoc")
+        if (file.exists()) {
+          file.delete()
+        }
+        val fw = new FileWriter(file)
+        try {
+          fw.write(data)
+        } catch {
+          case e: Throwable =>
+            throw e
+        } finally {
+          fw.close()
+        }
       }
     }
   }
@@ -139,4 +142,5 @@ object APIDocProcessor extends Logging {
       body.mkString("\r\n") + (if (item.reqExt.trim.nonEmpty) s"\r\n${item.reqExt.split("\r\n").map(_.trim).mkString("\r\n")}\r\n|===" else "\r\n|===")
     }
   }
+
 }
