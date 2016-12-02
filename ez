@@ -81,7 +81,7 @@ restart(){
 
 tailf(){
     app_code=$1
-	exec tailf -n 200 $log_path/$app_code/out.log
+	exec tailf -n 500 $log_path/$app_code/out.log
 }
 
 trace(){

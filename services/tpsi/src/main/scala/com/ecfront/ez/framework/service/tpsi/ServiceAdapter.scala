@@ -13,7 +13,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
     if (config.code == null || config.code.trim.isEmpty) {
       config.code = EZ.Info.module
     }
-    Resp.success("")
+    Resp.success(s"[TPSI]start success, mock = ${config.isMock}")
   }
 
   override def destroy(parameter: JsonNode): Resp[String] = {

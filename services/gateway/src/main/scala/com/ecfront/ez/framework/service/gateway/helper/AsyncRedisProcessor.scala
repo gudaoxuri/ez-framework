@@ -25,13 +25,18 @@ object AsyncRedisProcessor extends Logging {
     var resp: Resp[String] = null
     val addr = address.map(_.split(":"))
     val config = new RedisOptions()
-      .setHost(addr.head(0))
+    addr.foreach{
+      ad =>
+        // TODO 多地址支持
+        config.setHost(ad(0))
+        config.setPort(ad(1).toInt)
+    }
     simpleRedis = RedisClient.create(vertx, config)
-    simpleRedis.select(db, new Handler[AsyncResult[String]] {
-      override def handle(event: AsyncResult[String]): Unit = {
-        if (event.succeeded()) {
-          if (auth != null && auth.nonEmpty) {
-            simpleRedis.auth(auth, new Handler[AsyncResult[String]] {
+    if (auth != null && auth.nonEmpty) {
+      simpleRedis.auth(auth, new Handler[AsyncResult[String]] {
+        override def handle(event: AsyncResult[String]): Unit = {
+          if (event.succeeded()) {
+            simpleRedis.select(db, new Handler[AsyncResult[String]] {
               override def handle(event: AsyncResult[String]): Unit = {
                 if (event.succeeded()) {
                   resp = Resp.success("Redis client started")
@@ -44,16 +49,26 @@ object AsyncRedisProcessor extends Logging {
               }
             })
           } else {
-            resp = Resp.success("Redis client started")
+            logger.error("Redis client start fail.", event.cause())
+            resp = Resp.serverError(event.cause().getMessage)
             c.countDown()
           }
-        } else {
-          logger.error("Redis client start fail.", event.cause())
-          resp = Resp.serverError(event.cause().getMessage)
-          c.countDown()
         }
-      }
-    })
+      })
+    }else{
+      simpleRedis.select(db, new Handler[AsyncResult[String]] {
+        override def handle(event: AsyncResult[String]): Unit = {
+          if (event.succeeded()) {
+            resp = Resp.success("Redis client started")
+            c.countDown()
+          } else {
+            logger.error("Redis client start fail.", event.cause())
+            resp = Resp.serverError(event.cause().getMessage)
+            c.countDown()
+          }
+        }
+      })
+    }
     c.await()
     resp
   }
