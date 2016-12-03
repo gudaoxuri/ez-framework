@@ -64,7 +64,13 @@ private[jdbc] object JDBCExecutor extends Logging {
     if (!saveR) {
       saveR
     } else {
-      JDBCProcessor.get(s"SELECT * FROM $tableName WHERE $idFieldName  = ? ", List(saveR.body), clazz)
+      val idValue =
+        if (richValueInfo.contains(idFieldName)) {
+          richValueInfo(idFieldName)
+        } else {
+          saveR.body
+        }
+      JDBCProcessor.get(s"SELECT * FROM $tableName WHERE $idFieldName  = ? ", List(idValue), clazz)
     }
   }
 
