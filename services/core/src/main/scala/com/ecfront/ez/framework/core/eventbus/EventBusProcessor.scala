@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.core.eventbus
 
 import com.ecfront.common.JsonHelper
+import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.{Method, RPCProcessor}
 
@@ -10,6 +11,13 @@ trait EventBusProcessor extends Logging {
 
   private[ecfront] val FLAG_CONTEXT = "__ez_context__"
   val ADDRESS_SPLIT_FLAG = "@"
+
+  private val DEFAULT_TIMEOUT =
+    if (EZ.isDebug) {
+      Long.MaxValue
+    } else {
+      60L * 1000
+    }
 
   def publish(address: String, message: Any, args: Map[String, String] = Map()): Unit = {
     val addr = packageAddress(Method.PUB_SUB.toString, address)
@@ -34,7 +42,7 @@ trait EventBusProcessor extends Logging {
     request(address, message, args, ha)
   }
 
-  def ack[E: Manifest](address: String, message: Any, args: Map[String, String] = Map(), timeout: Long = 30 * 1000): (E, Map[String, String]) = {
+  def ack[E: Manifest](address: String, message: Any, args: Map[String, String] = Map(), timeout: Long = DEFAULT_TIMEOUT): (E, Map[String, String]) = {
     val addr = packageAddress(Method.ACK.toString, address)
     val msg = toAllowedMessage(message)
     logger.trace(s"[EB] ACK a message [$addr] : $args > ${RPCProcessor.cutPrintShow(msg.toString)} ")
@@ -43,7 +51,7 @@ trait EventBusProcessor extends Logging {
 
   protected def doAck[E: Manifest](address: String, message: Any, args: Map[String, String], timeout: Long): (E, Map[String, String])
 
-  def ackAsync[E: Manifest](address: String, message: Any, args: Map[String, String] = Map(), timeout: Long = 30 * 1000)(replyFun: => (E, Map[String, String]) => Unit): Unit = {
+  def ackAsync[E: Manifest](address: String, message: Any, args: Map[String, String] = Map(), timeout: Long = DEFAULT_TIMEOUT)(replyFun: => (E, Map[String, String]) => Unit): Unit = {
     val addr = packageAddress(Method.ACK.toString, address)
     val msg = toAllowedMessage(message)
     logger.trace(s"[EB] ACK async a message [$addr] : $args > ${RPCProcessor.cutPrintShow(msg.toString)} ")
