@@ -239,6 +239,7 @@ object EZManager extends Logging {
   }
 
   sys.addShutdownHook {
+    logger.info("!!! ==== Trigger shutdown event.")
     TaskMonitor.waitFinish()
     shutdown()
   }
