@@ -3,6 +3,7 @@ package com.ecfront.ez.framework.core.rpc.apidoc
 import java.io.{File, FileWriter}
 
 import com.ecfront.common.BeanHelper
+import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.i18n.I18NProcessor.Impl
 import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.{Label, Require}
@@ -39,7 +40,7 @@ object APIDocProcessor extends Logging {
       }.mkString("\r\n")
       if (items.nonEmpty) {
         val data = s"=== ${apiDoc.name}${apiDoc.desc.split("\r\n").map(_.trim).mkString("\r\n")}\r\n$items"
-        val file = new File(path + (if (apiDoc.fileName.endsWith("$")) apiDoc.fileName.substring(0, apiDoc.fileName.length - 1) else apiDoc.fileName) + ".adoc")
+        val file = new File(path + EZ.Info.module + "-" + (if (apiDoc.fileName.endsWith("$")) apiDoc.fileName.substring(0, apiDoc.fileName.length - 1) else apiDoc.fileName) + ".adoc")
         if (file.exists()) {
           file.delete()
         }
