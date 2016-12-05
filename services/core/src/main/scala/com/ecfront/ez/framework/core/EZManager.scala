@@ -140,6 +140,7 @@ object EZManager extends Logging {
     if (ezConfigR) {
       val ezConfig = ezConfigR.body
       EZ.Info.config = ezConfig
+      EZ.isDebug=ezConfig.ez.isDebug
       if (initMgr(ezConfig.ez.cluster)
         && initEB()
         /*&& initDistService()*/

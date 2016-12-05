@@ -3,6 +3,7 @@
   "ez": {
     "app": "",
     "module": "",
+    "isDebug":true,
     "cluster":{
       "userName":"user",
       "password":"password",

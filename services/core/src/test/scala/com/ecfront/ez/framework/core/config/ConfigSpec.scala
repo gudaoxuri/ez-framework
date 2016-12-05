@@ -6,7 +6,7 @@ import com.ecfront.ez.framework.core.{BasicSpec, EZ, EZManager}
 class ConfigSpec extends BasicSpec {
 
   test("config test") {
-    val tmpPath = "./com/ecfront/ez/framework/core/config/conf"
+    val tmpPath = "./conf"
     EZManager.start(s"@test#m1#$tmpPath")
     assert(EZ.Info.app == "test"
       && EZ.Info.module == "m1"

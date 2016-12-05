@@ -2,6 +2,7 @@
   "ez": {
     "app": "test",
     "module": "m1",
+    "isDebug":true,
     "cluster":{
       "userName":"user",
       "password":"password",

@@ -10,7 +10,6 @@ class MonitorSpec extends MockStartupSpec {
       Thread.sleep(5000)
       logger.info("end1....")
     }
-
     EZ.newThread{
       EZ.newThread{
         logger.info("start2 ....")
@@ -18,7 +17,19 @@ class MonitorSpec extends MockStartupSpec {
         logger.info("end2....")
       }
     }
+  }
 
+  test("Monitor Test2") {
+    new Thread(new Runnable {
+      override def run() = {
+        EZ.newThread{
+          logger.info("start1 ....")
+          Thread.sleep(5000)
+          logger.info("end1....")
+        }
+      }
+    }).start()
+   Thread.sleep(1000)
   }
 
 }
