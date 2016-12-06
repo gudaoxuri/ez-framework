@@ -100,7 +100,7 @@ object APIDocProcessor extends Logging {
       if (isList) {
         body +="""|Array |   | """
       }
-      body ++= labelsInfo.filterNot(i => extFieldNames.contains(i.fieldName)).map {
+      body ++= labelsInfo.filterNot(i => extFieldNames.contains(i.fieldName)).reverse.map {
         labelInfo =>
           val fieldName = labelInfo.fieldName
           val labelName =
@@ -127,7 +127,7 @@ object APIDocProcessor extends Logging {
       }
       val requiresInfo = BeanHelper.findFieldAnnotations(item.reqbody, Seq(classOf[Require]))
       val body = Seq("|===",s"""|列名|类型|说明|是否必填""", "") ++
-        labelsInfo.filterNot(i => extFieldNames.contains(i.fieldName)).map {
+        labelsInfo.filterNot(i => extFieldNames.contains(i.fieldName)).reverse.map {
           labelInfo =>
             val fieldName = labelInfo.fieldName
             val labelName =
