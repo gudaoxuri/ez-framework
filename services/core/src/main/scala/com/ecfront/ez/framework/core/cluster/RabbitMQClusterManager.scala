@@ -68,7 +68,7 @@ object RabbitMQClusterManager extends Logging {
     channel.exchangeDeclare(exchangeName, "direct")
     channel.queueDeclare(topic, false, false, false, null)
     val opt = new AMQP.BasicProperties.Builder().headers(args).build()
-    channel.basicPublish(exchangeName, topic, opt, message.getBytes())
+    channel.basicPublish(exchangeName, topic, opt, message.getBytes("UTF-8"))
     channel.close()
   }
 
@@ -95,7 +95,7 @@ object RabbitMQClusterManager extends Logging {
     channel.exchangeDeclare(exchangeName, "direct")
     channel.queueDeclare(address, true, false, false, null)
     val opt = new AMQP.BasicProperties.Builder().headers(args).build()
-    channel.basicPublish(exchangeName, address, opt, message.getBytes())
+    channel.basicPublish(exchangeName, address, opt, message.getBytes("UTF-8"))
     channel.close()
   }
 
@@ -140,7 +140,7 @@ object RabbitMQClusterManager extends Logging {
       .headers(args)
       .replyTo(replyQueueName)
       .build()
-    channel.basicPublish("", address, opt, message.getBytes())
+    channel.basicPublish("", address, opt, message.getBytes("UTF-8"))
     var replyMessage: String = null
     var replyHeader: Map[String, String] = null
     var hasReply = false
@@ -154,7 +154,7 @@ object RabbitMQClusterManager extends Logging {
               header =>
                 header._1 -> header._2.toString
             }.toMap
-            replyMessage = new String(delivery.getBody)
+            replyMessage = new String(delivery.getBody,"UTF-8")
           }
         } else {
           channel.close()
@@ -183,7 +183,7 @@ object RabbitMQClusterManager extends Logging {
       .headers(args)
       .replyTo(replyQueueName)
       .build()
-    channel.basicPublish("", address, opt, message.getBytes())
+    channel.basicPublish("", address, opt, message.getBytes("UTF-8"))
     EZ.execute.execute(new Runnable {
       override def run(): Unit = {
         var replyMessage: String = null
@@ -199,7 +199,7 @@ object RabbitMQClusterManager extends Logging {
                   header =>
                     header._1 -> header._2.toString
                 }.toMap
-                replyMessage = new String(delivery.getBody)
+                replyMessage = new String(delivery.getBody,"UTF-8")
               }
             } else {
               channel.close()
@@ -228,7 +228,7 @@ object RabbitMQClusterManager extends Logging {
           while (true) {
             val delivery = consumer.nextDelivery()
             val props = delivery.getProperties()
-            val message = new String(delivery.getBody())
+            val message = new String(delivery.getBody(),"UTF-8")
             EZ.newThread {
               val result = receivedFun(message, props.getHeaders.map {
                 header =>
@@ -238,7 +238,7 @@ object RabbitMQClusterManager extends Logging {
               .Builder()
                 .headers(result._2)
                 .correlationId(props.getCorrelationId())
-                .build(), result._1.getBytes)
+                .build(), result._1.getBytes("UTF-8"))
             }
           }
         } catch {
@@ -262,7 +262,7 @@ object RabbitMQClusterManager extends Logging {
           while (true) {
             val delivery = consumer.nextDelivery()
             val props = delivery.getProperties()
-            val message = new String(delivery.getBody())
+            val message = new String(delivery.getBody(),"UTF-8")
             EZ.newThread {
               receivedFun(message, props.getHeaders.map {
                 header =>
@@ -273,7 +273,7 @@ object RabbitMQClusterManager extends Logging {
                   .Builder()
                     .headers(result._2)
                     .correlationId(props.getCorrelationId())
-                    .build(), result._1.getBytes)
+                    .build(), result._1.getBytes("UTF-8"))
               }
             }
           }
