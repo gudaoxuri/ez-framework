@@ -1,5 +1,6 @@
 package com.ecfront.ez.framework.service.gateway
 
+import java.net.URLDecoder
 import java.util.regex.Pattern
 
 import com.ecfront.common.Resp
@@ -280,7 +281,7 @@ object LocalCacheContainer extends Logging {
               // 获取原始（注册时的）Path
               urlTemplate = item.originalPath
               // 从Path中抽取变量
-              item.param.foreach(name => newParameters += (name -> matcher.group(name)))
+              item.param.foreach(name => newParameters += (name -> URLDecoder.decode(matcher.group(name),"UTF-8")))
             }
         }
       }
