@@ -18,8 +18,8 @@ object EmailProcessor extends Logging {
 
   private var mailer: Mailer = _
 
-  private var defaultSender: String = _
-  private var defaultSendAddress: String = _
+  var defaultSender: String = _
+  var defaultSendAddress: String = _
 
   /**
     * 初始化
@@ -72,6 +72,22 @@ object EmailProcessor extends Logging {
     */
   def send(toName: String, toAddress: String, title: String, content: String, attachments: List[(String, String)]): Resp[Void] = {
     send(defaultSender, defaultSendAddress, List((toName, toAddress)), null, null, title, content, attachments, async = false)
+  }
+
+  /**
+    * 发送email
+    *
+    * @param to          to
+    * @param cc          cc
+    * @param bcc         bcc
+    * @param title       标题
+    * @param content     正文
+    * @param attachments 附件，格式：Name - Path
+    * @return 发送结果
+    */
+  def send(to: List[(String, String)], cc: List[(String, String)], bcc: List[(String, String)],
+           title: String, content: String, attachments: List[(String, String)]): Resp[Void] = {
+    send(defaultSender, defaultSendAddress, to, cc, bcc, title, content, attachments, async = false)
   }
 
   /**
