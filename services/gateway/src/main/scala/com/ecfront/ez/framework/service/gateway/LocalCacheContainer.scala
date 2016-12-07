@@ -36,13 +36,12 @@ object LocalCacheContainer extends Logging {
     Method.WS.toString -> collection.mutable.Map[String, ArrayBuffer[String]]()
   )
 
-  val resourceROrderByPathDepth = Ordering.by[(String, ArrayBuffer[String]), Int](_._1.split("/").length * -1)
-  private val resourcesR = Map[String, collection.mutable.SortedSet[(String, ArrayBuffer[String])]](
-    Method.GET.toString -> collection.mutable.SortedSet[(String, ArrayBuffer[String])]()(resourceROrderByPathDepth),
-    Method.POST.toString -> collection.mutable.SortedSet[(String, ArrayBuffer[String])]()(resourceROrderByPathDepth),
-    Method.PUT.toString -> collection.mutable.SortedSet[(String, ArrayBuffer[String])]()(resourceROrderByPathDepth),
-    Method.DELETE.toString -> collection.mutable.SortedSet[(String, ArrayBuffer[String])]()(resourceROrderByPathDepth),
-    Method.WS.toString -> collection.mutable.SortedSet[(String, ArrayBuffer[String])]()(resourceROrderByPathDepth)
+  private val resourcesR = Map[String, collection.mutable.ListBuffer[(String, ArrayBuffer[String])]](
+    Method.GET.toString -> collection.mutable.ListBuffer[(String, ArrayBuffer[String])](),
+    Method.POST.toString -> collection.mutable.ListBuffer[(String, ArrayBuffer[String])](),
+    Method.PUT.toString -> collection.mutable.ListBuffer[(String, ArrayBuffer[String])](),
+    Method.DELETE.toString -> collection.mutable.ListBuffer[(String, ArrayBuffer[String])](),
+    Method.WS.toString -> collection.mutable.ListBuffer[(String, ArrayBuffer[String])]()
   )
 
   private val organizations = collection.mutable.Set[String]()
@@ -61,8 +60,10 @@ object LocalCacheContainer extends Logging {
       def add(m: String): Unit = {
         if (!resourcesR(m).exists(_._1 == path.substring(0, path.length - 1))) {
           resourcesR(m) += ((path.substring(0, path.length - 1), ArrayBuffer()))
+          resourcesR(m).sortBy(_._1.split("/").length * -1)
         }
       }
+
       if (method == "*") {
         add(Method.GET.toString)
         add(Method.POST.toString)
@@ -78,6 +79,7 @@ object LocalCacheContainer extends Logging {
           resources(m) += path -> ArrayBuffer()
         }
       }
+
       if (method == "*") {
         add(Method.GET.toString)
         add(Method.POST.toString)
@@ -100,6 +102,7 @@ object LocalCacheContainer extends Logging {
           resourcesR(m) -= removeRes.get
         }
       }
+
       if (method == "*") {
         remove(Method.GET.toString)
         remove(Method.POST.toString)
@@ -193,6 +196,7 @@ object LocalCacheContainer extends Logging {
               resourcesR(m.toString) += ((path.substring(0, path.length - 1), ArrayBuffer(code)))
             }
           }
+
           if (method == "*") {
             add(Method.GET.toString)
             add(Method.POST.toString)
@@ -211,6 +215,7 @@ object LocalCacheContainer extends Logging {
               resources(m.toString) += path -> ArrayBuffer(code)
             }
           }
+
           if (method == "*") {
             add(Method.GET.toString)
             add(Method.POST.toString)
@@ -232,7 +237,7 @@ object LocalCacheContainer extends Logging {
   }
 
   def flushAuth(): Resp[Void] = {
-    resourcesR.foreach(_._2.empty)
+    resourcesR.foreach(_._2.clear)
     resources.foreach(_._2.empty)
     organizations.empty
     Resp.success(null)
@@ -261,7 +266,7 @@ object LocalCacheContainer extends Logging {
     newParameters ++= parameters
     // 格式化path
     val formatPath = if (path.endsWith("/")) path else path + "/"
-    var urlTemplate:String=null
+    var urlTemplate: String = null
     if (routerContainer.contains(method.toUpperCase)) {
       if (routerContainer(method.toUpperCase).contains(formatPath)) {
         urlTemplate = formatPath

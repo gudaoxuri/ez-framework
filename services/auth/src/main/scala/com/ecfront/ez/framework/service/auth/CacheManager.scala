@@ -104,7 +104,6 @@ object CacheManager extends Logging {
       Initiator.initOrganization(org)
     }
 
-
     def addOrganization(org: EZ_Organization): Unit = {
       EZ.eb.pubReq(ServiceAdapter.EB_ORG_ADD_FLAG, org)
     }

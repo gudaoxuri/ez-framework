@@ -15,7 +15,7 @@ object Initiator extends Logging {
 
   def init(): Unit = {
     updateCache()
-    val exist = EZ_Resource.existByCond(s"""code = ?""", List(EZ_Resource.assembleCode(Method.GET.toString, "/ez/auth/manage/organization/")))
+    val exist = EZ_Resource.existByCond(s"""code = ?""", List(EZ_Resource.assembleCode("*", "/ez/auth/manage/organization/*")))
     if (!exist.body) {
       EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/*", s"Manage ALL"))
       EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/organization/*", s"Organization CRUD"))
