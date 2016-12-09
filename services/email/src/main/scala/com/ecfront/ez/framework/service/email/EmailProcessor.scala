@@ -132,7 +132,7 @@ object EmailProcessor extends Logging {
       if (attachments != null) {
         attachments.foreach {
           attach =>
-            email.addAttachment(MimeUtility.encodeText(attach._1), new FileDataSource(attach._2))
+            email.addAttachment(MimeUtility.encodeText(attach._1,"UTF-8",null), new FileDataSource(attach._2))
         }
       }
       logger.trace(s"Send mail [$title] to ${to.map(_._2).mkString(";")}")
