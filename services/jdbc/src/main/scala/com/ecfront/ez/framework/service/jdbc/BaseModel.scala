@@ -16,6 +16,7 @@ import scala.reflect.runtime._
 abstract class BaseModel extends Serializable {
 
   @Id("seq")
+  @Desc("Id",100,0)
   @BeanProperty var id: String = _
 
 }
