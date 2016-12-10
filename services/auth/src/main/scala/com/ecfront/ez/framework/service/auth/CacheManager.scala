@@ -46,7 +46,7 @@ object CacheManager extends Logging {
     def addToken(account: EZ_Account, org: EZ_Organization): OptInfo = {
       // 加锁，避免在多线程下`TOKEN_ID_REL_FLAG + account.code`竞争问题
       tokenLock.lock()
-      removeToken(account.code)
+      removeTokenByAccountCode(account.code)
       val newTokenInfo = OptInfo(
         EZ.createUUID,
         account.code,
