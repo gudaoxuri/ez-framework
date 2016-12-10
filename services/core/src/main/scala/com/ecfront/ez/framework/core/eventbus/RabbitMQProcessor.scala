@@ -32,7 +32,9 @@ class RabbitMQProcessor extends EventBusProcessor {
                                  (implicit e: Manifest[E]): (E, Map[String, String]) = {
     val result = RabbitMQClusterManager.ack(address, toJsonString(message),
       args + (FLAG_CONTEXT -> JsonHelper.toJsonString(EZ.context)), timeout)
-    EZContext.setContext(JsonHelper.toObject[EZContext](result._2(FLAG_CONTEXT)))
+    if (result._2.contains(FLAG_CONTEXT)) {
+      EZContext.setContext(JsonHelper.toObject[EZContext](result._2(FLAG_CONTEXT)))
+    }
     val headers = result._2 - FLAG_CONTEXT
     try {
       val msg =
@@ -55,7 +57,9 @@ class RabbitMQProcessor extends EventBusProcessor {
     RabbitMQClusterManager.ackAsync(address, toJsonString(message),
       args + (FLAG_CONTEXT -> JsonHelper.toJsonString(EZ.context)), timeout) {
       (replyMessage, replyArgs) =>
-        EZContext.setContext(JsonHelper.toObject[EZContext](replyArgs(FLAG_CONTEXT)))
+        if (replyArgs.contains(FLAG_CONTEXT)) {
+          EZContext.setContext(JsonHelper.toObject[EZContext](replyArgs(FLAG_CONTEXT)))
+        }
         val headers = replyArgs - FLAG_CONTEXT
         try {
           val msg =
@@ -78,7 +82,9 @@ class RabbitMQProcessor extends EventBusProcessor {
   override protected def doSubscribe[E: Manifest](address: String, reqClazz: Class[E])(receivedFun: (E, Map[String, String]) => Unit): Unit = {
     RabbitMQClusterManager.subscribe(address) {
       (message, args) =>
-        EZContext.setContext(JsonHelper.toObject[EZContext](args(FLAG_CONTEXT)))
+        if (args.contains(FLAG_CONTEXT)) {
+          EZContext.setContext(JsonHelper.toObject[EZContext](args(FLAG_CONTEXT)))
+        }
         val headers = args - FLAG_CONTEXT
         logger.trace(s"[EB] Received a subscribe message [$address] : $headers > ${RPCProcessor.cutPrintShow(message)} ")
         try {
@@ -94,7 +100,9 @@ class RabbitMQProcessor extends EventBusProcessor {
   override protected def doResponse[E: Manifest](address: String, reqClazz: Class[E])(receivedFun: (E, Map[String, String]) => Unit): Unit = {
     RabbitMQClusterManager.response(address) {
       (message, args) =>
-        EZContext.setContext(JsonHelper.toObject[EZContext](args(FLAG_CONTEXT)))
+        if (args.contains(FLAG_CONTEXT)) {
+          EZContext.setContext(JsonHelper.toObject[EZContext](args(FLAG_CONTEXT)))
+        }
         val headers = args - FLAG_CONTEXT
         logger.trace(s"[EB] Received a response message [$address] : $headers > ${RPCProcessor.cutPrintShow(message)} ")
         try {
@@ -111,7 +119,9 @@ class RabbitMQProcessor extends EventBusProcessor {
                                              (receivedFun: (E, Map[String, String]) => (Any, Map[String, String])): Unit = {
     RabbitMQClusterManager.reply(address) {
       (message, args) =>
-        EZContext.setContext(JsonHelper.toObject[EZContext](args(FLAG_CONTEXT)))
+        if (args.contains(FLAG_CONTEXT)) {
+          EZContext.setContext(JsonHelper.toObject[EZContext](args(FLAG_CONTEXT)))
+        }
         val headers = args - FLAG_CONTEXT
         logger.trace(s"[EB] Received a reply message [$address] : $headers > ${RPCProcessor.cutPrintShow(message)} ")
         try {
@@ -131,8 +141,13 @@ class RabbitMQProcessor extends EventBusProcessor {
     RabbitMQClusterManager.replyAsync(address) {
       (message, args) =>
         val p = Promise[(String, Map[String, String])]()
-        val tmpContent = args(FLAG_CONTEXT)
-        EZContext.setContext(JsonHelper.toObject[EZContext](tmpContent))
+        val tmpContent =
+          if (args.contains(FLAG_CONTEXT)) {
+            EZContext.setContext(JsonHelper.toObject[EZContext](args(FLAG_CONTEXT)))
+            args(FLAG_CONTEXT)
+          } else {
+            JsonHelper.toJsonString(EZContext.getContext)
+          }
         val headers = args - FLAG_CONTEXT
         logger.trace(s"[EB] Received a reply message [$address] : $headers > ${RPCProcessor.cutPrintShow(message)} ")
         try {

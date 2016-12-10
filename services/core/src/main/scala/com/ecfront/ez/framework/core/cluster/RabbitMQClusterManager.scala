@@ -80,11 +80,17 @@ object RabbitMQClusterManager extends Logging {
     channel.queueBind(queueName, exchangeName, topic)
     val consumer = new DefaultConsumer(channel) {
       override def handleDelivery(consumerTag: String, envelope: Envelope, properties: BasicProperties, body: Array[Byte]): Unit = {
+        val header =
+          if (properties.getHeaders != null) {
+            properties.getHeaders.map {
+              header =>
+                header._1 -> header._2.toString
+            }.toMap
+          } else {
+            Map[String, String]()
+          }
         val message = new String(body, "UTF-8")
-        receivedFun(message, properties.getHeaders.map {
-          header =>
-            header._1 -> header._2.toString
-        }.toMap)
+        receivedFun(message, header)
       }
     }
     channel.basicConsume(queueName, true, consumer)
@@ -111,11 +117,17 @@ object RabbitMQClusterManager extends Logging {
         try {
           while (true) {
             val delivery = consumer.nextDelivery()
+            val header =
+              if (delivery.getProperties.getHeaders != null) {
+                delivery.getProperties.getHeaders.map {
+                  header =>
+                    header._1 -> header._2.toString
+                }.toMap
+              } else {
+                Map[String, String]()
+              }
             val message = new String(delivery.getBody(), "UTF-8")
-            receivedFun(message, delivery.getProperties.getHeaders.map {
-              header =>
-                header._1 -> header._2.toString
-            }.toMap)
+            receivedFun(message, header)
           }
         } catch {
           case e: ShutdownSignalException =>
@@ -150,11 +162,16 @@ object RabbitMQClusterManager extends Logging {
         if (delivery != null) {
           if (delivery.getProperties.getCorrelationId.equals(corrId)) {
             hasReply = true
-            replyHeader = delivery.getProperties.getHeaders.map {
-              header =>
-                header._1 -> header._2.toString
-            }.toMap
-            replyMessage = new String(delivery.getBody,"UTF-8")
+            replyHeader =
+              if (delivery.getProperties.getHeaders != null) {
+                delivery.getProperties.getHeaders.map {
+                  header =>
+                    header._1 -> header._2.toString
+                }.toMap
+              } else {
+                Map[String, String]()
+              }
+            replyMessage = new String(delivery.getBody, "UTF-8")
           }
         } else {
           channel.close()
@@ -195,11 +212,16 @@ object RabbitMQClusterManager extends Logging {
             if (delivery != null) {
               if (delivery.getProperties.getCorrelationId.equals(corrId)) {
                 hasReply = true
-                replyHeader = delivery.getProperties.getHeaders.map {
-                  header =>
-                    header._1 -> header._2.toString
-                }.toMap
-                replyMessage = new String(delivery.getBody,"UTF-8")
+                replyHeader =
+                  if (delivery.getProperties.getHeaders != null) {
+                    delivery.getProperties.getHeaders.map {
+                      header =>
+                        header._1 -> header._2.toString
+                    }.toMap
+                  } else {
+                    Map[String, String]()
+                  }
+                replyMessage = new String(delivery.getBody, "UTF-8")
               }
             } else {
               channel.close()
@@ -228,12 +250,18 @@ object RabbitMQClusterManager extends Logging {
           while (true) {
             val delivery = consumer.nextDelivery()
             val props = delivery.getProperties()
-            val message = new String(delivery.getBody(),"UTF-8")
+            val header =
+              if (props.getHeaders != null) {
+                props.getHeaders.map {
+                  header =>
+                    header._1 -> header._2.toString
+                }.toMap
+              } else {
+                Map[String, String]()
+              }
+            val message = new String(delivery.getBody(), "UTF-8")
             EZ.newThread {
-              val result = receivedFun(message, props.getHeaders.map {
-                header =>
-                  header._1 -> header._2.toString
-              }.toMap)
+              val result = receivedFun(message, header)
               channel.basicPublish("", props.getReplyTo(), new BasicProperties
               .Builder()
                 .headers(result._2)
@@ -262,12 +290,18 @@ object RabbitMQClusterManager extends Logging {
           while (true) {
             val delivery = consumer.nextDelivery()
             val props = delivery.getProperties()
-            val message = new String(delivery.getBody(),"UTF-8")
+            val header =
+              if (props.getHeaders != null) {
+                props.getHeaders.map {
+                  header =>
+                    header._1 -> header._2.toString
+                }.toMap
+              } else {
+                Map[String, String]()
+              }
+            val message = new String(delivery.getBody(), "UTF-8")
             EZ.newThread {
-              receivedFun(message, props.getHeaders.map {
-                header =>
-                  header._1 -> header._2.toString
-              }.toMap).onSuccess {
+              receivedFun(message, header).onSuccess {
                 case result =>
                   channel.basicPublish("", props.getReplyTo(), new BasicProperties
                   .Builder()
