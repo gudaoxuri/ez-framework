@@ -9,7 +9,7 @@ import com.ecfront.ez.framework.service.jdbc.scaffold.SimpleRPCService
 /**
   * 角色管理
   */
-@RPC("/ez/auth/manage/role/","角色管理","")
+@RPC("/ez/auth/manage/role/","EZ-角色管理","")
 object RoleService extends SimpleRPCService[EZ_Role] {
 
   override protected val storageObj: BaseStorage[EZ_Role] = EZ_Role

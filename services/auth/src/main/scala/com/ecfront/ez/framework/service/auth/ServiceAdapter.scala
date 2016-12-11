@@ -3,6 +3,7 @@ package com.ecfront.ez.framework.service.auth
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.core.EZServiceAdapter
 import com.ecfront.ez.framework.core.rpc.AutoBuildingProcessor
+import com.ecfront.ez.framework.core.rpc.apidoc.APIDocProcessor
 import com.fasterxml.jackson.databind.JsonNode
 
 import scala.collection.mutable

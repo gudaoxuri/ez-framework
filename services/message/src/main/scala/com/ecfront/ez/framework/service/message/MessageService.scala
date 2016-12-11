@@ -14,7 +14,7 @@ import com.ecfront.ez.framework.service.message.helper.TemplateEngineHelper
 /**
   * 消息服务
   */
-@RPC("/ez/message/", "消息服务", "")
+@RPC("/ez/message/", "EZ-消息服务", "")
 object MessageService extends Logging {
 
   /**

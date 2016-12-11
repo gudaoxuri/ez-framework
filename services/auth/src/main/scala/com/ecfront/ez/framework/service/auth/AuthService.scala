@@ -8,7 +8,7 @@ import com.ecfront.ez.framework.service.auth.helper.CaptchaHelper
 import com.ecfront.ez.framework.service.auth.model._
 import com.ecfront.ez.framework.service.jdbc.BaseModel
 
-@RPC("/ez/auth/", "权限组件", "")
+@RPC("/ez/auth/", "EZ-权限服务", "")
 object AuthService extends Logging {
 
   private val random = new scala.util.Random
@@ -108,7 +108,7 @@ object AuthService extends Logging {
     }
   }
 
-  @GET("/public/auth/captcha/:organizationCode/:id/", "获取验证码", "", "||File|验证码图片文件")
+  @GET("/public/auth/captcha/:organizationCode/:id/", "获取图片验证码", "", "||File|验证码图片文件")
   def getCaptcha(parameter: Map[String, String]): Resp[DownloadFile] = {
     val id = parameter.getOrElse("id", "")
     val organizationCode = parameter.getOrElse("organizationCode", ServiceAdapter.defaultOrganizationCode)

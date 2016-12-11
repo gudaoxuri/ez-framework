@@ -1,7 +1,7 @@
 {
   "ez": {
     "app": "test",
-    "module": "tpsi",
+    "module": "EZ-TPSI",
     "isDebug":true,
     "cluster":{
       "userName":"user",

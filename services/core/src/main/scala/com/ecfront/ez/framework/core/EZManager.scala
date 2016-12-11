@@ -140,12 +140,13 @@ object EZManager extends Logging {
     if (ezConfigR) {
       val ezConfig = ezConfigR.body
       EZ.Info.config = ezConfig
-      EZ.isDebug=ezConfig.ez.isDebug
+      EZ.isDebug = ezConfig.ez.isDebug
       if (initMgr(ezConfig.ez.cluster)
         && initEB()
         /*&& initDistService()*/
         && initCache(ezConfig.ez.cache)
-        && I18NProcessor.init()) {
+        && I18NProcessor.init()
+        && initRPC(ezConfig.ez.rpc)) {
         EZ.Info.app = ezConfig.ez.app
         EZ.Info.module = ezConfig.ez.module
         EZ.Info.timezone = ezConfig.ez.timezone
@@ -182,7 +183,7 @@ object EZManager extends Logging {
             }
             if (isSuccess) {
               ezServices.foreach(_.initPost())
-              if (initRPC(ezConfig.ez.rpc)) {
+              if (RPCProcessor.autoBuilding(ezConfig.ez.rpc)) {
                 logSuccess("Start Success")
               } else {
                 logError(s"Start Fail : Core services start error")

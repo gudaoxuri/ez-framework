@@ -24,15 +24,19 @@ object RPCProcessor extends Logging {
   private val requireFieldNames = collection.mutable.Map[String, List[String]]()
 
   private[core] def init(config: Map[String, Any]): Resp[Void] = {
-    val basePackage = config("package").asInstanceOf[String]
     printBodyLimit = config.getOrElse("printBodyLimit", 4000).asInstanceOf[Int]
     APIDocProcessor.init(config.getOrElse("docPath", null).asInstanceOf[String])
+    logger.info("[RPC] Init successful")
+    Resp.success(null)
+  }
+
+  private[core] def autoBuilding(config: Map[String, Any]): Resp[Void] = {
+    val basePackage = config("package").asInstanceOf[String]
     AutoBuildingProcessor.autoBuilding(basePackage)
     address.foreach {
       addr =>
         logger.info(s"[RPC] Register address : $addr")
     }
-    logger.info("[RPC] Init successful")
     Resp.success(null)
   }
 

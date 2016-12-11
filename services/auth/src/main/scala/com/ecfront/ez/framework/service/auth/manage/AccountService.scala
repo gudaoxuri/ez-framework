@@ -11,7 +11,7 @@ import com.ecfront.ez.framework.service.jdbc.{BaseStorage, Page}
 /**
   * 账号管理
   */
-@RPC("/ez/auth/manage/account/", "账号管理", "")
+@RPC("/ez/auth/manage/account/", "EZ-账号管理", "")
 object AccountService extends SimpleRPCService[EZ_Account] {
 
   override protected val storageObj: BaseStorage[EZ_Account] = EZ_Account

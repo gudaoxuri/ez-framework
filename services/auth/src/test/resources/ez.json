@@ -1,7 +1,7 @@
 {
   "ez": {
-    "app": "",
-    "module": "",
+    "app": "test",
+    "module": "EZ-Auth",
     "cluster":{
       "userName":"user",
       "password":"password",
@@ -16,7 +16,8 @@
       "address": "127.0.0.1:6379"
     },
     "rpc": {
-      "package": "com.ecfront.ez.framework.service.auth.test"
+      "package": "com.ecfront.ez.framework.service.auth.test",
+      "docPath": "../../../../doc/api"
     },
     "services": {
       "auth": {

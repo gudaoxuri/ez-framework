@@ -7,7 +7,7 @@ import com.ecfront.ez.framework.core.rpc._
 /**
   * TPSI服务
   */
-@RPC("/ez/tpsi/", "TPSI服务", "")
+@RPC("/ez/tpsi/", "EZ-TPSI服务", "")
 object TPSIProcessor extends Logging {
 
   /**
