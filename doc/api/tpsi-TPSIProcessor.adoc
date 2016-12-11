@@ -1,0 +1,62 @@
+=== TPSI服务
+==== 开始调用服务
+
+
+*请求*
+
+ [POST] /ez/tpsi/start/
+|===
+|列名|类型|说明|是否必填
+
+|service_code|String|服务名称|true
+|supplier_code|String|供应商名称|true
+|invoke_main_body|String|调用主体|true
+|===
+
+*响应*
+
+|===
+|列名|类型|说明
+
+||Long|服务ID,完成时带回此ID
+|===
+
+==== 完成服务调用
+
+
+*请求*
+
+ [PUT] /ez/tpsi/finish/
+|===
+|列名|类型|说明|是否必填
+
+|log_id|Long|开始的日志ID|true
+|success|Boolean|是否成功|true
+|message|String|结果描述|true
+|===
+
+*响应*
+
+_无_
+
+==== 记录服务调用,从开始到结束
+
+
+*请求*
+
+ [POST] /ez/tpsi/add/
+|===
+|列名|类型|说明|是否必填
+
+|service_code|String|服务名称|true
+|supplier_code|String|供应商名称|true
+|invoke_main_body|String|调用主体|true
+|start_time|java.util.Date|开始时间|true
+|end_time|java.util.Date|结束时间|true
+|success|Boolean|是否成功|true
+|message|String|结果描述|true
+|===
+
+*响应*
+
+_无_

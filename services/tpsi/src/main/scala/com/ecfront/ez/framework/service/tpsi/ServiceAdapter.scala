@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.service.tpsi
 
 import com.ecfront.common.{JsonHelper, Resp}
+import com.ecfront.ez.framework.core.rpc.AutoBuildingProcessor
 import com.ecfront.ez.framework.core.{EZ, EZServiceAdapter}
 import com.fasterxml.jackson.databind.JsonNode
 
@@ -13,6 +14,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
     if (config.code == null || config.code.trim.isEmpty) {
       config.code = EZ.Info.module
     }
+    AutoBuildingProcessor.autoBuilding("com.ecfront.ez.framework.service.tpsi")
     Resp.success(s"[TPSI]start success, mock = ${config.isMock}")
   }
 

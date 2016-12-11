@@ -46,7 +46,7 @@ trait TPSIService extends Logging {
       currEXInfo(funName + "@" + config.code) += traceId -> (new Date(), id)
       logger.info(s"[TPSI] start [$funName]:[${config.code}][$id]")
       val log = if (config.isStorage) {
-        EZ_TPSI_Log.start(funName, config.code)
+        EZ_TPSI_Log.start(funName, config.code,id)
       } else null
       val execResult = execFun
       val finishTime = new Date()

@@ -2,7 +2,7 @@ package com.ecfront.ez.framework.service.tpsi
 
 import java.util.Date
 
-import com.ecfront.common.Resp
+import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.helper.TimeHelper
 import com.ecfront.ez.framework.service.jdbc._
 
@@ -17,6 +17,9 @@ case class EZ_TPSI_Log() extends BaseModel {
   @Index
   @Desc("供应商名称", 200, 0)
   @BeanProperty var supplier_code: String = _
+  @Index
+  @Desc("调用主体", 200, 0)
+  @BeanProperty var invoke_main_body: String = _
   @Desc("开始年份", 0, 0)
   @BeanProperty var start_year: Long = _
   @Desc("开始月份", 0, 0)
@@ -36,15 +39,43 @@ case class EZ_TPSI_Log() extends BaseModel {
 
 object EZ_TPSI_Log extends BaseStorage[EZ_TPSI_Log] {
 
-  def start(serviceCode: String, supplierCode: String): EZ_TPSI_Log = {
+  def add(serviceCode: String, supplierCode: String, invokeMainBody: String,
+          success: Boolean, message: String, startTime: Date, endTime: Date): Unit = {
+    val log = new EZ_TPSI_Log
+    log.service_code = serviceCode
+    log.supplier_code = supplierCode
+    log.invoke_main_body = invokeMainBody
+    log.start_year = TimeHelper.yf.format(startTime).toLong
+    log.start_month = TimeHelper.Mf.format(startTime).toLong
+    log.start_time = TimeHelper.msf.format(startTime).toLong
+    log.end_time = TimeHelper.msf.format(endTime).toLong
+    log.use_time = log.end_time - log.start_time
+    log.success = success
+    log.message = message
+    addLogFile(EZ_TPSI_Log.save(log).body)
+  }
+
+  def start(serviceCode: String, supplierCode: String, invokeMainBody: String = ""): EZ_TPSI_Log = {
     val now = new Date()
     val log = new EZ_TPSI_Log
     log.service_code = serviceCode
     log.supplier_code = supplierCode
+    log.invoke_main_body = invokeMainBody
     log.start_year = TimeHelper.yf.format(now).toLong
     log.start_month = TimeHelper.Mf.format(now).toLong
     log.start_time = TimeHelper.msf.format(now).toLong
     EZ_TPSI_Log.save(log).body
+  }
+
+  def finishByLogId(success: Boolean, message: String, logId: Long, endTime: Date = new Date()): Unit = {
+    val log = EZ_TPSI_Log.getById(logId).body
+    if (log != null) {
+      log.end_time = TimeHelper.msf.format(endTime).toLong
+      log.use_time = log.end_time - log.start_time
+      log.success = success
+      log.message = message
+      addLogFile(EZ_TPSI_Log.update(log).body)
+    }
   }
 
   def finish(success: Boolean, message: String, log: EZ_TPSI_Log, endTime: Date = new Date()): Unit = {
@@ -52,11 +83,18 @@ object EZ_TPSI_Log extends BaseStorage[EZ_TPSI_Log] {
     log.use_time = log.end_time - log.start_time
     log.success = success
     log.message = message
-    EZ_TPSI_Log.update(log)
+    addLogFile(EZ_TPSI_Log.update(log).body)
   }
 
   def pageByCode(serviceCode: String, supplierCode: String, pageNumber: Long, pageSize: Int): Resp[Page[EZ_TPSI_Log]] = {
     page("service_code = ? and supplier_code = ? order by desc", List(serviceCode, supplierCode), pageNumber, pageSize)
+  }
+
+  def addLogFile(log:EZ_TPSI_Log):Unit={
+   val json=JsonHelper.createObjectNode()
+    json.put("category","TPSI")
+    json.set("detail",JsonHelper.toJson(log))
+    logger.info(s"[TPSI]${JsonHelper.toJsonString(json)}")
   }
 
 }

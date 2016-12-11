@@ -2,6 +2,7 @@
   "ez": {
     "app": "test",
     "module": "tpsi",
+    "isDebug":true,
     "cluster":{
       "userName":"user",
       "password":"password",
@@ -16,7 +17,8 @@
       "address": "127.0.0.1:6379"
     },
     "rpc": {
-      "package": "com.ecfront.ez.framework.service.tpsi"
+      "package": "com.ecfront.ez.framework.service.tpsi",
+      "docPath": "../../../../doc/api"
     },
     "services": {
       "tpsi": {
