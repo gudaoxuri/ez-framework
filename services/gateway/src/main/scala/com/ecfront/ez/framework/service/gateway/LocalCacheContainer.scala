@@ -209,7 +209,7 @@ object LocalCacheContainer extends Logging {
           }
         } else {
           def add(m: String): Unit = {
-            val resR = resources(Method.GET.toString).get(path)
+            val resR = resources(m).get(path)
             if (resR.isDefined) {
               resR.get += code
             } else {
