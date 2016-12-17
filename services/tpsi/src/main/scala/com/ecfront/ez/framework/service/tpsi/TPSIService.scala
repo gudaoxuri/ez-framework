@@ -45,7 +45,7 @@ trait TPSIService extends Logging {
       } else null
       val execResult = execFun
       val finishTime = new Date()
-      val useTimes = finishTime.getTime - TaskMonitor.poll(taskId)._2.getTime
+      val useTimes = finishTime.getTime - TaskMonitor.get(taskId)._2.getTime
       logger.debug(s"[TPSI] finish [$funName]:[${config.code}][$id] use ${useTimes}ms , return data:" + JsonHelper.toJsonString(execResult))
       val resp = execPostFun(execResult)
       if (log != null) {
@@ -55,6 +55,7 @@ trait TPSIService extends Logging {
           EZ_TPSI_Log.finish(success = false, resp.message, log, finishTime)
         }
       }
+      TaskMonitor.remove(taskId)
       resp.code match {
         case StandardCode.SUCCESS =>
           logger.info(s"[TPSI] success [$funName]:[${config.code}][$id]")
