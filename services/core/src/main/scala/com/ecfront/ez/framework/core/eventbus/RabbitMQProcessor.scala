@@ -2,6 +2,7 @@ package com.ecfront.ez.framework.core.eventbus
 
 import com.ecfront.common.{JsonHelper, Resp}
 import com.ecfront.ez.framework.core.cluster.RabbitMQClusterManager
+import com.ecfront.ez.framework.core.monitor.TaskMonitor
 import com.ecfront.ez.framework.core.rpc.RPCProcessor
 import com.ecfront.ez.framework.core.{EZ, EZContext}
 
@@ -30,6 +31,7 @@ class RabbitMQProcessor extends EventBusProcessor {
 
   override protected def doAck[E](address: String, message: Any, args: Map[String, String], timeout: Long)
                                  (implicit e: Manifest[E]): (E, Map[String, String]) = {
+    val taskId = TaskMonitor.add(s"ACK [$address] Task")
     val result = RabbitMQClusterManager.ack(address, toJsonString(message),
       args + (FLAG_CONTEXT -> JsonHelper.toJsonString(EZ.context)), timeout)
     if (result._2.contains(FLAG_CONTEXT)) {
@@ -50,10 +52,13 @@ class RabbitMQProcessor extends EventBusProcessor {
       case e: Throwable =>
         logger.error(s"[EB] Ack reply a message error : [$address] : ${result._1} ", e.getMessage)
         throw e
+    } finally {
+      TaskMonitor.remove(taskId)
     }
   }
 
   override protected def doAckAsync[E](replyFun: => (E, Map[String, String]) => Unit, address: String, message: Any, args: Map[String, String], timeout: Long)(implicit e: Manifest[E]): Unit = {
+    val taskId = TaskMonitor.add(s"ACKAsync [$address] Task")
     RabbitMQClusterManager.ackAsync(address, toJsonString(message),
       args + (FLAG_CONTEXT -> JsonHelper.toJsonString(EZ.context)), timeout) {
       (replyMessage, replyArgs) =>
@@ -75,6 +80,8 @@ class RabbitMQProcessor extends EventBusProcessor {
           case e: Throwable =>
             logger.error(s"[EB] Ack reply a message error : [$address] : $message ", e.getMessage)
             throw e
+        } finally {
+          TaskMonitor.remove(taskId)
         }
     }
   }

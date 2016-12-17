@@ -1,23 +1,26 @@
 package com.ecfront.ez.framework.core.monitor
 
 import java.util.Date
+import java.util.concurrent.ConcurrentHashMap
 
 import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.helper.TimeHelper
 import com.ecfront.ez.framework.core.logger.Logging
 
+import scala.collection.JavaConversions._
+
 object TaskMonitor extends Logging {
 
-  private val tasks = collection.mutable.Map[String, (String, Date)]()
+  private val tasks = new ConcurrentHashMap[String, (String, Date)]()
 
   def add(taskName: String): String = {
-    val taskId=EZ.createUUID
+    val taskId = EZ.createUUID
     tasks += taskId -> (taskName, new Date())
     taskId
   }
 
   def remove(taskId: String): Unit = {
-    tasks -= taskId
+    tasks -= (taskId)
   }
 
   def hasTask(): Boolean = {

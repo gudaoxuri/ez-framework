@@ -94,7 +94,7 @@ object EZ_TPSI_Log extends BaseStorage[EZ_TPSI_Log] {
    val json=JsonHelper.createObjectNode()
     json.put("category","TPSI")
     json.set("detail",JsonHelper.toJson(log))
-    logger.info(s"[TPSI]${JsonHelper.toJsonString(json)}")
+    logger.info(s"${JsonHelper.toJsonString(json)}")
   }
 
 }

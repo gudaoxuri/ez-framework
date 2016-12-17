@@ -172,6 +172,7 @@ object RabbitMQClusterManager extends Logging {
                 Map[String, String]()
               }
             replyMessage = new String(delivery.getBody, "UTF-8")
+            channel.close()
           }
         } else {
           channel.close()
@@ -180,9 +181,9 @@ object RabbitMQClusterManager extends Logging {
       }
     } catch {
       case e: ShutdownSignalException =>
+      case e:AlreadyClosedException =>
       case e: Throwable => e.printStackTrace()
     }
-    channel.close()
     (replyMessage, replyHeader)
   }
 
@@ -222,6 +223,7 @@ object RabbitMQClusterManager extends Logging {
                     Map[String, String]()
                   }
                 replyMessage = new String(delivery.getBody, "UTF-8")
+                channel.close()
               }
             } else {
               channel.close()
@@ -230,10 +232,10 @@ object RabbitMQClusterManager extends Logging {
           }
         } catch {
           case e: ShutdownSignalException =>
+          case e:AlreadyClosedException =>
           case e: Throwable => e.printStackTrace()
         }
         replyFun(replyMessage, replyHeader)
-        channel.close()
       }
     })
   }

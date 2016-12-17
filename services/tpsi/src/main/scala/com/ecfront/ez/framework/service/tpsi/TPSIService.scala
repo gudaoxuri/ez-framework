@@ -3,6 +3,7 @@ package com.ecfront.ez.framework.service.tpsi
 import java.net.SocketTimeoutException
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
 import javax.xml.ws.WebServiceException
 
 import com.ecfront.common.{JsonHelper, Resp, StandardCode}
@@ -10,6 +11,8 @@ import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.helper.TimerHelper
 import com.ecfront.ez.framework.core.logger.Logging
 import com.fasterxml.jackson.databind.JsonNode
+
+import scala.collection.JavaConversions._
 
 trait TPSIService extends Logging {
 
@@ -41,12 +44,12 @@ trait TPSIService extends Logging {
       limitFilter(config)
       traceId = id + System.nanoTime()
       if (!currEXInfo.contains(funName + "@" + config.code)) {
-        currEXInfo += funName + "@" + config.code -> collection.mutable.Map[String, (Date, String)]()
+        currEXInfo += funName + "@" + config.code -> new ConcurrentHashMap[String, (Date, String)]()
       }
       currEXInfo(funName + "@" + config.code) += traceId -> (new Date(), id)
       logger.info(s"[TPSI] start [$funName]:[${config.code}][$id]")
       val log = if (config.isStorage) {
-        EZ_TPSI_Log.start(funName, config.code,id)
+        EZ_TPSI_Log.start(funName, config.code, id)
       } else null
       val execResult = execFun
       val finishTime = new Date()
@@ -144,7 +147,7 @@ trait TPSIService extends Logging {
     EZ.cache.get(FLAG_TOKEN + config.code)
   }
 
-  private val currEXInfo = collection.mutable.Map[String, collection.mutable.Map[String, (Date, String)]]()
+  private val currEXInfo = collection.mutable.Map[String, ConcurrentMap[String, (Date, String)]]()
   private val yyyy_MM_dd_HH_mm_ss_SSS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS")
   TimerHelper.periodic(60L, {
     val currExecCount = currEXInfo.map(_._2.size).sum
