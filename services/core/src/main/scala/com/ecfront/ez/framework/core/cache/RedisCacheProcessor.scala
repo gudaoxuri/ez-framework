@@ -1,6 +1,7 @@
 package com.ecfront.ez.framework.core.cache
 
 import com.ecfront.common.Resp
+import com.ecfront.ez.framework.core.EZManager
 import redis.clients.jedis._
 
 import scala.collection.JavaConversions._
@@ -58,8 +59,12 @@ class RedisCacheProcessor extends CacheProcessor[JedisCommands] {
     * @return redis client
     */
   override def client(): JedisCommands = {
-    if (redisPool != null) {
-      redisPool.getResource
+  if (redisPool != null) {
+      if(!EZManager.isClose) {
+        redisPool.getResource
+      }else{
+        null
+      }
     } else {
       redisCluster
     }
@@ -337,7 +342,12 @@ class RedisCacheProcessor extends CacheProcessor[JedisCommands] {
 
   private def execute[T](client: JedisCommands, fun: JedisCommands => T, method: String): T = {
     try {
-      fun(client)
+      if(client!=null) {
+        fun(client)
+      }else{
+        logger.warn("Redis is closed.")
+        null.asInstanceOf[T]
+      }
     } catch {
       case e: Throwable =>
         logger.error(s"Redis $method error.", e)

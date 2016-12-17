@@ -23,6 +23,8 @@ object EZManager extends Logging {
   // EZ服务容器
   private var ezServices: List[EZServiceAdapter[_]] = _
 
+  var isClose=false
+
   private def initConfig(specialConfig: String = null): Resp[EZConfig] = {
     ConfigProcessor.init(specialConfig)
   }
@@ -241,6 +243,7 @@ object EZManager extends Logging {
   }
 
   sys.addShutdownHook {
+    isClose=true
     logger.info("!!! ==== Trigger shutdown event.")
     TaskMonitor.waitFinish()
     shutdown()
