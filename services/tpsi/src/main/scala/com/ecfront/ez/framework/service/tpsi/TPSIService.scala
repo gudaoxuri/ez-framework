@@ -76,11 +76,10 @@ trait TPSIService extends Logging {
           resp
         case StandardCode.SERVICE_UNAVAILABLE =>
           if (reTryTimes <= 5) {
-            logger.warn(s"[TPSI] service unavailable [$funName]:[${config.code}][$id],retry it")
-            Thread.sleep(10000)
+            logger.warn(s"[TPSI] service unavailable [$funName]:[${config.code}][$id],retry it [$reTryTimes]")
+            Thread.sleep(2000*reTryTimes)
             execute[R](id, funName, execFun, execPostFun, reTryTimes + 1)
           } else {
-            currEXInfo(funName + "@" + config.code) -= traceId
             logger.error(s"[TPSI] service unavailable [$funName]:[${config.code}][$id]")
             Resp.serverUnavailable(s"[TPSI] service unavailable and retry fail")
           }
@@ -99,12 +98,12 @@ trait TPSIService extends Logging {
       }
     } catch {
       case e: Throwable if e.isInstanceOf[WebServiceException] || e.isInstanceOf[SocketTimeoutException] =>
+        currEXInfo(funName + "@" + config.code) -= traceId
         if (reTryTimes <= 5) {
-          logger.warn(s"[TPSI] timeout [$funName]:[${config.code}][$id],retry it")
-          Thread.sleep(10000)
+          logger.warn(s"[TPSI] timeout [$funName]:[${config.code}][$id],retry it [$reTryTimes]")
+          Thread.sleep(2000*reTryTimes)
           execute[R](id, funName, execFun, execPostFun, reTryTimes + 1)
         } else {
-          currEXInfo(funName + "@" + config.code) -= traceId
           logger.error(s"[TPSI] timeout [$funName]:[${config.code}][$id]", e)
           Resp.serverUnavailable(s"[TPSI] timeout and retry fail")
         }
