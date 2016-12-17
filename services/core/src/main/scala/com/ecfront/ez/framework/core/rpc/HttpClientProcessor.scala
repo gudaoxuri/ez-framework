@@ -7,6 +7,7 @@ import java.util.Date
 import com.ecfront.common.JsonHelper
 import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.rpc.Method.Method
+import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods._
 import org.apache.http.entity.mime.{HttpMultipartMode, MultipartEntityBuilder}
@@ -44,8 +45,8 @@ object HttpClientProcessor extends Logging {
     * @param contentType 请求类型，默认为 application/json; charset=utf-8
     * @return 请求结果，string类型
     */
-  def get(url: String, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map()): String = {
-    request(Method.GET, url, null, contentType, header)
+  def get(url: String, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map(), charset: String = "UTF-8", timeout: Int = -1): String = {
+    request(Method.GET, url, null, contentType, header, charset, timeout)
   }
 
   /**
@@ -56,8 +57,8 @@ object HttpClientProcessor extends Logging {
     * @param contentType 请求类型，默认为 application/json; charset=utf-8
     * @return 请求结果，string类型
     */
-  def post(url: String, body: Any, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map()): String = {
-    request(Method.POST, url, body, contentType, header)
+  def post(url: String, body: Any, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map(), charset: String = "UTF-8", timeout: Int = -1): String = {
+    request(Method.POST, url, body, contentType, header, charset, timeout)
   }
 
   /**
@@ -68,8 +69,8 @@ object HttpClientProcessor extends Logging {
     * @param contentType 请求类型，默认为 application/json; charset=utf-8
     * @return 请求结果，string类型
     */
-  def put(url: String, body: Any, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map()): String = {
-    request(Method.PUT, url, body, contentType, header)
+  def put(url: String, body: Any, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map(), charset: String = "UTF-8", timeout: Int = -1): String = {
+    request(Method.PUT, url, body, contentType, header, charset, timeout)
   }
 
   /**
@@ -79,16 +80,19 @@ object HttpClientProcessor extends Logging {
     * @param contentType 请求类型，默认为 application/json; charset=utf-8
     * @return 请求结果，string类型
     */
-  def delete(url: String, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map()): String = {
-    request(Method.DELETE, url, null, contentType, header)
+  def delete(url: String, contentType: String = "application/json; charset=utf-8", header: Map[String, String] = Map(), charset: String = "UTF-8", timeout: Int = -1): String = {
+    request(Method.DELETE, url, null, contentType, header, charset, timeout)
   }
 
-  private[core] def request(methodStr: Method, url: String, body: Any, contentType: String, header: Map[String, String], retry: Int = 0): String = {
+  private[core] def request(methodStr: Method, url: String, body: Any, contentType: String, header: Map[String, String], charset: String = "UTF-8", timeout: Int = -1, retry: Int = 0): String = {
     val method = methodStr match {
       case Method.GET => new HttpGet(url)
       case Method.POST => new HttpPost(url)
       case Method.PUT => new HttpPut(url)
       case Method.DELETE => new HttpDelete(url)
+    }
+    if (timeout != -1) {
+      method.setConfig(RequestConfig.custom().setSocketTimeout(timeout).setConnectTimeout(timeout).build())
     }
     val realContextType = getRealContextType(body, contentType)
     logger.debug(s"HTTP [${method.getMethod}] request : ${method.getURI}")
@@ -106,16 +110,16 @@ object HttpClientProcessor extends Logging {
             entry =>
               m.add(new BasicNameValuePair(entry._1, entry._2.toString))
           }
-          new UrlEncodedFormEntity(m, "UTF-8")
+          new UrlEncodedFormEntity(m, charset)
         case t if t.toLowerCase.contains("xml") =>
           body match {
             case b: Document =>
-              new StringEntity($(b).toString, "UTF-8")
+              new StringEntity($(b).toString, charset)
             case b: String =>
-              new StringEntity(b, "UTF-8")
+              new StringEntity(b, charset)
             case _ =>
               logger.error(s"Not support return type [${body.getClass.getName}] by xml")
-              new StringEntity("", "UTF-8")
+              new StringEntity("", charset)
           }
         case t if t.toLowerCase.contains("multipart/form-data") =>
           val (fileName, file, fieldName) = body match {
@@ -149,14 +153,14 @@ object HttpClientProcessor extends Logging {
             case _ =>
               JsonHelper.toJsonString(body)
           }
-          new StringEntity(str, "UTF-8")
+          new StringEntity(str, charset)
       }
       method.asInstanceOf[HttpEntityEnclosingRequestBase].setEntity(entity)
     }
     var response: CloseableHttpResponse = null
     try {
       response = httpClient.execute(method)
-      EntityUtils.toString(response.getEntity, "UTF-8")
+      EntityUtils.toString(response.getEntity, charset)
     } catch {
       case e if e.getClass == classOf[SocketException]
         || e.getClass == classOf[NoHttpResponseException]
@@ -165,7 +169,7 @@ object HttpClientProcessor extends Logging {
         if (retry <= 5) {
           Thread.sleep(500)
           logger.warn(s"HTTP [${method.getMethod}] request  ${method.getURI} ERROR. retry [${retry + 1}] .")
-          request(methodStr, url, body, contentType, header, retry + 1)
+          request(methodStr, url, body, contentType, header, charset, retry + 1)
         } else {
           logger.warn(s"HTTP [${method.getMethod}] request : ${method.getURI} ERROR.", e)
           throw e
