@@ -131,7 +131,8 @@ object RabbitMQClusterManager extends Logging {
           }
         } catch {
           case e: ShutdownSignalException =>
-          case e: Throwable => e.printStackTrace()
+          case e: AlreadyClosedException =>
+          case e: Throwable => throw e
         }
       }
     })
@@ -181,13 +182,14 @@ object RabbitMQClusterManager extends Logging {
       }
     } catch {
       case e: ShutdownSignalException =>
-      case e:AlreadyClosedException =>
-      case e: Throwable => e.printStackTrace()
+      case e: AlreadyClosedException =>
+      case e: Throwable => throw e
     }
     (replyMessage, replyHeader)
   }
 
-  def ackAsync(address: String, message: String, args: Map[String, String] = Map(), timeout: Long = 30 * 1000, exchangeName: String = defaultRPCExchangeName)(replyFun: => (String, Map[String, String]) => Unit): Unit = {
+  def ackAsync(address: String, message: String, args: Map[String, String] = Map(), timeout: Long = 30 * 1000, exchangeName: String = defaultRPCExchangeName)
+              (replyFun: => (String, Map[String, String]) => Unit, replyError: => Throwable => Unit): Unit = {
     val channel = getChannel()
     channel.exchangeDeclare(exchangeName, "direct")
     channel.queueDeclare(address, false, false, false, null)
@@ -230,12 +232,14 @@ object RabbitMQClusterManager extends Logging {
               throw new TimeoutException("RabbitMQ ack timeout")
             }
           }
+          replyFun(replyMessage, replyHeader)
         } catch {
-          case e: ShutdownSignalException =>
-          case e:AlreadyClosedException =>
-          case e: Throwable => e.printStackTrace()
+          case e: ShutdownSignalException => replyError(e)
+          case e: AlreadyClosedException => replyError(e)
+          case e: Throwable =>
+            replyError(e)
+            throw e
         }
-        replyFun(replyMessage, replyHeader)
       }
     })
   }
@@ -273,7 +277,8 @@ object RabbitMQClusterManager extends Logging {
           }
         } catch {
           case e: ShutdownSignalException =>
-          case e: Throwable => e.printStackTrace()
+          case e: AlreadyClosedException =>
+          case e: Throwable => throw e
         }
       }
     })
@@ -315,7 +320,8 @@ object RabbitMQClusterManager extends Logging {
           }
         } catch {
           case e: ShutdownSignalException =>
-          case e: Throwable => e.printStackTrace()
+          case e: AlreadyClosedException =>
+          case e: Throwable => throw e
         }
       }
     })

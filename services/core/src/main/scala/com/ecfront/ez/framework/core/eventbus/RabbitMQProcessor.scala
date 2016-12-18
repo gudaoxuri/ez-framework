@@ -31,7 +31,6 @@ class RabbitMQProcessor extends EventBusProcessor {
 
   override protected def doAck[E](address: String, message: Any, args: Map[String, String], timeout: Long)
                                  (implicit e: Manifest[E]): (E, Map[String, String]) = {
-    val taskId = TaskMonitor.add(s"ACK [$address] Task")
     val result = RabbitMQClusterManager.ack(address, toJsonString(message),
       args + (FLAG_CONTEXT -> JsonHelper.toJsonString(EZ.context)), timeout)
     if (result._2.contains(FLAG_CONTEXT)) {
@@ -52,15 +51,13 @@ class RabbitMQProcessor extends EventBusProcessor {
       case e: Throwable =>
         logger.error(s"[EB] Ack reply a message error : [$address] : ${result._1} ", e.getMessage)
         throw e
-    } finally {
-      TaskMonitor.remove(taskId)
     }
   }
 
-  override protected def doAckAsync[E](replyFun: => (E, Map[String, String]) => Unit, address: String, message: Any, args: Map[String, String], timeout: Long)(implicit e: Manifest[E]): Unit = {
-    val taskId = TaskMonitor.add(s"ACKAsync [$address] Task")
+  override protected def doAckAsync[E](replyFun: => (E, Map[String, String]) => Unit, replyError: => Throwable => Unit,
+                                       address: String, message: Any, args: Map[String, String], timeout: Long)(implicit e: Manifest[E]): Unit = {
     RabbitMQClusterManager.ackAsync(address, toJsonString(message),
-      args + (FLAG_CONTEXT -> JsonHelper.toJsonString(EZ.context)), timeout) {
+      args + (FLAG_CONTEXT -> JsonHelper.toJsonString(EZ.context)), timeout) ({
       (replyMessage, replyArgs) =>
         if (replyArgs.contains(FLAG_CONTEXT)) {
           EZContext.setContext(JsonHelper.toObject[EZContext](replyArgs(FLAG_CONTEXT)))
@@ -80,10 +77,8 @@ class RabbitMQProcessor extends EventBusProcessor {
           case e: Throwable =>
             logger.error(s"[EB] Ack reply a message error : [$address] : $message ", e.getMessage)
             throw e
-        } finally {
-          TaskMonitor.remove(taskId)
         }
-    }
+    },replyError)
   }
 
   override protected def doSubscribe[E: Manifest](address: String, reqClazz: Class[E])(receivedFun: (E, Map[String, String]) => Unit): Unit = {

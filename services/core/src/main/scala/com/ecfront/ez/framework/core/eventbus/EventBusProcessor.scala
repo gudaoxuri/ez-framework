@@ -3,6 +3,7 @@ package com.ecfront.ez.framework.core.eventbus
 import com.ecfront.common.JsonHelper
 import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.logger.Logging
+import com.ecfront.ez.framework.core.monitor.TaskMonitor
 import com.ecfront.ez.framework.core.rpc.{Method, RPCProcessor}
 
 import scala.concurrent.Future
@@ -45,8 +46,13 @@ trait EventBusProcessor extends Logging {
   def ack[E: Manifest](address: String, message: Any, args: Map[String, String] = Map(), timeout: Long = DEFAULT_TIMEOUT): (E, Map[String, String]) = {
     val addr = packageAddress(Method.ACK.toString, address)
     val msg = toAllowedMessage(message)
+    val taskId = TaskMonitor.add(s"ACK [$address] Task")
     logger.trace(s"[EB] ACK a message [$addr] : $args > ${RPCProcessor.cutPrintShow(msg.toString)} ")
-    doAck[E](addr, msg, args, timeout)
+    try {
+      doAck[E](addr, msg, args, timeout)
+    } finally {
+      TaskMonitor.remove(taskId)
+    }
   }
 
   protected def doAck[E: Manifest](address: String, message: Any, args: Map[String, String], timeout: Long): (E, Map[String, String])
@@ -54,11 +60,22 @@ trait EventBusProcessor extends Logging {
   def ackAsync[E: Manifest](address: String, message: Any, args: Map[String, String] = Map(), timeout: Long = DEFAULT_TIMEOUT)(replyFun: => (E, Map[String, String]) => Unit): Unit = {
     val addr = packageAddress(Method.ACK.toString, address)
     val msg = toAllowedMessage(message)
+    val taskId = TaskMonitor.add(s"ACK [$address] Task")
     logger.trace(s"[EB] ACK async a message [$addr] : $args > ${RPCProcessor.cutPrintShow(msg.toString)} ")
-    doAckAsync[E](replyFun, addr, msg, args, timeout)
+    doAckAsync[E]({
+      try {
+        replyFun
+      } finally {
+        TaskMonitor.remove(taskId)
+      }
+    }, {
+      _ =>
+        TaskMonitor.remove(taskId)
+    }, addr, msg, args, timeout)
   }
 
-  protected def doAckAsync[E: Manifest](replyFun: => (E, Map[String, String]) => Unit, address: String, message: Any, args: Map[String, String], timeout: Long): Unit
+  protected def doAckAsync[E: Manifest](replyFun: => (E, Map[String, String]) => Unit, replyError: => Throwable => Unit,
+                                        address: String, message: Any, args: Map[String, String], timeout: Long): Unit
 
   def subscribe[E: Manifest](address: String, reqClazz: Class[E] = null)(receivedFun: (E, Map[String, String]) => Unit): Unit = {
     doSubscribe[E](packageAddress(Method.PUB_SUB.toString, address), reqClazz)(receivedFun)
