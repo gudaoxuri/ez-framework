@@ -2,7 +2,8 @@ package com.ecfront.ez.framework.service.tpsi
 
 import java.util.Date
 
-import com.ecfront.common.{JsonHelper, Resp}
+import com.ecfront.common.Resp
+import com.ecfront.ez.framework.core.EZ
 import com.ecfront.ez.framework.core.helper.TimeHelper
 import com.ecfront.ez.framework.service.jdbc._
 
@@ -52,7 +53,7 @@ object EZ_TPSI_Log extends BaseStorage[EZ_TPSI_Log] {
     log.use_time = log.end_time - log.start_time
     log.success = success
     log.message = message
-    addLogFile(EZ_TPSI_Log.save(log).body)
+    addEvent(EZ_TPSI_Log.save(log).body)
   }
 
   def start(serviceCode: String, supplierCode: String, invokeMainBody: String = ""): EZ_TPSI_Log = {
@@ -74,7 +75,7 @@ object EZ_TPSI_Log extends BaseStorage[EZ_TPSI_Log] {
       log.use_time = log.end_time - log.start_time
       log.success = success
       log.message = message
-      addLogFile(EZ_TPSI_Log.update(log).body)
+      addEvent(EZ_TPSI_Log.update(log).body)
     }
   }
 
@@ -83,18 +84,15 @@ object EZ_TPSI_Log extends BaseStorage[EZ_TPSI_Log] {
     log.use_time = log.end_time - log.start_time
     log.success = success
     log.message = message
-    addLogFile(EZ_TPSI_Log.update(log).body)
+    addEvent(EZ_TPSI_Log.update(log).body)
   }
 
   def pageByCode(serviceCode: String, supplierCode: String, pageNumber: Long, pageSize: Int): Resp[Page[EZ_TPSI_Log]] = {
     page("service_code = ? and supplier_code = ? order by desc", List(serviceCode, supplierCode), pageNumber, pageSize)
   }
 
-  def addLogFile(log:EZ_TPSI_Log):Unit={
-   val json=JsonHelper.createObjectNode()
-    json.put("category","TPSI")
-    json.set("detail",JsonHelper.toJson(log))
-    logger.info(s"${JsonHelper.toJsonString(json)}")
+  def addEvent(log: EZ_TPSI_Log): Unit = {
+    EZ.eb.pubReq(ServiceAdapter.TPSI_ADD_FLAG, log)
   }
 
 }

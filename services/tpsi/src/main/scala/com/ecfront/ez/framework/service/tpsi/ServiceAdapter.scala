@@ -9,6 +9,9 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
 
   private[tpsi] var config: TPSIConfig = _
 
+  val TPSI_ADD_FLAG = "/ez/tpsi/add/"
+
+
   override def init(parameter: JsonNode): Resp[String] = {
     config = JsonHelper.toObject[TPSIConfig](parameter)
     if (config.code == null || config.code.trim.isEmpty) {
