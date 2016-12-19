@@ -15,17 +15,9 @@ object Initiator extends Logging {
 
   def init(): Unit = {
     updateCache()
-    val exist = EZ_Resource.existByCond(s"""code = ?""", List(EZ_Resource.assembleCode("*", "/ez/auth/manage/organization/*")))
+    val exist = EZ_Resource.existByCond(s"""code = ?""", List(EZ_Resource.assembleCode("*", "/ez/auth/manage/*")))
     if (!exist.body) {
-      EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/*", s"Manage ALL"))
-      EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/organization/*", s"Organization CRUD"))
-      EZ_Resource.save(EZ_Resource(Method.GET.toString, "/ez/auth/manage/organization/:id/", s"Fetch Organization By Id"))
-      EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/account/", s"Account CRUD"))
-      EZ_Resource.save(EZ_Resource(Method.GET.toString, "/ez/auth/manage/account/:id/", s"Fetch Account By Id"))
-      EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/role/", s"Role CRUD"))
-      EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/resource/", s"Resource CRUD"))
-      EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/menu/", s"Menu CRUD"))
-      EZ_Resource.save(EZ_Resource(Method.GET.toString, "/ez/auth/manage/menu/", s"Fetch Menus"))
+      EZ_Resource.save(EZ_Resource("*", "/ez/auth/manage/*", s"Manage CRUD"))
       EZ_Role.save(EZ_Role(EZ_Role.SYSTEM_ROLE_FLAG, "System", Set(EZ_Resource.assembleCode("*", "/ez/auth/manage/*")), ""))
 
       val org = EZ_Organization(ServiceAdapter.defaultOrganizationCode, "default")
