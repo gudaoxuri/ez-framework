@@ -33,14 +33,20 @@ trait TPSIService extends Logging {
 
   protected def login(args: JsonNode): Resp[String] = Resp.success("")
 
-  protected def execute[R](id: String, funName: String, execFun: => Any, execPostFun: Any => Resp[R], reTryTimes: Int = 0): Resp[R] = {
+  protected def execute[R](id: String, funName: String, execFun: => Any, execPostFun: Any => Resp[R], storage: Option[Boolean] = None, reTryTimes: Int = 0): Resp[R] = {
     var taskId: String = ""
     try {
+      val isStorage =
+        if (storage.isDefined) {
+          storage.get
+        } else {
+          config.isStorage
+        }
       logger.debug(s"[TPSI] prepare [$funName]:[${config.code}][$id]")
       limitFilter(config)
       taskId = TaskMonitor.add(s"[TPSI] [$funName]:[${config.code}][$id]")
       logger.info(s"[TPSI] start [$funName]:[${config.code}][$id]")
-      val log = if (config.isStorage) {
+      val log = if (isStorage) {
         EZ_TPSI_Log.start(funName, config.code, id)
       } else null
       val execResult = execFun
@@ -64,7 +70,7 @@ trait TPSIService extends Logging {
           if (reTryTimes <= 5) {
             logger.warn(s"[TPSI] service unavailable [$funName]:[${config.code}][$id],retry it [$reTryTimes]")
             Thread.sleep(2000 * reTryTimes)
-            execute[R](id, funName, execFun, execPostFun, reTryTimes + 1)
+            execute[R](id, funName, execFun, execPostFun, storage, reTryTimes + 1)
           } else {
             logger.error(s"[TPSI] service unavailable [$funName]:[${config.code}][$id]")
             Resp.serverUnavailable(s"[TPSI] service unavailable and retry fail")
@@ -88,7 +94,7 @@ trait TPSIService extends Logging {
         if (reTryTimes <= 5) {
           logger.warn(s"[TPSI] timeout [$funName]:[${config.code}][$id],retry it [$reTryTimes]")
           Thread.sleep(2000 * reTryTimes)
-          execute[R](id, funName, execFun, execPostFun, reTryTimes + 1)
+          execute[R](id, funName, execFun, execPostFun, storage, reTryTimes + 1)
         } else {
           logger.error(s"[TPSI] timeout [$funName]:[${config.code}][$id]", e)
           Resp.serverUnavailable(s"[TPSI] timeout and retry fail")
