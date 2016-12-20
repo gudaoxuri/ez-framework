@@ -31,12 +31,14 @@ class ScheduleJobProxy extends Job with Logging {
     try {
       // 执行真正的调度回调类
       val resp = runtimeMirror.reflectModule(runtimeMirror.staticModule(scheduler.clazz)).instance.asInstanceOf[ScheduleJob].execute(scheduler)
+      log.end_time = TimeHelper.msf.format(new Date()).toLong
+      log.success = resp
+      log.message = resp.message
+      SchedulerProcessor.saveLog(log)
       if (resp) {
-        log.end_time = TimeHelper.msf.format(new Date()).toLong
-        log.success = resp
-        log.message = resp.message
-        SchedulerProcessor.saveLog(log)
         logger.debug(s"Finish execute scheduling  : [${scheduler.name}] ${scheduler.clazz} result ${log.success}")
+      } else {
+        logger.error(s"Execute scheduling error[${resp.code}]", resp.message)
       }
     } catch {
       case e: Throwable =>
