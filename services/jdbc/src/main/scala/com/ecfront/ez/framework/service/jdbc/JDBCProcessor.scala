@@ -226,9 +226,9 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
         if (connection != null && !connection.isClosed) {
           connection.commit()
           connection.close()
-          localConnCounter.remove()
-          localConnection.remove()
         }
+        localConnCounter.remove()
+        localConnection.remove()
       } else {
         counter.decrementAndGet()
       }
@@ -249,9 +249,9 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
         if (connection != null && !connection.isClosed) {
           connection.rollback()
           connection.close()
-          localConnCounter.remove()
-          localConnection.remove()
         }
+        localConnCounter.remove()
+        localConnection.remove()
       } else {
         counter.decrementAndGet()
       }
@@ -300,37 +300,39 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
       val callStmt = _conn.prepareCall(sql)
       if (inParameters != null && inParameters.nonEmpty) {
         inParameters.foreach {
-          param => param._1 match {
-            case p: String => callStmt.setString(param._2, p)
-            case p: Double => callStmt.setDouble(param._2, p)
-            case p: Float => callStmt.setFloat(param._2, p)
-            case p: Boolean => callStmt.setBoolean(param._2, p)
-            case p: BigDecimal => callStmt.setBigDecimal(param._2, p.bigDecimal)
-            case p: Long => callStmt.setLong(param._2, p)
-            case p: Int => callStmt.setInt(param._2, p)
-            case p: Short => callStmt.setShort(param._2, p)
-            case p: Date => callStmt.setDate(param._2, new java.sql.Date(p.getTime))
-            case p: Byte => callStmt.setByte(param._2, p)
-            case _ => logger.error("Not support type " + param._1)
-          }
+          param =>
+            param._1 match {
+              case p: String => callStmt.setString(param._2, p)
+              case p: Double => callStmt.setDouble(param._2, p)
+              case p: Float => callStmt.setFloat(param._2, p)
+              case p: Boolean => callStmt.setBoolean(param._2, p)
+              case p: BigDecimal => callStmt.setBigDecimal(param._2, p.bigDecimal)
+              case p: Long => callStmt.setLong(param._2, p)
+              case p: Int => callStmt.setInt(param._2, p)
+              case p: Short => callStmt.setShort(param._2, p)
+              case p: Date => callStmt.setDate(param._2, new java.sql.Date(p.getTime))
+              case p: Byte => callStmt.setByte(param._2, p)
+              case _ => logger.error("Not support type " + param._1)
+            }
         }
       }
       if (outParameters != null && outParameters.nonEmpty) {
         outParameters.foreach {
-          param => param._2 match {
-            case p if p == classOf[String] => callStmt.registerOutParameter(param._3, Types.VARCHAR)
-            case p if p == classOf[Double] => callStmt.registerOutParameter(param._3, Types.DOUBLE)
-            case p if p == classOf[Float] => callStmt.registerOutParameter(param._3, Types.FLOAT)
-            case p if p == classOf[Boolean] => callStmt.registerOutParameter(param._3, Types.BOOLEAN)
-            case p if p == classOf[BigDecimal] => callStmt.registerOutParameter(param._3, Types.DECIMAL)
-            case p if p == classOf[Long] => callStmt.registerOutParameter(param._3, Types.BIGINT)
-            case p if p == classOf[Int] => callStmt.registerOutParameter(param._3, Types.INTEGER)
-            case p if p == classOf[Short] => callStmt.registerOutParameter(param._3, Types.SMALLINT)
-            case p if p == classOf[Date] => callStmt.registerOutParameter(param._3, Types.DATE)
-            case p if p == classOf[List[_]] => callStmt.registerOutParameter(param._3, Types.ARRAY)
-            case p if p == classOf[Object] => callStmt.registerOutParameter(param._3, Types.REF_CURSOR)
-            case _ => logger.error("Not support type " + param._1)
-          }
+          param =>
+            param._2 match {
+              case p if p == classOf[String] => callStmt.registerOutParameter(param._3, Types.VARCHAR)
+              case p if p == classOf[Double] => callStmt.registerOutParameter(param._3, Types.DOUBLE)
+              case p if p == classOf[Float] => callStmt.registerOutParameter(param._3, Types.FLOAT)
+              case p if p == classOf[Boolean] => callStmt.registerOutParameter(param._3, Types.BOOLEAN)
+              case p if p == classOf[BigDecimal] => callStmt.registerOutParameter(param._3, Types.DECIMAL)
+              case p if p == classOf[Long] => callStmt.registerOutParameter(param._3, Types.BIGINT)
+              case p if p == classOf[Int] => callStmt.registerOutParameter(param._3, Types.INTEGER)
+              case p if p == classOf[Short] => callStmt.registerOutParameter(param._3, Types.SMALLINT)
+              case p if p == classOf[Date] => callStmt.registerOutParameter(param._3, Types.DATE)
+              case p if p == classOf[List[_]] => callStmt.registerOutParameter(param._3, Types.ARRAY)
+              case p if p == classOf[Object] => callStmt.registerOutParameter(param._3, Types.REF_CURSOR)
+              case _ => logger.error("Not support type " + param._1)
+            }
         }
       }
       callStmt.execute()
@@ -608,7 +610,7 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
         } catch {
           case e: Throwable =>
         }
-        if (!_conn.isClosed) {
+        if (_autoClose && !_conn.isClosed) {
           _conn.close()
         }
       }
@@ -621,7 +623,7 @@ case class JDBCProcessor(url: String, userName: String, password: String) extend
         } catch {
           case e: Throwable =>
         }
-        if (!_conn.isClosed) {
+        if (_autoClose && !_conn.isClosed) {
           _conn.close()
         }
         logger.error(s"JDBC $funName error : $sql [$parameters]", e)

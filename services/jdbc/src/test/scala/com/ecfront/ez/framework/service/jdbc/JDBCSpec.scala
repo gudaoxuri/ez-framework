@@ -18,6 +18,14 @@ class JDBCSpec extends MockStartupSpec {
     testSP()
   }
 
+  test("tx new test"){
+    JDBCProcessor.tx{
+      JDBCProcessor.find(s"""select now1()""",List())
+      JDBCProcessor.find(s"""select now()""",List())
+    }
+    JDBCProcessor.find(s"""select now()""",List())
+  }
+
   def baseTest(): Unit = {
     /* JDBCProcessor.ddl(
        """
