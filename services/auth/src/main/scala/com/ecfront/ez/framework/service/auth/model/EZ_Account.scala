@@ -144,8 +144,8 @@ object EZ_Account extends SecureStorage[EZ_Account] with StatusStorage[EZ_Accoun
     }
     model.code = null
     model.organization_code = null
-    model.role_codes = null
     model.exchange_role_codes = model.role_codes
+    model.role_codes = null
     if (model.exchange_pwd != null && model.exchange_pwd.trim.nonEmpty) {
       model.password = model.exchange_pwd
     } else if (model.password != null && model.password.trim.nonEmpty) {

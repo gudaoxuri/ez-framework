@@ -26,7 +26,7 @@ object AuthInterceptor extends GatewayInterceptor {
       } else {
         None
       }
-    if (obj.templateUri.startsWith(publicUriPrefix)) {
+    if (obj.templateUri.startsWith(publicUriPrefix) && (obj.token.isEmpty || obj.token.get=="")) {
       // 可匿名访问
       p.success(obj)
     } else {

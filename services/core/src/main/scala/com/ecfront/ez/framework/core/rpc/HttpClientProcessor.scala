@@ -10,6 +10,7 @@ import com.ecfront.ez.framework.core.rpc.Method.Method
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods._
+import org.apache.http.conn.ConnectTimeoutException
 import org.apache.http.entity.mime.{HttpMultipartMode, MultipartEntityBuilder}
 import org.apache.http.entity.{ContentType, StringEntity}
 import org.apache.http.impl.client.{CloseableHttpClient, HttpClients}
@@ -163,6 +164,7 @@ object HttpClientProcessor extends Logging {
       EntityUtils.toString(response.getEntity, charset)
     } catch {
       case e if e.getClass == classOf[SocketException]
+        || e.getClass == classOf[ConnectTimeoutException]
         || e.getClass == classOf[NoHttpResponseException]
         || e.getClass == classOf[MalformedChunkCodingException] =>
         // 同络错误重试5次
