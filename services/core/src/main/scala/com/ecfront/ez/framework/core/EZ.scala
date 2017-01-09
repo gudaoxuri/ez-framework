@@ -4,14 +4,12 @@ import java.net.InetAddress
 import java.util.UUID
 import java.util.concurrent.Executors
 
-import com.ecfront.ez.framework.core.cache.CacheProcessor
+import com.ecfront.ez.framework.core.cluster.{ClusterCache, ClusterDist}
 import com.ecfront.ez.framework.core.config.EZConfig
-import com.ecfront.ez.framework.core.dist.DistributedServiceProcessor
 import com.ecfront.ez.framework.core.eventbus.EventBusProcessor
 import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.monitor.TaskMonitor
 import com.fasterxml.jackson.databind.JsonNode
-import redis.clients.jedis.JedisCommands
 
 /**
   * EZ容器，用于放置全局属性
@@ -66,11 +64,11 @@ object EZ extends Logging {
   // 是否调试模式
   var isDebug: Boolean = _
 
-  var eb: EventBusProcessor = _
+  val eb = EventBusProcessor
 
-  var dist: DistributedServiceProcessor = _
+  var dist: ClusterDist = _
 
-  var cache: CacheProcessor[JedisCommands] = _
+  var cache: ClusterCache = _
 
   def context: EZContext = EZContext.getContext
 

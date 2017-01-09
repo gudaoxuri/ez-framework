@@ -3,17 +3,15 @@
     "app": "",
     "module": "",
     "cluster":{
-      "userName":"user",
-      "password":"password",
-      "host":"127.0.0.1",
-      "port":5672,
-      "virtualHost":"ez",
-      "defaultTopicExchangeName":"ex_topic",
-      "defaultRPCExchangeName":"ex_rpc",
-      "defaultQueueExchangeName":"ex_queue"
-    },
-    "cache": {
-      "address": "127.0.0.1:6379"
+      "use": {
+        "rpc": "nats",
+        "mq": "",
+        "dist": "",
+        "cache": ""
+      },
+      "nats": {
+        "address":"127.0.0.1:4222"
+      }
     },
     "rpc":{
       "package":"com.ecfront.ez"
@@ -23,6 +21,11 @@
         "host": "0.0.0.0",
         "port": 8080,
         "wsPort": 8081,
+        "cache":{
+          "address":"127.0.0.1:6379",
+          "db":0,
+          "auth":""
+        },
         "monitor": {
           "slow": {
             "time": 100,  // 最慢时间，单位毫秒

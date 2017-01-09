@@ -15,7 +15,7 @@
     <description>EZ框架Parent POM</description>
     <url>https://github.com/gudaoxuri/ez-framework</url>
     <packaging>pom</packaging>
-    <version>4.0-SNAPSHOT</version>
+    <version>4.0.1-SNAPSHOT</version>
 
     <scm>
         <connection>scm:git:git@github.com:gudaoxuri/ez-framework.git</connection>
@@ -24,12 +24,15 @@
     </scm>
 
     <properties>
-        <ezf-version>4.0-SNAPSHOT</ezf-version>
+        <ezf-version>4.0.1-SNAPSHOT</ezf-version>
         <ez-common.version>1.2.3</ez-common.version>
     </properties>
 
     <modules>
         <module>services/core</module>
+        <module>services/cluster-nats</module>
+        <module>services/cluster-redis</module>
+        <module>services/cluster-rabbitmq</module>
         <module>services/gateway</module>
         <module>services/jdbc</module>
         <module>services/email</module>

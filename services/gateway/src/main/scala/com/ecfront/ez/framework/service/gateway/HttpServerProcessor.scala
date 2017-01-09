@@ -200,7 +200,7 @@ class HttpServerProcessor(resourcePath: String, accessControlAllowOrigin: String
   }
 
   private def returnContent(response: HttpServerResponse, accept: String, res: String): Unit = {
-    logger.trace("Response: \r\n" + RPCProcessor.cutPrintShow(res))
+    logger.trace("Response: \r\n" + res)
     // 支持CORS
     response.setStatusCode(HTTP_STATUS_200).putHeader("Content-Type", accept)
       .putHeader("Cache-Control", "no-cache")

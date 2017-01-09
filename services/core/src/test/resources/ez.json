@@ -3,32 +3,45 @@
   "ez": {
     "app": "",
     "module": "",
-    "isDebug":true,
-    "cluster":{
-      "userName":"user",
-      "password":"password",
-      "host":"127.0.0.1",
-      "port":5672,
-      "virtualHost":"ez",
-      "defaultTopicExchangeName":"ex_topic",
-      "defaultRPCExchangeName":"ex_rpc",
-      "defaultQueueExchangeName":"ex_queue"
+    "isDebug": true,
+    "cluster": {
+      "use": {
+        "rpc": "nats",
+        "mq": "rabbitmq",
+        "dist": "redis",
+        "cache": "redis"
+      },
+      "nats": {
+        "address":"127.0.0.1:4222"
+      },
+      "redis": {
+        "address":"127.0.0.1:6379"
+      },
+      "rabbitmq": {
+        "userName": "user",
+        "password": "wz_pass_2016",
+        "host": "127.0.0.1",
+        "port": 5672,
+        "virtualHost": "ez",
+        "defaultTopicExchangeName": "ex_topic",
+        "defaultRPCExchangeName": "ex_rpc",
+        "defaultQueueExchangeName": "ex_queue"
+      }
     },
-    "cache": {
-      "address": "127.0.0.1:6379"
-    },
-    "rpc":{
-      "package":"com.ecfront.ez",
-      "printBodyLimit":4000
+    "rpc": {
+      "package": "com.ecfront.ez"
     },
     "timezone": "Asia/Shanghai",
     "perf": {
       "eventLoopPoolSize": 2,
       "workerPoolSize": 20,
       "internalBlockingPoolSize": 20,
-      "maxEventLoopExecuteTime": 2000, // ms
-      "maxWorkerExecuteTime": 60000,  // ms
-      "warningExceptionTime": 5000  // ms
+      "maxEventLoopExecuteTime": 2000,
+      // ms
+      "maxWorkerExecuteTime": 60000,
+      // ms
+      "warningExceptionTime": 5000
+      // ms
     },
     "services": {
       "test1": {

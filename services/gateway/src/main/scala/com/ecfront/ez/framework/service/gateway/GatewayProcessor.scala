@@ -3,7 +3,7 @@ package com.ecfront.ez.framework.service.gateway
 import java.util.Date
 
 import com.ecfront.common.{JsonHelper, Resp}
-import com.ecfront.ez.framework.core.eventbus.RabbitMQProcessor
+import com.ecfront.ez.framework.core.eventbus.EventBusProcessor
 import com.ecfront.ez.framework.core.helper.TimeHelper
 import com.ecfront.ez.framework.core.interceptor.EZAsyncInterceptorProcessor
 import com.ecfront.ez.framework.core.logger.Logging
@@ -23,12 +23,12 @@ trait GatewayProcessor extends Logging {
 
   protected def execute(body: String, context: EZAPIContext, resultFun: Resp[(EZAPIContext, Map[String, Any])] => Unit): Unit = {
     if (EZ.isDebug) {
-      logger.trace(s"Execute a request [${context.method}][${context.realUri}]，from ${context.remoteIP} | ${RPCProcessor.cutPrintShow(body)}")
+      logger.trace(s"Execute a request [${context.method}][${context.realUri}]，from ${context.remoteIP} | $body")
     }
     EZAsyncInterceptorProcessor.process[EZAPIContext](GatewayInterceptor.category, context, {
-      (context, param) =>
+      (context, _) =>
         val p = Promise[Resp[EZAPIContext]]()
-        val msg = EZ.eb.asInstanceOf[RabbitMQProcessor].toAllowedMessage(body)
+        val msg = EventBusProcessor.toAllowedMessage(body)
         val cxt = new EZContext
         cxt.id = EZ.createUUID
         cxt.startTime = TimeHelper.msf.format(new Date).toLong

@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.ecfront</groupId>
         <artifactId>ezf-parent</artifactId>
-        <version>4.0-SNAPSHOT</version>
+        <version>4.0.1-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -88,6 +88,24 @@
         <dependency>
             <groupId>com.ecfront</groupId>
             <artifactId>ezf-jdbc</artifactId>
+            <version>${ezf-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-cluster-nats</artifactId>
+            <version>${ezf-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-cluster-redis</artifactId>
+            <version>${ezf-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-cluster-rabbitmq</artifactId>
             <version>${ezf-version}</version>
             <scope>test</scope>
         </dependency>
