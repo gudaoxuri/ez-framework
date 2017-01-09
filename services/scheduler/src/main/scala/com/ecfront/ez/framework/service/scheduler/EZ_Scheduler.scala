@@ -23,6 +23,8 @@ case class EZ_Scheduler() extends SecureModel with StatusModel {
   var parameterstr: String = _
   @Desc("使用的模块", 200, 0)
   @BeanProperty var module: String = _
+  @Desc("是否单例", 0, 0)
+  @BeanProperty var exec_one_node: Boolean = _
 
 }
 

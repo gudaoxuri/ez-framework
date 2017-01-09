@@ -10,6 +10,8 @@ trait ClusterDist extends Logging {
 
   def map[M:Manifest](key: String): IMap[M]
 
+  def executeOneNode(key:String,fun: => Any):Any
+
 }
 
 trait ILock {

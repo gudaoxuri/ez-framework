@@ -10,8 +10,12 @@ import scala.collection.mutable
 object ServiceAdapter extends EZServiceAdapter[JsonNode] {
 
   override def init(parameter: JsonNode): Resp[String] = {
-    AutoBuildingProcessor.autoBuilding("com.ecfront.ez.framework.service.message")
     Resp.success("")
+  }
+
+  override def initPost(): Unit = {
+    AutoBuildingProcessor.autoBuilding("com.ecfront.ez.framework.service.message")
+    super.initPost()
   }
 
   override def destroy(parameter: JsonNode): Resp[String] = {

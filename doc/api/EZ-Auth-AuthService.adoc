@@ -91,6 +91,56 @@ _无_
 |extInfo|String|扩展信息
 |===
 
+==== 获取登录账号的信息
+
+
+*请求*
+
+ [GET] /ez/auth/account/bylogin/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|id|String|数据库id，不能更改
+|login_id|String|登录id，不能更改
+|name|String|姓名
+|image|String|头像
+|email|String|Email
+|current_password|String|当前密码，更新时需要验证
+|new_password|String|新密码，如果需要更改密码时填写
+|organization_code|String|组织编码，不能更改
+|ext_id|String|扩展ID，不能更改
+|ext_info|String|扩展信息
+|===
+
+==== 更新登录账号的信息
+
+
+*请求*
+
+ [PUT] /ez/auth/account/bylogin/
+|===
+|列名|类型|说明|是否必填
+
+|id|String|数据库id，不能更改|true
+|login_id|String|登录id，不能更改|true
+|name|String|姓名|true
+|image|String|头像|true
+|email|String|Email|true
+|current_password|String|当前密码，更新时需要验证|true
+|new_password|String|新密码，如果需要更改密码时填写|false
+|organization_code|String|组织编码，不能更改|false
+|ext_id|String|扩展ID，不能更改|false
+|ext_info|String|扩展信息|false
+|===
+
+*响应*
+
+_无_
+
 ==== 获取菜单列表
 
 

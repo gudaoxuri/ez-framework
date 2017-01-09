@@ -201,4 +201,8 @@ object RedisClusterDist extends ClusterDist {
 
   }
 
+  override def executeOneNode(key:String,fun: => Any): Any = {
+      lock(key).tryLockWithFun()(fun)
+  }
+
 }

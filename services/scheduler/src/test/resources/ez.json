@@ -2,29 +2,41 @@
   "ez": {
     "app": "",
     "module": "scheduler",
-    "cluster":{
-      "userName":"user",
-      "password":"password",
-      "host":"127.0.0.1",
-      "port":5672,
-      "virtualHost":"ez",
-      "defaultTopicExchangeName":"ex_topic",
-      "defaultRPCExchangeName":"ex_rpc",
-      "defaultQueueExchangeName":"ex_queue"
+    "cluster": {
+      "use": {
+        "rpc": "nats",
+        "mq": "rabbitmq",
+        "dist": "redis",
+        "cache": "redis"
+      },
+      "nats": {
+        "address": "127.0.0.1:4222"
+      },
+      "redis": {
+        "address": "127.0.0.1:6379"
+      },
+      "rabbitmq": {
+        "userName": "user",
+        "password": "wz_pass_2016",
+        "host": "127.0.0.1",
+        "port": 5672,
+        "virtualHost": "ez",
+        "defaultTopicExchangeName": "ex_topic",
+        "defaultRPCExchangeName": "ex_rpc",
+        "defaultQueueExchangeName": "ex_queue"
+      }
     },
-    "cache": {
-      "address": "127.0.0.1:6379"
-    },
-    "rpc":{
-      "package":"com.ecfront.ez"
+    "rpc": {
+      "package": "com.ecfront.ez"
     },
     "services": {
-      "scheduler":{
+      "scheduler": {
       },
       "jdbc": {
         "url": "jdbc:mysql://127.0.0.1:3306/ez?characterEncoding=UTF-8&autoReconnect=true",
         "userName": "root",
-        "password": "123456"
+        "password": "123456",
+        "createTable":true
       }
     }
   },

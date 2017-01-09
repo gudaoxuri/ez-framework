@@ -91,24 +91,6 @@
             <version>${ezf-version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.ecfront</groupId>
-            <artifactId>ezf-cluster-nats</artifactId>
-            <version>${ezf-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.ecfront</groupId>
-            <artifactId>ezf-cluster-redis</artifactId>
-            <version>${ezf-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.ecfront</groupId>
-            <artifactId>ezf-cluster-rabbitmq</artifactId>
-            <version>${ezf-version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
 </project>

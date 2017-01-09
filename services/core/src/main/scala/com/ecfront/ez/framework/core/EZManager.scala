@@ -184,8 +184,8 @@ object EZManager extends Logging {
                 }
             }
             if (isSuccess) {
-              ezServices.foreach(_.initPost())
               if (initCluster(ezConfig.ez.cluster) && RPCProcessor.autoBuilding(ezConfig.ez.rpc)) {
+                ezServices.foreach(_.initPost())
                 logSuccess("Start Success")
               } else {
                 logError(s"Start Fail : Core services start error")

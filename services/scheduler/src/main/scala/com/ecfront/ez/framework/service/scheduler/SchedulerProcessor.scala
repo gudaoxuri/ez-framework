@@ -48,7 +48,8 @@ object SchedulerProcessor extends Logging {
       "name" -> scheduler.name,
       "cron" -> scheduler.cron,
       "clazz" -> scheduler.clazz,
-      "parameters" -> scheduler.parameterstr
+      "parameters" -> scheduler.parameterstr,
+      "exec_one_node" -> scheduler.exec_one_node
     )
   }
 
