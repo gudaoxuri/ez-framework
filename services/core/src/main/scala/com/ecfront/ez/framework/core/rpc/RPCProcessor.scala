@@ -17,14 +17,12 @@ object RPCProcessor extends Logging {
   val VIEW_TOKEN_FLAG = "__ez_token__"
 
   private val address = collection.mutable.Set[String]()
-  private var printBodyLimit: Int = _
 
   private val allAnnotations = collection.mutable.Map[String, List[FieldAnnotationInfo]]()
   private val fieldLabels = collection.mutable.Map[String, Map[String, String]]()
   private val requireFieldNames = collection.mutable.Map[String, List[String]]()
 
   private[core] def init(config: Map[String, Any]): Resp[Void] = {
-    printBodyLimit = config.getOrElse("printBodyLimit", 4000).asInstanceOf[Int]
     APIDocProcessor.init(config.getOrElse("docPath", null).asInstanceOf[String])
     logger.info("[RPC] Init successful")
     Resp.success(null)
@@ -112,14 +110,6 @@ object RPCProcessor extends Logging {
             field.fieldName
         }
       }
-    }
-  }
-
-  def cutPrintShow(body: String): String = {
-    if (body == null || body.length < printBodyLimit) {
-      body
-    } else {
-      body.substring(0, printBodyLimit) + "..."
     }
   }
 

@@ -11,7 +11,6 @@ class ConfigSpec extends BasicSpec {
     assert(EZ.Info.app == "test"
       && EZ.Info.module == "m1"
       && EZ.Info.timezone == "Asia/Shanghai"
-      && EZ.Info.config.ez.cache == Map("address" -> "127.0.0.1:6379")
       && EZ.Info.config.ez.rpc == Map("package" -> "com.xx")
       && EZ.Info.config.ez.perf.nonEmpty
       && EZ.Info.config.ez.services.size == 3

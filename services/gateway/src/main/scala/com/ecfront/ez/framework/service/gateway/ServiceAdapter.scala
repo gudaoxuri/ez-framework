@@ -28,29 +28,29 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
   var resourcePath: String = _
   var publicUrl: String = _
 
-  override def init(parameter: JsonNode): Resp[String] = {
+  override def init(config: JsonNode): Resp[String] = {
     vertx = initVertx(EZ.Info.config.ez.perf.toMap, EZ.Info.config.ez.isDebug)
-    val publicUriPrefix = parameter.path("publicUriPrefix").asText("/public/")
-    val useSSL = parameter.has("ssl")
-    val port = parameter.path("port").asInt(if (useSSL) DEFAULT_HTTPS_PORT else DEFAULT_HTTP_PORT)
-    val wsPort = parameter.path("wsPort").asInt(DEFAULT_WS_PORT)
-    val host = parameter.path("host").asText("127.0.0.1")
-    resourcePath = parameter.path("resourcePath").asText("/tmp/")
-    publicUrl = parameter.path("publicUrl").asText(s"http${if (useSSL) "s" else ""}://" + host + ":" + port + "/")
+    val publicUriPrefix = config.path("publicUriPrefix").asText("/public/")
+    val useSSL = config.has("ssl")
+    val port = config.path("port").asInt(if (useSSL) DEFAULT_HTTPS_PORT else DEFAULT_HTTP_PORT)
+    val wsPort = config.path("wsPort").asInt(DEFAULT_WS_PORT)
+    val host = config.path("host").asText("127.0.0.1")
+    resourcePath = config.path("resourcePath").asText("/tmp/")
+    publicUrl = config.path("publicUrl").asText(s"http${if (useSSL) "s" else ""}://" + host + ":" + port + "/")
     val opt = new HttpServerOptions()
     if (useSSL) {
-      var keyPath = parameter.path("ssl").path("keyPath").asText()
+      var keyPath = config.path("ssl").path("keyPath").asText()
       if (!keyPath.startsWith("/")) {
         keyPath = EZ.Info.confPath + keyPath
       }
       opt.setSsl(true).setKeyStoreOptions(
         new JksOptions().setPath(keyPath)
-          .setPassword(parameter.path("ssl").path("keyPassword").asText())
+          .setPassword(config.path("ssl").path("keyPassword").asText())
       )
     }
     opt.setTcpKeepAlive(true).setReuseAddress(true).setCompressionSupported(true)
-    if (parameter.has("monitor")) {
-      val monitor = parameter.path("monitor")
+    if (config.has("monitor")) {
+      val monitor = config.path("monitor")
       if (monitor.has("slow")) {
         val slow = monitor.path("slow")
         SlowMonitorInterceptor.init(
@@ -64,13 +64,14 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
     AuthInterceptor.init(publicUriPrefix)
     EZAsyncInterceptorProcessor.register(GatewayInterceptor.category, AuthInterceptor)
 
-    val address = EZ.Info.config.ez.cache("address").asInstanceOf[String].split(";")
-    val db = EZ.Info.config.ez.cache.getOrElse("db", 0).asInstanceOf[Int]
-    val auth = EZ.Info.config.ez.cache.getOrElse("auth", "").asInstanceOf[String]
+    val cache = config.get("cache")
+    val address = cache.get("address").asText().split(";")
+    val db = cache.path("db").asInt(0)
+    val auth = cache.path("auth").asText("")
     AsyncRedisProcessor.init(vertx, address.toList, db, auth)
 
-    if (parameter.has("antiDDoS")) {
-      val antiDDoS = parameter.get("antiDDoS")
+    if (config.has("antiDDoS")) {
+      val antiDDoS = config.get("antiDDoS")
       val reqRatePerMinute = antiDDoS.get("reqRatePerMinute").asInt()
       val illegalReqRatePerMinute = antiDDoS.get("illegalReqRatePerMinute").asInt()
       AntiDDoSInterceptor.init(reqRatePerMinute, illegalReqRatePerMinute)
@@ -78,13 +79,13 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
 
     val c = new CountDownLatch(2)
     val httpServer = vertx.createHttpServer(opt)
-    httpServer.requestHandler(new HttpServerProcessor(resourcePath, parameter.path("accessControlAllowOrigin").asText("*")))
+    httpServer.requestHandler(new HttpServerProcessor(resourcePath, config.path("accessControlAllowOrigin").asText("*")))
       .listen(port, host, new Handler[AsyncResult[HttpServer]] {
         override def handle(event: AsyncResult[HttpServer]): Unit = {
           if (event.succeeded()) {
             logger.info(
               s"""HTTP${if (useSSL) "s" else ""} start successful.
-                  | http${if (useSSL) "s" else ""}://$host:$port/""".stripMargin)
+                 | http${if (useSSL) "s" else ""}://$host:$port/""".stripMargin)
             c.countDown()
           } else {
             logger.error(s"HTTP${if (useSSL) "s" else ""} start fail .", event.cause())
@@ -98,7 +99,7 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
           if (event.succeeded()) {
             logger.info(
               s"""WS start successful.
-                  | ws://$host:$wsPort/""".stripMargin)
+                 | ws://$host:$wsPort/""".stripMargin)
             c.countDown()
           } else {
             logger.error(s"WS start fail .", event.cause())
@@ -106,8 +107,8 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
         }
       })
     initMetrics(vertx)
-    if (parameter.has("metrics")) {
-      val intervalSec = parameter.get("metrics").path("intervalSec").asInt(60 * 60)
+    if (config.has("metrics")) {
+      val intervalSec = config.get("metrics").path("intervalSec").asInt(60 * 60)
       metrics.statistics(intervalSec, httpServer)
       metrics.statistics(intervalSec, wsServer)
     }

@@ -31,7 +31,7 @@ object ConfigProcessor extends Logging {
           val Array(app, module, path) = configContent.substring(1).split("#")
           var unifyConfigPath = if (path.endsWith("/")) path else path + "/"
           if (unifyConfigPath.startsWith(".")) {
-            unifyConfigPath = this.getClass().getResource("/").getPath + unifyConfigPath
+            unifyConfigPath = this.getClass.getResource("/").getPath + unifyConfigPath
           }
           logger.info("[Config] load unify config path :" + unifyConfigPath)
           val basicConfig = parseConfig(Source.fromFile(new File(unifyConfigPath + "ez.json"), "UTF-8").mkString)
@@ -41,9 +41,6 @@ object ConfigProcessor extends Logging {
           moduleConfig.ez.instance = moduleConfig.ez.instance + System.nanoTime()
           if (moduleConfig.ez.cluster == null) {
             moduleConfig.ez.cluster = basicConfig.ez.cluster
-          }
-          if (moduleConfig.ez.cache == null) {
-            moduleConfig.ez.cache = basicConfig.ez.cache
           }
           if (moduleConfig.ez.rpc == null) {
             moduleConfig.ez.rpc = basicConfig.ez.rpc

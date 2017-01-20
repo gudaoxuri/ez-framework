@@ -1,15 +1,16 @@
 package com.ecfront.ez.framework.core
 
 import com.ecfront.common.Resp
-import com.ecfront.ez.framework.core.cache.RedisCacheProcessor
-import com.ecfront.ez.framework.core.cluster.RabbitMQClusterManager
+import com.ecfront.ez.framework.core.cluster.{Cluster, ClusterManage}
 import com.ecfront.ez.framework.core.config.{ConfigProcessor, EZConfig}
-import com.ecfront.ez.framework.core.eventbus.RabbitMQProcessor
+import com.ecfront.ez.framework.core.eventbus.EventBusProcessor
 import com.ecfront.ez.framework.core.i18n.I18NProcessor
 import com.ecfront.ez.framework.core.logger.Logging
 import com.ecfront.ez.framework.core.monitor.TaskMonitor
 import com.ecfront.ez.framework.core.rpc.RPCProcessor
+import com.fasterxml.jackson.databind.JsonNode
 
+import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.runtime._
 
@@ -23,39 +24,42 @@ object EZManager extends Logging {
   // EZ服务容器
   private var ezServices: List[EZServiceAdapter[_]] = _
 
-  var isClose=false
+  private val clusterManageContainer = ArrayBuffer[ClusterManage]()
+
+  var isClose = false
 
   private def initConfig(specialConfig: String = null): Resp[EZConfig] = {
     ConfigProcessor.init(specialConfig)
   }
 
-  private def initMgr(config: Map[String, Any]): Resp[Void] = {
-    RabbitMQClusterManager.init(config)
+  private def initCluster(config: JsonNode): Resp[Void] = {
+    val spiNames = config.fieldNames().filterNot(_ == "use").toList
+    val Array(rpc, mq, dist, cache) =
+      if (config.has("use")) {
+        val use = config.get("use")
+        Array(use.get("rpc").asText(), use.get("mq").asText(), use.get("dist").asText(), use.get("cache").asText())
+      } else {
+        val headSpi = spiNames.head
+        Array(headSpi, headSpi, headSpi, headSpi)
+      }
+    spiNames.foreach {
+      spiName =>
+        val spi = runtimeMirror.reflectModule(runtimeMirror.staticModule(s"com.ecfront.ez.framework.cluster.$spiName.${spiName.capitalize}Cluster")).instance.asInstanceOf[Cluster]
+        spi.manage.init(config.get(spiName))
+        clusterManageContainer += spi.manage
+        EventBusProcessor.init(if (rpc == spiName) spi.rpc else null, if (mq == spiName) spi.mq else null)
+        if (dist == spiName) {
+          EZ.dist = spi.dist
+        }
+        if (cache == spiName) {
+          EZ.cache = spi.cache
+        }
+    }
+    Resp.success(null)
   }
-
-  private def initEB(): Resp[Void] = {
-    val eb = new RabbitMQProcessor()
-    EZ.eb = eb
-    eb.init()
-  }
-
-  /*private def initDistService(): Resp[Void] = {
-    val dist = new HazelcastDistributedServiceProcessor()
-    EZ.dist = dist
-    dist.init()
-  }*/
 
   private def initRPC(config: Map[String, Any]): Resp[Void] = {
     RPCProcessor.init(config)
-  }
-
-  private def initCache(args: Map[String, Any]): Resp[Void] = {
-    val address = args("address").asInstanceOf[String].split(";")
-    val db = args.getOrElse("db", 0).asInstanceOf[Int]
-    val auth = args.getOrElse("auth", "").asInstanceOf[String]
-    val cache = new RedisCacheProcessor()
-    EZ.cache = cache
-    cache.init(address, db, auth)
   }
 
   /**
@@ -143,11 +147,7 @@ object EZManager extends Logging {
       val ezConfig = ezConfigR.body
       EZ.Info.config = ezConfig
       EZ.isDebug = ezConfig.ez.isDebug
-      if (initMgr(ezConfig.ez.cluster)
-        && initEB()
-        /*&& initDistService()*/
-        && initCache(ezConfig.ez.cache)
-        && I18NProcessor.init()
+      if (I18NProcessor.init()
         && initRPC(ezConfig.ez.rpc)) {
         EZ.Info.app = ezConfig.ez.app
         EZ.Info.module = ezConfig.ez.module
@@ -184,8 +184,8 @@ object EZManager extends Logging {
                 }
             }
             if (isSuccess) {
-              ezServices.foreach(_.initPost())
-              if (RPCProcessor.autoBuilding(ezConfig.ez.rpc)) {
+              if (initCluster(ezConfig.ez.cluster) && RPCProcessor.autoBuilding(ezConfig.ez.rpc)) {
+                ezServices.foreach(_.initPost())
                 logSuccess("Start Success")
               } else {
                 logError(s"Start Fail : Core services start error")
@@ -214,6 +214,7 @@ object EZManager extends Logging {
     logEnter("Stopping...")
     var isSuccess = true
     var message = ""
+    clusterManageContainer.foreach(_.close())
     if (ezServices != null) {
       ezServices.foreach {
         service =>
@@ -243,7 +244,7 @@ object EZManager extends Logging {
   }
 
   sys.addShutdownHook {
-    isClose=true
+    isClose = true
     logger.info("!!! ==== Trigger shutdown event.")
     TaskMonitor.waitFinish()
     shutdown()

@@ -2,18 +2,29 @@
   "ez": {
     "app": "",
     "module": "",
-    "cluster":{
-      "userName":"user",
-      "password":"password",
-      "host":"127.0.0.1",
-      "port":5672,
-      "virtualHost":"ez",
-      "defaultTopicExchangeName":"ex_topic",
-      "defaultRPCExchangeName":"ex_rpc",
-      "defaultQueueExchangeName":"ex_queue"
-    },
-    "cache": {
-      "address": "127.0.0.1:6379"
+    "cluster": {
+      "use": {
+        "rpc": "nats",
+        "mq": "rabbitmq",
+        "dist": "redis",
+        "cache": "redis"
+      },
+      "nats": {
+        "address":"127.0.0.1:4222"
+      },
+      "redis": {
+        "address":"127.0.0.1:6379"
+      },
+      "rabbitmq": {
+        "userName": "user",
+        "password": "wz_pass_2016",
+        "host": "127.0.0.1",
+        "port": 5672,
+        "virtualHost": "ez",
+        "defaultTopicExchangeName": "ex_topic",
+        "defaultRPCExchangeName": "ex_rpc",
+        "defaultQueueExchangeName": "ex_queue"
+      }
     },
     "rpc":{
       "package":"com.ecfront.ez"
@@ -27,7 +38,7 @@
         "minSize": 1, // 最小连接池数量
         "maxSize": 1, // 最大连接池数量
         "maxIdleTime": 60000, // 获取连接时最大等待时间，单位秒
-        "createTable":false
+        "createTable":true
       }
     }
   },

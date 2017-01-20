@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.ecfront</groupId>
         <artifactId>ezf-parent</artifactId>
-        <version>4.0-SNAPSHOT</version>
+        <version>4.0.1-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -18,17 +18,11 @@
     <version>${ezf-version}</version>
 
     <properties>
-        <rabbitmq.version>3.6.6</rabbitmq.version>
         <httpclient.version>4.5.2</httpclient.version>
-        <redis.version>2.8.1</redis.version>
+        <redis.version>2.9.0</redis.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.rabbitmq</groupId>
-            <artifactId>amqp-client</artifactId>
-            <version>${rabbitmq.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
@@ -40,14 +34,27 @@
             <version>${httpclient.version}</version>
         </dependency>
         <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>${redis.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>joox</artifactId>
             <version>1.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-cluster-nats</artifactId>
+            <version>${ezf-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-cluster-redis</artifactId>
+            <version>${ezf-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-cluster-rabbitmq</artifactId>
+            <version>${ezf-version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

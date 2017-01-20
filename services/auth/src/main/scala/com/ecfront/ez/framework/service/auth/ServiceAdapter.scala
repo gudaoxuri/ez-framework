@@ -54,11 +54,14 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
       } else {
         ""
       }
-    AutoBuildingProcessor.autoBuilding("com.ecfront.ez.framework.service.auth")
-    Initiator.init()
     Resp.success("")
   }
 
+  override def initPost(): Unit = {
+    AutoBuildingProcessor.autoBuilding("com.ecfront.ez.framework.service.auth")
+    Initiator.init()
+    super.initPost()
+  }
 
   override def destroy(parameter: JsonNode): Resp[String] = {
     Resp.success("")

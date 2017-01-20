@@ -1,0 +1,33 @@
+{
+  "ez": {
+    "app": "",
+    "module": "",
+    "isDebug": true,
+    "cluster": {
+      "use":{
+        "rpc":"rabbitmq",
+        "mq":"rabbitmq",
+        "dist":"",
+        "cache":""
+      },
+      "rabbitmq": {
+        "userName": "user",
+        "password": "wz_pass_2016",
+        "host": "127.0.0.1",
+        "port": 5672,
+        "virtualHost": "ez",
+        "defaultTopicExchangeName": "ex_topic",
+        "defaultRPCExchangeName": "ex_rpc",
+        "defaultQueueExchangeName": "ex_queue"
+      }
+    },
+    "rpc": {
+      "package": "com.ecfront.ez"
+    },
+    "services": {
+
+    }
+  },
+  "args": {
+  }
+}

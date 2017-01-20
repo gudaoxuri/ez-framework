@@ -17,8 +17,12 @@ object ServiceAdapter extends EZServiceAdapter[JsonNode] {
     if (config.code == null || config.code.trim.isEmpty) {
       config.code = EZ.Info.module
     }
-    AutoBuildingProcessor.autoBuilding("com.ecfront.ez.framework.service.tpsi")
     Resp.success(s"[TPSI]start success, mock = ${config.isMock}")
+  }
+
+  override def initPost(): Unit = {
+    AutoBuildingProcessor.autoBuilding("com.ecfront.ez.framework.service.tpsi")
+    super.initPost()
   }
 
   override def destroy(parameter: JsonNode): Resp[String] = {

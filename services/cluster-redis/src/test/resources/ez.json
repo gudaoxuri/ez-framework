@@ -1,0 +1,26 @@
+{
+  "ez": {
+    "app": "",
+    "module": "",
+    "isDebug": true,
+    "cluster": {
+      "use":{
+        "rpc":"",
+        "mq":"",
+        "dist":"redis",
+        "cache":"redis"
+      },
+      "redis": {
+        "address":"127.0.0.1:6379"
+      }
+    },
+    "rpc": {
+      "package": "com.ecfront.ez"
+    },
+    "services": {
+
+    }
+  },
+  "args": {
+  }
+}

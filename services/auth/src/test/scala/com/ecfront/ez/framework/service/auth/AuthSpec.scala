@@ -28,7 +28,7 @@ class AuthSpec extends GatewayStartupSpec {
   def basicTest(): Unit = {
     val resources = EZ_Resource.find("").body
     assert(
-      resources.size == 9
+      resources.size == 1
         && resources.head.method == "*"
         && resources.head.uri == "/ez/auth/manage/*"
         && resources.head.code == "*" + BaseModel.SPLIT + "/ez/auth/manage/*"

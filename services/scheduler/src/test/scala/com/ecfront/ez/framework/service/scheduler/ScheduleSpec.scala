@@ -4,10 +4,16 @@ import java.util.concurrent.CountDownLatch
 
 import com.ecfront.common.Resp
 import com.ecfront.ez.framework.test.MockStartupSpec
+import org.slf4j.LoggerFactory
 
 class ScheduleSpec extends MockStartupSpec {
 
   test("Schedule Test") {
+
+    val log = LoggerFactory.getLogger(classOf[ScheduleSpec])
+
+    log.debug("aaaaa")
+    logger.debug("aaaa")
 
     val cdl = new CountDownLatch(1)
 
@@ -19,6 +25,7 @@ class ScheduleSpec extends MockStartupSpec {
     scheduler.module = "scheduler"
     scheduler.clazz = TestScheduleJob.getClass.getName
     scheduler.parameters = Map("p1" -> 1, "p2" -> "1")
+    scheduler.exec_one_node = true
     scheduler = SchedulerProcessor.save(scheduler)
 
     scheduler.parameters = Map("p1" -> 22222, "p2" -> "1")
