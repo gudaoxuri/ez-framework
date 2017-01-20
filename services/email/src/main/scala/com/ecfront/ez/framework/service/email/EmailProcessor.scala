@@ -128,7 +128,7 @@ object EmailProcessor extends Logging {
         }
       }
       email.setSubject(title)
-      email.setText(content)
+      email.setTextHTML(content)
       if (attachments != null) {
         attachments.foreach {
           attach =>
