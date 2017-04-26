@@ -1,12 +1,7 @@
 = EZ.F - Scala中功能全面、使用简单的服务框架
 
-<<<<<<< HEAD
-**4.0版本构建中, https://github.com/gudaoxuri/ez-framework/tree/4.0**
-
 image::https://img.shields.io/travis/gudaoxuri/ez-framework.svg[link="https://travis-ci.org/gudaoxuri/ez-framework"]
 
-=======
->>>>>>> 4.0-optimize
 == 设计理念
 从第一个版本发展到现在，期间换过多个基础类库、也在异步与同步编程之间不断地尝试，这是个全新的版本，也这几年工程实践的最佳方案。
 
