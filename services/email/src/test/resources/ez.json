@@ -1,0 +1,47 @@
+{
+  "ez": {
+    "app": "",
+    "module": "",
+    "cluster": {
+      "use": {
+        "rpc": "nats",
+        "mq": "rabbitmq",
+        "dist": "redis",
+        "cache": "redis"
+      },
+      "nats": {
+        "address":"127.0.0.1:4222"
+      },
+      "redis": {
+        "address":"127.0.0.1:6379"
+      },
+      "rabbitmq": {
+        "userName": "user",
+        "password": "wz_pass_2016",
+        "host": "127.0.0.1",
+        "port": 5672,
+        "virtualHost": "ez",
+        "defaultTopicExchangeName": "ex_topic",
+        "defaultRPCExchangeName": "ex_rpc",
+        "defaultQueueExchangeName": "ex_queue"
+      }
+    },
+    "rpc":{
+      "package":"com.ecfront.ez"
+    },
+    "services": {
+      "email": {
+        "host": "smtp.exmail.qq.com",
+        "port": 465,
+        "userName": "test@ecfront.com",
+        "password": "Ez1234",
+        "protocol": "ssl",
+        "poolSize": 2,
+        "defaultSender": "蒋震宇",
+        "defaultSendAddress": "test@ecfront.com"
+      }
+    }
+  },
+  "args": {
+  }
+}

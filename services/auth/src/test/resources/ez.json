@@ -1,0 +1,55 @@
+{
+  "ez": {
+    "app": "test",
+    "module": "EZ-Auth",
+    "cluster": {
+      "use": {
+        "rpc": "nats",
+        "mq": "rabbitmq",
+        "dist": "redis",
+        "cache": "redis"
+      },
+      "nats": {
+        "address":"127.0.0.1:4222"
+      },
+      "redis": {
+        "address":"127.0.0.1:6379"
+      },
+      "rabbitmq": {
+        "userName": "user",
+        "password": "wz_pass_2016",
+        "host": "127.0.0.1",
+        "port": 5672,
+        "virtualHost": "ez",
+        "defaultTopicExchangeName": "ex_topic",
+        "defaultRPCExchangeName": "ex_rpc",
+        "defaultQueueExchangeName": "ex_queue"
+      }
+    },
+    "rpc": {
+      "package": "com.ecfront.ez.framework.service.auth.test",
+      "docPath": "../../../../doc/api"
+    },
+    "services": {
+      "auth": {
+        "customLogin": false,
+        "loginLimit": {
+          "showCaptcha": 3
+        },
+        "defaultOrganizationCode": "",
+        "loginKeepSeconds": 0
+        /* "encrypt": {
+           "algorithm": "bcrypt",
+           "salt": "vsefuj3iee3m3"
+         }*/
+      },
+      "jdbc": {
+        "url": "jdbc:mysql://127.0.0.1:3306/ez?characterEncoding=UTF-8&autoReconnect=true",
+        "userName": "root",
+        "password": "123456"
+      }
+    }
+  },
+  "args": {
+  }
+}

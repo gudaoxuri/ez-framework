@@ -1,0 +1,216 @@
+=== EZ-资源管理
+==== 保存
+
+
+*请求*
+
+ [POST] /ez/auth/manage/resource/
+|===
+|列名|类型|说明|是否必填
+
+|===
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 更新
+
+
+*请求*
+
+ [PUT] /ez/auth/manage/resource/:id/
+|===
+|列名|类型|说明|是否必填
+
+|===
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 根据业务主键更新
+
+
+*请求*
+
+ [PUT] /ez/auth/manage/resource/uuid/:uuid/
+|===
+|列名|类型|说明|是否必填
+
+|===
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 查询启用的记录
+TIP: url参数`condition`表示筛选条件，限制性sql形式
+
+*请求*
+
+ [GET] /ez/auth/manage/resource/enable/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 查询所有记录
+TIP: url参数`condition`表示筛选条件，限制性sql形式
+
+*请求*
+
+ [GET] /ez/auth/manage/resource/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 分页查询记录
+TIP: url参数`pageNumber`表示当前页，从1开始，`pageSize`表示每页条数，`condition`表示筛选条件，限制性sql形式
+
+*请求*
+
+ [GET] /ez/auth/manage/resource/page/:pageNumber/:pageSize/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 分页查询启用的记录
+TIP: url参数`pageNumber`表示当前页，从1开始，`pageSize`表示每页条数，`condition`表示筛选条件，限制性sql形式
+
+*请求*
+
+ [GET] /ez/auth/manage/resource/enable/page/:pageNumber/:pageSize/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 获取一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/resource/:id/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 根据业务主键获取一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/resource/uuid/:uuid/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 删除一条记录
+
+
+*请求*
+
+ [DELETE] /ez/auth/manage/resource/:id/
+
+
+*响应*
+
+_无_
+
+==== 根据业务主键删除一条记录
+
+
+*请求*
+
+ [DELETE] /ez/auth/manage/resource/uuid/:uuid/
+
+
+*响应*
+
+_无_
+
+==== 启用一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/resource/:id/enable/
+
+
+*响应*
+
+_无_
+
+==== 根据业务主键启用一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/resource/uuid/:uuid/enable/
+
+
+*响应*
+
+_无_
+
+==== 禁用一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/resource/:id/disable/
+
+
+*响应*
+
+_无_
+
+==== 根据业务主键禁用一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/resource/uuid/:uuid/disable/
+
+
+*响应*
+
+_无_

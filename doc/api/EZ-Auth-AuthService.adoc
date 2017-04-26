@@ -1,0 +1,174 @@
+=== EZ-权限服务
+==== 登录
+
+
+*请求*
+
+ [POST] /public/ez/auth/login/
+|===
+|列名|类型|说明|是否必填
+
+
+|id|String|Id，可以是登录Id或email|true
+|password|String|密码|true
+|organizationCode|String|对应的组织编码|false
+
+|===
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|token|String|token
+|accountCode|String|账号编码
+|loginId|String|登录Id
+|name|String|姓名
+|email|String|email
+|image|String|头像
+|organizationCode|String|组织编码
+|organizationName|String|组织名称
+|organizationCategory|String|组织类型
+|roleCodes|Set[String]|角色编码列表
+|lastLoginTime|java.util.Date|最后一次登录时间
+|extId|String|扩展Id
+|extInfo|String|扩展信息
+|===
+
+==== 获取图片验证码
+
+
+*请求*
+
+ [GET] /public/auth/captcha/:organizationCode/:id/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+||File|验证码图片文件
+|===
+
+==== 注销
+
+
+*请求*
+
+ [GET] /ez/auth/logout/
+
+
+*响应*
+
+_无_
+
+==== 获取当前登录信息
+
+
+*请求*
+
+ [GET] /ez/auth/logininfo/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|token|String|token
+|accountCode|String|账号编码
+|loginId|String|登录Id
+|name|String|姓名
+|email|String|email
+|image|String|头像
+|organizationCode|String|组织编码
+|organizationName|String|组织名称
+|organizationCategory|String|组织类型
+|roleCodes|Set[String]|角色编码列表
+|lastLoginTime|java.util.Date|最后一次登录时间
+|extId|String|扩展Id
+|extInfo|String|扩展信息
+|===
+
+==== 获取登录账号的信息
+
+
+*请求*
+
+ [GET] /ez/auth/account/bylogin/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|id|String|数据库id，不能更改
+|login_id|String|登录id，不能更改
+|name|String|姓名
+|image|String|头像
+|email|String|Email
+|current_password|String|当前密码，更新时需要验证
+|new_password|String|新密码，如果需要更改密码时填写
+|organization_code|String|组织编码，不能更改
+|ext_id|String|扩展ID，不能更改
+|ext_info|String|扩展信息
+|===
+
+==== 更新登录账号的信息
+
+
+*请求*
+
+ [PUT] /ez/auth/account/bylogin/
+|===
+|列名|类型|说明|是否必填
+
+|id|String|数据库id，不能更改|true
+|login_id|String|登录id，不能更改|true
+|name|String|姓名|true
+|image|String|头像|true
+|email|String|Email|true
+|current_password|String|当前密码，更新时需要验证|true
+|new_password|String|新密码，如果需要更改密码时填写|false
+|organization_code|String|组织编码，不能更改|false
+|ext_id|String|扩展ID，不能更改|false
+|ext_info|String|扩展信息|false
+|===
+
+*响应*
+
+_无_
+
+==== 获取菜单列表
+
+
+*请求*
+
+ [GET] /public/ez/menu/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|Array |   | 
+|-organization_code|String|Organization Code
+|-enable|Boolean|Enable
+|-create_org|String|Create Organization
+|-create_user|String|Create User
+|-create_time|Long|Create Time
+|-update_org|String|Update Organization
+|-update_user|String|Update User
+|-update_time|Long|Update Time
+|-id|String|Id
+|-code|String|Code
+|-uri|String|URI
+|-name|String|Name
+|-icon|String|Icon
+|-translate|String|Translate
+|-parent_code|String|Parent Code
+|-sort|Int|Sort
+|===

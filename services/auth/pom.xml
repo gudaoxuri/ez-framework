@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.ecfront</groupId>
+        <artifactId>ezf-parent</artifactId>
+        <version>4.0.1-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>ezf-auth</artifactId>
+    <name>EZ Framework Auth</name>
+    <description>EZ框架认证模块</description>
+    <packaging>jar</packaging>
+    <version>${ezf-version}</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-core</artifactId>
+            <version>${ezf-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-jdbc</artifactId>
+            <version>${ezf-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.cage</groupId>
+            <artifactId>cage</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-gateway</artifactId>
+            <version>${ezf-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ecfront</groupId>
+            <artifactId>ezf-test</artifactId>
+            <version>${ezf-version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

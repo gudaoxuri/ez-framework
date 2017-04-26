@@ -1,0 +1,45 @@
+{
+  "ez": {
+    "app": "test",
+    "module": "m1",
+    "isDebug":true,
+    "cluster":{
+      "userName":"user",
+      "password":"password",
+      "host":"127.0.0.1",
+      "port":5672,
+      "virtualHost":"ez",
+      "defaultTopicExchangeName":"ex_topic",
+      "defaultRPCExchangeName":"ex_rpc",
+      "defaultQueueExchangeName":"ex_queue"
+    },
+    "cache": {
+      "address": "127.0.0.1:6379"
+    },
+    "timezone": "Asia/Shanghai",
+    "perf": {
+      "eventLoopPoolSize": 2,
+      "workerPoolSize": 20,
+      "internalBlockingPoolSize": 20,
+      "maxEventLoopExecuteTime": 2000,
+      // ms
+      "maxWorkerExecuteTime": 60000,
+      // ms
+      "warningExceptionTime": 5000
+      // ms
+    },
+    "services": {
+      "test1": {
+        "field1": "1",
+        "field2": "2"
+      },
+      "test2": {
+        "field1": "2"
+      }
+    }
+  },
+  "args": {
+    "global_a":"global.a",
+    "global_b":"global.b"
+  }
+}

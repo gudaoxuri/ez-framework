@@ -1,0 +1,13 @@
+{
+  "ez": {
+    "rpc": {
+      "package": "com.ecfront.ez.framework.service.auth"
+    },
+    "services": {
+      "auth": null,
+      "jdbc": null
+    }
+  },
+  "args": {
+  }
+}

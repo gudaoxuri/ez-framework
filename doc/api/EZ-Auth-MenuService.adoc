@@ -1,0 +1,233 @@
+=== EZ-菜单管理
+==== 保存
+
+
+*请求*
+
+ [POST] /ez/auth/manage/menu/
+|===
+|列名|类型|说明|是否必填
+
+|===
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 更新
+
+
+*请求*
+
+ [PUT] /ez/auth/manage/menu/:id/
+|===
+|列名|类型|说明|是否必填
+
+|===
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 根据业务主键更新
+
+
+*请求*
+
+ [PUT] /ez/auth/manage/menu/uuid/:uuid/
+|===
+|列名|类型|说明|是否必填
+
+|===
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 查询启用的记录
+TIP: url参数`condition`表示筛选条件，限制性sql形式
+
+*请求*
+
+ [GET] /ez/auth/manage/menu/enable/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 分页查询记录
+TIP: url参数`pageNumber`表示当前页，从1开始，`pageSize`表示每页条数，`condition`表示筛选条件，限制性sql形式
+
+*请求*
+
+ [GET] /ez/auth/manage/menu/page/:pageNumber/:pageSize/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 分页查询启用的记录
+TIP: url参数`pageNumber`表示当前页，从1开始，`pageSize`表示每页条数，`condition`表示筛选条件，限制性sql形式
+
+*请求*
+
+ [GET] /ez/auth/manage/menu/enable/page/:pageNumber/:pageSize/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 获取一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/menu/:id/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 根据业务主键获取一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/menu/uuid/:uuid/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|===
+
+==== 删除一条记录
+
+
+*请求*
+
+ [DELETE] /ez/auth/manage/menu/:id/
+
+
+*响应*
+
+_无_
+
+==== 根据业务主键删除一条记录
+
+
+*请求*
+
+ [DELETE] /ez/auth/manage/menu/uuid/:uuid/
+
+
+*响应*
+
+_无_
+
+==== 启用一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/menu/:id/enable/
+
+
+*响应*
+
+_无_
+
+==== 根据业务主键启用一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/menu/uuid/:uuid/enable/
+
+
+*响应*
+
+_无_
+
+==== 禁用一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/menu/:id/disable/
+
+
+*响应*
+
+_无_
+
+==== 根据业务主键禁用一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/menu/uuid/:uuid/disable/
+
+
+*响应*
+
+_无_
+
+==== 查询所有记录
+TIP: url参数`condition`表示筛选条件，限制性sql形式
+
+*请求*
+
+ [GET] /ez/auth/manage/menu/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|Array |   | 
+|-organization_code|String|Organization Code
+|-enable|Boolean|Enable
+|-create_org|String|Create Organization
+|-create_user|String|Create User
+|-create_time|Long|Create Time
+|-update_org|String|Update Organization
+|-update_user|String|Update User
+|-update_time|Long|Update Time
+|-id|String|Id
+|-code|String|Code
+|-uri|String|URI
+|-name|String|Name
+|-icon|String|Icon
+|-translate|String|Translate
+|-parent_code|String|Parent Code
+|-sort|Int|Sort
+|===

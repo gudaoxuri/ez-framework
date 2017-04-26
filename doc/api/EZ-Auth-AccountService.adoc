@@ -1,0 +1,425 @@
+=== EZ-账号管理
+==== 删除一条记录
+
+
+*请求*
+
+ [DELETE] /ez/auth/manage/account/:id/
+
+
+*响应*
+
+_无_
+
+==== 根据业务主键删除一条记录
+
+
+*请求*
+
+ [DELETE] /ez/auth/manage/account/uuid/:uuid/
+
+
+*响应*
+
+_无_
+
+==== 启用一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/account/:id/enable/
+
+
+*响应*
+
+_无_
+
+==== 根据业务主键启用一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/account/uuid/:uuid/enable/
+
+
+*响应*
+
+_无_
+
+==== 禁用一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/account/:id/disable/
+
+
+*响应*
+
+_无_
+
+==== 根据业务主键禁用一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/account/uuid/:uuid/disable/
+
+
+*响应*
+
+_无_
+
+==== 保存
+
+
+*请求*
+
+ [POST] /ez/auth/manage/account/
+|===
+|列名|类型|说明|是否必填
+
+
+login_id|String|登录Id|true
+|name|String|姓名|true
+|image|String|头像|false
+|password|String|密码|true
+|email|String|邮箱|true
+|role_codes|Array|所属角色编码|true
+|organization_code|String|所属组织编码|true
+|enable|Boolean|是否启用|true
+|ext_info|String|扩展信息，json格式|false
+
+|===
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|organization_code|String|Organization Code
+|enable|Boolean|Enable
+|create_org|String|Create Organization
+|create_user|String|Create User
+|create_time|Long|Create Time
+|update_org|String|Update Organization
+|update_user|String|Update User
+|update_time|Long|Update Time
+|id|String|Id
+|code|String|Code
+|login_id|String|Login Id
+|name|String|Name
+|image|String|Image
+|password|String|Password
+|email|String|Email
+|ext_id|String|Ext Id
+|ext_info|String|Ext Info
+|oauth|String|OAuth Info
+|===
+
+==== 更新
+
+
+*请求*
+
+ [PUT] /ez/auth/manage/account/:id/
+|===
+|列名|类型|说明|是否必填
+
+
+|id|String|主键|true
+|login_id|String|登录Id|true
+|name|String|姓名|true
+|image|String|头像|false
+|password|String|密码|true
+|email|String|邮箱|true
+|role_codes|Array|所属角色编码|true
+|organization_code|String|所属组织编码|true
+|enable|Boolean|是否启用|true
+|ext_info|String|扩展信息，json格式|false
+
+|===
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|organization_code|String|Organization Code
+|enable|Boolean|Enable
+|create_org|String|Create Organization
+|create_user|String|Create User
+|create_time|Long|Create Time
+|update_org|String|Update Organization
+|update_user|String|Update User
+|update_time|Long|Update Time
+|id|String|Id
+|code|String|Code
+|login_id|String|Login Id
+|name|String|Name
+|image|String|Image
+|password|String|Password
+|email|String|Email
+|ext_id|String|Ext Id
+|ext_info|String|Ext Info
+|oauth|String|OAuth Info
+|===
+
+==== 根据业务主键更新
+
+
+*请求*
+
+ [PUT] /ez/auth/manage/account/uuid/:uuid/
+|===
+|列名|类型|说明|是否必填
+
+
+|id|String|主键|true
+|login_id|String|登录Id|true
+|name|String|姓名|true
+|image|String|头像|false
+|password|String|密码|true
+|email|String|邮箱|true
+|role_codes|Array|所属角色编码|true
+|organization_code|String|所属组织编码|true
+|enable|Boolean|是否启用|true
+|ext_info|String|扩展信息，json格式|false
+
+|===
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|organization_code|String|Organization Code
+|enable|Boolean|Enable
+|create_org|String|Create Organization
+|create_user|String|Create User
+|create_time|Long|Create Time
+|update_org|String|Update Organization
+|update_user|String|Update User
+|update_time|Long|Update Time
+|id|String|Id
+|code|String|Code
+|login_id|String|Login Id
+|name|String|Name
+|image|String|Image
+|password|String|Password
+|email|String|Email
+|ext_id|String|Ext Id
+|ext_info|String|Ext Info
+|oauth|String|OAuth Info
+|===
+
+==== 查询所有记录
+TIP: url参数`condition`表示筛选条件，限制性sql形式
+
+*请求*
+
+ [GET] /ez/auth/manage/account/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|Array |   | 
+|-organization_code|String|Organization Code
+|-enable|Boolean|Enable
+|-create_org|String|Create Organization
+|-create_user|String|Create User
+|-create_time|Long|Create Time
+|-update_org|String|Update Organization
+|-update_user|String|Update User
+|-update_time|Long|Update Time
+|-id|String|Id
+|-code|String|Code
+|-login_id|String|Login Id
+|-name|String|Name
+|-image|String|Image
+|-password|String|Password
+|-email|String|Email
+|-ext_id|String|Ext Id
+|-ext_info|String|Ext Info
+|-oauth|String|OAuth Info
+|===
+
+==== 查询启用的记录
+TIP: url参数`condition`表示筛选条件，限制性sql形式
+
+*请求*
+
+ [GET] /ez/auth/manage/account/enable/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|Array |   | 
+|-organization_code|String|Organization Code
+|-enable|Boolean|Enable
+|-create_org|String|Create Organization
+|-create_user|String|Create User
+|-create_time|Long|Create Time
+|-update_org|String|Update Organization
+|-update_user|String|Update User
+|-update_time|Long|Update Time
+|-id|String|Id
+|-code|String|Code
+|-login_id|String|Login Id
+|-name|String|Name
+|-image|String|Image
+|-password|String|Password
+|-email|String|Email
+|-ext_id|String|Ext Id
+|-ext_info|String|Ext Info
+|-oauth|String|OAuth Info
+|===
+
+==== 分页查询记录
+TIP: url参数`pageNumber`表示当前页，从1开始，`pageSize`表示每页条数，`condition`表示筛选条件，限制性sql形式
+
+*请求*
+
+ [GET] /ez/auth/manage/account/page/:pageNumber/:pageSize/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|pageNumber|Long|当前页，从1开始  
+|pageSize|Int|每页条数  
+|pageTotal|Long|总共页数  
+|recordTotal|Long|总共记录数  
+|objects|Array|当前页的实体列表  
+|-organization_code|String|Organization Code
+|-enable|Boolean|Enable
+|-create_org|String|Create Organization
+|-create_user|String|Create User
+|-create_time|Long|Create Time
+|-update_org|String|Update Organization
+|-update_user|String|Update User
+|-update_time|Long|Update Time
+|-id|String|Id
+|-code|String|Code
+|-login_id|String|Login Id
+|-name|String|Name
+|-image|String|Image
+|-password|String|Password
+|-email|String|Email
+|-ext_id|String|Ext Id
+|-ext_info|String|Ext Info
+|-oauth|String|OAuth Info
+|===
+
+==== 分页查询启用的记录
+TIP: url参数`pageNumber`表示当前页，从1开始，`pageSize`表示每页条数，`condition`表示筛选条件，限制性sql形式
+
+*请求*
+
+ [GET] /ez/auth/manage/account/enable/page/:pageNumber/:pageSize/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|pageNumber|Long|当前页，从1开始  
+|pageSize|Int|每页条数  
+|pageTotal|Long|总共页数  
+|recordTotal|Long|总共记录数  
+|objects|Array|当前页的实体列表  
+|-organization_code|String|Organization Code
+|-enable|Boolean|Enable
+|-create_org|String|Create Organization
+|-create_user|String|Create User
+|-create_time|Long|Create Time
+|-update_org|String|Update Organization
+|-update_user|String|Update User
+|-update_time|Long|Update Time
+|-id|String|Id
+|-code|String|Code
+|-login_id|String|Login Id
+|-name|String|Name
+|-image|String|Image
+|-password|String|Password
+|-email|String|Email
+|-ext_id|String|Ext Id
+|-ext_info|String|Ext Info
+|-oauth|String|OAuth Info
+|===
+
+==== 获取一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/account/:id/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|organization_code|String|Organization Code
+|enable|Boolean|Enable
+|create_org|String|Create Organization
+|create_user|String|Create User
+|create_time|Long|Create Time
+|update_org|String|Update Organization
+|update_user|String|Update User
+|update_time|Long|Update Time
+|id|String|Id
+|code|String|Code
+|login_id|String|Login Id
+|name|String|Name
+|image|String|Image
+|password|String|Password
+|email|String|Email
+|ext_id|String|Ext Id
+|ext_info|String|Ext Info
+|oauth|String|OAuth Info
+|===
+
+==== 根据业务主键获取一条记录
+
+
+*请求*
+
+ [GET] /ez/auth/manage/account/uuid/:uuid/
+
+
+*响应*
+
+|===
+|列名|类型|说明
+
+|organization_code|String|Organization Code
+|enable|Boolean|Enable
+|create_org|String|Create Organization
+|create_user|String|Create User
+|create_time|Long|Create Time
+|update_org|String|Update Organization
+|update_user|String|Update User
+|update_time|Long|Update Time
+|id|String|Id
+|code|String|Code
+|login_id|String|Login Id
+|name|String|Name
+|image|String|Image
+|password|String|Password
+|email|String|Email
+|ext_id|String|Ext Id
+|ext_info|String|Ext Info
+|oauth|String|OAuth Info
+|===

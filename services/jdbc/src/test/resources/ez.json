@@ -1,0 +1,47 @@
+{
+  "ez": {
+    "app": "",
+    "module": "",
+    "cluster": {
+      "use": {
+        "rpc": "nats",
+        "mq": "rabbitmq",
+        "dist": "redis",
+        "cache": "redis"
+      },
+      "nats": {
+        "address":"127.0.0.1:4222"
+      },
+      "redis": {
+        "address":"127.0.0.1:6379"
+      },
+      "rabbitmq": {
+        "userName": "user",
+        "password": "wz_pass_2016",
+        "host": "127.0.0.1",
+        "port": 5672,
+        "virtualHost": "ez",
+        "defaultTopicExchangeName": "ex_topic",
+        "defaultRPCExchangeName": "ex_rpc",
+        "defaultQueueExchangeName": "ex_queue"
+      }
+    },
+    "rpc":{
+      "package":"com.ecfront.ez"
+    },
+    "services": {
+      "jdbc": {
+        "url": "jdbc:mysql://127.0.0.1:3306/ez?characterEncoding=UTF-8&autoReconnect=true",
+        "userName": "root",
+        "password": "123456",
+        "initialSize": 1, // 初始化时建立物理连接的个数
+        "minSize": 1, // 最小连接池数量
+        "maxSize": 1, // 最大连接池数量
+        "maxIdleTime": 60000, // 获取连接时最大等待时间，单位秒
+        "createTable":true
+      }
+    }
+  },
+  "args": {
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "ez": {
+    "rpc": {
+      "package": "com.ecfront.ez.framework.service.gateway"
+    },
+    "perf": {
+      "eventLoopPoolSize": 1,
+      "workerPoolSize": 1,
+      "internalBlockingPoolSize": 1
+    },
+    "services": {
+      "gateway": null
+    }
+  },
+  "args": {
+  }
+}
